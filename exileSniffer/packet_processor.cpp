@@ -170,7 +170,11 @@ void packet_processor::handle_packet_from_loginserver(networkStreamID streamID, 
 				break;
 			}
 			else
-				std::cout << "Bad decryp " << (int)decrypted[0] << "," << (int)decrypted[1] << std::endl;
+			{
+				UIaddLogMsg("ERROR: Loginserver receive bad decrypt for packet 4",
+					0,	uiMsgQueue);
+				return;
+			}
 		}
 
 		std::cout << "Character List (" << (int)decrypted[45] << " characters)" << std::endl;
@@ -194,23 +198,6 @@ void packet_processor::handle_packet_from_loginserver(networkStreamID streamID, 
 	UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(streamObj->workingRecvKey->sourceProcess, eLogin, true);
 	msg->setData(decrypted, dataLen);
 	uiMsgQueue->addItem(msg);
-	/*
-	outfile << "Sent from login server...\n\n";
-	outfile.write((const char *)decrypted, dataLen);
-	outfile << "\nhex:\n";
-	outfile << std::setfill('0');
-	for (int i = 0; i < dataLen; ++i)
-	{
-		byte item = decrypted[i];
-		if (item)
-			outfile << std::hex << std::setw(2) << (int)item << " ";
-		else
-			outfile << "00 ";
-		if (i % 16 == 0) std::cout << std::endl;
-	}
-	outfile << "\n\n";
-	outfile.flush();
-	*/
 
 	char pktType = decrypted[1];
 	switch (pktType)
@@ -255,15 +242,12 @@ void packet_processor::handle_packet_from_loginserver(networkStreamID streamID, 
 		if (key1A->salsakey[0] == 0 && key1A->salsakey[3] == 0 && key1A->salsakey[7])
 		{
 			std::cout << "Discarding bad key in play response" << std::endl;
-			//outfile << "Discarding bad key in play response" << std::endl;
 			break; //probably an old zero-ed out key
 		}
 
 		key1A->sourceProcess = key1B->sourceProcess = streamObj->workingRecvKey->sourceProcess;
 		key1A->foundAddress = key1B->foundAddress = SENT_BY_SERVER;
 		pendingGameserverKeys[connectionID] = make_pair(key1A, key1B);
-		//keyGrabber->insertKey(key1A);
-		//keyGrabber->insertKey(key1B);
 
 		return;
 	}
@@ -485,12 +469,10 @@ void packet_processor::handle_login_data(std::vector<byte> pkt)
 
 	if (isIncoming)
 	{
-		printf("from server:\n");
 		handle_packet_from_loginserver(streamID, data, dataLen);
 	}
 	else
 	{
-		printf("to server:\n");
 		handle_packet_to_loginserver(streamID, data, dataLen);
 	}
 

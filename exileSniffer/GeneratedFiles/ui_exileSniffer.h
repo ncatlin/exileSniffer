@@ -26,7 +26,6 @@
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPlainTextEdit>
 #include <QtWidgets/QPushButton>
-#include <QtWidgets/QScrollBar>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QTextEdit>
@@ -56,13 +55,13 @@ public:
     QHBoxLayout *textPaneFrame;
     QTextEdit *ptHexPane;
     QTextEdit *ptASCIIPane;
-    QScrollBar *verticalScrollBar;
     QHBoxLayout *rawControls;
     QFrame *bytesPerRowFrame;
     QHBoxLayout *horizontalLayout_2;
     QLabel *bytesRowLael;
     QComboBox *bytesRowCombo;
     QCheckBox *rawLinewrapCheck;
+    QCheckBox *rawAutoScrollCheck;
     QFrame *frame;
     QHBoxLayout *horizontalLayout;
     QLabel *filterLabel;
@@ -161,23 +160,25 @@ public:
         font2.setFamily(QStringLiteral("Courier New"));
         font2.setPointSize(8);
         ptHexPane->setFont(font2);
+        ptHexPane->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
         ptHexPane->setLineWrapMode(QTextEdit::NoWrap);
+        ptHexPane->setReadOnly(true);
+        ptHexPane->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
         textPaneFrame->addWidget(ptHexPane);
 
         ptASCIIPane = new QTextEdit(rawDecryptTab);
         ptASCIIPane->setObjectName(QStringLiteral("ptASCIIPane"));
+        QFont font3;
+        font3.setFamily(QStringLiteral("Courier New"));
+        ptASCIIPane->setFont(font3);
+        ptASCIIPane->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+        ptASCIIPane->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
         textPaneFrame->addWidget(ptASCIIPane);
 
-        verticalScrollBar = new QScrollBar(rawDecryptTab);
-        verticalScrollBar->setObjectName(QStringLiteral("verticalScrollBar"));
-        verticalScrollBar->setOrientation(Qt::Vertical);
-
-        textPaneFrame->addWidget(verticalScrollBar);
-
-        textPaneFrame->setStretch(0, 3);
-        textPaneFrame->setStretch(1, 1);
+        textPaneFrame->setStretch(0, 5);
+        textPaneFrame->setStretch(1, 3);
 
         verticalLayout_2->addLayout(textPaneFrame);
 
@@ -217,6 +218,13 @@ public:
 
         rawControls->addWidget(rawLinewrapCheck);
 
+        rawAutoScrollCheck = new QCheckBox(rawDecryptTab);
+        rawAutoScrollCheck->setObjectName(QStringLiteral("rawAutoScrollCheck"));
+        rawAutoScrollCheck->setMaximumSize(QSize(76, 16777215));
+        rawAutoScrollCheck->setChecked(true);
+
+        rawControls->addWidget(rawAutoScrollCheck);
+
         frame = new QFrame(rawDecryptTab);
         frame->setObjectName(QStringLiteral("frame"));
         frame->setMaximumSize(QSize(259, 16777215));
@@ -228,7 +236,7 @@ public:
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
         filterLabel = new QLabel(frame);
         filterLabel->setObjectName(QStringLiteral("filterLabel"));
-        filterLabel->setMaximumSize(QSize(100, 16777215));
+        filterLabel->setMaximumSize(QSize(500, 16777215));
 
         horizontalLayout->addWidget(filterLabel);
 
@@ -283,6 +291,7 @@ public:
         QObject::connect(filtersBtn, SIGNAL(clicked()), exileSniffer, SLOT(showRawFiltersDLG()));
         QObject::connect(bytesRowCombo, SIGNAL(activated(QString)), exileSniffer, SLOT(rawBytesRowChanged(QString)));
         QObject::connect(rawLinewrapCheck, SIGNAL(toggled(bool)), exileSniffer, SLOT(toggleRawLineWrap(bool)));
+        QObject::connect(rawAutoScrollCheck, SIGNAL(toggled(bool)), exileSniffer, SLOT(toggleRawAutoScroll(bool)));
 
         processTabs->setCurrentIndex(2);
 
@@ -299,6 +308,16 @@ public:
         statusText->setText(QApplication::translate("exileSniffer", "No running Path of Exile clients found", Q_NULLPTR));
         processTabs->setTabText(processTabs->indexOf(interceptionTab), QApplication::translate("exileSniffer", "Interception", Q_NULLPTR));
         processTabs->setTabText(processTabs->indexOf(decodeTab), QApplication::translate("exileSniffer", "Decoder", Q_NULLPTR));
+        ptHexPane->setHtml(QApplication::translate("exileSniffer", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:'Courier New'; font-size:8pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>", Q_NULLPTR));
+        ptASCIIPane->setHtml(QApplication::translate("exileSniffer", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:'Courier New'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>", Q_NULLPTR));
         bytesRowLael->setText(QApplication::translate("exileSniffer", "Bytes Per Row:", Q_NULLPTR));
         bytesRowCombo->clear();
         bytesRowCombo->insertItems(0, QStringList()
@@ -308,7 +327,8 @@ public:
          << QApplication::translate("exileSniffer", "64", Q_NULLPTR)
         );
         rawLinewrapCheck->setText(QApplication::translate("exileSniffer", "Line Wrap", Q_NULLPTR));
-        filterLabel->setText(QApplication::translate("exileSniffer", "0 Packets Filtered", Q_NULLPTR));
+        rawAutoScrollCheck->setText(QApplication::translate("exileSniffer", "AutoScroll", Q_NULLPTR));
+        filterLabel->setText(QApplication::translate("exileSniffer", "0 Packets Captured", Q_NULLPTR));
         filtersBtn->setText(QApplication::translate("exileSniffer", "Filters", Q_NULLPTR));
         processTabs->setTabText(processTabs->indexOf(rawDecryptTab), QApplication::translate("exileSniffer", "Raw Plaintext", Q_NULLPTR));
         processTabs->setTabText(processTabs->indexOf(metaLogTab), QApplication::translate("exileSniffer", "Log", Q_NULLPTR));

@@ -18,6 +18,12 @@ exileSniffer::exileSniffer(QWidget *parent)
 
 	toggleRawLineWrap(ui.rawLinewrapCheck->isChecked());
 
+	connect(ui.ptHexPane->verticalScrollBar(), SIGNAL(valueChanged(int)),
+		ui.ptASCIIPane->verticalScrollBar(), SLOT(setValue(int)));
+	connect(ui.ptASCIIPane->verticalScrollBar(), SIGNAL(valueChanged(int)),
+		ui.ptHexPane->verticalScrollBar(), SLOT(setValue(int)));
+	ui.ptHexPane->verticalScrollBar()->hide();
+
 	//start the packet capture thread to grab streams
 	packetSniffer = new packet_capture_thread(&uiMsgQueue);
 	std::thread packetSnifferInstance(&packet_capture_thread::ThreadEntry, packetSniffer);
@@ -36,7 +42,7 @@ exileSniffer::exileSniffer(QWidget *parent)
 	//start a timer to pull updates into the UI
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(read_UI_Q()));
-	timer->start(20);
+	timer->start(10);
 }
 
 void exileSniffer::read_UI_Q()
@@ -47,8 +53,8 @@ void exileSniffer::read_UI_Q()
 		UI_MESSAGE *msg = uiMsgQueue.waitItem();
 		action_UI_Msg(msg);
 
-		float secondsSinceStart = ((float)clock() - startTicks) / CLOCKS_PER_SEC;
-		if (secondsSinceStart > 0.15) //todo: season to taste
+		float secondsElapsed = ((float)clock() - startTicks) / CLOCKS_PER_SEC;
+		if (secondsElapsed > 0.15) //todo: season to taste
 			break;
 	}
 }
@@ -156,36 +162,94 @@ void exileSniffer::handle_client_event(DWORD pid, bool isRunning)
 
 std::string serverString(streamType server, string IP)
 {
-	return "serverrrr";
+	switch (server)
+	{
+	case streamType::eGame:
+		return "GameServer";
+	case streamType::eLogin:
+		return "LoginServer";
+	case streamType::ePatch:
+		return "PatchServer";
+	default:
+		return "UnknownServer";
+	}
 }
 
-void exileSniffer::handle_raw_packet_data(UI_RAWHEX_PKT *pkt)
+void exileSniffer::insertRawText(std::string hexdump, std::string asciidump)
+{
+	int oldScrollPos = ui.ptHexPane->verticalScrollBar()->sliderPosition();
+
+	QTextCursor userCursor = ui.ptHexPane->textCursor();
+	ui.ptHexPane->moveCursor(QTextCursor::MoveOperation::End);
+	ui.ptHexPane->append(QString::fromStdString(hexdump));
+	ui.ptHexPane->setTextCursor(userCursor);
+
+	userCursor = ui.ptASCIIPane->textCursor();
+	ui.ptASCIIPane->moveCursor(QTextCursor::MoveOperation::End);
+	ui.ptASCIIPane->append(QString::fromStdString(asciidump));
+	ui.ptASCIIPane->setTextCursor(userCursor);
+
+	if(!ui.rawAutoScrollCheck->isChecked())
+		ui.ptASCIIPane->verticalScrollBar()->setSliderPosition(oldScrollPos);
+}
+
+//todo: bold first two bytes, may need to add a 'continuationpacket' field
+void exileSniffer::print_raw_packet(UI_RAWHEX_PKT *pkt)
 {
 	std::stringstream hexdump;
+	std::stringstream asciidump;
 
 	char timestamp[20];
 	struct tm *tm = gmtime(&pkt->createdtime);
-	strftime(timestamp, sizeof(timestamp), "%H:%M:%S-%e/%d/%g", tm);
+	strftime(timestamp, sizeof(timestamp), "%H:%M:%S", tm);
+
+	hexdump << "#" << packetsRecorded << " " << timestamp << " ";
 
 	if (pkt->incoming)
-		hexdump << serverString(pkt->stream, "f") << " to POE Client <324324234>";
+		hexdump << serverString(pkt->stream, "f") << " to POE Client";
 	else
-		hexdump << "POE Client <324324234> to " << serverString(pkt->stream,"f");
-	hexdump << " [" << timestamp << "]" <<std::endl;
+		hexdump << "POE Client to " << serverString(pkt->stream, "f");
+	hexdump << std::endl << "  ";
+	asciidump << std::endl;
 
 	hexdump << std::setfill('0') << std::uppercase;
 	for (int i = 0; i < pkt->pktBytes.size(); ++i)
 	{
-	byte item = pkt->pktBytes.at(i);
-	if (item)
-		hexdump << std::hex << std::setw(2) << (int)item << " ";
-	else
-		hexdump << "00 ";
-	if ((i + 1) % UIhexPacketsPerRow == 0) hexdump << std::endl;
-	}
-	hexdump << "\n\n" <<  std::nouppercase;
+		byte item = pkt->pktBytes.at(i);
 
-	ui.ptHexPane->insertPlainText(QString::fromStdString(hexdump.str()));
+		if (item)
+			hexdump << std::hex << std::setw(2) << (int)item << " ";
+		else
+			hexdump << "00 ";
+
+		if (item >= ' ' && item <= '~')
+			asciidump << (char)item;
+		else
+			asciidump << '.';//replace unprintable with dots
+
+		if ((i + 1) % UIhexPacketsPerRow == 0)
+		{
+			hexdump << std::endl << "  ";
+			asciidump << std::endl;
+		}
+	}
+	hexdump << "\n" << std::endl << std::nouppercase;
+	asciidump << "\n" << std::endl;
+
+
+	insertRawText(hexdump.str(), asciidump.str());
+
+}
+
+bool exileSniffer::packet_passes_raw_filter(UI_RAWHEX_PKT *pkt, clientData *client)
+{
+	return true;
+}
+
+void exileSniffer::handle_raw_packet_data(UI_RAWHEX_PKT *pkt)
+{
+
+	clientData *client = NULL;
 
 	if (pkt->pid == 0)
 	{
@@ -193,24 +257,37 @@ void exileSniffer::handle_raw_packet_data(UI_RAWHEX_PKT *pkt)
 		//we will have to stick with placing unassigned logon packets to the
 		//first unauthenticated process we find
 		auto it = clients.begin();
-		for(; it != clients.end(); it++)
+		for (; it != clients.end(); it++)
 			if (!it->second->isLoggedIn)
 			{
-				it->second->rawHexPackets.push_back(pkt);
-				return;
+				client = it->second;
+				break;
 			}
-
-		add_metalog_update("Warning: Dropped packet with no associated PID", 0);
-	
 	}
 	else
 	{
 		auto it = clients.find(pkt->pid);
 		if (it != clients.end())
 		{
-			it->second->rawHexPackets.push_back(pkt);
+			client = it->second;	
 		}
 	}
+
+	if (!client)
+	{
+		add_metalog_update("Warning: Dropped packet with no associated PID", 0);
+		return;
+	}
+
+
+	if (packet_passes_raw_filter(pkt, client))
+		print_raw_packet(pkt);
+	else
+		++packetsFiltered;
+	++packetsRecorded;
+
+	client->rawHexPackets.push_back(pkt);
+	updateRawFilterLabel();
 }
 
 
@@ -229,15 +306,37 @@ void exileSniffer::rawBytesRowChanged(QString arg)
 void exileSniffer::reprintRawHex()
 {
 	ui.ptHexPane->clear();
+	ui.ptASCIIPane->clear();
 
-	vector <UI_RAWHEX_PKT *> examplepkts = clients.begin()->second->rawHexPackets;
-	for (auto pktIt = examplepkts.begin(); pktIt != examplepkts.end(); pktIt++)
+
+
+	clientData *exampleclient = clients.begin()->second;
+	vector <UI_RAWHEX_PKT *> pkts = exampleclient->rawHexPackets;
+
+	packetsRecorded = 0;
+	packetsFiltered = 0;
+
+	for (auto pktIt = pkts.begin(); pktIt != pkts.end(); pktIt++)
 	{
 		UI_RAWHEX_PKT *pkt = *pktIt;
-		handle_raw_packet_data(pkt);
+
+		if (packet_passes_raw_filter(pkt, exampleclient))
+			print_raw_packet(pkt);
+		else
+			++packetsFiltered;
+		++packetsRecorded;
 	}
+	updateRawFilterLabel();
 }
 
+void exileSniffer::updateRawFilterLabel()
+{
+	std::stringstream filterLabTxt;
+	filterLabTxt << std::dec << packetsRecorded << " Packets Captured";
+	if (packetsFiltered)
+		filterLabTxt << " / " << packetsFiltered << " Filtered";
+	ui.filterLabel->setText(QString::fromStdString(filterLabTxt.str()));
+}
 
 void exileSniffer::toggleRawLineWrap(bool wrap)
 {
@@ -252,4 +351,14 @@ void exileSniffer::toggleRawLineWrap(bool wrap)
 		ui.ptASCIIPane->setLineWrapMode(QTextEdit::LineWrapMode::NoWrap);
 	}
 
+}
+
+
+void exileSniffer::toggleRawAutoScroll(bool enabled)
+{
+	if (enabled)
+	{
+		ui.ptASCIIPane->moveCursor(QTextCursor::MoveOperation::End);
+		ui.ptHexPane->moveCursor(QTextCursor::MoveOperation::End);
+	}
 }

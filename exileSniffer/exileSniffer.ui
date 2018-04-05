@@ -134,7 +134,10 @@
          <number>2</number>
         </property>
         <item>
-         <layout class="QHBoxLayout" name="textPaneFrame" stretch="3,1,0">
+         <layout class="QHBoxLayout" name="textPaneFrame" stretch="5,3">
+          <property name="spacing">
+           <number>1</number>
+          </property>
           <item>
            <widget class="QTextEdit" name="ptHexPane">
             <property name="font">
@@ -143,18 +146,46 @@
               <pointsize>8</pointsize>
              </font>
             </property>
+            <property name="verticalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOn</enum>
+            </property>
             <property name="lineWrapMode">
              <enum>QTextEdit::NoWrap</enum>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+            <property name="html">
+             <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Courier New'; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="textInteractionFlags">
+             <set>Qt::TextSelectableByMouse</set>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QTextEdit" name="ptASCIIPane"/>
-          </item>
-          <item>
-           <widget class="QScrollBar" name="verticalScrollBar">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
+           <widget class="QTextEdit" name="ptASCIIPane">
+            <property name="font">
+             <font>
+              <family>Courier New</family>
+             </font>
+            </property>
+            <property name="verticalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOn</enum>
+            </property>
+            <property name="sizeAdjustPolicy">
+             <enum>QAbstractScrollArea::AdjustToContents</enum>
+            </property>
+            <property name="html">
+             <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Courier New'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
@@ -258,6 +289,22 @@
            </widget>
           </item>
           <item>
+           <widget class="QCheckBox" name="rawAutoScrollCheck">
+            <property name="maximumSize">
+             <size>
+              <width>76</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>AutoScroll</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QFrame" name="frame">
             <property name="maximumSize">
              <size>
@@ -276,12 +323,12 @@
               <widget class="QLabel" name="filterLabel">
                <property name="maximumSize">
                 <size>
-                 <width>100</width>
+                 <width>500</width>
                  <height>16777215</height>
                 </size>
                </property>
                <property name="text">
-                <string>0 Packets Filtered</string>
+                <string>0 Packets Captured</string>
                </property>
               </widget>
              </item>
@@ -404,10 +451,27 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>rawAutoScrollCheck</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>exileSniffer</receiver>
+   <slot>toggleRawAutoScroll(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>448</x>
+     <y>608</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>413</x>
+     <y>336</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>showRawFiltersDLG()</slot>
   <slot>rawBytesRowChanged(QString)</slot>
   <slot>toggleRawLineWrap(bool)</slot>
+  <slot>toggleRawAutoScroll(bool)</slot>
  </slots>
 </ui>

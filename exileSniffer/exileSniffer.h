@@ -36,6 +36,7 @@ private slots:
 	void updateRawFilters() { std::cout << "yay"<<std::endl; }
 	void rawBytesRowChanged(QString arg);
 	void toggleRawLineWrap(bool state);
+	void toggleRawAutoScroll(bool state);
 
 private:
 	void action_UI_Msg(UI_MESSAGE *msg);
@@ -43,17 +44,24 @@ private:
 	void handle_client_event(DWORD pid, bool isRunning);
 	void handle_raw_packet_data(UI_RAWHEX_PKT *pkt);
 	void reprintRawHex();
-
+	void insertRawText(std::string hexdump, std::string asciidump);
+	void print_raw_packet(UI_RAWHEX_PKT *pkt);
+	bool packet_passes_raw_filter(UI_RAWHEX_PKT *pkt, clientData *client);
+	void updateRawFilterLabel();
 private:
 	Ui::exileSniffer ui;
 	Ui::rawFilterForm rawFiltersFormUI;
 	derivedRawFilterForm rawFilterForm;
 
 	unsigned short UIhexPacketsPerRow = 16;
+
+	unsigned long packetsRecorded = 0;
+	unsigned long packetsFiltered = 0;
 	//RAW_FILTERS rawPacketFilters;
 
 	SafeQueue<UI_MESSAGE> uiMsgQueue; //read by ui thread, written by all others
 	map<DWORD, clientData *> clients;
+
 
 	packet_capture_thread *packetSniffer;
 	key_grabber_thread *keyGrabber;
