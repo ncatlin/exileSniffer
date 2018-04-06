@@ -124,14 +124,16 @@ void packet_processor::handle_packet_from_loginserver(networkStreamID streamID, 
 	if (streamObj->packetCount < 2) //warning - a null packet is ignored
 	{
 		UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(0, eLogin, true);
+		byte *plainTextBuf = new byte[dataLen];
+		std::copy(data, data + dataLen, plainTextBuf);
 		msg->setData(data, dataLen);
 		uiMsgQueue->addItem(msg);
 		return;
 	}
 
-	byte *decrypted = new byte[dataLen];
+	decryptedBuffer = new byte[dataLen];
 
-	memset(decrypted, 0, dataLen);
+	memset(decryptedBuffer, 0, dataLen);
 
 	if (!streamObj->workingRecvKey)
 	{
@@ -152,9 +154,9 @@ void packet_processor::handle_packet_from_loginserver(networkStreamID streamID, 
 			streamObj->fromLoginSalsa.SetKeyWithIV((const byte *)keyCandidate->salsakey, 
 				32, 
 				(const byte *)keyCandidate->IV);
-			streamObj->fromLoginSalsa.ProcessData(decrypted, data, dataLen);
+			streamObj->fromLoginSalsa.ProcessData(decryptedBuffer, data, dataLen);
 
-			unsigned short packetID = getUshort(decrypted);
+			unsigned short packetID = getUshort(decryptedBuffer);
 			if (packetID == 0x0004)
 			{
 				keyCandidate->used = true;
@@ -177,29 +179,29 @@ void packet_processor::handle_packet_from_loginserver(networkStreamID streamID, 
 			}
 		}
 
-		std::cout << "Character List (" << (int)decrypted[45] << " characters)" << std::endl;
+		std::cout << "Character List (" << (int)decryptedBuffer[45] << " characters)" << std::endl;
 
 		for (int i = 0; i < dataLen; ++i)
 		{
-			byte item = decrypted[i];
+			byte item = decryptedBuffer[i];
 			std::cout << std::hex << std::setw(2) << (int)item;
 			if (i % 16 == 0) std::cout << std::endl;
 		}
 
-		UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(streamObj->workingRecvKey->sourceProcess, eLogin, false);
-		msg->setData(decrypted, dataLen);
+		UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(streamObj->workingRecvKey->sourceProcess, eLogin, true);
+		msg->setData(decryptedBuffer, dataLen);
 		uiMsgQueue->addItem(msg);
-		delete decrypted;
 		return;
 	}
 
-	streamObj->fromLoginSalsa.ProcessData(decrypted, data, dataLen);
-
+	streamObj->fromLoginSalsa.ProcessData(decryptedBuffer, data, dataLen);
+	/*
 	UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(streamObj->workingRecvKey->sourceProcess, eLogin, true);
-	msg->setData(decrypted, dataLen);
+	msg->setData(decryptedBuffer, dataLen);
 	uiMsgQueue->addItem(msg);
+	*/
 
-	char pktType = decrypted[1];
+	char pktType = decryptedBuffer[1];
 	switch (pktType)
 	{
 	case SRVPK_GAMESERVER_INFO:
@@ -208,19 +210,19 @@ void packet_processor::handle_packet_from_loginserver(networkStreamID streamID, 
 		//outfile << "Got gameserver info from loginserver" << std::endl;
 		unsigned int pktidx = 2;
 
-		unsigned long connectionID = getUlong(decrypted + 10);
+		unsigned long connectionID = getUlong(decryptedBuffer + 10);
 		std::cout << "Got key for connection ID " << std::hex << connectionID << std::endl;
 
 		pktidx = 17;
-		unsigned int port = (decrypted[17] << 8) + decrypted[18];
+		unsigned int port = (decryptedBuffer[17] << 8) + decryptedBuffer[18];
 		std::stringstream serverIP;
-		serverIP << (int)decrypted[19] << ".";
-		serverIP << (int)decrypted[20] << ".";
-		serverIP << (int)decrypted[21] << ".";
-		serverIP << (int)decrypted[22] << ":" << std::dec << port;
+		serverIP << (int)decryptedBuffer[19] << ".";
+		serverIP << (int)decryptedBuffer[20] << ".";
+		serverIP << (int)decryptedBuffer[21] << ".";
+		serverIP << (int)decryptedBuffer[22] << ":" << std::dec << port;
 		std::cout << "\tGameserver: " << serverIP.str() << std::endl;
 
-		DWORD *keyblob = (DWORD *)((byte*)decrypted + 43);
+		DWORD *keyblob = (DWORD *)((byte*)decryptedBuffer + 43);
 
 
 		KEYDATA *key1A = new KEYDATA;
@@ -257,17 +259,17 @@ void packet_processor::handle_packet_from_loginserver(networkStreamID streamID, 
 		return;
 
 	case 19:
-		std::cout << "League data from login server" << decrypted << std::endl;
+		std::cout << "League data from login server" << decryptedBuffer << std::endl;
 		return;
 
 
 	default:
-		printf("Unknown packet from login server: byte[1]==0x%x (dec %d)\n", decrypted[1], decrypted[1]);
+		printf("Unknown packet from login server: byte[1]==0x%x (dec %d)\n", decryptedBuffer[1], decryptedBuffer[1]);
 
 		std::cout << "Hex Payload: " << std::endl;
 		for (int i = 0; i < dataLen; ++i)
 		{
-			byte item = decrypted[i];
+			byte item = decryptedBuffer[i];
 			std::cout << std::hex << std::setw(2) << (int)item;
 			if (i % 16 == 0) std::cout << std::endl;
 		}
@@ -287,14 +289,16 @@ void packet_processor::handle_packet_to_loginserver(networkStreamID streamID, by
 		(byte)data[0], (byte)data[1], dataLen - 2);
 		*/
 		UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(0, eLogin, false);
+		byte *plainTextBuf = new byte[dataLen];
+		std::copy(data, data + dataLen, plainTextBuf);
 		msg->setData(data, dataLen);
 		uiMsgQueue->addItem(msg);
 		return;
 	}
 
 
-	byte *decrypted = new byte[dataLen];
-	memset(decrypted, 0, dataLen);
+	byte *decryptedBuffer = new byte[dataLen];
+	memset(decryptedBuffer, 0, dataLen);
 	if (!streamObj->workingSendKey)
 	{
 		std::cout << "Login request: " << std::endl;
@@ -314,9 +318,9 @@ void packet_processor::handle_packet_to_loginserver(networkStreamID streamID, by
 			streamObj->toLoginSalsa.SetKeyWithIV((byte *)keyCandidate->salsakey,
 				32,
 				(byte *)keyCandidate->IV);
-			streamObj->toLoginSalsa.ProcessData(decrypted, data, dataLen);
+			streamObj->toLoginSalsa.ProcessData(decryptedBuffer, data, dataLen);
 
-			if (decrypted[0] == 0 && decrypted[1] == 3)
+			if (decryptedBuffer[0] == 0 && decryptedBuffer[1] == 3)
 			{
 				keyCandidate->used = true;
 				keyGrabber->claimKey(keyCandidate, streamID);
@@ -331,22 +335,22 @@ void packet_processor::handle_packet_to_loginserver(networkStreamID streamID, by
 		}
 
 		UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(streamObj->workingSendKey->sourceProcess, eLogin, false);
-		msg->setData(decrypted, dataLen);
+		msg->setData(decryptedBuffer, dataLen);
 		uiMsgQueue->addItem(msg);
 
 		std::cout << std::setfill('0');
-		std::cout << std::hex << std::setw(2) << "ID2: 0x" << (int)decrypted[5] << (int)decrypted[4] << (int)decrypted[3] << (int)decrypted[2] << std::endl;
-		unsigned int emailLen = decrypted[7] * 2;
-		if (decrypted[6] != 0)
+		std::cout << std::hex << std::setw(2) << "ID2: 0x" << (int)decryptedBuffer[5] << (int)decryptedBuffer[4] << (int)decryptedBuffer[3] << (int)decryptedBuffer[2] << std::endl;
+		unsigned int emailLen = decryptedBuffer[7] * 2;
+		if (decryptedBuffer[6] != 0)
 			printf("Warning, long login email not handled\n");
-		std::wstring email(reinterpret_cast<wchar_t*>(decrypted + 8), (emailLen) / sizeof(wchar_t));
+		std::wstring email(reinterpret_cast<wchar_t*>(decryptedBuffer + 8), (emailLen) / sizeof(wchar_t));
 		std::wcout << "\tUsername: " << email << std::endl;
 
 		unsigned int pktindex = 8 + emailLen;
 		std::cout << "\tPOE.exe hash: ";
 		for (int i = 0; i < 32; ++i)
 		{
-			byte item = decrypted[pktindex + i];
+			byte item = decryptedBuffer[pktindex + i];
 			std::cout << std::hex << std::setw(2) << (int)item;
 		}
 		std::cout << std::endl;
@@ -355,7 +359,7 @@ void packet_processor::handle_packet_to_loginserver(networkStreamID streamID, by
 		std::cout << "\tuser creds: ";
 		for (int i = 0; i < 32; ++i)
 		{
-			byte item = decrypted[pktindex + i];
+			byte item = decryptedBuffer[pktindex + i];
 			std::cout << std::hex << std::setw(2) << (int)item;
 		}
 		std::cout << std::endl;
@@ -364,30 +368,27 @@ void packet_processor::handle_packet_to_loginserver(networkStreamID streamID, by
 		std::cout << "\tMAC hash: ";
 		for (int i = 0; i < 32; ++i)
 		{
-			byte item = decrypted[pktindex + i];
+			byte item = decryptedBuffer[pktindex + i];
 			std::cout << std::hex << std::setw(2) << (int)item;
 		}
 		std::cout << std::endl;
 
 		pktindex += 32;
 
-		std::cout << "\tPW save1: " << (int)(decrypted[pktindex++]) << std::endl;
-		std::cout << "\tPW save2: " << (int)(decrypted[pktindex]) << std::endl;
+		std::cout << "\tPW save1: " << (int)(decryptedBuffer[pktindex++]) << std::endl;
+		std::cout << "\tPW save2: " << (int)(decryptedBuffer[pktindex]) << std::endl;
 
-
-
-		delete decrypted;
 		return;
 	}
 
-	streamObj->toLoginSalsa.ProcessData(decrypted, data, dataLen);
+	streamObj->toLoginSalsa.ProcessData(decryptedBuffer, data, dataLen);
 
 	std::cout << "Sent to login server...\n\n";
 	std::cout << "\nhex:\n";
 	std::cout << std::setfill('0');
 	for (int i = 0; i < dataLen; ++i)
 	{
-		byte item = decrypted[i];
+		byte item = decryptedBuffer[i];
 		if (item)
 			std::cout << std::hex << std::setw(2) << (int)item << " ";
 		else
@@ -398,10 +399,10 @@ void packet_processor::handle_packet_to_loginserver(networkStreamID streamID, by
 	std::cout.flush();
 	
 	UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(streamObj->workingSendKey->sourceProcess, eLogin, false);
-	msg->setData(decrypted, dataLen);
+	msg->setData(decryptedBuffer, dataLen);
 	uiMsgQueue->addItem(msg);
 
-	char pktType = decrypted[1];
+	char pktType = decryptedBuffer[1];
 	switch (pktType)
 	{
 	case 01:
@@ -413,10 +414,10 @@ void packet_processor::handle_packet_to_loginserver(networkStreamID streamID, by
 	{
 		printf("Play request\n");
 
-		unsigned int charNameLen = decrypted[3] * 2;
-		if (decrypted[2] != 0)
+		unsigned int charNameLen = decryptedBuffer[3] * 2;
+		if (decryptedBuffer[2] != 0)
 			printf("Warning, long login charname not handled\n");
-		std::wstring charn(reinterpret_cast<wchar_t*>(decrypted + 4), (charNameLen) / sizeof(wchar_t));
+		std::wstring charn(reinterpret_cast<wchar_t*>(decryptedBuffer + 4), (charNameLen) / sizeof(wchar_t));
 		std::wcout << "\tSelected Char: " << charn << std::endl;
 		//uidata.charname = charn;
 
@@ -424,16 +425,16 @@ void packet_processor::handle_packet_to_loginserver(networkStreamID streamID, by
 	}
 	case 11:
 	{
-		std::cout << "Character selection sent to login server by number: " << (int)decrypted[6] << std::endl;
+		std::cout << "Character selection sent to login server by number: " << (int)decryptedBuffer[6] << std::endl;
 		return;
 	}
 	default:
-		printf("Client sent unknown packet to login server: 0x%x\n", decrypted[1]);
+		printf("Client sent unknown packet to login server: 0x%x\n", decryptedBuffer[1]);
 
 		std::cout << "Hex Payload: " << std::endl;
 		for (int i = 0; i < dataLen; ++i)
 		{
-			byte item = decrypted[i];
+			byte item = decryptedBuffer[i];
 			std::cout << std::hex << std::setw(2) << (int)item;
 			if (i % 16 == 0) std::cout << std::endl;
 		}
@@ -451,8 +452,6 @@ void packet_processor::handle_login_data(std::vector<byte> pkt)
 
 	char *streamID_s = strtok_s(next_token, ",", &next_token);
 	networkStreamID streamID = (networkStreamID)atoi(streamID_s);
-
-
 
 	char *incoming = strtok_s(next_token, ",", &next_token);
 	bool isIncoming = (*incoming == '1') ? true : false;
@@ -497,7 +496,7 @@ void packet_processor::handle_game_data(std::vector<byte> pkt)
 	if (!dataLen)
 		return;
 
-	std::cout << "handling game data, size "<<std::dec <<dataLen<<" incoming- "<<(int)isIncoming << std::endl;
+	//std::cout << "handling game data, size "<<std::dec <<dataLen<<" incoming- "<<(int)isIncoming << std::endl;
 
 	byte *data = (byte *)next_token;
 
@@ -512,14 +511,11 @@ void packet_processor::handle_game_data(std::vector<byte> pkt)
 	++streamObj->packetCount;
 }
 
-bool sanityCheckPacketID(unsigned short pktID)
+bool packet_processor::sanityCheckPacketID(unsigned short pktID)
 {
 	if (pktID > 0x220)
 	{
-		std::cout << "\n\n-------------" <<
-			"!!!WARNING! Very high Packet ID! (0x" << std::hex << pktID <<
-			") Decrypt probably out of sync or using wrong key/IV!---------\n" << std::endl;
-
+		errorFlag = eDecodingErr::eBadPacketID;
 		return false;
 	}
 	return true;
@@ -632,16 +628,6 @@ bool packet_processor::lookup_hash(unsigned long hash, std::string& result, std:
 }
 
 
-
-
-
-
-
-
-
-
-
-
 void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byte* data, unsigned int dataLen)
 {
 
@@ -651,7 +637,6 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 		if (data[0] == 0 && data[1] == 3)
 		{
 			unsigned long connectionID = getUlong(data + 2);
-			std::cout << "Continuing connection ID " << std::hex<< connectionID << std::endl;
 
 			streamObj->workingSendKey = pendingGameserverKeys.at(connectionID).first;
 			streamObj->toGameSalsa.SetKeyWithIV(
@@ -665,9 +650,12 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 
 			pendingGameserverKeys.erase(connectionID);
 
+
 			UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(
 				streamObj->workingSendKey->sourceProcess, eGame, false);
-			msg->setData(data, dataLen);
+			byte *plainTextBuf = new byte[dataLen];
+			std::copy(data, data + dataLen, plainTextBuf);
+			msg->setData(plainTextBuf, dataLen);
 			uiMsgQueue->addItem(msg);
 
 		}
@@ -678,513 +666,101 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 		return;
 	}
 
-	byte *decrypted = new byte[dataLen];
-	memset(decrypted, 0, dataLen);
-	streamObj->toGameSalsa.ProcessData(decrypted, data, dataLen);
-
-	UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(
-		streamObj->workingSendKey->sourceProcess, eGame, false);
-	msg->setData(decrypted, dataLen);
-	uiMsgQueue->addItem(msg);
-
-
-	bool dumpHex = false;
-	int remainingBytes = dataLen;
-
-	int index = 0;
-	int sIdx = index;
-
-	while (true)
-	{
-		if (remainingBytes == 0) break;
-		if (remainingBytes < 2) {
-			std::cerr << "ERROR! Bad remaining len. Datalen was " << dataLen
-				<< ", remaining now " << remainingBytes << std::endl;
-			dumpHex = true;
-			break;
-		}
-
-		unsigned short pktId = getUshort(decrypted + sIdx); sIdx += 2;
-
-		sanityCheckPacketID(pktId);
-
-		switch (pktId)
-		{
-		case CLI_CHAT_MESSAGE_ITEMS:
-		{
-			/*
-			used when items are linked, but replaces CLI_CHAT_MESSAGE entirely with 2+ items
-			-------
-			00 06 //pkt id
-
-			//header. expands 15 bytes for every extra item.
-			//cant see obvious link between values and item codes
-
-			00 00 00 01
-			00 00 00 01
-			00 00 04 04 00 00 08
-
-			00 06 //text len (bytes*2)
-			23 00 5f 00 61  00 61 00 61 00 5f 00  //text with 5f00 replacing items
-			02 //item count
-			00 00 00 01  //item reference
-			00 00 00 05
-			-------
-			need to understand header bytes but not a priority at the moment.
-			notes for 2+ items:
-			[header]
-
-			header has 15 bytes per item
-
-			*/
-			std::cout << "Player linked items in chat" << std::endl;
-			break;
-		}
-
-		case CLI_CHAT_MESSAGE:
-		{
-			unsigned short msgLen = getUshort(decrypted + sIdx); sIdx += 2;
-			std::string msgmb(decrypted + sIdx, decrypted + sIdx + msgLen * 2); sIdx += (msgLen * 2);
-			std::wstring msg = mb_to_utf8(msgmb);
-			byte itemCount = decrypted[sIdx++];
-
-			if (itemCount == 0)
-				std::wcout << "[You In Chat]:\"" << msg << "\"" << std::endl;
-			else
-			{
-				int itemPos = msg.find(0x5f, 0);
-				std::wcout << "[You In Chat]:\"" << msg.substr(0, itemPos);
-				std::wcout << "_ITEM";
-				std::wcout << msg.substr(itemPos, msg.size()) << std::endl;
-			}
-
-			sIdx += (4 * itemCount);
-
-
-
-
-			remainingBytes -= (sIdx - index);
-			index = sIdx;
-			continue;
-
-		}
-		case CLI_CHAT_COMMAND:
-		{
-			byte commandID = decrypted[sIdx]; sIdx += 1;
-			short unk = getUshort(decrypted + sIdx); sIdx += 2;
-
-			std::cout << "Client used command: ";
-
-			bool knownShortCommand = true;
-
-			//todo - future GGPK integration: 
-			//	can look up as (RowID+1) in Data/Commands.dat 
-			switch (commandID) {
-			case 0x04:
-				std::cout << "/remaining";
-				break;
-			case 0x06:
-				std::cout << "/pvp";
-				break;
-			case 0x08:
-				std::cout << "/oos";
-				break;
-			case 0x0d:
-				std::cout << "/fixmyhelmet";
-				break;
-			case 0x2f:
-				std::cout << "/menagerie";
-				break;
-			default:
-				std::cout << std::hex << (int)commandID <<
-					" [not bothered to list - todo put these in a map and lookup]" << std::endl;
-				knownShortCommand = false;
-				break;
-			}
-
-			if (knownShortCommand)
-			{
-				remainingBytes -= (sIdx - index);
-				index = sIdx;
-				continue;
-			}
-			else
-			{
-				dumpHex = true;
-				break;
-			}
-		}
-		case CLI_LOGGED_OUT:
-		{
-			//logout: arg 0
-			byte arg = decrypted[sIdx]; sIdx += 1;
-			std::cout << "Client logged out. Arg: " << (int)arg << std::endl;
-			remainingBytes -= (sIdx - index);
-			index = sIdx;
-			continue;
-		}
-		case CLIPK_PING_CHALLENGE:
-		{
-			//ignore for now
-			sIdx += 4;
-			remainingBytes -= (sIdx - index);
-			index = sIdx;
-			continue;
-		}
-		case CLI_CLICKED_GROUND_ITEM:
-		{
-			unsigned long targID = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long unk1 = getUlong(decrypted + sIdx); sIdx += 4;
-			char controlStatus = decrypted[sIdx]; sIdx += 1;
-
-
-			std::cout << std::hex << "Client clicked" << explainMouseLastByte(controlStatus)
-				<< " on world obj ID 0x" << targID << " unk1: 0x" << unk1 << std::endl;
-
-			remainingBytes -= (sIdx - index);
-			index = sIdx;
-			continue;
-
-		}
-
-		case CLI_ACTION_PREDICTIVE:
-		{
-			unsigned long targcoord1 = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long targcoord2 = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned short skill = getUshort(decrypted + sIdx); sIdx += 2;
-			unsigned short pcount = getUshort(decrypted + sIdx); sIdx += 2;
-			char controlStatus = decrypted[sIdx]; sIdx += 1;
-
-			std::cout << std::hex << "Player used" << explainMouseLastByte(controlStatus)
-				<< " skill 0x" << skill << " on coord (" <<
-				targcoord1 << "," << targcoord2 << ") " << std::endl;
-
-			if (controlStatus > 0xf || !(controlStatus & 0x8))
-				std::cout << "\t!Unusual controlStatus " << (int)controlStatus << " - window open?>" << std::endl;
-
-			remainingBytes -= (sIdx - index);
-			index = sIdx;
-			continue;
-		}
-
-		case 0x17:
-			std::cout << std::hex << "[" << pktId << "] client dropped held item on floor" << std::endl;
-			if (dataLen != 2)
-				dumpHex = true;
-			break;
-
-		case 0x18:
-			std::cout << std::hex << "[" << pktId << "] client put item down in inventory" << std::endl;
-			dumpHex = true;
-			break;
-
-		case CLIPK_PICKUP_ITEM:
-		{
-			unsigned short unk1 = getUshort(decrypted + 2);
-			unsigned long itemID = getUlong(decrypted + 6);
-			byte slot = decrypted[5];
-			byte unk2 = decrypted[10]; //divisible by 4?
-			std::cout << "Player clicked item 0x" << std::hex << itemID << " in slot " << slotToString(slot) << std::endl;
-			std::cout << "Unknown Values 1: 0x" << unk1 << ", 0x2: " << (int)unk2 << std::endl;
-			break;
-		}
-
-		case CLI_PLACE_ITEM:
-		{
-			unsigned long container = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long column = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long row = getUlong(decrypted + sIdx); sIdx += 4;
-			byte unk2 = decrypted[sIdx++];
-
-			std::cout << "player placed picked up item? Row: " << row << " Column: " << column
-				<< " Container: " << slotToString(container) << " unk2: 0x" << (int)unk2 << std::endl;
-
-			remainingBytes -= (sIdx - index);
-			index = sIdx;
-			continue;
-		}
-
-		case CLI_REMOVE_FROM_SOCKET:
-		{
-			/*
-			001d
-			00000001
-			00000054
-			00000001
-			00
-			*/
-			unsigned long container = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long sourceItemID = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long sockID = getUlong(decrypted + sIdx); sIdx += 4;
-			byte unk = decrypted[sIdx++];
-
-
-			std::cout << std::hex << "Client removed gem from [" << slotToString(container) << " - ItemID 0x" << sourceItemID <<
-				" - socket " << sockID << "] unk: 0x" << (int)unk << std::endl;
-
-			remainingBytes -= (sIdx - index);
-			index = sIdx;
-			continue;
-		}
-
-		case CLI_INSERT_INTO_SOCKET:
-		{
-			//001e
-			//00000001
-			//0000004c
-			//00000000
-			unsigned long container = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long targitemID = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long sockID = getUlong(decrypted + sIdx); sIdx += 4;
-
-			std::cout << std::hex << "Client inserted held gem into [" << slotToString(container) <<
-				" - item 0x" << targitemID << " - socket " << sockID << "]" << std::endl;
-
-			remainingBytes -= (sIdx - index);
-			index = sIdx;
-			continue;
-		}
-
-		case CLIPK_LEVEL_SKILL_GEM:
-		{
-			unsigned long container = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long itemID = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long slot = getUlong(decrypted + sIdx); sIdx += 4;
-			std::cout << "Client clicked level skillgem on [ItemID 0x" << std::hex << itemID <<
-				" - container " << slotToString(container) << " - slot " << slot << "]" << std::endl;
-
-			remainingBytes -= (sIdx - index);
-			index = sIdx;
-			continue;
-		}
-
-		case CLIPK_SKILLPOINT_CHANGE:
-		{
-			unsigned long passiveGraphIdx = getUlong(decrypted + sIdx); sIdx += 4;
-			std::cout << std::hex << "Client invested in passive skill node 0x" << passiveGraphIdx << std::endl;
-			remainingBytes -= (sIdx - index);
-			index = sIdx;
-			continue;
-		}
-
-		case CLI_CANCEL_BUF:
-		{
-			unsigned long bufid = getUlong(decrypted + sIdx); sIdx += 4;
-			std::cout << std::hex << "[" << CLI_CANCEL_BUF << "] Client cancelled buf 0x" <<
-				bufid << std::endl;
-
-			remainingBytes -= (sIdx - index);
-			index = sIdx;
-			continue;
-		}
-
-		case CLIPK_SET_HOTBARSKILL:
-		{
-			byte slot = decrypted[sIdx++];
-			unsigned short skillID = getUshort(decrypted + sIdx); sIdx += 2;
-
-			std::cout << std::hex << "Client put skill 0x" << skillID << " on skillbar slot " << (int)slot << std::endl;
-			remainingBytes -= (sIdx - index);
-			index = sIdx;
-			continue;
-		}
-
-		case 0x32:
-			std::cout << std::hex << "[" << pktId << "] client used flask/item with right mouse" << std::endl;
-			dumpHex = true;
-			break;
-
-		case 0x33:
-			std::cout << std::hex << "[" << pktId << "] client identified item?" << std::endl;
-			dumpHex = true;
-			break;
-
-		case CLI_USE_BELT_SLOT:
-		{
-			//003700000004 = 5th slot
-			unsigned long slot = getUlong(decrypted + sIdx); sIdx += 4;
-			std::cout << std::hex << "Player activated potion slot 0x" << slot << std::endl;
-
-			remainingBytes -= (sIdx - index);
-			index = sIdx;
-			continue;
-		}
-		case CLI_USE_ITEM:
-		{
-			/*
-			0038
-			00 00 00 01
-			00 00  04 02
-			00 00 00 01
-			00 00  04 03
-			*/
-			unsigned long unk1 = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long item1 = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long unk2 = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long item2 = getUlong(decrypted + sIdx); sIdx += 4;
-
-			std::cout << std::hex << "Player activated item 0x" << item1 << " on item 0x" << item2;
-			std::cout << "i1unk: 0x" << unk1 << " i2unk: 0x" << unk2 << std::endl;
-			remainingBytes -= (sIdx - index);
-			index = sIdx;
-			continue;
-		}
-		case 0x48:
-			std::cout << std::hex << "[" << pktId << "] Client possibly clicked dialog option " << std::endl;
-			dumpHex = true;
-			break;
-
-		case CLIPK_REQUEST_PUBLICPARTIES:
-			std::cout << std::hex << "[" << pktId << "] client request social update" << std::endl;
-			dumpHex = true;
-			break;
-
-		case CLIPK_SWAPPED_WEAPONS:
-		{
-			byte setIdx = decrypted[sIdx++];
-
-			std::cout << std::hex << "Client swapped to weapon set " << (1 + (int)setIdx) << std::endl;
-
-			remainingBytes -= (sIdx - index);
-			index = sIdx;
-			continue;
-		}
-		case CLIPK_SKILLPANE_ACTION:
-			std::cout << std::hex << "[" << pktId << "] Client skill pane ";
-			if ((int)decrypted[2])
-				std::cout << "opened";
-			else
-				std::cout << "closed";
-			std::cout << std::endl;
-			break;
-
-		case CLIPK_MICROSTRANSACTIONPANE_ACTION:
-			std::cout << std::hex << "[" << pktId << "] Client microtransactions pane opened";
-			break;
-			//case 0x98:
-			//	std::cout << std::hex << "[" << pktId << "] client unsubscribe from chat" << std::endl;
-			//	break;
-
-
-
-		case 0xca:
-		{
-			unsigned int skillID = (decrypted[10] << 8) + decrypted[11];
-			unsigned int xLoc = getUlong(decrypted + 2);
-			unsigned int yLoc = getUlong(decrypted + 6);
-
-			std::cout << std::hex << "[" << pktId << "] Player performed action " << std::hex << skillID << " [" << getSkillName(skillID) << "]"
-				<< " at location [" << xLoc << "," << yLoc << "]" << std::endl;
-			break;
-		}
-
-		case CLIPK_USED_SKILL:
-		{
-			if (dataLen != 13)
-				std::cerr << "Warning, expected skill usage packed 0xd8 to be 13 bytes but it is " << std::dec << dataLen << std::endl;
-			unsigned skillID = (decrypted[10] << 8) + decrypted[11];
-			std::cout << "Client used skill: " << getSkillName(skillID) << std::endl;
-			dumpHex = true;
-			break;
-		}
-		case CLIPK_CLICK_OBJ:
-			std::cout << std::hex << "[" << pktId << "]  Client clicked ground item" << std::endl;
-			dumpHex = true;
-			break;
-
-		case CLIPK_MOUSE_HELD:
-		{
-			unsigned long coord1 = getUlong(decrypted + 2);
-			unsigned long coord2 = getUlong(decrypted + 6);
-			std::cout << std::hex << "[" << pktId << "]  Client mouse held on location (" << coord1 << "," << coord2 << ")" << std::endl;
-			dumpHex = true;
-			break;
-		}
-
-		case CLIPK_MOUSE_RELEASE:
-		{
-			std::cout << std::hex << "[" << pktId << "]  Client released mouse" << std::endl;
-
-			remainingBytes -= (sIdx - index);
-			index = sIdx;
-			continue;
-		}
-		//case 0xce:
-		//	std::cout << std::hex << "[" << pktId << "] Action button press"<<std::endl;
-		//	break;
-
-		case CLIPK_OPTOUT_TUTORIALS:
-			if (dataLen != 3) {
-				std::cerr << "Warning! Packet ID " << CLIPK_OPTOUT_TUTORIALS << " changed length, may no longer be tutorial cancel" << std::endl;
-			}
-			std::cout << std::hex << "[" << pktId << "] Client skipped tutorials" << std::endl;
-			break;
-
-
-
-		default:
-			std::cout << "C->S UnkPkID: 0x" << std::hex << pktId
-				<< " size: " << std::dec << dataLen << " bytes" << std::endl;
-			//outfile << "Unhandled packet ID - client to gameserver: 0x" << std::hex << pktId
-			//	<< " size: " << std::dec << dataLen << " bytes" << std::endl;
-			dumpHex = true;
-			break;
-		}
-
-
-		remainingBytes = 0;
-	}
-
-
-
-	if (dumpHex)
-	{
-		for (int i = 0; i < dataLen; ++i)
-		{
-			byte item = decrypted[i];
-			std::cout << std::hex << std::setw(2) << (int)item;
-			//if (i && (i % 16 == 0)) std::cout << std::endl;
-		}
-		std::cout << std::endl;
-	}
-
-	//write packet only at end
-	unsigned short firstid = getUshort(decrypted);
 	/*
-	outfile << "\nPacket from client to gameserver starting with ID 0x" << std::hex << firstid << std::endl;
-	outfile << "Raw:" << std::endl;
-	for (int i = 0; i < dataLen; i++)
-	{
-		char nextChar = decrypted[i];
-		if (nextChar < 0x20 || nextChar > 0x7f)
-			outfile << ".";
-		else
-			outfile << nextChar;
+	this is not deleted because pointers to it are held by the
+	raw decoder and pointers into it are held by the decodedpackets. 
+	Don't want to make a bunch of copies because it will balloon in size with long running streams
+	*/
+	decryptedBuffer = new byte[dataLen+1];
+	memset(decryptedBuffer, 0, dataLen+1);
+	streamObj->toGameSalsa.ProcessData(decryptedBuffer, data, dataLen);
 
-		if ((i + 1) % 48 == 0) outfile << std::endl;
-	}
-	outfile << "\nHex:\n";
-	outfile << std::setfill('0');
+	std::cout << "Hex Payload: " << std::endl;
 	for (int i = 0; i < dataLen; ++i)
 	{
-		byte item = decrypted[i];
-		if (item)
-			outfile << std::hex << std::setw(2) << (int)item << " ";
-		else
-			outfile << "00 ";
-		if ((i + 1) % 16 == 0) outfile << std::endl;
+		byte item = decryptedBuffer[i];
+		std::cout << std::hex << std::setw(2) << (int)item;
+		if (i % 16 == 0) std::cout << std::endl;
 	}
-	outfile << "\n\n";
-	outfile << "\Packet from client end\n";
-	outfile.flush();
-	*/
-	delete decrypted;
+	std::cout << std::endl;
+
+	if (unfinishedPacket)
+	{
+		std::cout << "todo: multipacket packets" << std::endl;
+		return;
+	}
+
+	remainingDecrypted = dataLen;
+	decryptedIndex = 0;
+	errorFlag = eNoErr;
+
+
+	while (remainingDecrypted > 0)
+	{
+		unsigned short pktId = consumeUShort();
+		if (pktId == 0xd) return;
+		std::cout << "1 decode clipk " << pktId << std::endl;
+		if (errorFlag)
+		{
+			emit_decoding_err_msg(0, streamObj->lastPktID);
+			break;
+		}
+
+		if (!sanityCheckPacketID(pktId))
+		{
+			emit_decoding_err_msg(pktId, streamObj->lastPktID);
+			break;
+		}
+
+		
+		
+		UI_DECODED_PKT *ui_decodedpkt = new UI_DECODED_PKT(streamObj->workingSendKey->sourceProcess, eGame, false);
+
+		auto it = packetDeserialisers.find(pktId);
+		if (it != packetDeserialisers.end())
+		{
+			
+			packet_processor::deserialiser f = it->second;
+			std::cout << "2 calling memberfunc for " << pktId << "*" << std::hex << f << std::endl;
+			ui_decodedpkt->decodedobj = (this->*f)();
+			std::cout << "5 returned clichat decoder" << std::endl;
+		}
+		else
+		{
+			stringstream errmsg;
+			errmsg << "ERROR: no handler for client msgID " << pktId;
+			UIaddLogMsg(QString::fromStdString(errmsg.str()), activeClientPID, uiMsgQueue);
+			break;
+		}
+
+		if (errorFlag)
+		{
+			emit_decoding_err_msg(pktId, streamObj->lastPktID);
+			break;
+		}
+		else
+		{
+			std::cout << "6. addpk  clichat decoder" << std::endl;
+			uiMsgQueue->addItem(ui_decodedpkt);
+		}
+
+		streamObj->lastPktID = pktId;
+	}
+
+
+
+	UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(streamObj->workingSendKey->sourceProcess, eGame, false);
+	std::cout << "calling setdata with len " << dataLen << std::endl;
+	msg->setData(decryptedBuffer, dataLen);
+	if (errorFlag != eNoErr)
+		msg->setErrorIndex(decryptedIndex);
+	uiMsgQueue->addItem(msg);
+
 }
 
 
 void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, byte* data, unsigned int dataLen)
 {
-	std::cout << "halding packet from gameserver... " << std::endl;
 
 	//first packet from gameserver starts 0005, followed by crypt which start 0012
 	STREAMDATA *streamObj = &streamDatas.at(streamID);
@@ -1195,8 +771,8 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 		return;
 	}
 
-	byte *decrypted = new byte[dataLen];
-	memset(decrypted, 0, dataLen);
+	decryptedBuffer = new byte[dataLen];
+	memset(decryptedBuffer, 0, dataLen);
 
 	if (streamObj->packetCount == 1)
 	{
@@ -1209,25 +785,20 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 			streamObj->fromGameSalsa.SetKeyWithIV(
 				(byte *)streamObj->workingRecvKey->salsakey, 32,
 				(byte *)streamObj->workingRecvKey->IV);
-			decrypted[0] = data[0];
-			decrypted[1] = data[1];
-			streamObj->fromGameSalsa.ProcessData(decrypted + 2, data + 2, dataLen - 2);
-			if (decrypted[2] != 0 || decrypted[3] != 0x12) {
+			decryptedBuffer[0] = data[0];
+			decryptedBuffer[1] = data[1];
+			streamObj->fromGameSalsa.ProcessData(decryptedBuffer + 2, data + 2, dataLen - 2);
+			if (decryptedBuffer[2] != 0 || decryptedBuffer[3] != 0x12) {
 				std::cout << "assert 2" << std::endl;
 			}
-			assert(decrypted[2] == 0 && decrypted[3] == 0x12);
+			assert(decryptedBuffer[2] == 0 && decryptedBuffer[3] == 0x12);
 
 	}
 	else
 	{
-		streamObj->fromGameSalsa.ProcessData(decrypted, data, dataLen);
+		streamObj->fromGameSalsa.ProcessData(decryptedBuffer, data, dataLen);
 	}
 
-
-	UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(
-		streamObj->workingRecvKey->sourceProcess, eGame, false);
-	msg->setData(decrypted, dataLen);
-	uiMsgQueue->addItem(msg);
 
 	bool dumpHex = false;
 	int remainingBytes = dataLen;
@@ -1249,7 +820,7 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 		}
 
 		int sIdx = index;
-		unsigned short pktId = getUshort(decrypted + sIdx); sIdx += 2;
+		unsigned short pktId = getUshort(decryptedBuffer + sIdx); sIdx += 2;
 		lastPktID = pktId;
 
 		sanityCheckPacketID(pktId);
@@ -1269,26 +840,26 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 		}
 		case SRV_PKT_ENCAPSULATED:
 		{
-			unsigned short pktID2 = getUshort(decrypted + sIdx); sIdx += 2;
+			unsigned short pktID2 = getUshort(decryptedBuffer + sIdx); sIdx += 2;
 			std::cout << "Processing encapsulated packet subpacket ID 0x" << pktID2 << std::endl;
 
 			if (pktID2 == SRV_MONSTERS_PRELOAD)
 			{
-				unsigned short varietyCount = getUshort(decrypted + sIdx); sIdx += 2;
+				unsigned short varietyCount = getUshort(decryptedBuffer + sIdx); sIdx += 2;
 				std::cout << "\tprocessing first subpacket 0x12, Inner len is liekly 3x " <<
 					std::dec << varietyCount << std::endl;
 
 				std::vector<std::pair<unsigned short, byte>> varietyList;
 				for (int i = 0; i < varietyCount; i++)
 				{
-					unsigned short monsterVariety = ntohs(getUshort(decrypted + sIdx)); sIdx += 2;
+					unsigned short monsterVariety = ntohs(getUshort(decryptedBuffer + sIdx)); sIdx += 2;
 					varietyList.push_back(std::make_pair(monsterVariety, 0));
 				}
 				//this flag tends to be 1 if you would expect the monster in the zone
 				//or 0 if it makes no sense at all...
 				for (int i = 0; i < varietyCount; i++)
 				{
-					varietyList.at(i).second = decrypted[sIdx++];
+					varietyList.at(i).second = decryptedBuffer[sIdx++];
 				}
 
 				for (int i = 0; i < varietyCount; i++)
@@ -1328,19 +899,19 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 
 		case SRVPK_CHAT_INCOMING_MESSAGE: //chat message
 		{
-			unsigned short nameLen = getUshort(decrypted + sIdx); sIdx += 2;
-			std::string namemb(decrypted + sIdx, decrypted + sIdx + nameLen * 2); sIdx += nameLen * 2;
+			unsigned short nameLen = getUshort(decryptedBuffer + sIdx); sIdx += 2;
+			std::string namemb(decryptedBuffer + sIdx, decryptedBuffer + sIdx + nameLen * 2); sIdx += nameLen * 2;
 			std::wstring name = mb_to_utf8(namemb);
-			unsigned short chatLen = getUshort(decrypted + sIdx); sIdx += 2;
-			std::string chatmb(decrypted + sIdx, decrypted + sIdx + chatLen * 2); sIdx += chatLen * 2;
+			unsigned short chatLen = getUshort(decryptedBuffer + sIdx); sIdx += 2;
+			std::string chatmb(decryptedBuffer + sIdx, decryptedBuffer + sIdx + chatLen * 2); sIdx += chatLen * 2;
 			std::wstring chat = mb_to_utf8(chatmb);
-			unsigned short tagLen = getUshort(decrypted + sIdx); sIdx += 2;
-			std::string tagmb(decrypted + sIdx, decrypted + sIdx + tagLen * 2); sIdx += tagLen * 2;
+			unsigned short tagLen = getUshort(decryptedBuffer + sIdx); sIdx += 2;
+			std::string tagmb(decryptedBuffer + sIdx, decryptedBuffer + sIdx + tagLen * 2); sIdx += tagLen * 2;
 			std::wstring tag = mb_to_utf8(tagmb);
 
-			byte isDev = decrypted[sIdx++];
-			byte challengesComplete = decrypted[sIdx++];
-			unsigned short unk = getUshort(decrypted + sIdx); sIdx += 2;
+			byte isDev = decryptedBuffer[sIdx++];
+			byte challengesComplete = decryptedBuffer[sIdx++];
+			unsigned short unk = getUshort(decryptedBuffer + sIdx); sIdx += 2;
 
 			/*
 			if (isDev)
@@ -1396,8 +967,8 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 			6d 00 69 00 6e 00 75 00 74 00 65 00 73 00 2e 00
 			*/
 			std::cout << std::hex << "[" << pktId << "]" << "Server sent remaining response for area 0x";
-			unsigned int remaining = (unsigned long)htonl(*((unsigned long *)(decrypted + 8)));
-			std::cout << (unsigned long)htonl(*((DWORD *)(decrypted + 3))) << " : " << std::dec << remaining << std::hex << std::endl;
+			unsigned int remaining = (unsigned long)htonl(*((unsigned long *)(decryptedBuffer + 8)));
+			std::cout << (unsigned long)htonl(*((DWORD *)(decryptedBuffer + 3))) << " : " << std::dec << remaining << std::hex << std::endl;
 			dumpHex = true;
 			break;
 		}
@@ -1406,35 +977,35 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 		case SRV_AREA_INFO:
 		{
 			//code of area to load <"unknown6" in worldareas.dat> eg: 0x64, 0x83, is toxic conduit>
-			unsigned long areaCode = getUlong(decrypted + sIdx); sIdx += 4;
+			unsigned long areaCode = getUlong(decryptedBuffer + sIdx); sIdx += 4;
 			std::string areaname;
 			lookup_areaCode(areaCode, areaname);
 
-			unsigned short difficultyLen = getUshort(decrypted + sIdx); sIdx += 2;
-			std::wstring difficultyName(reinterpret_cast<wchar_t*>(decrypted + sIdx), difficultyLen);
+			unsigned short difficultyLen = getUshort(decryptedBuffer + sIdx); sIdx += 2;
+			std::wstring difficultyName(reinterpret_cast<wchar_t*>(decryptedBuffer + sIdx), difficultyLen);
 			sIdx += (difficultyLen * sizeof(wchar_t));
 
-			unsigned long areaSeedVariantID = getUlong(decrypted + sIdx); sIdx += 4;
-			byte unkb1 = decrypted[sIdx++];
-			byte unkb2 = decrypted[sIdx++];
-			byte unkb3 = decrypted[sIdx++];
-			unsigned short unks4 = getUshort(decrypted + sIdx); sIdx += 2;
-			byte unkb4 = decrypted[sIdx++];
+			unsigned long areaSeedVariantID = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			byte unkb1 = decryptedBuffer[sIdx++];
+			byte unkb2 = decryptedBuffer[sIdx++];
+			byte unkb3 = decryptedBuffer[sIdx++];
+			unsigned short unks4 = getUshort(decryptedBuffer + sIdx); sIdx += 2;
+			byte unkb4 = decryptedBuffer[sIdx++];
 
-			unsigned short hashCount = getUshort(decrypted + sIdx); sIdx += 2;
+			unsigned short hashCount = getUshort(decryptedBuffer + sIdx); sIdx += 2;
 			std::vector<unsigned long> hashlist;
 			hashlist.reserve(hashCount);
 			for (int i = 0; i < hashCount; i++)
 			{
-				unsigned long preloadhash = getUlong(decrypted + sIdx); sIdx += 4;
+				unsigned long preloadhash = getUlong(decryptedBuffer + sIdx); sIdx += 4;
 				hashlist.push_back(preloadhash);
 			}
 
-			unsigned short unks5 = getUshort(decrypted + sIdx); sIdx += 2;
-			unsigned short unks6 = getUshort(decrypted + sIdx); sIdx += 2;
-			unsigned short unks7 = getUshort(decrypted + sIdx); sIdx += 2;
-			unsigned short unks8 = getUshort(decrypted + sIdx); sIdx += 2;
-			unsigned short unks9 = getUshort(decrypted + sIdx); sIdx += 2;
+			unsigned short unks5 = getUshort(decryptedBuffer + sIdx); sIdx += 2;
+			unsigned short unks6 = getUshort(decryptedBuffer + sIdx); sIdx += 2;
+			unsigned short unks7 = getUshort(decryptedBuffer + sIdx); sIdx += 2;
+			unsigned short unks8 = getUshort(decryptedBuffer + sIdx); sIdx += 2;
+			unsigned short unks9 = getUshort(decryptedBuffer + sIdx); sIdx += 2;
 
 			std::cout << "Pkt 0x" << std::hex << SRV_AREA_INFO <<
 				" from gameserver, entered area: " << areaname << " - ";
@@ -1470,8 +1041,8 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 		case SRVPK_PLAYER_ITEMS_DATA:
 		{
 			std::cout << std::hex << "[" << pktId << "] Player Items Listing" <<
-				std::hex << getUlong(decrypted) << std::endl;
-			//handle_server_items_packet(decrypted, dataLen);
+				std::hex << getUlong(decryptedBuffer) << std::endl;
+			//handle_server_items_packet(decryptedBuffer, dataLen);
 			dumpHex = true;
 			break;
 		}
@@ -1479,18 +1050,18 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 		case SRVPK_INSTANCE_SERVER_DATA:
 		{
 			/*
-			unsigned long unk1 = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long unk2 = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long areacode = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long unk3 = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long unk4 = getUlong(decrypted + sIdx); sIdx += 4; //starting coord?
-			unsigned short port = getUshort(decrypted + sIdx); sIdx += 2;
+			unsigned long unk1 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			unsigned long unk2 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			unsigned long areacode = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			unsigned long unk3 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			unsigned long unk4 = getUlong(decryptedBuffer + sIdx); sIdx += 4; //starting coord?
+			unsigned short port = getUshort(decryptedBuffer + sIdx); sIdx += 2;
 
 			std::stringstream serverIP;
-			serverIP << (int)decrypted[sIdx++] << ".";
-			serverIP << (int)decrypted[sIdx++] << ".";
-			serverIP << (int)decrypted[sIdx++] << ".";
-			serverIP << (int)decrypted[sIdx++];
+			serverIP << (int)decryptedBuffer[sIdx++] << ".";
+			serverIP << (int)decryptedBuffer[sIdx++] << ".";
+			serverIP << (int)decryptedBuffer[sIdx++] << ".";
+			serverIP << (int)decryptedBuffer[sIdx++];
 
 			std::cout << std::hex << "[" << pktId << "] New game server data. AREA TRANSITION" << std::endl;
 			std::cout << "\tGameserver: " << serverIP.str() << ":" << std::dec << port << std::hex << std::endl;
@@ -1498,8 +1069,8 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 			sIdx += 20; //??
 
 			KEYDATA key1A, key1B;
-			memcpy(key1A.salsakey, decrypted + sIdx, 32);
-			memcpy(key1B->salsakey, decrypted + sIdx, 32);
+			memcpy(key1A.salsakey, decryptedBuffer + sIdx, 32);
+			memcpy(key1B->salsakey, decryptedBuffer + sIdx, 32);
 
 			if (key1A.salsakey[0] == 0 && key1A.salsakey[3] == 0 && key1A.salsakey[7])
 			{
@@ -1510,9 +1081,9 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 
 
 			memcpy(nextGameSalsaKey, key1A.salsakey, 32);	sIdx += 32;
-			memcpy(key1A.IV, decrypted + sIdx, 8); sIdx += 8;
+			memcpy(key1A.IV, decryptedBuffer + sIdx, 8); sIdx += 8;
 			sIdx += 8;
-			memcpy(key1B->IV, decrypted + sIdx, 8); sIdx += 8;
+			memcpy(key1B->IV, decryptedBuffer + sIdx, 8); sIdx += 8;
 
 			memcpy(nextGameIVClientToServer, key1A.IV, 8);
 			memcpy(nextGameIVServerToClient, key1B->IV, 8);
@@ -1540,7 +1111,7 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 			std::cout << std::hex << "Skills on hotbar now:" << std::endl;
 			for (int i = 0; i < 8; i++)
 			{
-				std::cout << "(" << i << ", 0x" << getUshort(decrypted + sIdx) << ") ";
+				std::cout << "(" << i << ", 0x" << getUshort(decryptedBuffer + sIdx) << ") ";
 				sIdx += 2;
 				if (sIdx >= dataLen) break;
 			}
@@ -1630,16 +1201,16 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 			55bca13a00d47b0100000100000000010000020300030002010100006d000000000d0000006d000000010000006c0000000000
 			*/
 			//id1 = in mouse
-			byte unk0 = decrypted[sIdx++]; sIdx += 1;
-			DWORD unk1 = getUlong(decrypted + sIdx); sIdx += 4;
-			DWORD newID = getUlong(decrypted + sIdx); sIdx += 4;
-			DWORD action1 = getUlong(decrypted + sIdx); sIdx += 4;
-			DWORD prevID = getUlong(decrypted + sIdx); sIdx += 4;
-			byte col = decrypted[sIdx++];
-			byte row = decrypted[sIdx++];
-			short unk2 = getUshort(decrypted + sIdx); sIdx += 2;
-			DWORD unk3 = getUlong(decrypted + sIdx); sIdx += 4;
-			byte unk4 = decrypted[sIdx++];
+			byte unk0 = decryptedBuffer[sIdx++]; sIdx += 1;
+			DWORD unk1 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			DWORD newID = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			DWORD action1 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			DWORD prevID = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			byte col = decryptedBuffer[sIdx++];
+			byte row = decryptedBuffer[sIdx++];
+			short unk2 = getUshort(decryptedBuffer + sIdx); sIdx += 2;
+			DWORD unk3 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			byte unk4 = decryptedBuffer[sIdx++];
 
 			std::string action;
 			switch (action1) {
@@ -1666,10 +1237,10 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 
 		case SRV_VENDOR_INVENTORY:
 		{
-			short unk1 = getUshort(decrypted + sIdx); sIdx += 2;
-			unsigned int ID1 = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned int ID2 = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned int numItems = getUlong(decrypted + sIdx); sIdx += 4;
+			short unk1 = getUshort(decryptedBuffer + sIdx); sIdx += 2;
+			unsigned int ID1 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			unsigned int ID2 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			unsigned int numItems = getUlong(decryptedBuffer + sIdx); sIdx += 4;
 
 			std::cout << std::hex << "Vendor inventory listing (" << std::dec << numItems << " items )" <<
 				std::hex << " ID1 0x" << ID1 << " ID2: 0x" << ID2 << std::endl;
@@ -1699,25 +1270,25 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 		case 0xd9:
 		{
 
-			DWORD objID = getUlong(decrypted);
-			DWORD objID2 = getUlong(decrypted + 4);
+			DWORD objID = getUlong(decryptedBuffer);
+			DWORD objID2 = getUlong(decryptedBuffer + 4);
 
-			DWORD unk0 = getUlong(decrypted + 8) >> 2;
+			DWORD unk0 = getUlong(decryptedBuffer + 8) >> 2;
 
-			DWORD pos1x = getUshort(decrypted + 11) - 0x8000;
-			DWORD pos1y = getUshort(decrypted + 13) - 0x8000;
+			DWORD pos1x = getUshort(decryptedBuffer + 11) - 0x8000;
+			DWORD pos1y = getUshort(decryptedBuffer + 13) - 0x8000;
 
-			DWORD pos2x = getUshort(decrypted + 15) - 0x8000;
-			DWORD pos2y = getUshort(decrypted + 17) - 0x8000;
+			DWORD pos2x = getUshort(decryptedBuffer + 15) - 0x8000;
+			DWORD pos2y = getUshort(decryptedBuffer + 17) - 0x8000;
 
-			DWORD skillSlot = getUshort(decrypted + 19);
+			DWORD skillSlot = getUshort(decryptedBuffer + 19);
 
-			DWORD counter = getUshort(decrypted + 21);
+			DWORD counter = getUshort(decryptedBuffer + 21);
 
 			std::cout << std::hex << "[" << pktId <<
 				"]  Targeted skill used by object " << objID << " (" << pos1x << " , " << pos1y << ")->" <<
 				" on obj2 " << objID2 << " (" << pos2x << " , " << pos2y << ")" <<
-				"unk1: " << unk0 << ", skillSlot:" << skillSlot << " unk2:" << (int)decrypted[23] << std::endl;
+				"unk1: " << unk0 << ", skillSlot:" << skillSlot << " unk2:" << (int)decryptedBuffer[23] << std::endl;
 
 			dumpHex = true;
 			break;
@@ -1725,19 +1296,19 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 		/*
 		case 0xdd: //??
 		{
-		decrypted++;
+		decryptedBuffer++;
 
 		std::cout << std::endl;
-		unsigned long target = getUlong(decrypted);
-		unsigned long source = getUlong(decrypted + 4);
-		unsigned int unknown2 = getUlong(decrypted + 8);
-		unsigned int unknown3 = getUshort(decrypted + 10);
-		unsigned int unknown4 = getUshort(decrypted + 14);
-		unsigned int unknown5 = getUshort(decrypted + 18);
-		unsigned int damage = getUshort(decrypted + 22);
-		unsigned int unknown7 = getUshort(decrypted + 24);
+		unsigned long target = getUlong(decryptedBuffer);
+		unsigned long source = getUlong(decryptedBuffer + 4);
+		unsigned int unknown2 = getUlong(decryptedBuffer + 8);
+		unsigned int unknown3 = getUshort(decryptedBuffer + 10);
+		unsigned int unknown4 = getUshort(decryptedBuffer + 14);
+		unsigned int unknown5 = getUshort(decryptedBuffer + 18);
+		unsigned int damage = getUshort(decryptedBuffer + 22);
+		unsigned int unknown7 = getUshort(decryptedBuffer + 24);
 
-		if (decrypted[4] == 0)
+		if (decryptedBuffer[4] == 0)
 		{
 		std::cout << std::hex << "[" << pktId
 		<< "] [fixme?]Obj " << target << "(player?) took " << damage << " damage from obj (" << source <<
@@ -1747,7 +1318,7 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 
 		deserialiseMore = true;
 		dumpHex = true;
-		decrypted += 30;
+		decryptedBuffer += 30;
 		}
 		else
 		{
@@ -1763,22 +1334,22 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 		/*
 		case 0xde: //melee attacked
 		{
-		decrypted++;
+		decryptedBuffer++;
 		/*
 		std::cout << "printing dd hex:" << std::endl;
 		for (int i = 0; i < dataLen - 1; ++i)
 		{
-		byte item = decrypted[i];
+		byte item = decryptedBuffer[i];
 		std::cout << std::hex << std::setw(2) << (int)item;
 		}*/
 		/*
 		std::cout << std::endl;
-		unsigned long objid1 = getUlong(decrypted);
-		unsigned long objid2 = getUlong(decrypted + 4);
-		unsigned int unknown2 = getUshort(decrypted + 8);
-		unsigned int counter = getUshort(decrypted + 10);
-		unsigned long zeros = getUlong(decrypted + 12);
-		unsigned long unknown = getUlong(decrypted + 12);
+		unsigned long objid1 = getUlong(decryptedBuffer);
+		unsigned long objid2 = getUlong(decryptedBuffer + 4);
+		unsigned int unknown2 = getUshort(decryptedBuffer + 8);
+		unsigned int counter = getUshort(decryptedBuffer + 10);
+		unsigned long zeros = getUlong(decryptedBuffer + 12);
+		unsigned long unknown = getUlong(decryptedBuffer + 12);
 
 		std::cout << std::hex << "[" << pktId
 		<< "] Damage1 taken from objs (" << objid1 << "," << objid2
@@ -1787,20 +1358,20 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 
 		deserialiseMore = true;
 		dumpHex = true;
-		decrypted += 20;
+		decryptedBuffer += 20;
 		break;
 		}
 		case 0xdf:
 		{
-		decrypted++;
-		unsigned long target = getUlong(decrypted);
-		unsigned long source = getUlong(decrypted + 4);
-		unsigned int flag1 = decrypted[8];
-		unsigned int direction = decrypted[9];
-		unsigned int value = getUlong(decrypted + 10);
-		unsigned long zeros = getUlong(decrypted + 14);
-		unsigned int attribute = getUshort(decrypted + 18);
-		unsigned long next = decrypted[21];
+		decryptedBuffer++;
+		unsigned long target = getUlong(decryptedBuffer);
+		unsigned long source = getUlong(decryptedBuffer + 4);
+		unsigned int flag1 = decryptedBuffer[8];
+		unsigned int direction = decryptedBuffer[9];
+		unsigned int value = getUlong(decryptedBuffer + 10);
+		unsigned long zeros = getUlong(decryptedBuffer + 14);
+		unsigned int attribute = getUshort(decryptedBuffer + 18);
+		unsigned long next = decryptedBuffer[21];
 
 		if (direction == 0x01)
 		{
@@ -1842,7 +1413,7 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 
 		if (next != 0xf9)
 		{
-		decrypted += 21;
+		decryptedBuffer += 21;
 		deserialiseMore = true;
 		}
 		break;
@@ -1883,16 +1454,16 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 			026603050132
 			*/
 
-			unsigned int userID = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned int ID2 = getUlong(decrypted + sIdx); sIdx += 4;
-			byte controlstatus = decrypted[sIdx + 2]; sIdx += 3;
-			unsigned short startCoord1 = getUshort(decrypted + sIdx) - 0x8000; sIdx += 2;
-			unsigned short startCoord2 = getUshort(decrypted + sIdx) - 0x8000; sIdx += 2;
-			unsigned short endCoord1 = getUshort(decrypted + sIdx) - 0x8000; sIdx += 2;
-			unsigned short endCoord2 = getUshort(decrypted + sIdx) - 0x8000; sIdx += 2;
-			unsigned short skillID = getUshort(decrypted + sIdx); sIdx += 2;
-			unsigned short packCt = getUshort(decrypted + sIdx); sIdx += 2;
-			unsigned short unk1 = getUshort(decrypted + sIdx); sIdx += 2;
+			unsigned int userID = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			unsigned int ID2 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			byte controlstatus = decryptedBuffer[sIdx + 2]; sIdx += 3;
+			unsigned short startCoord1 = getUshort(decryptedBuffer + sIdx) - 0x8000; sIdx += 2;
+			unsigned short startCoord2 = getUshort(decryptedBuffer + sIdx) - 0x8000; sIdx += 2;
+			unsigned short endCoord1 = getUshort(decryptedBuffer + sIdx) - 0x8000; sIdx += 2;
+			unsigned short endCoord2 = getUshort(decryptedBuffer + sIdx) - 0x8000; sIdx += 2;
+			unsigned short skillID = getUshort(decryptedBuffer + sIdx); sIdx += 2;
+			unsigned short packCt = getUshort(decryptedBuffer + sIdx); sIdx += 2;
+			unsigned short unk1 = getUshort(decryptedBuffer + sIdx); sIdx += 2;
 			std::cout << std::hex << "[" << pktId << "] Mobile ID 0x" << userID
 				<< " used skill 0x" << skillID;
 
@@ -1915,13 +1486,13 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 
 		case SRV_MOBILE_UPDATE_HMS:
 		{
-			unsigned long mobileID = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long unkl1 = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned short unks2 = getUshort(decrypted + sIdx); sIdx += 2;
-			unsigned long val = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long unks3 = getUlong(decrypted + sIdx); sIdx += 4;
-			byte stat = decrypted[sIdx++];
-			byte unkb4 = decrypted[sIdx++];
+			unsigned long mobileID = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			unsigned long unkl1 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			unsigned short unks2 = getUshort(decryptedBuffer + sIdx); sIdx += 2;
+			unsigned long val = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			unsigned long unks3 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			byte stat = decryptedBuffer[sIdx++];
+			byte unkb4 = decryptedBuffer[sIdx++];
 
 			std::cout << std::hex << "[Pkt 0x" << SRV_MOBILE_UPDATE_HMS <<
 				"] Mobile 0x" << mobileID << " had stat ";
@@ -2012,13 +1583,13 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 			7fffffff
 			7f7fffff
 			*/
-			unsigned long mobileID1 = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long mobileID2 = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned short unk1 = getUshort(decrypted + sIdx); sIdx += 2;
-			unsigned long coord1 = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long coord2 = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long unk2 = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long unk3 = getUlong(decrypted + sIdx); sIdx += 4;
+			unsigned long mobileID1 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			unsigned long mobileID2 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			unsigned short unk1 = getUshort(decryptedBuffer + sIdx); sIdx += 2;
+			unsigned long coord1 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			unsigned long coord2 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			unsigned long unk2 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			unsigned long unk3 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
 
 			remainingBytes -= (sIdx - index);
 			index = sIdx;
@@ -2046,9 +1617,9 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 			30		 - buf ended operation
 			000002	 - buf id 02
 			*/
-			unsigned long targID1 = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long targID2 = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long unk3 = getUlong(decrypted + sIdx); sIdx += 4;
+			unsigned long targID1 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			unsigned long targID2 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			unsigned long unk3 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
 
 			std::cout << std::hex << "Status Effect ended. <Targ1: 0x" << targID1
 				<< ", Targ2: 0x" << targID2 << "> - 0x" << unk3 << std::endl;
@@ -2089,17 +1660,17 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 			{
 			dumpHex = true;
 
-			unsigned long unk1 = getUshort(decrypted + 2);
-			byte slot = decrypted[8];
-			unsigned long id1 = getUlong(decrypted + 9);
-			unsigned long unk2 = getUlong(decrypted + 13);
-			unsigned long unk3 = getUlong(decrypted + 17);
-			unsigned long id2 = getUlong(decrypted + 21);
-			byte coord1 = decrypted[25];
-			byte coord3 = decrypted[26];
-			byte coord2 = decrypted[27];
-			unsigned long itemcode1 = getUlong(decrypted + 28);
-			unsigned long itemcode2 = getUlong(decrypted + 32);
+			unsigned long unk1 = getUshort(decryptedBuffer + 2);
+			byte slot = decryptedBuffer[8];
+			unsigned long id1 = getUlong(decryptedBuffer + 9);
+			unsigned long unk2 = getUlong(decryptedBuffer + 13);
+			unsigned long unk3 = getUlong(decryptedBuffer + 17);
+			unsigned long id2 = getUlong(decryptedBuffer + 21);
+			byte coord1 = decryptedBuffer[25];
+			byte coord3 = decryptedBuffer[26];
+			byte coord2 = decryptedBuffer[27];
+			unsigned long itemcode1 = getUlong(decryptedBuffer + 28);
+			unsigned long itemcode2 = getUlong(decryptedBuffer + 32);
 
 			std::cout << "Item 0x" << std::hex << itemcode1 << itemcode2 << " moved in ";
 			bool known = false;
@@ -2126,11 +1697,11 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 		{
 			//see server implementatio and 0xf1 for how the stats work
 
-			unsigned long id = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long id2 = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned short unk1 = getUshort(decrypted + sIdx); sIdx += 2;
-			unsigned long objHash = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned short followingLen = getUshort(decrypted + sIdx); sIdx += 2;
+			unsigned long id = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			unsigned long id2 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			unsigned short unk1 = getUshort(decryptedBuffer + sIdx); sIdx += 2;
+			unsigned long objHash = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			unsigned short followingLen = getUshort(decryptedBuffer + sIdx); sIdx += 2;
 
 			if (followingLen > 40)
 				std::cout << "{INTERESTING SPAWN}\t" << std::endl;
@@ -2152,8 +1723,8 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 				break;
 			}
 
-			unsigned long coordBig1 = getUlong(decrypted + sIdx); sIdx += 4;
-			unsigned long coordBig2 = getUlong(decrypted + sIdx); sIdx += 4;
+			unsigned long coordBig1 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
+			unsigned long coordBig2 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
 
 			unsigned long adjCoord1 = ntohl(coordBig1) >> 8;
 			unsigned long adjCoord2 = ntohl(coordBig2) >> 8;
@@ -2167,8 +1738,8 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 			std::cout << "at (" << adjCoord1 << "," << adjCoord2 << ") Unk1: 0x" << unk1 << std::endl;
 			//outfile << "at (" << adjCoord1 << "," << adjCoord2 << ") Unk1: 0x" << unk1 << std::endl;
 
-			//byte unk3 = decrypted[sIdx++];
-			//unsigned long unk3 = getUlong(decrypted + sIdx); sIdx += 4;
+			//byte unk3 = decryptedBuffer[sIdx++];
+			//unsigned long unk3 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
 			dumpHex = true;
 			break;
 		}
@@ -2195,55 +1766,10 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 		remainingBytes = 0;
 	}
 
-
-
-	if (dumpHex)
-	{
-
-		for (int i = 0; i < dataLen; ++i)
-		{
-			byte item = decrypted[i];
-			std::cout << std::setw(2) << std::hex << (int)item;
-			//if (i && (i % 16 == 0)) std::cout << std::endl;
-		}
-		std::cout << std::flush << std::endl;;
-	}
-
-	if (dataLen != 2) //spammy keepalives with predictive mode
-	{
-		//write packet only at end
-		/*
-		unsigned short firstid = getUshort(decrypted);
-		outfile << "\nPacket from gameserver starting with ID 0x" << std::hex << firstid << std::endl;
-		outfile << "Raw:" << std::endl;
-		for (int i = 0; i < dataLen; i++)
-		{
-			char nextChar = decrypted[i];
-			if (nextChar < 0x20 || nextChar > 0x7f)
-				outfile << ".";
-			else
-				outfile << nextChar;
-			if ((i + 1) % 48 == 0)
-				outfile << std::endl;
-		}
-		outfile << "\nHex:\n";
-		outfile << std::setfill('0');
-		for (int i = 0; i < dataLen; ++i)
-		{
-			byte item = decrypted[i];
-			if (item)
-				outfile << std::setw(2) << (int)item << " ";
-			else
-				outfile << "00 ";
-			if ((i + 1) % 16 == 0) outfile << std::endl;
-		}
-		outfile << "\n\n";
-		outfile << "\nPacket from gameserver end\n";
-		outfile.flush();
-		*/
-	}
-
-	delete decrypted;
+	UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(
+		streamObj->workingRecvKey->sourceProcess, eGame, true);
+	msg->setData(decryptedBuffer, dataLen);
+	uiMsgQueue->addItem(msg);
 }
 
 bool packet_processor::process_packet_loop()
@@ -2384,6 +1910,7 @@ void packet_processor::fillObjCodeMap()
 void packet_processor::main_loop()
 {
 	fillObjCodeMap();
+	init_packetDeserialisers();
 
 	printf("Connecting to sniffer pipes...\n");
 	while (!patchpipe)

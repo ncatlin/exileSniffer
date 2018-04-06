@@ -46,19 +46,25 @@ UI_RAWHEX_PKT::UI_RAWHEX_PKT(DWORD processID, streamType streamServer, bool isIn
 	incoming = isIncoming;
 	stream = streamServer;
 	msgType = uiMsgType::ePacketHex;
-	pktBytes.clear();
 }
 
-void UI_RAWHEX_PKT::setData(byte *source, size_t length) 
+void UI_RAWHEX_PKT::setData(byte *source, unsigned short length)
 {
-	if (!length) return;
+	pktBytes = source;
+	pktSize = length;
 
-	pktBytes.insert(pktBytes.end(), &source[0], &source[length]);
-	assert(pktBytes.size() == length);
+	if (length < 2) return;
 
-	if (length >= 2)
-		startBytes = getUshort(source);
-	else 
-		startBytes = source[0];
+
+	startBytes = getUshort(source);
+
 }
 
+UI_DECODED_PKT::UI_DECODED_PKT(DWORD processID, streamType streamServer, bool isIncoming)
+{
+	createdtime = time(0);
+	pid = processID;
+	incoming = isIncoming;
+	stream = streamServer;
+	msgType = uiMsgType::eDecodedPacket;
+}

@@ -21,6 +21,7 @@
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
+#include <QtWidgets/QListWidget>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
@@ -50,6 +51,13 @@ public:
     QLabel *statusLabel;
     QLabel *statusText;
     QWidget *decodeTab;
+    QGridLayout *gridLayout_3;
+    QFrame *decodeDisplayFrame;
+    QVBoxLayout *verticalLayout_3;
+    QListWidget *decodedList;
+    QPlainTextEdit *decodedText;
+    QHBoxLayout *horizontalLayout_4;
+    QPushButton *decodedFiltersBtn;
     QWidget *rawDecryptTab;
     QVBoxLayout *verticalLayout_2;
     QHBoxLayout *textPaneFrame;
@@ -144,6 +152,45 @@ public:
         processTabs->addTab(interceptionTab, QString());
         decodeTab = new QWidget();
         decodeTab->setObjectName(QStringLiteral("decodeTab"));
+        gridLayout_3 = new QGridLayout(decodeTab);
+        gridLayout_3->setSpacing(6);
+        gridLayout_3->setContentsMargins(11, 11, 11, 11);
+        gridLayout_3->setObjectName(QStringLiteral("gridLayout_3"));
+        gridLayout_3->setContentsMargins(-1, -1, -1, 5);
+        decodeDisplayFrame = new QFrame(decodeTab);
+        decodeDisplayFrame->setObjectName(QStringLiteral("decodeDisplayFrame"));
+        decodeDisplayFrame->setFrameShape(QFrame::StyledPanel);
+        decodeDisplayFrame->setFrameShadow(QFrame::Raised);
+        verticalLayout_3 = new QVBoxLayout(decodeDisplayFrame);
+        verticalLayout_3->setSpacing(1);
+        verticalLayout_3->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_3->setObjectName(QStringLiteral("verticalLayout_3"));
+        verticalLayout_3->setContentsMargins(-1, -1, -1, 0);
+        decodedList = new QListWidget(decodeDisplayFrame);
+        decodedList->setObjectName(QStringLiteral("decodedList"));
+
+        verticalLayout_3->addWidget(decodedList);
+
+        decodedText = new QPlainTextEdit(decodeDisplayFrame);
+        decodedText->setObjectName(QStringLiteral("decodedText"));
+
+        verticalLayout_3->addWidget(decodedText);
+
+
+        gridLayout_3->addWidget(decodeDisplayFrame, 0, 0, 1, 1);
+
+        horizontalLayout_4 = new QHBoxLayout();
+        horizontalLayout_4->setSpacing(6);
+        horizontalLayout_4->setObjectName(QStringLiteral("horizontalLayout_4"));
+        decodedFiltersBtn = new QPushButton(decodeTab);
+        decodedFiltersBtn->setObjectName(QStringLiteral("decodedFiltersBtn"));
+        decodedFiltersBtn->setMaximumSize(QSize(80, 16777215));
+
+        horizontalLayout_4->addWidget(decodedFiltersBtn);
+
+
+        gridLayout_3->addLayout(horizontalLayout_4, 1, 0, 1, 1);
+
         processTabs->addTab(decodeTab, QString());
         rawDecryptTab = new QWidget();
         rawDecryptTab->setObjectName(QStringLiteral("rawDecryptTab"));
@@ -152,7 +199,7 @@ public:
         verticalLayout_2->setContentsMargins(11, 11, 11, 11);
         verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
         textPaneFrame = new QHBoxLayout();
-        textPaneFrame->setSpacing(6);
+        textPaneFrame->setSpacing(1);
         textPaneFrame->setObjectName(QStringLiteral("textPaneFrame"));
         ptHexPane = new QTextEdit(rawDecryptTab);
         ptHexPane->setObjectName(QStringLiteral("ptHexPane"));
@@ -293,7 +340,7 @@ public:
         QObject::connect(rawLinewrapCheck, SIGNAL(toggled(bool)), exileSniffer, SLOT(toggleRawLineWrap(bool)));
         QObject::connect(rawAutoScrollCheck, SIGNAL(toggled(bool)), exileSniffer, SLOT(toggleRawAutoScroll(bool)));
 
-        processTabs->setCurrentIndex(2);
+        processTabs->setCurrentIndex(1);
 
 
         QMetaObject::connectSlotsByName(exileSniffer);
@@ -307,6 +354,7 @@ public:
         statusLabel->setText(QApplication::translate("exileSniffer", "Status:", Q_NULLPTR));
         statusText->setText(QApplication::translate("exileSniffer", "No running Path of Exile clients found", Q_NULLPTR));
         processTabs->setTabText(processTabs->indexOf(interceptionTab), QApplication::translate("exileSniffer", "Interception", Q_NULLPTR));
+        decodedFiltersBtn->setText(QApplication::translate("exileSniffer", "Filters", Q_NULLPTR));
         processTabs->setTabText(processTabs->indexOf(decodeTab), QApplication::translate("exileSniffer", "Decoder", Q_NULLPTR));
         ptHexPane->setHtml(QApplication::translate("exileSniffer", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"

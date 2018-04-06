@@ -1,9 +1,8 @@
 #pragma once
 #include "safequeue.h"
+#include "decodedPacket.h"
 
-
-enum streamType { eLogin = 'L', eGame = 'G', ePatch = 'P', eNone = 0 };
-enum uiMsgType {eMetaLog, eClientEvent, eLoginNote, ePacketHex};
+enum uiMsgType {eMetaLog, eClientEvent, eLoginNote, ePacketHex, eDecodedPacket};
 
 class UI_MESSAGE
 {
@@ -36,17 +35,35 @@ class UI_RAWHEX_PKT : public UI_MESSAGE
 {
 public:
 	UI_RAWHEX_PKT(DWORD processID, streamType streamServer, bool isIncoming);
-	void setData(byte *source, size_t length);
-
+	void setData(byte *source, unsigned short length);
+	void setErrorIndex(unsigned short idx) {
+		decodeFailed = true;
+		failLocation = idx;
+	}
 
 	streamType stream;
 	bool incoming;
 	DWORD pid;
 	time_t createdtime;
-	std::vector<byte> pktBytes;
+	byte* pktBytes;
+	unsigned short pktSize = 0;
 	short startBytes;
+	bool decodeFailed = false;
+	unsigned short failLocation = 0;
 };
 
+class UI_DECODED_PKT : public UI_MESSAGE
+{
+public:
+	UI_DECODED_PKT(DWORD processID, streamType streamServer, bool isIncoming);
+	void attachDecodedObj(decodedPacket obj) { decodedobj = obj; };
+
+	streamType stream;
+	bool incoming;
+	DWORD pid;
+	time_t createdtime;
+	decodedPacket decodedobj;
+};
 
 void UIaddLogMsg(QString msg, DWORD clientPID, SafeQueue<UI_MESSAGE> *uiMsgQueue);
 void UIaddLogMsg(std::string msg, DWORD clientPID, SafeQueue<UI_MESSAGE> *uiMsgQueue);

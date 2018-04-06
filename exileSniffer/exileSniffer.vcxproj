@@ -129,6 +129,7 @@
   <ItemGroup>
     <ClCompile Include="base_thread.cpp" />
     <ClCompile Include="clientData.cpp" />
+    <ClCompile Include="decodedPacket.cpp" />
     <ClCompile Include="derivedRawFilterForm.cpp">
       <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\%(Filename).moc</OutputFile>
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
@@ -136,11 +137,14 @@
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
     </ClCompile>
     <ClCompile Include="exileSniffer.cpp" />
+    <ClCompile Include="exileSniffer_packet_actions.cpp" />
     <ClCompile Include="inventory.cpp" />
     <ClCompile Include="key_grabber_thread.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="packet_processor.cpp" />
     <QtMoc Include="rawFilterForm.h" />
+    <ClCompile Include="packet_processor_decode_utils.cpp" />
+    <ClCompile Include="packet_processor_game_packet_decoders.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -153,6 +157,7 @@
     <ClInclude Include="base_thread.h" />
     <ClInclude Include="clientData.h" />
     <ClInclude Include="cppsemaphore.h" />
+    <ClInclude Include="decodedPacket.h" />
     <ClInclude Include="inventory.h" />
     <ClInclude Include="key_grabber_thread.h" />
     <ClInclude Include="packetIDs.h" />

@@ -3,6 +3,9 @@
 #include "packet_capture_thread.h"
 #include "key_grabber_thread.h"
 
+enum eDecodingErr{ eNoErr, eErrUnderflow, eBadPacketID};
+
+
 class STREAMDATA {
 public:
 	CryptoPP::Salsa20::Encryption toLoginSalsa, fromLoginSalsa;
@@ -10,6 +13,7 @@ public:
 	unsigned long packetCount = 0;
 	KEYDATA *workingRecvKey = NULL;
 	KEYDATA *workingSendKey = NULL;
+	unsigned short lastPktID = 0;
 };
 
 class packet_processor :
@@ -24,6 +28,8 @@ public:
 private:
 	void main_loop();
 
+	void init_packetDeserialisers();
+
 	bool process_packet_loop();
 	void handle_patch_data(std::vector<byte> pkt);
 	void handle_login_data(std::vector<byte> pkt);
@@ -36,6 +42,18 @@ private:
 	void handle_packet_from_gameserver(networkStreamID streamID, byte* data, unsigned int dataLen);
 	void handle_packet_to_gameserver(networkStreamID streamID, byte* data, unsigned int dataLen);
 
+	pkt_CLI_MOUSE_RELEASE deserialise_CLI_MOUSE_RELEASE();
+	pkt_CLI_CHAT_MSG deserialise_CLI_CHAT_MSG();
+
+	byte consumeByte();
+	unsigned short consumeUShort();
+	unsigned long consumeULong();
+	std::wstring consumeWString(size_t bytesLength);
+
+	bool sanityCheckPacketID(unsigned short pktID);
+	void emit_decoding_err_msg(unsigned short msgID, unsigned short lastMsgID);
+
+	
 	void fillObjCodeMap();
 	bool lookup_areaCode(unsigned long code, std::string& result);
 	bool lookup_hash(unsigned long hash, std::string& result, std::string& category);
@@ -47,12 +65,20 @@ private:
 	map<networkStreamID, unsigned long> connectionIDStreamIDmapping;
 	SafeQueue<UI_MESSAGE>* uiMsgQueue;
 
+	typedef decodedPacket (packet_processor::*deserialiser)();
+	map<unsigned short, deserialiser> packetDeserialisers;
 
 	HANDLE patchpipe = NULL;
 	HANDLE loginpipe = NULL;
 	HANDLE gamepipe = NULL;
 
+	DWORD activeClientPID = 0;
+	byte *decryptedBuffer = NULL;
+	size_t remainingDecrypted = 0, decryptedIndex = 0;
+	eDecodingErr errorFlag = eDecodingErr::eNoErr;
+	unsigned long errorCount = 0;
 
+	bool unfinishedPacket = false;
 
 	std::map <unsigned long, std::string> gameObjHashes;
 	std::map <unsigned long, std::string> monsterHashes;

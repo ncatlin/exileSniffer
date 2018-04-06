@@ -17,7 +17,6 @@ public:
 		unique_lock<mutex> lck(mtx);
 		++count;
 		cv.notify_one();
-		std::cout << "+count " << count << std::endl;
 	}
 
 	void wait()
@@ -29,8 +28,6 @@ public:
 		}
 
 		--count;
-
-		std::cout << "-count " << count << std::endl;
 	}
 
 	bool empty()

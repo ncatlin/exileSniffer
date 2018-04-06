@@ -24,6 +24,14 @@ exileSniffer::exileSniffer(QWidget *parent)
 		ui.ptHexPane->verticalScrollBar(), SLOT(setValue(int)));
 	ui.ptHexPane->verticalScrollBar()->hide();
 
+	init_DecodedPktActioners();
+
+	start_threads();
+
+}
+
+void exileSniffer::start_threads()
+{
 	//start the packet capture thread to grab streams
 	packetSniffer = new packet_capture_thread(&uiMsgQueue);
 	std::thread packetSnifferInstance(&packet_capture_thread::ThreadEntry, packetSniffer);
@@ -89,6 +97,16 @@ void exileSniffer::action_UI_Msg(UI_MESSAGE *msg)
 	{
 		deleteAfterUse = false; //archived
 		handle_raw_packet_data((UI_RAWHEX_PKT *)msg);
+		break;
+	}
+	case uiMsgType::eDecodedPacket:
+	{
+		std::cout << "7 startaction pk" << std::endl;
+		UI_DECODED_PKT &uiDecodedMsg = *((UI_DECODED_PKT *)msg);
+		if(uiDecodedMsg.decodedobj.failedDecode)
+			action_undecoded_packet(uiDecodedMsg);
+		else
+			action_decoded_packet(uiDecodedMsg);
 		break;
 	}
 	}
@@ -209,18 +227,21 @@ void exileSniffer::print_raw_packet(UI_RAWHEX_PKT *pkt)
 		hexdump << serverString(pkt->stream, "f") << " to POE Client";
 	else
 		hexdump << "POE Client to " << serverString(pkt->stream, "f");
-	hexdump << std::endl << "  ";
+	hexdump << std::endl;
 	asciidump << std::endl;
 
-	hexdump << std::setfill('0') << std::uppercase;
-	for (int i = 0; i < pkt->pktBytes.size(); ++i)
+
+	stringstream::pos_type bytesStart = hexdump.tellp();
+
+	hexdump << std::setfill('0') << std::uppercase << " ";
+	for (int i = 0; i < pkt->pktSize; ++i)
 	{
-		byte item = pkt->pktBytes.at(i);
+		byte item = pkt->pktBytes[i];
 
 		if (item)
-			hexdump << std::hex << std::setw(2) << (int)item << " ";
+			hexdump << " " << std::hex << std::setw(2) << (int)item ;
 		else
-			hexdump << "00 ";
+			hexdump << " 00";
 
 		if (item >= ' ' && item <= '~')
 			asciidump << (char)item;
@@ -236,8 +257,11 @@ void exileSniffer::print_raw_packet(UI_RAWHEX_PKT *pkt)
 	hexdump << "\n" << std::endl << std::nouppercase;
 	asciidump << "\n" << std::endl;
 
-
-	insertRawText(hexdump.str(), asciidump.str());
+	std::string hexdumpstring = hexdump.str();
+	//todo: work out position from bytes*2 + bytes*space + bytes/bytesperline*space
+	//if (pkt->decodeFailed)
+	//	hexdumpstring.at()
+	insertRawText(hexdumpstring, asciidump.str());
 
 }
 
@@ -279,7 +303,7 @@ void exileSniffer::handle_raw_packet_data(UI_RAWHEX_PKT *pkt)
 		return;
 	}
 
-
+	std::cout << "call print raw sise " << pkt->pktSize << std::endl;
 	if (packet_passes_raw_filter(pkt, client))
 		print_raw_packet(pkt);
 	else
@@ -305,6 +329,7 @@ void exileSniffer::rawBytesRowChanged(QString arg)
 
 void exileSniffer::reprintRawHex()
 {
+	std::cout << "reprinting raw" << std::endl;
 	ui.ptHexPane->clear();
 	ui.ptASCIIPane->clear();
 
@@ -362,3 +387,5 @@ void exileSniffer::toggleRawAutoScroll(bool enabled)
 		ui.ptHexPane->moveCursor(QTextCursor::MoveOperation::End);
 	}
 }
+
+

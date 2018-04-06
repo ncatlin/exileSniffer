@@ -66,6 +66,18 @@
     <ClCompile Include="derivedRawFilterForm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="decodedPacket.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="packet_processor_decode_utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="exileSniffer_packet_actions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="packet_processor_game_packet_decoders.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -102,6 +114,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inventory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="decodedPacket.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
