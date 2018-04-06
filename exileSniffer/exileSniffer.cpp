@@ -101,7 +101,6 @@ void exileSniffer::action_UI_Msg(UI_MESSAGE *msg)
 	}
 	case uiMsgType::eDecodedPacket:
 	{
-		std::cout << "7 startaction pk" << std::endl;
 		UI_DECODED_PKT &uiDecodedMsg = *((UI_DECODED_PKT *)msg);
 		if(uiDecodedMsg.decodedobj.failedDecode)
 			action_undecoded_packet(uiDecodedMsg);
@@ -303,7 +302,6 @@ void exileSniffer::handle_raw_packet_data(UI_RAWHEX_PKT *pkt)
 		return;
 	}
 
-	std::cout << "call print raw sise " << pkt->pktSize << std::endl;
 	if (packet_passes_raw_filter(pkt, client))
 		print_raw_packet(pkt);
 	else

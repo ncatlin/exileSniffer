@@ -204,7 +204,7 @@ void packet_processor::handle_packet_from_loginserver(networkStreamID streamID, 
 	char pktType = decryptedBuffer[1];
 	switch (pktType)
 	{
-	case SRVPK_GAMESERVER_INFO:
+	case LSRV_GAMESERVER_INFO:
 	{
 		std::cout << "Got gameserver info from loginserver" << std::endl;
 		//outfile << "Got gameserver info from loginserver" << std::endl;
@@ -675,15 +675,6 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 	memset(decryptedBuffer, 0, dataLen+1);
 	streamObj->toGameSalsa.ProcessData(decryptedBuffer, data, dataLen);
 
-	std::cout << "Hex Payload: " << std::endl;
-	for (int i = 0; i < dataLen; ++i)
-	{
-		byte item = decryptedBuffer[i];
-		std::cout << std::hex << std::setw(2) << (int)item;
-		if (i % 16 == 0) std::cout << std::endl;
-	}
-	std::cout << std::endl;
-
 	if (unfinishedPacket)
 	{
 		std::cout << "todo: multipacket packets" << std::endl;
@@ -698,8 +689,6 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 	while (remainingDecrypted > 0)
 	{
 		unsigned short pktId = consumeUShort();
-		if (pktId == 0xd) return;
-		std::cout << "1 decode clipk " << pktId << std::endl;
 		if (errorFlag)
 		{
 			emit_decoding_err_msg(0, streamObj->lastPktID);
@@ -721,15 +710,23 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 		{
 			
 			packet_processor::deserialiser f = it->second;
-			std::cout << "2 calling memberfunc for " << pktId << "*" << std::hex << f << std::endl;
 			ui_decodedpkt->decodedobj = (this->*f)();
-			std::cout << "5 returned clichat decoder" << std::endl;
 		}
 		else
 		{
 			stringstream errmsg;
 			errmsg << "ERROR: no handler for client msgID " << pktId;
 			UIaddLogMsg(QString::fromStdString(errmsg.str()), activeClientPID, uiMsgQueue);
+
+			std::cout << "Unhandled Hex Payload msgID 0x" <<std::hex << pktId<<std::endl;
+			for (int i = 0; i < dataLen; ++i)
+			{
+				byte item = decryptedBuffer[i];
+				std::cout << std::setw(2) << (int)item;
+				if (i % 16 == 0) std::cout << std::endl;
+			}
+			std::cout << std::endl;
+
 			break;
 		}
 
@@ -740,7 +737,6 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 		}
 		else
 		{
-			std::cout << "6. addpk  clichat decoder" << std::endl;
 			uiMsgQueue->addItem(ui_decodedpkt);
 		}
 
@@ -750,7 +746,6 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 
 
 	UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(streamObj->workingSendKey->sourceProcess, eGame, false);
-	std::cout << "calling setdata with len " << dataLen << std::endl;
 	msg->setData(decryptedBuffer, dataLen);
 	if (errorFlag != eNoErr)
 		msg->setErrorIndex(decryptedIndex);
@@ -800,7 +795,6 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 	}
 
 
-	bool dumpHex = false;
 	int remainingBytes = dataLen;
 	bool deserialiseMore = false;
 	int index = 0;
@@ -815,7 +809,6 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 		if (remainingBytes < 2) {
 			std::cerr << "ERROR! Bad remaining length " << std::dec << remainingBytes << std::endl;
 			std::cerr << "Probable bad handling of previous packet " << lastPktID << std::endl;
-			dumpHex = true;
 			break;
 		}
 
@@ -830,11 +823,10 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 		case 0:
 		{
 			//handling of items in incoming chat messages needs implementing
-			if (lastPktID != SRVPK_CHAT_INCOMING_MESSAGE)
+			if (lastPktID != SRV_CHAT_MESSAGE)
 			{
 				std::cout << "Bad packet ID 0 <gameserver to client>: 0x" << std::hex << pktId
 					<< " size: " << std::dec << dataLen << " bytes";
-				dumpHex = true;
 			}
 			break;
 		}
@@ -885,7 +877,7 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 			break;
 
 		}
-		case SRVPK_PING_RESPONSE:
+		case SRV_PING_RESPONSE:
 		{
 			sIdx += 4;
 
@@ -897,7 +889,7 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 			//ping response?
 		}
 
-		case SRVPK_CHAT_INCOMING_MESSAGE: //chat message
+		case SRV_CHAT_MESSAGE: //chat message
 		{
 			unsigned short nameLen = getUshort(decryptedBuffer + sIdx); sIdx += 2;
 			std::string namemb(decryptedBuffer + sIdx, decryptedBuffer + sIdx + nameLen * 2); sIdx += nameLen * 2;
@@ -934,7 +926,7 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 			continue;
 		}
 
-		case SRVPK_SERVER_MESSAGE:
+		case SRV_SERVER_MESSAGE:
 		{
 			/*
 			33 remaining:
@@ -969,7 +961,6 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 			std::cout << std::hex << "[" << pktId << "]" << "Server sent remaining response for area 0x";
 			unsigned int remaining = (unsigned long)htonl(*((unsigned long *)(decryptedBuffer + 8)));
 			std::cout << (unsigned long)htonl(*((DWORD *)(decryptedBuffer + 3))) << " : " << std::dec << remaining << std::hex << std::endl;
-			dumpHex = true;
 			break;
 		}
 
@@ -1043,7 +1034,6 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 			std::cout << std::hex << "[" << pktId << "] Player Items Listing" <<
 				std::hex << getUlong(decryptedBuffer) << std::endl;
 			//handle_server_items_packet(decryptedBuffer, dataLen);
-			dumpHex = true;
 			break;
 		}
 
@@ -1120,7 +1110,6 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 		}
 		case SRVPK_STASH_INFO:
 			std::cout << std::hex << "[" << pktId << "] server sent stash data?" << std::endl;
-			dumpHex = true;
 			break;
 
 		case SRVPK_RESPOND_PUBLICPARTIES:
@@ -1231,7 +1220,6 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 				std::cout << " [Row " << (int)row << ", Col" << (int)col << "]";
 			std::cout << " PrevID: 0x" << prevID << " unk2: 0x" << unk2
 				<< " unk3: 0x" << unk3 << " unk4: " << (int)unk4 << std::endl;
-			dumpHex = true;
 			break;
 		}
 
@@ -1244,7 +1232,6 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 
 			std::cout << std::hex << "Vendor inventory listing (" << std::dec << numItems << " items )" <<
 				std::hex << " ID1 0x" << ID1 << " ID2: 0x" << ID2 << std::endl;
-			dumpHex = true;
 			break;
 		}
 		case SRVPK_SKILLPANE_DATA:
@@ -1259,12 +1246,10 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 			}*/
 		case SRVPK_MICROSTRANSACTIONSPANE_RESP: //7 bytes of other data, expect reflects changes?
 			std::cout << std::hex << "[" << pktId << "] Server acknowledge microtranspane opened";
-			dumpHex = true;
 			break;
 		case SRV_DISPLAY_BUILTIN_MSG:
 		{
 			std::cout << "Server requested client display a builtin message" << std::endl;
-			dumpHex = true;
 			break;
 		}
 		case 0xd9:
@@ -1290,7 +1275,6 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 				" on obj2 " << objID2 << " (" << pos2x << " , " << pos2y << ")" <<
 				"unk1: " << unk0 << ", skillSlot:" << skillSlot << " unk2:" << (int)decryptedBuffer[23] << std::endl;
 
-			dumpHex = true;
 			break;
 		}
 		/*
@@ -1421,20 +1405,17 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 		*/
 		case 0xe0:
 			std::cout << std::hex << "[" << pktId << "] Server player info change update" << std::endl;
-			dumpHex = true;
 			break;
 
 		case 0xe2:
 			std::cout << std::hex << "[" << pktId << "] Possible aura effects!" << std::endl;
-			dumpHex = true;
 			break;
 
 		case 0xe9:
 			std::cout << std::hex << "[" << pktId << "] Picked item up?" << std::endl;
-			dumpHex = true;
 			break;
 
-		case SRVPK_MOBILE_USED_SKILL:
+		case SRV_MOBILE_USED_SKILL:
 		{
 			//noisy
 			break;
@@ -1481,7 +1462,6 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 
 		case 0xee:
 			std::cout << std::hex << "[" << pktId << "] Effects or object related update ee" << std::endl;
-			dumpHex = true;
 			break;
 
 		case SRV_MOBILE_UPDATE_HMS:
@@ -1514,7 +1494,6 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 			remainingBytes -= (sIdx - index);
 			index = sIdx;
 
-			dumpHex = true;
 			break;
 		}
 
@@ -1562,12 +1541,10 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 
 			*/
 			std::cout << std::hex << "[" << pktId << "] Server sent stat update" << std::endl;
-			dumpHex = true;
 			break;
 
 		case 0xf2:
 			std::cout << std::hex << "[" << pktId << "] Server sent equipped item/armor/weapon update 1/f2" << std::endl;
-			dumpHex = true;
 			break;
 
 		case SRV_CRITTER_MOVEMENT:
@@ -1605,7 +1582,6 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 			000002	 - buf id 02
 			*/
 			std::cout << std::hex << "[" << pktId << "] Char status related update" << std::endl;
-			dumpHex = true;
 			break;
 		}
 		case SRV_END_EFFECT:
@@ -1740,14 +1716,12 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 
 			//byte unk3 = decryptedBuffer[sIdx++];
 			//unsigned long unk3 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
-			dumpHex = true;
 			break;
 		}
 
 		case SRV_UNK_13A:
 		{
 			std::cout << "What am I?? pkt ID 0x13a" << std::endl;
-			dumpHex = true;
 			break;
 		}
 
@@ -1757,7 +1731,6 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 				<< " size: " << std::dec << dataLen << " bytes" << std::endl;
 			//outfile << "Unhandled packet ID - gameserver to client: 0x" << std::hex << pktId
 			//	<< " size: " << std::dec << dataLen << " bytes" << std::endl;
-			dumpHex = true;
 			break;
 		}
 
@@ -1766,10 +1739,10 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 		remainingBytes = 0;
 	}
 
-	UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(
-		streamObj->workingRecvKey->sourceProcess, eGame, true);
-	msg->setData(decryptedBuffer, dataLen);
-	uiMsgQueue->addItem(msg);
+	//UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(
+	//	streamObj->workingRecvKey->sourceProcess, eGame, true);
+	//msg->setData(decryptedBuffer, dataLen);
+	//uiMsgQueue->addItem(msg);
 }
 
 bool packet_processor::process_packet_loop()

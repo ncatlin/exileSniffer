@@ -42,8 +42,19 @@ private:
 	void handle_packet_from_gameserver(networkStreamID streamID, byte* data, unsigned int dataLen);
 	void handle_packet_to_gameserver(networkStreamID streamID, byte* data, unsigned int dataLen);
 
-	pkt_CLI_MOUSE_RELEASE deserialise_CLI_MOUSE_RELEASE();
+	pkt_SRV_PKT_ENCAPSULATED deserialise_SRV_PKT_ENCAPSULATED();
+	pkt_CLI_CHAT_MSG_ITEMS deserialise_CLI_CHAT_MSG_ITEMS();
 	pkt_CLI_CHAT_MSG deserialise_CLI_CHAT_MSG();
+	pkt_CLI_CHAT_COMMAND deserialise_CLI_CHAT_COMMAND();
+	pkt_SRV_CHAT_MESSAGE deserialise_SRV_CHAT_MESSAGE();
+	pkt_SRV_SERVER_MESSAGE deserialise_SRV_SERVER_MESSAGE();
+	pkt_CLI_LOGGED_OUT deserialise_CLI_LOGGED_OUT();
+	pkt_CLI_PING_CHALLENGE deserialise_CLI_PING_CHALLENGE();
+	pkt_CLI_ACTION_PREDICTIVE deserialise_CLI_ACTION_PREDICTIVE();
+	pkt_CLI_USE_BELT_SLOT deserialise_CLI_USE_BELT_SLOT();
+	pkt_CLI_USE_ITEM deserialise_CLI_USE_ITEM();
+	pkt_CLI_MOUSE_RELEASE deserialise_CLI_MOUSE_RELEASE();
+
 
 	byte consumeByte();
 	unsigned short consumeUShort();

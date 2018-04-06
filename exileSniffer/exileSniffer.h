@@ -55,7 +55,17 @@ private:
 	void updateRawFilterLabel();
 
 private:
+	void action_SRV_PKT_ENCAPSULATED(UI_DECODED_PKT& decobj);
+	void action_CLI_CHAT_MSG_ITEMS(UI_DECODED_PKT& decobj);
 	void action_CLI_CHAT_MSG(UI_DECODED_PKT& decobj);
+	void action_CLI_CHAT_COMMAND(UI_DECODED_PKT& decobj);
+	void action_SRV_CHAT_MESSAGE(UI_DECODED_PKT& decobj);
+	void action_SRV_SERVER_MESSAGE(UI_DECODED_PKT& decobj);
+	void action_CLI_LOGGED_OUT(UI_DECODED_PKT& decobj);
+	void action_CLI_PING_CHALLENGE(UI_DECODED_PKT& decobj);
+	void action_CLI_ACTION_PREDICTIVE(UI_DECODED_PKT& decobj);
+	void action_CLI_USE_BELT_SLOT(UI_DECODED_PKT& decobj);
+	void action_CLI_USE_ITEM(UI_DECODED_PKT& decobj);
 	void action_CLI_MOUSE_RELEASE(UI_DECODED_PKT& decobj);
 
 private:
