@@ -301,14 +301,19 @@ void packet_processor::handle_packet_to_loginserver(networkStreamID streamID, by
 	memset(decryptedBuffer, 0, dataLen);
 	if (!streamObj->workingSendKey)
 	{
+		unsigned int msWaited = 0;
 		std::cout << "Login request: " << std::endl;
 		while (true)
 		{
+
 			//should use hint here, but have to reliably find corresponding stream
 			KEYDATA *keyCandidate = keyGrabber->getUnusedMemoryKey(streamID, false);
 			if (!keyCandidate) {
-				std::cout << "sleep no key candidate for sid " << streamID << std::endl;
 				Sleep(200);
+				msWaited += 200;
+				//every two seconds relax the memory scan filters
+				if(msWaited % 2000 == 0)
+					keyGrabber->relaxScanFilters();
 				continue;
 			}
 

@@ -5,6 +5,7 @@
 
 #define PLEASE_TERMINATE 0
 #define SCAN_WORKER_THREAD_COUNT 2
+#define MEMSCAN_FILTERS_IMPLEMENTED 6
 
 #define RECV_TESTED 0x1
 #define SEND_TESTED 0x2
@@ -192,6 +193,39 @@ void key_grabber_thread::claimKey(KEYDATA *key, unsigned int keyStreamID)
 	ReleaseMutex(keyVecMutex);
 }
 
+
+bool key_grabber_thread::relaxScanFilters()
+{
+	GAMECLIENTINFO* result = NULL;
+
+	bool atLeastOneDone = false;
+
+	processListMutex.lock();
+	for (auto it = activeClients.begin(); it != activeClients.end(); it++)
+	{
+		GAMECLIENTINFO *client = ((GAMECLIENTINFO*)*it);
+		if (client->needsLoginKey)
+		{
+			if (client->memScanFiltersRelaxed < MEMSCAN_FILTERS_IMPLEMENTED)
+			{
+				client->memScanFiltersRelaxed += 1;
+
+				stringstream msg;
+				msg << "INFO: Keygrabber relaxed memory scan filters for unauthenticated client 0x" <<
+					std::hex << client->pid	<< " to " << std::dec << 
+					client->memScanFiltersRelaxed << " remaining filters";
+				UIaddLogMsg(msg.str(), client->pid, uiMsgQueue);
+
+				atLeastOneDone = true;
+			}
+		}
+	}
+	processListMutex.unlock();
+
+	return atLeastOneDone;
+}
+
+
 /*
 This searches the memory of a gameclient using addresses passed to it in the
 gameClient address queue for salsa keys. Keys will be placed in this objects key vector.
@@ -339,10 +373,23 @@ void key_grabber_thread::grabKeys(GAMECLIENTINFO *gameClient)
 			nextp += info.RegionSize;
 			//some filters to avoid scanning memory where the key (hopefully) won't be
 			//homework: narrow them down to be as restrictive as possible without missing any keys
-			if (info.AllocationProtect != PAGE_READWRITE) continue;
-			if (!(info.State & MEM_COMMIT)) continue;
-			if (info.Type != MEM_PRIVATE) continue;
-			if (info.RegionSize > 20 * 1024 * 1024 || info.RegionSize <= 1024) continue;
+			switch (gameClient->memScanFiltersRelaxed)
+			{
+			case (MEMSCAN_FILTERS_IMPLEMENTED - 6):
+				if (info.AllocationProtect != PAGE_READWRITE) continue;
+			case (MEMSCAN_FILTERS_IMPLEMENTED - 5):
+				if (!(info.State & MEM_COMMIT)) continue;
+			case (MEMSCAN_FILTERS_IMPLEMENTED - 4):
+				if (info.Type != MEM_PRIVATE) continue;
+			case (MEMSCAN_FILTERS_IMPLEMENTED - 3):
+				if (info.RegionSize > 20 * 1024 * 1024) continue;
+			case (MEMSCAN_FILTERS_IMPLEMENTED - 2):
+				if (info.RegionSize <= 1024) continue;
+			case (MEMSCAN_FILTERS_IMPLEMENTED - 1):
+				if (info.RegionSize > 60 * 1024 * 1024) continue;
+			case MEMSCAN_FILTERS_IMPLEMENTED:
+				break;
+			}
 
 			//totalMem += info.RegionSize;
 			WaitForSingleObject(gameClient->addressQueueMutex, INFINITE);

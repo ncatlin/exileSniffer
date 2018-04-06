@@ -38,6 +38,7 @@ public:
 	bool needsLoginKey = true;
 	semaphore handlesOpen;
 	HANDLE addressQueueMutex;
+	unsigned int memScanFiltersRelaxed = 0;
 	std::queue<std::pair<void *, size_t>> addressQueue;
 };
 
@@ -59,14 +60,14 @@ public:
 	void claimKey(KEYDATA *key, unsigned int keyStreamID);
 	bool insertKey(KEYDATA *key);
 	void stopProcessScan(DWORD pid);
+	bool relaxScanFilters();
 
 private:
 	void main_loop();
 	void grabKeys(GAMECLIENTINFO *clientInfo);
 	bool insertKey(DWORD pid, DWORD *keyblobptr, DWORD foundAddress);
 	int getClientPIDs(std::vector <DWORD>& resultsList);
-	GAMECLIENTINFO* key_grabber_thread::get_process_obj(DWORD pid);
-
+	GAMECLIENTINFO* get_process_obj(DWORD pid);
 	void memoryScanWorker(GAMECLIENTINFO *);
 	static DWORD WINAPI scanWorkerStart(void* Param) {
 		memWorkerParams *paramsPtr = (memWorkerParams*)Param;
