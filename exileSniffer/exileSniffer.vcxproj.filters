@@ -66,9 +66,6 @@
     <ClCompile Include="derivedRawFilterForm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="decodedPacket.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="packet_processor_decode_utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -114,9 +111,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inventory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="decodedPacket.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

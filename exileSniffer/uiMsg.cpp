@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "uiMsg.h"
 #include "utilities.h"
+#include "rapidjson\stringbuffer.h"
+#include "rapidjson\writer.h"
+
 
 void UIaddLogMsg(QString msg, DWORD clientPID, SafeQueue<UI_MESSAGE> *uiMsgQueue)
 {
@@ -60,11 +63,126 @@ void UI_RAWHEX_PKT::setData(byte *source, unsigned short length)
 
 }
 
-UI_DECODED_PKT::UI_DECODED_PKT(DWORD processID, streamType streamServer, bool isIncoming)
+UIDecodedPkt::UIDecodedPkt(DWORD processID, streamType streamServer, byte isIncoming)
 {
-	createdtime = time(0);
-	pid = processID;
-	incoming = isIncoming;
-	stream = streamServer;
+	jsn.SetObject();
 	msgType = uiMsgType::eDecodedPacket;
+	add_dword(L"processID", processID);
+
+	byte streamFlags = 0;
+	streamFlags |= isIncoming;
+
+	switch (streamServer) 
+	{
+	case streamType::eGame:
+		streamFlags |= PKTBIT_GAMESERVER;
+		break;
+	case streamType::eLogin:
+		streamFlags |= PKTBIT_LOGINSERVER;
+		break;
+	case streamType::ePatch:
+		streamFlags |= PKTBIT_PATCHSERVER;
+		break;
+	}
+	streamFlags |= streamServer;
+	add_byte(L"Flags", streamFlags);
+
+	isIncoming = (isIncoming == PKTBIT_INBOUND);
+	serverStream = streamServer;
+
+	payload = jsn.AddMember(L"Payload", WValue(rapidjson::kObjectType), jsn.GetAllocator());
+
+	/*
+	createdtime = time(0);
+	*/
+}
+void UIDecodedPkt::add_dword(std::wstring name, DWORD dwordfield)
+{
+	WValue nameVal (name.c_str(), jsn.GetAllocator());
+	if (payloadOperations)
+		payload.AddMember(nameVal, (uint64_t)dwordfield, jsn.GetAllocator());
+	else
+		jsn.AddMember(nameVal, (uint64_t)dwordfield, jsn.GetAllocator());
+}
+
+void UIDecodedPkt::add_word(std::wstring name, ushort ushortfield)
+{
+	WValue nameVal(name.c_str(), jsn.GetAllocator());
+	if (payloadOperations)
+		jsn.AddMember(nameVal, ushortfield, jsn.GetAllocator());
+	else
+		jsn.AddMember(nameVal, ushortfield, jsn.GetAllocator());
+}
+
+void UIDecodedPkt::add_byte(std::wstring name, byte bytefield)
+{
+	WValue nameVal(name.c_str(), jsn.GetAllocator());
+	if (payloadOperations)
+		jsn.AddMember(nameVal, bytefield, jsn.GetAllocator());
+	else
+		jsn.AddMember(nameVal, bytefield, jsn.GetAllocator());
+}
+
+void UIDecodedPkt::add_wstring(std::wstring name, std::wstring stringfield)
+{
+	WValue nameVal(name.c_str(), jsn.GetAllocator());
+	WValue stringVal(stringfield.c_str(), jsn.GetAllocator());
+	if (payloadOperations)
+		jsn.AddMember(nameVal, stringVal, jsn.GetAllocator());
+	else
+		jsn.AddMember(nameVal, stringVal, jsn.GetAllocator());
+}
+
+UINT32 UIDecodedPkt::get_UInt32(std::wstring name)
+{
+
+	auto it = payloadOperations ? payload.FindMember(name.c_str())
+		: jsn.FindMember(name.c_str());
+	if (it != payload.MemberEnd() && it->value.IsUint())
+		return it->value.GetUint();
+
+	std::wcerr << "JSON ERROR: No Int32 field named " << name <<
+		" in pktID 0x" << messageID;
+	if (payloadOperations)
+		std::wcerr << " payload" << std::endl;
+	else
+		std::wcerr << " metadata" << std::endl;
+
+	return 0xffffffff;
+}
+
+UINT64 UIDecodedPkt::get_UInt64(std::wstring name)
+{
+
+	auto it = payloadOperations ? payload.FindMember(name.c_str())
+		: jsn.FindMember(name.c_str());
+	if (it != payload.MemberEnd() && it->value.IsUint64())
+		return it->value.GetUint64();
+
+	std::wcerr << "JSON ERROR: No Int64 field named " << name <<
+		" in pktID 0x" << messageID;
+	if (payloadOperations)
+		std::wcerr << " payload" << std::endl;
+	else
+		std::wcerr << " metadata" << std::endl;
+
+	return 0xffffffffffffffff;
+}
+
+std::wstring UIDecodedPkt::get_wstring(std::wstring name)
+{
+
+	auto it = payloadOperations ? payload.FindMember(name.c_str()) 
+								: jsn.FindMember(name.c_str());
+	if (it != payload.MemberEnd() && it->value.IsString())
+		return it->value.GetString();
+
+	std::wcerr << "JSON ERROR: No string field named " << name <<
+		" in pktID 0x" << messageID;
+	if (payloadOperations)
+		std::wcerr << " payload" << std::endl;
+	else
+		std::wcerr << " metadata" << std::endl;
+
+	return L"<ERROR>";
 }

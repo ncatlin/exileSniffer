@@ -129,7 +129,6 @@
   <ItemGroup>
     <ClCompile Include="base_thread.cpp" />
     <ClCompile Include="clientData.cpp" />
-    <ClCompile Include="decodedPacket.cpp" />
     <ClCompile Include="derivedRawFilterForm.cpp">
       <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\%(Filename).moc</OutputFile>
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
@@ -157,7 +156,6 @@
     <ClInclude Include="base_thread.h" />
     <ClInclude Include="clientData.h" />
     <ClInclude Include="cppsemaphore.h" />
-    <ClInclude Include="decodedPacket.h" />
     <ClInclude Include="inventory.h" />
     <ClInclude Include="key_grabber_thread.h" />
     <ClInclude Include="packetIDs.h" />

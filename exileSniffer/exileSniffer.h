@@ -45,8 +45,8 @@ private:
 	void add_metalog_update(QString msg, DWORD pid);
 	void handle_client_event(DWORD pid, bool isRunning);
 	void handle_raw_packet_data(UI_RAWHEX_PKT *pkt);
-	void action_undecoded_packet(UI_DECODED_PKT& decoded);
-	void action_decoded_packet(UI_DECODED_PKT& decoded);
+	void action_undecoded_packet(UIDecodedPkt& decoded);
+	void action_decoded_packet(UIDecodedPkt& decoded);
 
 	void reprintRawHex();
 	void insertRawText(std::string hexdump, std::string asciidump);
@@ -55,18 +55,18 @@ private:
 	void updateRawFilterLabel();
 
 private:
-	void action_SRV_PKT_ENCAPSULATED(UI_DECODED_PKT& decobj);
-	void action_CLI_CHAT_MSG_ITEMS(UI_DECODED_PKT& decobj);
-	void action_CLI_CHAT_MSG(UI_DECODED_PKT& decobj);
-	void action_CLI_CHAT_COMMAND(UI_DECODED_PKT& decobj);
-	void action_SRV_CHAT_MESSAGE(UI_DECODED_PKT& decobj);
-	void action_SRV_SERVER_MESSAGE(UI_DECODED_PKT& decobj);
-	void action_CLI_LOGGED_OUT(UI_DECODED_PKT& decobj);
-	void action_CLI_PING_CHALLENGE(UI_DECODED_PKT& decobj);
-	void action_CLI_ACTION_PREDICTIVE(UI_DECODED_PKT& decobj);
-	void action_CLI_USE_BELT_SLOT(UI_DECODED_PKT& decobj);
-	void action_CLI_USE_ITEM(UI_DECODED_PKT& decobj);
-	void action_CLI_MOUSE_RELEASE(UI_DECODED_PKT& decobj);
+	void action_SRV_PKT_ENCAPSULATED(UIDecodedPkt& decobj);
+	void action_CLI_CHAT_MSG_ITEMS(UIDecodedPkt& decobj);
+	void action_CLI_CHAT_MSG(UIDecodedPkt& decobj);
+	void action_CLI_CHAT_COMMAND(UIDecodedPkt& decobj);
+	void action_SRV_CHAT_MESSAGE(UIDecodedPkt& decobj);
+	void action_SRV_SERVER_MESSAGE(UIDecodedPkt& decobj);
+	void action_CLI_LOGGED_OUT(UIDecodedPkt& decobj);
+	void action_CLI_PING_CHALLENGE(UIDecodedPkt& decobj);
+	void action_CLI_ACTION_PREDICTIVE(UIDecodedPkt& decobj);
+	void action_CLI_USE_BELT_SLOT(UIDecodedPkt& decobj);
+	void action_CLI_USE_ITEM(UIDecodedPkt& decobj);
+	void action_CLI_MOUSE_RELEASE(UIDecodedPkt& decobj);
 
 private:
 	Ui::exileSniffer ui;
@@ -83,7 +83,7 @@ private:
 	map<DWORD, clientData *> clients;
 
 
-	typedef void (exileSniffer::*actionFunc)(UI_DECODED_PKT& uiDecodedPktMsg);
+	typedef void (exileSniffer::*actionFunc)(UIDecodedPkt& uiDecodedPktMsg);
 	map<unsigned short, actionFunc> decodedPktActioners;
 
 

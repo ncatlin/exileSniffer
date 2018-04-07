@@ -1,7 +1,15 @@
 #pragma once
 #include "safequeue.h"
-#include "decodedPacket.h"
 
+#define PKTBIT_OUTBOUND 0
+#define PKTBIT_INBOUND 0x1
+#define PKTBIT_LOGINSERVER 0x2
+#define PKTBIT_GAMESERVER 0x4
+#define PKTBIT_PATCHSERVER 0x8
+
+enum streamType { eLogin = 'L', eGame = 'G', ePatch = 'P', eNone = 0 };
+
+typedef rapidjson::GenericValue<rapidjson::UTF16<> > WValue;
 enum uiMsgType {eMetaLog, eClientEvent, eLoginNote, ePacketHex, eDecodedPacket};
 
 class UI_MESSAGE
@@ -52,17 +60,42 @@ public:
 	unsigned short failLocation = 0;
 };
 
-class UI_DECODED_PKT : public UI_MESSAGE
+class UIDecodedPkt : public UI_MESSAGE
 {
 public:
-	UI_DECODED_PKT(DWORD processID, streamType streamServer, bool isIncoming);
-	void attachDecodedObj(decodedPacket obj) { decodedobj = obj; };
+	UIDecodedPkt(DWORD processID, streamType streamServer, byte isIncoming);
+	//void attachDecodedObj(decodedPacket obj) { decodedobj = obj; };
+	void toggle_payload_operations(bool state) { payloadOperations = state; }
 
-	streamType stream;
+	void add_dword(std::wstring name, DWORD dwordfield);
+	void add_word(std::wstring name, ushort ushortfield);
+	void add_byte(std::wstring name, byte bytefield);
+	void add_wstring(std::wstring name, std::wstring stringfield);
+
+	std::wstring get_wstring(std::wstring name);
+	UINT32 get_UInt32(std::wstring name);
+	UINT64 get_UInt64(std::wstring name);
+	
+
+	void setBuffer(byte *buf) { originalbuf = buf; }
+	void setStartOffset(unsigned short off) { bufferOffsets.first = off; }
+	void setEndOffset(unsigned short off) { bufferOffsets.second = off; }
+	void setFailedDecode() { failedDecode = true; }
+	bool decodeError() { return failedDecode; }
+
+	ushort messageID;
+	streamType serverStream;
 	bool incoming;
-	DWORD pid;
+
+private:
+	byte *originalbuf = NULL;
+	std::pair<ushort, short> bufferOffsets;
 	time_t createdtime;
-	decodedPacket decodedobj;
+	bool failedDecode = false;
+	bool payloadOperations = false;
+
+	rapidjson::GenericDocument<rapidjson::UTF16<> > jsn;
+	WValue payload;
 };
 
 void UIaddLogMsg(QString msg, DWORD clientPID, SafeQueue<UI_MESSAGE> *uiMsgQueue);

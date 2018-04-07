@@ -32,7 +32,7 @@ void packet_processor::emit_decoding_err_msg(unsigned short msgID, unsigned shor
 	UIaddLogMsg(QString::fromStdString(errmsg.str()), activeClientPID, uiMsgQueue);
 }
 
-unsigned char packet_processor::consumeByte()
+unsigned char packet_processor::consume_Byte()
 {
 	if (errorFlag != eDecodingErr::eNoErr) return 0;
 	if (remainingDecrypted < 1)
@@ -66,7 +66,7 @@ unsigned short packet_processor::consumeUShort()
 	return result;
 }
 
-unsigned long packet_processor::consumeULong()
+unsigned long packet_processor::consume_DWORD()
 {
 	if (errorFlag != eDecodingErr::eNoErr) return 0;
 	if (remainingDecrypted < 4)

@@ -13,6 +13,7 @@ UI update operations
 
 #include "stdafx.h"
 #include "exileSniffer.h"
+#include "packetIDs.h"
 
 void exileSniffer::init_DecodedPktActioners()
 {
@@ -30,14 +31,14 @@ void exileSniffer::init_DecodedPktActioners()
 	decodedPktActioners[CLI_MOUSE_RELEASE] = &exileSniffer::action_CLI_MOUSE_RELEASE;
 }
 
-void exileSniffer::action_undecoded_packet(UI_DECODED_PKT& decoded)
+void exileSniffer::action_undecoded_packet(UIDecodedPkt& decoded)
 {
 	std::cout << "ingoring action undecoded pkt" << std::endl;
 }
 
-void exileSniffer::action_decoded_packet(UI_DECODED_PKT& decoded)
+void exileSniffer::action_decoded_packet(UIDecodedPkt& decoded)
 {
-	auto it = decodedPktActioners.find(decoded.decodedobj.messageID);
+	auto it = decodedPktActioners.find(decoded.messageID);
 	if (it != decodedPktActioners.end())
 	{
 		exileSniffer::actionFunc f = it->second;
@@ -45,25 +46,25 @@ void exileSniffer::action_decoded_packet(UI_DECODED_PKT& decoded)
 	}
 	else
 	{
-		std::cerr << "Warning!! no actioner setup for pkt id " << decoded.decodedobj.messageID << std::endl;
+		std::cerr << "Warning!! no actioner setup for pkt id " << decoded.messageID << std::endl;
 	}
 
 }
 
-QString msgIDPrefix(UI_DECODED_PKT& uipkt)
+QString msgIDPrefix(UIDecodedPkt& uipkt)
 {
-	return "[" + QString::number(uipkt.decodedobj.messageID, 16) + "] ";
+	return "[" + QString::number(uipkt.messageID, 16) + "] ";
 }
 
 
 
 
-void exileSniffer::action_SRV_PKT_ENCAPSULATED(UI_DECODED_PKT& decobj)
+void exileSniffer::action_SRV_PKT_ENCAPSULATED(UIDecodedPkt& decobj)
 {
 	/* no action for this, action the packet it encapsulates instead*/
 }
 
-void exileSniffer::action_CLI_CHAT_MSG_ITEMS(UI_DECODED_PKT& decodedobj)
+void exileSniffer::action_CLI_CHAT_MSG_ITEMS(UIDecodedPkt& decodedobj)
 {
 	QListWidgetItem *listitem = new QListWidgetItem;
 	QString summaryText(msgIDPrefix(decodedobj) + "Player sent chat message with with linked items");
@@ -71,7 +72,7 @@ void exileSniffer::action_CLI_CHAT_MSG_ITEMS(UI_DECODED_PKT& decodedobj)
 	ui.decodedList->addItem(listitem);
 }
 
-void exileSniffer::action_CLI_CHAT_COMMAND(UI_DECODED_PKT& decodedobj)
+void exileSniffer::action_CLI_CHAT_COMMAND(UIDecodedPkt& decodedobj)
 {
 	QListWidgetItem *listitem = new QListWidgetItem;
 	QString summaryText(msgIDPrefix(decodedobj) + "Player used / command");
@@ -79,7 +80,7 @@ void exileSniffer::action_CLI_CHAT_COMMAND(UI_DECODED_PKT& decodedobj)
 	ui.decodedList->addItem(listitem);
 }
 
-void exileSniffer::action_SRV_CHAT_MESSAGE(UI_DECODED_PKT& decodedobj)
+void exileSniffer::action_SRV_CHAT_MESSAGE(UIDecodedPkt& decodedobj)
 {
 	QListWidgetItem *listitem = new QListWidgetItem;
 	QString summaryText(msgIDPrefix(decodedobj) + "Chat message from server");
@@ -87,7 +88,7 @@ void exileSniffer::action_SRV_CHAT_MESSAGE(UI_DECODED_PKT& decodedobj)
 	ui.decodedList->addItem(listitem);
 }
 
-void exileSniffer::action_SRV_SERVER_MESSAGE(UI_DECODED_PKT& decodedobj)
+void exileSniffer::action_SRV_SERVER_MESSAGE(UIDecodedPkt& decodedobj)
 {
 	QListWidgetItem *listitem = new QListWidgetItem;
 	QString summaryText(msgIDPrefix(decodedobj) + "Server sent message ");
@@ -95,7 +96,7 @@ void exileSniffer::action_SRV_SERVER_MESSAGE(UI_DECODED_PKT& decodedobj)
 	ui.decodedList->addItem(listitem);
 }
 
-void exileSniffer::action_CLI_LOGGED_OUT(UI_DECODED_PKT& decodedobj)
+void exileSniffer::action_CLI_LOGGED_OUT(UIDecodedPkt& decodedobj)
 {
 	QListWidgetItem *listitem = new QListWidgetItem;
 	QString summaryText(msgIDPrefix(decodedobj) + "Game client logged out");
@@ -104,7 +105,7 @@ void exileSniffer::action_CLI_LOGGED_OUT(UI_DECODED_PKT& decodedobj)
 }
 
 
-void exileSniffer::action_CLI_CHAT_MSG(UI_DECODED_PKT& decodedobj)
+void exileSniffer::action_CLI_CHAT_MSG(UIDecodedPkt& decodedobj)
 {
 	//summary item
 	QListWidgetItem *listitem = new QListWidgetItem;
@@ -112,6 +113,8 @@ void exileSniffer::action_CLI_CHAT_MSG(UI_DECODED_PKT& decodedobj)
 	listitem->setText(summaryText);
 	ui.decodedList->addItem(listitem);
 
+	decodedobj.toggle_payload_operations(true);
+	std::wcout << "[You In Chat]:\"" << decodedobj.get_wstring(L"Message") << "\"" << std::endl;
 
 	/*
 	if (cliChatObj.linkedItemCount == 0)
@@ -126,15 +129,18 @@ void exileSniffer::action_CLI_CHAT_MSG(UI_DECODED_PKT& decodedobj)
 	*/
 }
 
-void exileSniffer::action_CLI_PING_CHALLENGE(UI_DECODED_PKT& decodedobj)
+void exileSniffer::action_CLI_PING_CHALLENGE(UIDecodedPkt& decodedobj)
 {
+	decodedobj.toggle_payload_operations(true);
+	UINT64 challenge = decodedobj.get_UInt64(L"Challenge");
+
 	QListWidgetItem *listitem = new QListWidgetItem;
-	QString summaryText(msgIDPrefix(decodedobj) + "Game Client sent ping challenge");
+	QString summaryText(msgIDPrefix(decodedobj) + "Game Client sent ping challenge 0x"+QString::number(challenge,16));
 	listitem->setText(summaryText);
 	ui.decodedList->addItem(listitem);
 }
 
-void exileSniffer::action_CLI_ACTION_PREDICTIVE(UI_DECODED_PKT& decodedobj)
+void exileSniffer::action_CLI_ACTION_PREDICTIVE(UIDecodedPkt& decodedobj)
 {
 	QListWidgetItem *listitem = new QListWidgetItem;
 	QString summaryText(msgIDPrefix(decodedobj) + "Player performed action");
@@ -142,7 +148,7 @@ void exileSniffer::action_CLI_ACTION_PREDICTIVE(UI_DECODED_PKT& decodedobj)
 	ui.decodedList->addItem(listitem);
 }
 
-void exileSniffer::action_CLI_USE_BELT_SLOT(UI_DECODED_PKT& decodedobj)
+void exileSniffer::action_CLI_USE_BELT_SLOT(UIDecodedPkt& decodedobj)
 {
 	QListWidgetItem *listitem = new QListWidgetItem;
 	QString summaryText(msgIDPrefix(decodedobj) + "Player used belt slot");
@@ -150,7 +156,7 @@ void exileSniffer::action_CLI_USE_BELT_SLOT(UI_DECODED_PKT& decodedobj)
 	ui.decodedList->addItem(listitem);
 }
 
-void exileSniffer::action_CLI_USE_ITEM(UI_DECODED_PKT& decodedobj)
+void exileSniffer::action_CLI_USE_ITEM(UIDecodedPkt& decodedobj)
 {
 	QListWidgetItem *listitem = new QListWidgetItem;
 	QString summaryText(msgIDPrefix(decodedobj) + "Player used inventory item");
@@ -158,7 +164,7 @@ void exileSniffer::action_CLI_USE_ITEM(UI_DECODED_PKT& decodedobj)
 	ui.decodedList->addItem(listitem);
 }
 
-void exileSniffer::action_CLI_MOUSE_RELEASE(UI_DECODED_PKT& decodedobj)
+void exileSniffer::action_CLI_MOUSE_RELEASE(UIDecodedPkt& decodedobj)
 {
 	QListWidgetItem *listitem = new QListWidgetItem;
 	QString summaryText(msgIDPrefix(decodedobj) + "Player released mouse");

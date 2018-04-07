@@ -43,6 +43,7 @@ rapidjson for ggpk data
 
 #include "rapidjson\document.h"
 #include "rapidjson\filereadstream.h" 
+#include "rapidjson\allocators.h"
 
 #include <cryptopp\cryptlib.h>
 #include <cryptopp\salsa.h>

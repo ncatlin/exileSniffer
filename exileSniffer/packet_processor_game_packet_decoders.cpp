@@ -4,8 +4,8 @@ into meaningful data as the game client/server would interpret it
 */
 #include "stdafx.h"
 #include "packet_processor.h"
+#include "packetIDs.h"
 
-#define PKT_ID_LEN 2
 
 void packet_processor::init_packetDeserialisers()
 {
@@ -44,126 +44,71 @@ this is deserialised within the processing loop as part of stream crypt resynchr
 the packet within is then deserialised and actioned
 this function only here for completeness - it should not be used!
 */
-pkt_SRV_PKT_ENCAPSULATED packet_processor::deserialise_SRV_PKT_ENCAPSULATED()
+void packet_processor::deserialise_SRV_PKT_ENCAPSULATED(UIDecodedPkt *uipkt)
 {
 	assert(false);
-	pkt_SRV_PKT_ENCAPSULATED decodedObj(decryptedBuffer, decryptedIndex);
-	decodedObj.finalise(decryptedIndex);
-	return decodedObj;
 }
 
-pkt_CLI_CHAT_MSG_ITEMS packet_processor::deserialise_CLI_CHAT_MSG_ITEMS()
+void packet_processor::deserialise_CLI_CHAT_MSG_ITEMS(UIDecodedPkt *uipkt)
 {
-	pkt_CLI_CHAT_MSG_ITEMS decodedObj(decryptedBuffer, decryptedIndex);
+	//pkt_CLI_CHAT_MSG_ITEMS decodedObj(decryptedBuffer, decryptedIndex);
 	/*---deserialise contents here---*/
 
 	//no data expected
 
 	/*---deserialising done---*/
-	decodedObj.finalise(decryptedIndex);
-	return decodedObj;
+	//decodedObj.finalise(decryptedIndex);
 }
 
-pkt_CLI_CHAT_MSG packet_processor::deserialise_CLI_CHAT_MSG()
+void packet_processor::deserialise_CLI_CHAT_MSG(UIDecodedPkt *uipkt)
 {
-	pkt_CLI_CHAT_MSG decodedObj(decryptedBuffer, decryptedIndex);
-	/*---deserialise contents here---*/
-
-	decodedObj.msgLen_Words = consumeUShort();
-	decodedObj.msg = consumeWString(decodedObj.msgLen_Words * 2);
-	decodedObj.linkedItemCount = consumeByte();
-
-	/*---deserialising done---*/
-	decodedObj.finalise(decryptedIndex);
-	return decodedObj;
+	ushort msgLenWords = consumeUShort();
+	std::wstring msg = consumeWString(msgLenWords * 2);
+	uipkt->add_wstring(L"Message", msg);
+	uipkt->add_byte(L"NumLinkedItems", consume_Byte());
 }
 
-pkt_CLI_PING_CHALLENGE packet_processor::deserialise_CLI_PING_CHALLENGE()
+void packet_processor::deserialise_CLI_PING_CHALLENGE(UIDecodedPkt *uipkt)
 {
-	pkt_CLI_PING_CHALLENGE decodedObj(decryptedBuffer, decryptedIndex);
-	/*---deserialise contents here---*/
-
-	decodedObj.challenge = consumeUShort();
-
-	/*---deserialising done---*/
-	decodedObj.finalise(decryptedIndex);
-	return decodedObj;
+	uipkt->add_dword(L"Challenge", consume_DWORD());
 }
 
 
 
 
 
-pkt_CLI_CHAT_COMMAND packet_processor::deserialise_CLI_CHAT_COMMAND()
+void packet_processor::deserialise_CLI_CHAT_COMMAND(UIDecodedPkt *uipkt)
 {
-	pkt_CLI_CHAT_COMMAND decodedObj(decryptedBuffer, decryptedIndex);
-	/*---deserialise contents here---*/
-
 	//todo
-
-	/*---deserialising done---*/
-	decodedObj.finalise(decryptedIndex);
-	return decodedObj;
 }
 
-pkt_SRV_CHAT_MESSAGE packet_processor::deserialise_SRV_CHAT_MESSAGE()
+void packet_processor::deserialise_SRV_CHAT_MESSAGE(UIDecodedPkt *uipkt)
 {
-	pkt_SRV_CHAT_MESSAGE decodedObj(decryptedBuffer, decryptedIndex);
-	/*---deserialise contents here---*/
+	//todo
+}
 
+void packet_processor::deserialise_SRV_SERVER_MESSAGE(UIDecodedPkt *uipkt)
+{
+	//todo
+}
+
+void packet_processor::deserialise_CLI_LOGGED_OUT(UIDecodedPkt *uipkt)
+{
 	//no data expected
-
-	/*---deserialising done---*/
-	decodedObj.finalise(decryptedIndex);
-	return decodedObj;
 }
 
-pkt_SRV_SERVER_MESSAGE packet_processor::deserialise_SRV_SERVER_MESSAGE()
+void packet_processor::deserialise_CLI_USE_BELT_SLOT(UIDecodedPkt *uipkt)
 {
-	pkt_SRV_SERVER_MESSAGE decodedObj(decryptedBuffer, decryptedIndex);
-	/*---deserialise contents here---*/
-
-	//no data expected
-
-	/*---deserialising done---*/
-	decodedObj.finalise(decryptedIndex);
-	return decodedObj;
-}
-
-pkt_CLI_LOGGED_OUT packet_processor::deserialise_CLI_LOGGED_OUT()
-{
-	pkt_CLI_LOGGED_OUT decodedObj(decryptedBuffer, decryptedIndex);
-	/*---deserialise contents here---*/
-
-	//no data expected
-
-	/*---deserialising done---*/
-	decodedObj.finalise(decryptedIndex);
-	return decodedObj;
-}
-
-pkt_CLI_USE_BELT_SLOT packet_processor::deserialise_CLI_USE_BELT_SLOT()
-{
-	pkt_CLI_USE_BELT_SLOT decodedObj(decryptedBuffer, decryptedIndex);
-	/*---deserialise contents here---*/
-
 	//todo
 	/*
 				//003700000004 = 5th slot
 			unsigned long slot = getUlong(decryptedBuffer + sIdx); sIdx += 4;
 			std::cout << std::hex << "Player activated potion slot 0x" << slot << std::endl;
 	*/
-
-	/*---deserialising done---*/
-	decodedObj.finalise(decryptedIndex);
-	return decodedObj;
 }
 
-pkt_CLI_USE_ITEM packet_processor::deserialise_CLI_USE_ITEM()
+void packet_processor::deserialise_CLI_USE_ITEM(UIDecodedPkt *uipkt)
 {
-	pkt_CLI_USE_ITEM decodedObj(decryptedBuffer, decryptedIndex);
-	/*---deserialise contents here---*/
-
 	//todo
 	/*
 				unsigned long unk1 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
@@ -174,16 +119,10 @@ pkt_CLI_USE_ITEM packet_processor::deserialise_CLI_USE_ITEM()
 			std::cout << std::hex << "Player activated item 0x" << item1 << " on item 0x" << item2;
 			std::cout << "i1unk: 0x" << unk1 << " i2unk: 0x" << unk2 << std::endl;
 	*/
-
-	/*---deserialising done---*/
-	decodedObj.finalise(decryptedIndex);
-	return decodedObj;
 }
 
-pkt_CLI_ACTION_PREDICTIVE packet_processor::deserialise_CLI_ACTION_PREDICTIVE()
+void packet_processor::deserialise_CLI_ACTION_PREDICTIVE(UIDecodedPkt *uipkt)
 {
-	pkt_CLI_ACTION_PREDICTIVE decodedObj(decryptedBuffer, decryptedIndex);
-	/*---deserialise contents here---*/
 	/*
 				unsigned long targcoord1 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
 			unsigned long targcoord2 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
@@ -198,20 +137,9 @@ pkt_CLI_ACTION_PREDICTIVE packet_processor::deserialise_CLI_ACTION_PREDICTIVE()
 			if (controlStatus > 0xf || !(controlStatus & 0x8))
 				std::cout << "\t!Unusual controlStatus " << (int)controlStatus << " - window open?>" << std::endl;
 	*/
-
-	/*---deserialising done---*/
-	decodedObj.finalise(decryptedIndex);
-	return decodedObj;
 }
 
-pkt_CLI_MOUSE_RELEASE packet_processor::deserialise_CLI_MOUSE_RELEASE()
+void packet_processor::deserialise_CLI_MOUSE_RELEASE(UIDecodedPkt *uipkt)
 {
-	pkt_CLI_MOUSE_RELEASE decodedObj(decryptedBuffer, decryptedIndex);
-	/*---deserialise contents here---*/
-
 	//no data expected
-
-	/*---deserialising done---*/
-	decodedObj.finalise(decryptedIndex);
-	return decodedObj;
 }

@@ -28,6 +28,15 @@ exileSniffer::exileSniffer(QWidget *parent)
 
 	start_threads();
 
+
+	rapidjson::Document docjson;
+	docjson.SetObject();
+
+	//rapidjson::Value processID(3333);
+
+	docjson.AddMember("pid", rapidjson::Value(3333), docjson.GetAllocator());
+
+	std::cout << "docppid is " << docjson["pid"].GetInt64() << std::endl;
 }
 
 void exileSniffer::start_threads()
@@ -101,11 +110,11 @@ void exileSniffer::action_UI_Msg(UI_MESSAGE *msg)
 	}
 	case uiMsgType::eDecodedPacket:
 	{
-		UI_DECODED_PKT &uiDecodedMsg = *((UI_DECODED_PKT *)msg);
-		if(uiDecodedMsg.decodedobj.failedDecode)
-			action_undecoded_packet(uiDecodedMsg);
+		UIDecodedPkt &uiDecodedMsg = *((UIDecodedPkt *)msg);
+		if(!uiDecodedMsg.decodeError())
+			action_decoded_packet(uiDecodedMsg); 
 		else
-			action_decoded_packet(uiDecodedMsg);
+			action_undecoded_packet(uiDecodedMsg);
 		break;
 	}
 	}

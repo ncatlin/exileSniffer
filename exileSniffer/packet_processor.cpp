@@ -706,16 +706,25 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 			break;
 		}
 
-		
-		
-		UI_DECODED_PKT *ui_decodedpkt = new UI_DECODED_PKT(streamObj->workingSendKey->sourceProcess, eGame, false);
+		UIDecodedPkt *ui_decodedpkt = 
+			new UIDecodedPkt(streamObj->workingSendKey->sourceProcess, eGame, PKTBIT_OUTBOUND);
 
 		auto it = packetDeserialisers.find(pktId);
 		if (it != packetDeserialisers.end())
 		{
 			
-			packet_processor::deserialiser f = it->second;
-			ui_decodedpkt->decodedobj = (this->*f)();
+			packet_processor::deserialiser deserialiserForPktID = it->second;
+			ui_decodedpkt->setBuffer(decryptedBuffer);
+			ui_decodedpkt->setStartOffset(decryptedIndex);
+			ui_decodedpkt->messageID = pktId;
+			ui_decodedpkt->toggle_payload_operations(true);
+
+			(this->*deserialiserForPktID)(ui_decodedpkt);
+
+			if (errorFlag == eNoErr)
+				ui_decodedpkt->setEndOffset(decryptedIndex);
+			else
+				ui_decodedpkt->setFailedDecode();
 		}
 		else
 		{
@@ -1890,24 +1899,35 @@ void packet_processor::main_loop()
 	fillObjCodeMap();
 	init_packetDeserialisers();
 
-	printf("Connecting to sniffer pipes...\n");
-	while (!patchpipe)
-	{
+	unsigned int errCount = 0;
+
+	while (!patchpipe)	{
 		patchpipe = connectPipe(L"\\\\.\\pipe\\patchpipe");
-		Sleep(500);
+		Sleep(200);
+		if (errCount++ > 10)
+			break;
 	}
-	while (!loginpipe)
-	{
+
+	while (!loginpipe)	{
 		loginpipe = connectPipe(L"\\\\.\\pipe\\loginpipe");
-		Sleep(500);
+		Sleep(200);
+		if (errCount++ > 10)
+			break;
 	}
-	while (!gamepipe)
-	{
+
+	while (!gamepipe)	{
 		gamepipe = connectPipe(L"\\\\.\\pipe\\gamepipe");
-		Sleep(500);
+		Sleep(200);
+		if (errCount++ > 10)
+			break;
 	}
 
-	printf("Connected! Starting packet processing\n");
-
-	process_packet_loop();
+	if (loginpipe && gamepipe)
+	{
+		process_packet_loop();
+	}
+	else
+	{
+		UIaddLogMsg("ERROR: Unable to connect to packet capture pipes. Failing.", activeClientPID, uiMsgQueue);
+	}
 }
