@@ -93,6 +93,7 @@ UIDecodedPkt::UIDecodedPkt(DWORD processID, streamType streamServer, byte isInco
 
 	payload = jsn.AddMember(L"Payload", WValue(rapidjson::kObjectType), jsn.GetAllocator());
 }
+
 void UIDecodedPkt::add_dword(std::wstring name, DWORD dwordfield)
 {
 	WValue nameVal (name.c_str(), jsn.GetAllocator());

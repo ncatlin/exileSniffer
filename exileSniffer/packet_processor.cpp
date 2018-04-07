@@ -176,8 +176,13 @@ void packet_processor::handle_packet_from_loginserver(networkStreamID streamID, 
 			}
 			else
 			{
-				UIaddLogMsg("ERROR: Loginserver receive bad decrypt for packet 4",
-					0,	uiMsgQueue);
+				std::stringstream err;
+				err << "Error expected packet 0x4 from loginserver but got 0x" << std::hex << packetID;
+
+				UIaddLogMsg(err.str(),	0,	uiMsgQueue);
+
+				//todo: need to handle gracefully
+
 				return;
 			}
 		}
@@ -678,16 +683,16 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 
 	while (remainingDecrypted > 0)
 	{
-		unsigned short pktId = consumeUShort();
+		unsigned short pktIDWord = consumeUShort();
 		if (errorFlag)
 		{
-			emit_decoding_err_msg(0, streamObj->lastPktID);
+			emit_decoding_err_msg(pktIDWord, streamObj->lastPktID);
 			break;
 		}
 
-		if (!sanityCheckPacketID(pktId))
+		if (!sanityCheckPacketID(pktIDWord))
 		{
-			emit_decoding_err_msg(pktId, streamObj->lastPktID);
+			emit_decoding_err_msg(pktIDWord, streamObj->lastPktID);
 			break;
 		}
 
@@ -695,10 +700,10 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 			new UIDecodedPkt(streamObj->workingSendKey->sourceProcess, eGame, PKTBIT_OUTBOUND, timems);
 		ui_decodedpkt->setBuffer(decryptedBuffer);
 		ui_decodedpkt->setStartOffset(decryptedIndex);
-		ui_decodedpkt->messageID = pktId;
+		ui_decodedpkt->messageID = pktIDWord;
 		ui_decodedpkt->toggle_payload_operations(true);
 
-		auto it = packetDeserialisers.find(pktId);
+		auto it = packetDeserialisers.find(pktIDWord);
 		if (it != packetDeserialisers.end())
 		{
 			packet_processor::deserialiser deserialiserForPktID = it->second;
@@ -711,7 +716,7 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 		}
 		else
 		{
-			std::cout << "Unhandled Hex Payload msgID 0x" <<std::hex << pktId <<std::endl;
+			std::cout << "Unhandled Hex Payload msgID 0x" <<std::hex << pktIDWord <<std::endl;
 			for (int i = 0; i < dataLen; ++i)
 			{
 				byte item = decryptedBuffer[i];
@@ -728,14 +733,14 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 		if (errorFlag != eNoErr)
 		{
 			remainingDecrypted = 0;
-			emit_decoding_err_msg(pktId, streamObj->lastPktID);
+			emit_decoding_err_msg(pktIDWord, streamObj->lastPktID);
 			ui_decodedpkt->setFailedDecode();
 		}
 
 		uiMsgQueue->addItem(ui_decodedpkt);
 
 
-		streamObj->lastPktID = pktId;
+		streamObj->lastPktID = pktIDWord;
 	}
 
 
@@ -1108,7 +1113,7 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 			std::cout << std::hex << "[" << pktId << "] server sent stash data?" << std::endl;
 			break;
 
-		case SRVPK_RESPOND_PUBLICPARTIES:
+		case SRV_RESPOND_PUBLICPARTIES:
 			std::cout << std::hex << "[" << pktId << "] social pane info response" << std::endl;
 			break;
 
@@ -1230,7 +1235,7 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 				std::hex << " ID1 0x" << ID1 << " ID2: 0x" << ID2 << std::endl;
 			break;
 		}
-		case SRVPK_SKILLPANE_DATA:
+		case SRV_SKILLPANE_DATA:
 			std::cout << std::hex << "[" << pktId << "] Skill pane info" << std::endl;
 			break;
 			/*
@@ -1240,7 +1245,7 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 			dumpHex = true;
 			break;
 			}*/
-		case SRVPK_MICROSTRANSACTIONSPANE_RESP: //7 bytes of other data, expect reflects changes?
+		case SRV_MICROSTRANSACTIONSPANE_RESP: //7 bytes of other data, expect reflects changes?
 			std::cout << std::hex << "[" << pktId << "] Server acknowledge microtranspane opened";
 			break;
 		case SRV_DISPLAY_BUILTIN_MSG:

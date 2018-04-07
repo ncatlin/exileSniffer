@@ -106,10 +106,27 @@ class exileSniffer : public QMainWindow
 		void action_SRV_SERVER_MESSAGE(UIDecodedPkt& decobj);
 		void action_CLI_LOGGED_OUT(UIDecodedPkt& decobj);
 		void action_CLI_PING_CHALLENGE(UIDecodedPkt& decobj);
+		void action_CLI_CLICKED_GROUND_ITEM(UIDecodedPkt& decobj);
 		void action_CLI_ACTION_PREDICTIVE(UIDecodedPkt& decobj);
+
+		void action_CLI_PICKUP_ITEM(UIDecodedPkt& decobj);
+		void action_CLI_PLACE_ITEM(UIDecodedPkt& decobj);
+		void action_CLI_REMOVE_SOCKET(UIDecodedPkt& decobj);
+		void action_CLI_INSERT_SOCKET(UIDecodedPkt& decobj);
+		void action_CLI_LEVEL_SKILLGEM(UIDecodedPkt& decobj);
+		void action_CLI_SKILLPOINT_CHANGE(UIDecodedPkt& decobj);
+		void action_CLI_CANCEL_BUF(UIDecodedPkt& decobj);
+		void action_CLI_SET_HOTBARSKILL(UIDecodedPkt& decobj);
 		void action_CLI_USE_BELT_SLOT(UIDecodedPkt& decobj);
 		void action_CLI_USE_ITEM(UIDecodedPkt& decobj);
+		void action_CLI_REQUEST_PUBLICPARTIES(UIDecodedPkt& decobj);
+		void action_CLI_SKILLPANE_ACTION(UIDecodedPkt& decobj);
+		void action_CLI_MICROSTRANSACTIONPANE_ACTION(UIDecodedPkt& decobj);
+		void action_CLI_USED_SKILL(UIDecodedPkt& decobj);
+		void action_CLI_CLICK_OBJ(UIDecodedPkt& decobj);
+		void action_CLI_MOUSE_HELD(UIDecodedPkt& decobj);
 		void action_CLI_MOUSE_RELEASE(UIDecodedPkt& decobj);
+		void action_CLI_OPTOUT_TUTORIALS(UIDecodedPkt& decobj);
 
 	private:
 		Ui::exileSniffer ui;

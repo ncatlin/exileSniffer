@@ -42,6 +42,10 @@ private:
 	void handle_packet_from_gameserver(networkStreamID streamID, byte* data, unsigned int dataLen, long long timems);
 	void handle_packet_to_gameserver(networkStreamID streamID, byte* data, unsigned int dataLen, long long timems);
 
+	inline void consume_add_byte(std::wstring name, UIDecodedPkt *uipkt) {	uipkt->add_byte(name, consume_Byte());}
+	inline void consume_add_word(std::wstring name, UIDecodedPkt *uipkt) { uipkt->add_word(name, consumeUShort()); }
+	inline void consume_add_dword(std::wstring name, UIDecodedPkt *uipkt) { uipkt->add_dword(name, consume_DWORD()); }
+
 	void deserialise_SRV_PKT_ENCAPSULATED(UIDecodedPkt *);
 	void deserialise_CLI_CHAT_MSG_ITEMS(UIDecodedPkt *);
 	void deserialise_CLI_CHAT_MSG(UIDecodedPkt *);
@@ -51,9 +55,28 @@ private:
 	void deserialise_CLI_LOGGED_OUT(UIDecodedPkt *);
 	void deserialise_CLI_PING_CHALLENGE(UIDecodedPkt *);
 	void deserialise_CLI_ACTION_PREDICTIVE(UIDecodedPkt *);
+	void deserialise_CLI_CLICKED_GROUND_ITEM(UIDecodedPkt *uipkt);
+	void deserialise_CLI_PICKUP_ITEM(UIDecodedPkt *uipkt);
+	void deserialise_CLI_PLACE_ITEM(UIDecodedPkt *uipkt);
+	void deserialise_CLI_REMOVE_SOCKET(UIDecodedPkt *uipkt);
+	void deserialise_CLI_INSERT_SOCKET(UIDecodedPkt *uipkt);
+
+	void deserialise_CLI_LEVEL_SKILLGEM(UIDecodedPkt *uipkt);
+	void deserialise_CLI_SKILLPOINT_CHANGE(UIDecodedPkt *uipkt);
+	void deserialise_CLI_CANCEL_BUF(UIDecodedPkt *uipkt);
+	void deserialise_CLI_SET_HOTBARSKILL(UIDecodedPkt *uipkt);
+
 	void deserialise_CLI_USE_BELT_SLOT(UIDecodedPkt *);
 	void deserialise_CLI_USE_ITEM(UIDecodedPkt *);
+
+	void deserialise_CLI_REQUEST_PUBLICPARTIES(UIDecodedPkt *);
+	void deserialise_CLI_SKILLPANE_ACTION(UIDecodedPkt *);
+	void deserialise_CLI_MICROSTRANSACTIONPANE_ACTION(UIDecodedPkt *);
+	void deserialise_CLI_USED_SKILL(UIDecodedPkt *);
+	void deserialise_CLI_CLICK_OBJ(UIDecodedPkt *);
+	void deserialise_CLI_MOUSE_HELD(UIDecodedPkt *);
 	void deserialise_CLI_MOUSE_RELEASE(UIDecodedPkt *);
+	void deserialise_CLI_OPTOUT_TUTORIALS(UIDecodedPkt *);
 
 
 	byte consume_Byte();

@@ -305,11 +305,17 @@ void exileSniffer::print_raw_packet(UI_RAWHEX_PKT *pkt)
 
 bool exileSniffer::packet_passes_raw_filter(UI_RAWHEX_PKT *pkt, clientData *client)
 {
+	//todo
+	if (pkt->startBytes == 0xd || pkt->startBytes == 0xe)
+		return false;
 	return true;
 }
 
 bool exileSniffer::packet_passes_decoded_filter(UIDecodedPkt& decoded, clientData *client)
 {
+	//todo
+	if (decoded.messageID == 0xd || decoded.messageID == 0xe)
+		return false;
 	return true;
 }
 

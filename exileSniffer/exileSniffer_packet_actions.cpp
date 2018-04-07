@@ -14,7 +14,7 @@ UI update operations
 #include "stdafx.h"
 #include "exileSniffer.h"
 #include "packetIDs.h"
-
+#include "inventory.h"
 
 std::wstring explainModifier(byte lastByte)
 {
@@ -50,11 +50,35 @@ void exileSniffer::init_DecodedPktActioners()
 	decodedPktActioners[SRV_CHAT_MESSAGE] = &exileSniffer::action_SRV_CHAT_MESSAGE;
 	decodedPktActioners[SRV_SERVER_MESSAGE] = &exileSniffer::action_SRV_SERVER_MESSAGE;
 	decodedPktActioners[CLI_LOGGED_OUT] = &exileSniffer::action_CLI_LOGGED_OUT;
+
+	decodedPktActioners[CLI_CLICKED_GROUND_ITEM] = &exileSniffer::action_CLI_CLICKED_GROUND_ITEM;
 	decodedPktActioners[CLI_ACTION_PREDICTIVE] = &exileSniffer::action_CLI_ACTION_PREDICTIVE;
+
+	decodedPktActioners[CLI_PICKUP_ITEM] = &exileSniffer::action_CLI_PICKUP_ITEM;
+	decodedPktActioners[CLI_PLACE_ITEM] = &exileSniffer::action_CLI_PLACE_ITEM;
+	decodedPktActioners[CLI_REMOVE_SOCKET] = &exileSniffer::action_CLI_REMOVE_SOCKET;
+	decodedPktActioners[CLI_INSERT_SOCKET] = &exileSniffer::action_CLI_INSERT_SOCKET;
+
+	decodedPktActioners[CLI_LEVEL_SKILLGEM] = &exileSniffer::action_CLI_LEVEL_SKILLGEM;
+	decodedPktActioners[CLI_SKILLPOINT_CHANGE] = &exileSniffer::action_CLI_SKILLPOINT_CHANGE;
+	decodedPktActioners[CLI_CANCEL_BUF] = &exileSniffer::action_CLI_CANCEL_BUF;
+	decodedPktActioners[CLI_SET_HOTBARSKILL] = &exileSniffer::action_CLI_SET_HOTBARSKILL;
+
 	decodedPktActioners[CLI_USE_BELT_SLOT] = &exileSniffer::action_CLI_USE_BELT_SLOT;
 	decodedPktActioners[CLI_USE_ITEM] = &exileSniffer::action_CLI_USE_ITEM;
 
+
+	decodedPktActioners[CLI_REQUEST_PUBLICPARTIES] = &exileSniffer::action_CLI_REQUEST_PUBLICPARTIES;
+	decodedPktActioners[CLI_SKILLPANE_ACTION] = &exileSniffer::action_CLI_SKILLPANE_ACTION;
+	decodedPktActioners[CLI_MICROSTRANSACTIONPANE_ACTION] = &exileSniffer::action_CLI_MICROSTRANSACTIONPANE_ACTION;
+	decodedPktActioners[CLI_USED_SKILL] = &exileSniffer::action_CLI_USED_SKILL;
+	decodedPktActioners[CLI_CLICK_OBJ] = &exileSniffer::action_CLI_CLICK_OBJ;
+	decodedPktActioners[CLI_MOUSE_HELD] = &exileSniffer::action_CLI_MOUSE_HELD;
 	decodedPktActioners[CLI_MOUSE_RELEASE] = &exileSniffer::action_CLI_MOUSE_RELEASE;
+	decodedPktActioners[CLI_OPTOUT_TUTORIALS] = &exileSniffer::action_CLI_OPTOUT_TUTORIALS;
+
+
+
 }
 
 void exileSniffer::setRowColor(int tablerow, QColor colour)
@@ -111,7 +135,7 @@ void exileSniffer::action_undecoded_packet(UIDecodedPkt& obj)
 	wstringstream summary;
 	summary << "Undecoded packet or multipacket blob ("
 		<< std::dec << sizeAfterID << " byte";
-	summary << (sizeAfterID == 1) ? ")" : "s)";
+	summary << ((sizeAfterID == 1) ? ")" : "s)");
 
 	UI_DECODED_LIST_ENTRY listentry(obj);
 	listentry.summary = QString::fromStdWString(summary.str());
@@ -147,7 +171,9 @@ void exileSniffer::action_decoded_packet(UIDecodedPkt& decoded)
 	}
 	else
 	{
-		std::cerr << "ERROR! no action setup for known pkt id 0x" <<std::hex<< decoded.messageID << std::endl;
+		stringstream err;
+		err << "ERROR! no action setup for known pkt id 0x" << std::hex << decoded.messageID;
+		add_metalog_update(QString::fromStdString(err.str()), decoded.clientProcessID());
 	}
 
 }
@@ -156,29 +182,34 @@ void exileSniffer::action_decoded_packet(UIDecodedPkt& decoded)
 void exileSniffer::action_SRV_PKT_ENCAPSULATED(UIDecodedPkt& decobj)
 {
 	/* no action for this, action the packet it encapsulates instead*/
+	//silently dropped
 }
 
-void exileSniffer::action_CLI_CHAT_MSG_ITEMS(UIDecodedPkt& decodedobj)
+void exileSniffer::action_CLI_CHAT_MSG_ITEMS(UIDecodedPkt& obj)
 {
+	obj.toggle_payload_operations(true);
 
-	QTableWidgetItem *listitem = new QTableWidgetItem;
-	QString summaryText("Player sent chat message with with linked items");
-	listitem->setText(summaryText);
-
-	ui.decodedList->setItem(ui.decodedList->rowCount(), 1, listitem);
-
-	listitem = new QTableWidgetItem("time");
-	QString timeText("time");
-	listitem->setText(timeText);
-
-	ui.decodedList->setItem(ui.decodedList->rowCount(), 0, listitem);
+	UI_DECODED_LIST_ENTRY listentry(obj);
+	listentry.summary = "Player sent chat message with with linked items";
+	addDecodedListEntry(listentry);
 }
 
 void exileSniffer::action_CLI_CHAT_COMMAND(UIDecodedPkt& decodedobj)
 {
 	decodedobj.toggle_payload_operations(true);
+
+	/*
+	todo - load into presupplied data blob or lookup in ggpk
+	0x04 = /remaining, 0x06=/pvp, 0x08=/oos, 0x0d=/fixmyhelmet, etc
+	*/
+	UINT32 commandsDatIndex = decodedobj.get_UInt32(L"CommandID");
+	UINT32 unk1 = decodedobj.get_UInt32(L"Unk1");
+
+	wstringstream summary;
+	summary << "Player used command at commands.dat index: " << std::dec << commandsDatIndex <<
+		" [unkVal 0x: " << std::hex << unk1 << "]";
 	UI_DECODED_LIST_ENTRY listentry(decodedobj);
-	listentry.summary = "Player used / command";
+	listentry.summary = QString::fromStdWString(summary.str());
 	addDecodedListEntry(listentry);
 }
 
@@ -201,8 +232,11 @@ void exileSniffer::action_SRV_SERVER_MESSAGE(UIDecodedPkt& decodedobj)
 void exileSniffer::action_CLI_LOGGED_OUT(UIDecodedPkt& decodedobj)
 {
 	decodedobj.toggle_payload_operations(true);
+
+	UINT32 arg = decodedobj.get_UInt32(L"Unk1");
+
 	UI_DECODED_LIST_ENTRY listentry(decodedobj);
-	listentry.summary = "Game client logged out";
+	listentry.summary = "Game client logged out. [Arg: "+QString::number(arg)+"]";
 	addDecodedListEntry(listentry);
 }
 
@@ -240,6 +274,24 @@ void exileSniffer::action_CLI_PING_CHALLENGE(UIDecodedPkt& decodedobj)
 	addDecodedListEntry(listentry);
 }
 
+void exileSniffer::action_CLI_CLICKED_GROUND_ITEM(UIDecodedPkt& decodedobj)
+{
+	decodedobj.toggle_payload_operations(true);
+
+	UINT64 targID = decodedobj.get_UInt64(L"TargID");
+	UINT64 Unk1 = decodedobj.get_UInt64(L"Unk1");
+	UINT32 modifier = decodedobj.get_UInt32(L"Modifier");
+
+	std::wstringstream summary;
+	summary << "Player clicked ground itemID 0x" << std::hex << targID << " Arg1: 0x" << Unk1;
+
+	if (modifier)
+		summary << " [" << explainModifier(modifier) << "]";
+
+	if (modifier > 0xf || !(modifier & 0x8))
+		summary << " <!Unusual modifier 0x" << std::hex << modifier << " - what are you doing?>";
+}
+
 void exileSniffer::action_CLI_ACTION_PREDICTIVE(UIDecodedPkt& decodedobj)
 {
 	decodedobj.toggle_payload_operations(true);
@@ -264,11 +316,87 @@ void exileSniffer::action_CLI_ACTION_PREDICTIVE(UIDecodedPkt& decodedobj)
 	addDecodedListEntry(listentry);
 }
 
-void exileSniffer::action_CLI_USE_BELT_SLOT(UIDecodedPkt& decodedobj)
+
+void exileSniffer::action_CLI_PICKUP_ITEM(UIDecodedPkt& decodedobj)
+{
+	decodedobj.toggle_payload_operations(true);
+	UINT64 container = decodedobj.get_UInt64(L"Container");
+	UINT64 itemID = decodedobj.get_UInt32(L"ItemID");
+	UINT32 unk2 = decodedobj.get_UInt32(L"Unk2");
+
+	std::wstringstream summary;
+	summary << "Player picked up itemID 0x" << std::hex << itemID 
+		<< "in container " << slotToString(container) <<" < unk2: 0x"<<unk2<<">";
+
+	UI_DECODED_LIST_ENTRY listentry(decodedobj);
+	listentry.summary = QString::fromStdWString(summary.str());
+	addDecodedListEntry(listentry);
+}
+
+void exileSniffer::action_CLI_PLACE_ITEM(UIDecodedPkt& decodedobj)
 {
 	decodedobj.toggle_payload_operations(true);
 	UI_DECODED_LIST_ENTRY listentry(decodedobj);
-	listentry.summary = "Player used belt slot";
+	listentry.summary = "Player placed item down";
+	addDecodedListEntry(listentry);
+}
+
+void exileSniffer::action_CLI_REMOVE_SOCKET(UIDecodedPkt& decodedobj)
+{
+	decodedobj.toggle_payload_operations(true);
+	UI_DECODED_LIST_ENTRY listentry(decodedobj);
+	listentry.summary = "Player removed from socket";
+	addDecodedListEntry(listentry);
+}
+
+void exileSniffer::action_CLI_INSERT_SOCKET(UIDecodedPkt& decodedobj)
+{
+	decodedobj.toggle_payload_operations(true);
+	UI_DECODED_LIST_ENTRY listentry(decodedobj);
+	listentry.summary = "Player inserted into socket";
+	addDecodedListEntry(listentry);
+}
+
+void exileSniffer::action_CLI_LEVEL_SKILLGEM(UIDecodedPkt& decodedobj)
+{
+	decodedobj.toggle_payload_operations(true);
+	UI_DECODED_LIST_ENTRY listentry(decodedobj);
+	listentry.summary = "Player levelled a skillgem";
+	addDecodedListEntry(listentry);
+}
+
+void exileSniffer::action_CLI_SKILLPOINT_CHANGE(UIDecodedPkt& decodedobj)
+{
+	decodedobj.toggle_payload_operations(true);
+	UI_DECODED_LIST_ENTRY listentry(decodedobj);
+	listentry.summary = "Player added a skillpoint";
+	addDecodedListEntry(listentry);
+}
+
+void exileSniffer::action_CLI_CANCEL_BUF(UIDecodedPkt& decodedobj)
+{
+	decodedobj.toggle_payload_operations(true);
+	UI_DECODED_LIST_ENTRY listentry(decodedobj);
+	listentry.summary = "Player cancelled a buff";
+	addDecodedListEntry(listentry);
+}
+
+void exileSniffer::action_CLI_SET_HOTBARSKILL(UIDecodedPkt& decodedobj)
+{
+	decodedobj.toggle_payload_operations(true);
+	UI_DECODED_LIST_ENTRY listentry(decodedobj);
+	listentry.summary = "Player changed a hotbar skill";
+	addDecodedListEntry(listentry);
+}
+
+void exileSniffer::action_CLI_USE_BELT_SLOT(UIDecodedPkt& decodedobj)
+{
+	decodedobj.toggle_payload_operations(true);
+
+	UINT64 slot = decodedobj.get_UInt32(L"Slot");
+
+	UI_DECODED_LIST_ENTRY listentry(decodedobj);
+	listentry.summary = "Player activated belt slot "+slot;
 	addDecodedListEntry(listentry);
 }
 
@@ -276,7 +404,55 @@ void exileSniffer::action_CLI_USE_ITEM(UIDecodedPkt& decodedobj)
 {
 	decodedobj.toggle_payload_operations(true);
 	UI_DECODED_LIST_ENTRY listentry(decodedobj);
-	listentry.summary = "Player used inventory item";
+	listentry.summary = "Player used inventory item X on item Y";
+	addDecodedListEntry(listentry);
+}
+
+void exileSniffer::action_CLI_REQUEST_PUBLICPARTIES(UIDecodedPkt& decodedobj)
+{
+	decodedobj.toggle_payload_operations(true);
+	UI_DECODED_LIST_ENTRY listentry(decodedobj);
+	listentry.summary = "Client requested latest public parties";
+	addDecodedListEntry(listentry);
+}
+
+void exileSniffer::action_CLI_SKILLPANE_ACTION(UIDecodedPkt& decodedobj)
+{
+	decodedobj.toggle_payload_operations(true);
+	UI_DECODED_LIST_ENTRY listentry(decodedobj);
+	listentry.summary = "Player used skillpane";
+	addDecodedListEntry(listentry);
+}
+
+void exileSniffer::action_CLI_MICROSTRANSACTIONPANE_ACTION(UIDecodedPkt& decodedobj)
+{
+	decodedobj.toggle_payload_operations(true);
+	UI_DECODED_LIST_ENTRY listentry(decodedobj);
+	listentry.summary = "Player opened microtransaction pane";
+	addDecodedListEntry(listentry);
+}
+
+void exileSniffer::action_CLI_USED_SKILL(UIDecodedPkt& decodedobj)
+{
+	decodedobj.toggle_payload_operations(true);
+	UI_DECODED_LIST_ENTRY listentry(decodedobj);
+	listentry.summary = "Player used skill (lockstep)";
+	addDecodedListEntry(listentry);
+}
+
+void exileSniffer::action_CLI_CLICK_OBJ(UIDecodedPkt& decodedobj)
+{
+	decodedobj.toggle_payload_operations(true);
+	UI_DECODED_LIST_ENTRY listentry(decodedobj);
+	listentry.summary = "Player clicked object x";
+	addDecodedListEntry(listentry);
+}
+
+void exileSniffer::action_CLI_MOUSE_HELD(UIDecodedPkt& decodedobj)
+{
+	decodedobj.toggle_payload_operations(true);
+	UI_DECODED_LIST_ENTRY listentry(decodedobj);
+	listentry.summary = "Player is holding mouse";
 	addDecodedListEntry(listentry);
 }
 
@@ -288,3 +464,11 @@ void exileSniffer::action_CLI_MOUSE_RELEASE(UIDecodedPkt& decodedobj)
 	addDecodedListEntry(listentry);
 }
 
+
+void exileSniffer::action_CLI_OPTOUT_TUTORIALS(UIDecodedPkt& decodedobj)
+{
+	decodedobj.toggle_payload_operations(true);
+	UI_DECODED_LIST_ENTRY listentry(decodedobj);
+	listentry.summary = "Player opted out of tutorials";
+	addDecodedListEntry(listentry);
+}

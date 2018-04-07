@@ -15,4 +15,4 @@
 #define INVENTORY_SLOT_POTIONS 0xc
 
 
-std::string slotToString(byte slot);
+std::wstring slotToString(DWORD slot);

@@ -1,35 +1,39 @@
 #include "stdafx.h"
 #include "inventory.h"
 
-std::string slotToString(byte slot)
+std::wstring slotToString(DWORD slot)
 {
 	switch (slot)
 	{
 	case INVENTORY_SLOT_BAG:
-		return "Bag";
+		return L"Bag";
 	case INVENTORY_SLOT_CHEST:
-		return "Chest";
+		return L"Chest";
 	case INVENTORY_SLOT_LWEAP:
-		return "LHand";
+		return L"LHand";
 	case INVENTORY_SLOT_RWEAP:
-		return "Rhand";
+		return L"Rhand";
 	case INVENTORY_SLOT_HEAD:
-		return "Head";
+		return L"Head";
 	case INVENTORY_SLOT_NECK:
-		return "Neck";
+		return L"Neck";
 	case INVENTORY_SLOT_LEFTRING:
-		return "LRing";
+		return L"LRing";
 	case INVENTORY_SLOT_RIGHTRING:
-		return "RRing";
+		return L"RRing";
 	case INVENTORY_SLOT_GLOVES:
-		return "Glove";
+		return L"Glove";
 	case INVENTORY_SLOT_BOOTS:
-		return "Boot";
+		return L"Boot";
 	case INVENTORY_SLOT_BELT:
-		return "Boot";
+		return L"Boot";
 	case INVENTORY_SLOT_POTIONS:
-		return "Belt";
+		return L"Belt";
 	default:
-		return "<TODO>";
+		{
+		std::wstringstream err;
+		err << L"<TODO container 0x"<<std::hex<<slot;
+		return err.str();
+		}
 	}
 }
