@@ -73,10 +73,6 @@ void packet_processor::deserialise_CLI_PING_CHALLENGE(UIDecodedPkt *uipkt)
 	uipkt->add_dword(L"Challenge", consume_DWORD());
 }
 
-
-
-
-
 void packet_processor::deserialise_CLI_CHAT_COMMAND(UIDecodedPkt *uipkt)
 {
 	//todo
@@ -123,20 +119,11 @@ void packet_processor::deserialise_CLI_USE_ITEM(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_CLI_ACTION_PREDICTIVE(UIDecodedPkt *uipkt)
 {
-	/*
-				unsigned long targcoord1 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
-			unsigned long targcoord2 = getUlong(decryptedBuffer + sIdx); sIdx += 4;
-			unsigned short skill = getUshort(decryptedBuffer + sIdx); sIdx += 2;
-			unsigned short pcount = getUshort(decryptedBuffer + sIdx); sIdx += 2;
-			char controlStatus = decryptedBuffer[sIdx]; sIdx += 1;
-
-			std::cout << std::hex << "Player used" << explainMouseLastByte(controlStatus)
-				<< " skill 0x" << skill << " on coord (" <<
-				targcoord1 << "," << targcoord2 << ") " << std::endl;
-
-			if (controlStatus > 0xf || !(controlStatus & 0x8))
-				std::cout << "\t!Unusual controlStatus " << (int)controlStatus << " - window open?>" << std::endl;
-	*/
+	uipkt->add_dword(L"TargCoord1", consume_DWORD());
+	uipkt->add_dword(L"TargCoord2", consume_DWORD());
+	uipkt->add_dword(L"SkillID", consumeUShort());
+	uipkt->add_dword(L"PkCount", consumeUShort());
+	uipkt->add_byte(L"Modifier", consume_Byte());
 }
 
 void packet_processor::deserialise_CLI_MOUSE_RELEASE(UIDecodedPkt *uipkt)

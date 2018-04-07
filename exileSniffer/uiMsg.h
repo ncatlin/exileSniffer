@@ -1,11 +1,12 @@
 #pragma once
 #include "safequeue.h"
+#include "utilities.h"
 
-#define PKTBIT_OUTBOUND 0
-#define PKTBIT_INBOUND 0x1
-#define PKTBIT_LOGINSERVER 0x2
-#define PKTBIT_GAMESERVER 0x4
-#define PKTBIT_PATCHSERVER 0x8
+#define PKTBIT_OUTBOUND 0x1
+#define PKTBIT_INBOUND 0x2
+#define PKTBIT_LOGINSERVER 0x4
+#define PKTBIT_GAMESERVER 0x8
+#define PKTBIT_PATCHSERVER 0x10
 
 enum streamType { eLogin = 'L', eGame = 'G', ePatch = 'P', eNone = 0 };
 
@@ -49,13 +50,16 @@ public:
 		failLocation = idx;
 	}
 
+	time_t createdtime;	
+	unsigned long sequenceID;
+	DWORD pid;
 	streamType stream;
 	bool incoming;
-	DWORD pid;
-	time_t createdtime;
+
 	byte* pktBytes;
+	unsigned short startBytes;
 	unsigned short pktSize = 0;
-	short startBytes;
+
 	bool decodeFailed = false;
 	unsigned short failLocation = 0;
 };
@@ -63,8 +67,7 @@ public:
 class UIDecodedPkt : public UI_MESSAGE
 {
 public:
-	UIDecodedPkt(DWORD processID, streamType streamServer, byte isIncoming);
-	//void attachDecodedObj(decodedPacket obj) { decodedobj = obj; };
+	UIDecodedPkt(DWORD processID, streamType streamServer, byte isIncoming, long long timeSeen);
 	void toggle_payload_operations(bool state) { payloadOperations = state; }
 
 	void add_dword(std::wstring name, DWORD dwordfield);
@@ -76,23 +79,25 @@ public:
 	UINT32 get_UInt32(std::wstring name);
 	UINT64 get_UInt64(std::wstring name);
 	
-
 	void setBuffer(byte *buf) { originalbuf = buf; }
 	void setStartOffset(unsigned short off) { bufferOffsets.first = off; }
 	void setEndOffset(unsigned short off) { bufferOffsets.second = off; }
 	void setFailedDecode() { failedDecode = true; }
 	bool decodeError() { return failedDecode; }
+	long long time_processed_ms() { return mstime; }
+	DWORD clientProcessID() { return PID; }
 
+public:
 	ushort messageID;
-	streamType serverStream;
-	bool incoming;
-
-private:
+	byte streamFlags = 0;
 	byte *originalbuf = NULL;
 	std::pair<ushort, short> bufferOffsets;
-	time_t createdtime;
+
+private:
+	DWORD PID;
 	bool failedDecode = false;
 	bool payloadOperations = false;
+	long long mstime;
 
 	rapidjson::GenericDocument<rapidjson::UTF16<> > jsn;
 	WValue payload;

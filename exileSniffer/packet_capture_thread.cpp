@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "packet_capture_thread.h"
 #include "uiMsg.h" 
+#include "utilities.h"
 
 #define PATCHSERVER_PORT 12995
 #define LOGINSERVER_PORT 20481
@@ -35,7 +36,7 @@ void packet_capture_thread::on_patchclient_data(Tins::TCPIP::Stream& stream)
 	//printf("patch client data\n");
 	const Tins::TCPIP::Stream::payload_type& payload = stream.client_payload();
 	std::stringstream pktstringstr;
-	pktstringstr << getStreamID(stream) << "," << PACKET_OUTGOING << "," <<
+	pktstringstr << getStreamID(stream) << "," << PACKET_OUTGOING << "," << ms_since_epoch() << "," <<
 		payload.size() << "," << std::string(payload.begin(), payload.end());
 	std::string pktstr = pktstringstr.str();
 	WriteFile(patchPipe, pktstr.c_str(), pktstr.size(), 0, 0);
@@ -48,7 +49,7 @@ void packet_capture_thread::on_patchserver_data(Tins::TCPIP::Stream& stream)
 	const Tins::TCPIP::Stream::payload_type& payload = stream.server_payload();
 	std::ostringstream pktstringstr;
 
-	pktstringstr << getStreamID(stream) << "," << PACKET_INCOMING << "," <<
+	pktstringstr << getStreamID(stream) << "," << PACKET_INCOMING << "," << ms_since_epoch() << "," <<
 		payload.size() << "," << std::string(payload.begin(), payload.end());
 	
 	std::string pktstr = pktstringstr.str();
@@ -59,9 +60,11 @@ void packet_capture_thread::on_loginclient_data(Tins::TCPIP::Stream& stream)
 {
 	//printf("login client data, getting clientpayload of stream %lx\n",&stream);
 	const Tins::TCPIP::Stream::payload_type& payload = stream.client_payload();
+	
 	std::stringstream pktstringstr;
-	pktstringstr << getStreamID(stream) << "," << PACKET_OUTGOING << "," <<
+	pktstringstr << getStreamID(stream) << "," << PACKET_OUTGOING << "," << ms_since_epoch() << "," <<
 		payload.size() << "," << std::string(payload.begin(), payload.end());
+	
 	std::string pktstr = pktstringstr.str();
 	DWORD writtens = 0;
 	WriteFile(loginPipe, pktstr.c_str(), pktstr.size(), &writtens, 0);
@@ -73,19 +76,19 @@ void packet_capture_thread::on_loginserver_data(Tins::TCPIP::Stream& stream)
 	//printf("login server data\n"); 
 	const Tins::TCPIP::Stream::payload_type& payload = stream.server_payload();
 	std::stringstream pktstringstr;
-	pktstringstr << getStreamID(stream) << "," << PACKET_INCOMING << "," <<
+	pktstringstr << getStreamID(stream) << "," << PACKET_INCOMING << "," << ms_since_epoch() << "," <<
 		payload.size() << "," << std::string(payload.begin(), payload.end());
 	std::string pktstr = pktstringstr.str();
 	DWORD writtens = 0;
 	WriteFile(loginPipe, pktstr.c_str(), pktstr.size(), &writtens, 0);
 }
 
+
 void packet_capture_thread::on_gameclient_data(Tins::TCPIP::Stream& stream) 
 {
-	//printf("game client data\n");
 	const Tins::TCPIP::Stream::payload_type& payload = stream.client_payload();
 	std::stringstream pktstringstr;
-	pktstringstr << getStreamID(stream) << "," << PACKET_OUTGOING << "," <<
+	pktstringstr << getStreamID(stream) << "," << PACKET_OUTGOING << "," << ms_since_epoch() << "," <<
 		payload.size() << "," << std::string(payload.begin(), payload.end());
 	std::string pktstr = pktstringstr.str();
 	DWORD writtens = 0;
@@ -98,7 +101,7 @@ void packet_capture_thread::on_gameserver_data(Tins::TCPIP::Stream& stream)
 	//printf("game server data\n");
 	const Tins::TCPIP::Stream::payload_type& payload = stream.server_payload();
 	std::stringstream pktstringstr;
-	pktstringstr << getStreamID(stream) << "," << PACKET_INCOMING << "," <<
+	pktstringstr << getStreamID(stream) << "," << PACKET_INCOMING << "," << ms_since_epoch() << "," <<
 		payload.size() << "," << std::string(payload.begin(), payload.end());
 	std::string pktstr = pktstringstr.str();
 	DWORD writtens = 0;
@@ -108,7 +111,8 @@ void packet_capture_thread::on_gameserver_data(Tins::TCPIP::Stream& stream)
 
 void packet_capture_thread::on_new_stream(Tins::TCPIP::Stream& stream)
 {
-	printf("New stream [#%d]: client:%d -> %s:%d ", connectionCount, stream.client_port(), stream.server_addr_v4().to_string().c_str(), stream.server_port());
+	printf("New stream [#%d]: client:%d -> %s:%d ", connectionCount, stream.client_port(), 
+		stream.server_addr_v4().to_string().c_str(), stream.server_port());
 	char serverType = portStreamType(stream.server_port());
 
 	streamList[stream.create_time()] = connectionCount++;

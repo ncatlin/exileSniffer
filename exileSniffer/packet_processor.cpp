@@ -94,6 +94,9 @@ void packet_processor::handle_patch_data(std::vector<byte> pkt)
 	char *incoming = strtok_s(next_token, ",", &next_token);
 	bool isIncoming = (*incoming == '1') ? true : false;
 
+	char *timeprocessed = strtok_s(next_token, ",", &next_token);
+	long long msProcessed = atoll(timeprocessed);
+
 	char *dLen = strtok_s(next_token, ",", &next_token);
 	unsigned int dataLen = atoi(dLen);
 
@@ -461,6 +464,9 @@ void packet_processor::handle_login_data(std::vector<byte> pkt)
 	char *incoming = strtok_s(next_token, ",", &next_token);
 	bool isIncoming = (*incoming == '1') ? true : false;
 
+	char *timeprocessed = strtok_s(next_token, ",", &next_token);
+	long long msProcessed = atoll(timeprocessed);
+
 	char *dLen = strtok_s(next_token, ",", &next_token);
 	unsigned int dataLen = atoi(dLen);
 	if (!dataLen)
@@ -496,6 +502,9 @@ void packet_processor::handle_game_data(std::vector<byte> pkt)
 	char *incoming = strtok_s(next_token, ",", &next_token);
 	bool isIncoming = (*incoming == '1');
 
+	char *timeprocessed = strtok_s(next_token, ",", &next_token);
+	long long msProcessed = atoll(timeprocessed);
+
 	char *dLen = strtok_s(next_token, ",", &next_token);
 	unsigned int dataLen = atoi(dLen);
 	if (!dataLen)
@@ -508,9 +517,9 @@ void packet_processor::handle_game_data(std::vector<byte> pkt)
 	if (dataLen > 0)
 	{
 		if (isIncoming)
-			handle_packet_from_gameserver(streamID, data, dataLen);
+			handle_packet_from_gameserver(streamID, data, dataLen, msProcessed);
 		else
-			handle_packet_to_gameserver(streamID, data, dataLen);
+			handle_packet_to_gameserver(streamID, data, dataLen, msProcessed);
 	}
 
 	++streamObj->packetCount;
@@ -524,31 +533,6 @@ bool packet_processor::sanityCheckPacketID(unsigned short pktID)
 		return false;
 	}
 	return true;
-}
-
-std::string explainMouseLastByte(byte lastByte)
-{
-	/*
-	00001000 click       0x8
-	00001001 +shift		 0x9
-	00001010 +windowOpen 0xa
-	00001100 +ctrl		 0xc
-
-	8 = inventory/etc open
-	9 = shift held
-	c = control held
-	*/
-
-	std::string result = "";
-
-	if (lastByte & 0x1)
-		result += "+shift ";
-	if (lastByte & 0x2)
-		result += "+dilog ";
-	if (lastByte & 0x4)
-		result += "+ctrl ";
-
-	return result;
 }
 
 bool packet_processor::lookup_areaCode(unsigned long code, std::string& result)
@@ -633,7 +617,8 @@ bool packet_processor::lookup_hash(unsigned long hash, std::string& result, std:
 }
 
 
-void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byte* data, unsigned int dataLen)
+void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byte* data, 
+	unsigned int dataLen, long long timems)
 {
 
 	STREAMDATA *streamObj = &streamDatas.at(streamID);
@@ -707,32 +692,26 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 		}
 
 		UIDecodedPkt *ui_decodedpkt = 
-			new UIDecodedPkt(streamObj->workingSendKey->sourceProcess, eGame, PKTBIT_OUTBOUND);
+			new UIDecodedPkt(streamObj->workingSendKey->sourceProcess, eGame, PKTBIT_OUTBOUND, timems);
+		ui_decodedpkt->setBuffer(decryptedBuffer);
+		ui_decodedpkt->setStartOffset(decryptedIndex);
+		ui_decodedpkt->messageID = pktId;
+		ui_decodedpkt->toggle_payload_operations(true);
 
 		auto it = packetDeserialisers.find(pktId);
 		if (it != packetDeserialisers.end())
 		{
-			
 			packet_processor::deserialiser deserialiserForPktID = it->second;
-			ui_decodedpkt->setBuffer(decryptedBuffer);
-			ui_decodedpkt->setStartOffset(decryptedIndex);
-			ui_decodedpkt->messageID = pktId;
-			ui_decodedpkt->toggle_payload_operations(true);
-
 			(this->*deserialiserForPktID)(ui_decodedpkt);
 
 			if (errorFlag == eNoErr)
 				ui_decodedpkt->setEndOffset(decryptedIndex);
 			else
-				ui_decodedpkt->setFailedDecode();
+				ui_decodedpkt->setEndOffset(dataLen);
 		}
 		else
 		{
-			stringstream errmsg;
-			errmsg << "ERROR: no handler for client msgID " << pktId;
-			UIaddLogMsg(QString::fromStdString(errmsg.str()), activeClientPID, uiMsgQueue);
-
-			std::cout << "Unhandled Hex Payload msgID 0x" <<std::hex << pktId<<std::endl;
+			std::cout << "Unhandled Hex Payload msgID 0x" <<std::hex << pktId <<std::endl;
 			for (int i = 0; i < dataLen; ++i)
 			{
 				byte item = decryptedBuffer[i];
@@ -741,18 +720,20 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 			}
 			std::cout << std::endl;
 
-			break;
+			ui_decodedpkt->setEndOffset(dataLen);
+
+			errorFlag = eDecodingErr::ePktIDUnimplemented;
 		}
 
-		if (errorFlag)
+		if (errorFlag != eNoErr)
 		{
+			remainingDecrypted = 0;
 			emit_decoding_err_msg(pktId, streamObj->lastPktID);
-			break;
+			ui_decodedpkt->setFailedDecode();
 		}
-		else
-		{
-			uiMsgQueue->addItem(ui_decodedpkt);
-		}
+
+		uiMsgQueue->addItem(ui_decodedpkt);
+
 
 		streamObj->lastPktID = pktId;
 	}
@@ -768,7 +749,8 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 }
 
 
-void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, byte* data, unsigned int dataLen)
+void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, byte* data, 
+	unsigned int dataLen, long long timems)
 {
 
 	//first packet from gameserver starts 0005, followed by crypt which start 0012
@@ -1901,25 +1883,24 @@ void packet_processor::main_loop()
 
 	unsigned int errCount = 0;
 
+	//pipes were implemented when the pcap was done in another process
+	//todo: use something else now
 	while (!patchpipe)	{
 		patchpipe = connectPipe(L"\\\\.\\pipe\\patchpipe");
 		Sleep(200);
-		if (errCount++ > 10)
-			break;
+		if (errCount++ > 10) break;
 	}
 
 	while (!loginpipe)	{
 		loginpipe = connectPipe(L"\\\\.\\pipe\\loginpipe");
 		Sleep(200);
-		if (errCount++ > 10)
-			break;
+		if (errCount++ > 10) break;
 	}
 
 	while (!gamepipe)	{
 		gamepipe = connectPipe(L"\\\\.\\pipe\\gamepipe");
 		Sleep(200);
-		if (errCount++ > 10)
-			break;
+		if (errCount++ > 10) break;
 	}
 
 	if (loginpipe && gamepipe)
@@ -1928,6 +1909,6 @@ void packet_processor::main_loop()
 	}
 	else
 	{
-		UIaddLogMsg("ERROR: Unable to connect to packet capture pipes. Failing.", activeClientPID, uiMsgQueue);
+		UIaddLogMsg("ERROR: Unable to connect to our own packet capture pipes. Failing.", activeClientPID, uiMsgQueue);
 	}
 }

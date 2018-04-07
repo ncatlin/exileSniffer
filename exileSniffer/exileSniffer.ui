@@ -139,38 +139,151 @@
           <property name="frameShadow">
            <enum>QFrame::Raised</enum>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0">
-           <property name="spacing">
-            <number>1</number>
-           </property>
-           <property name="bottomMargin">
-            <number>0</number>
-           </property>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
            <item>
-            <widget class="QListWidget" name="decodedList"/>
+            <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QFrame" name="decodedControlFrame">
+               <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
+               </property>
+               <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
+               </property>
+               <layout class="QHBoxLayout" name="horizontalLayout_6">
+                <property name="topMargin">
+                 <number>3</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>3</number>
+                </property>
+                <item>
+                 <widget class="QCheckBox" name="decodedAutoscrollCheck">
+                  <property name="layoutDirection">
+                   <enum>Qt::LeftToRight</enum>
+                  </property>
+                  <property name="text">
+                   <string>Auto Scroll</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QFrame" name="decodedLabelFrame">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
+               </property>
+               <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
+               </property>
+               <layout class="QHBoxLayout" name="horizontalLayout_3">
+                <property name="topMargin">
+                 <number>3</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>3</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="decodedDisplayedLabel">
+                  <property name="text">
+                   <string>Packets ( Displayed: Filtered: )</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="decodedFiltersBtn">
+                  <property name="maximumSize">
+                   <size>
+                    <width>69</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>Filters</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
            </item>
            <item>
-            <widget class="QPlainTextEdit" name="decodedText"/>
+            <widget class="QSplitter" name="splitter">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="handleWidth">
+              <number>2</number>
+             </property>
+             <widget class="QTableWidget" name="decodedList">
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="horizontalScrollBarPolicy">
+               <enum>Qt::ScrollBarAsNeeded</enum>
+              </property>
+              <property name="showDropIndicator" stdset="0">
+               <bool>false</bool>
+              </property>
+              <property name="dragEnabled">
+               <bool>false</bool>
+              </property>
+              <property name="sortingEnabled">
+               <bool>true</bool>
+              </property>
+              <attribute name="horizontalHeaderDefaultSectionSize">
+               <number>60</number>
+              </attribute>
+              <attribute name="horizontalHeaderMinimumSectionSize">
+               <number>43</number>
+              </attribute>
+              <attribute name="verticalHeaderVisible">
+               <bool>false</bool>
+              </attribute>
+              <attribute name="verticalHeaderHighlightSections">
+               <bool>false</bool>
+              </attribute>
+              <column>
+               <property name="text">
+                <string>Time</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Sender</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Msg ID</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Summary</string>
+               </property>
+              </column>
+             </widget>
+             <widget class="QPlainTextEdit" name="decodedText"/>
+            </widget>
            </item>
           </layout>
          </widget>
-        </item>
-        <item row="1" column="0">
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
-          <item>
-           <widget class="QPushButton" name="decodedFiltersBtn">
-            <property name="maximumSize">
-             <size>
-              <width>80</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Filters</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
         </item>
        </layout>
       </widget>
@@ -453,14 +566,14 @@ p, li { white-space: pre-wrap; }
  </resources>
  <connections>
   <connection>
-   <sender>filtersBtn</sender>
+   <sender>decodedFiltersBtn</sender>
    <signal>clicked()</signal>
    <receiver>exileSniffer</receiver>
    <slot>showRawFiltersDLG()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>628</x>
-     <y>608</y>
+     <x>129</x>
+     <y>99</y>
     </hint>
     <hint type="destinationlabel">
      <x>413</x>
@@ -516,11 +629,28 @@ p, li { white-space: pre-wrap; }
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>decodedList</sender>
+   <signal>clicked(QModelIndex)</signal>
+   <receiver>exileSniffer</receiver>
+   <slot>decodedListClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>412</x>
+     <y>207</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>413</x>
+     <y>336</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>showRawFiltersDLG()</slot>
   <slot>rawBytesRowChanged(QString)</slot>
   <slot>toggleRawLineWrap(bool)</slot>
   <slot>toggleRawAutoScroll(bool)</slot>
+  <slot>decodedListClicked()</slot>
  </slots>
 </ui>

@@ -21,14 +21,15 @@
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
-#include <QtWidgets/QListWidget>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPlainTextEdit>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QSplitter>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTabWidget>
+#include <QtWidgets/QTableWidget>
 #include <QtWidgets/QTextEdit>
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QVBoxLayout>
@@ -54,10 +55,17 @@ public:
     QGridLayout *gridLayout_3;
     QFrame *decodeDisplayFrame;
     QVBoxLayout *verticalLayout_3;
-    QListWidget *decodedList;
-    QPlainTextEdit *decodedText;
-    QHBoxLayout *horizontalLayout_4;
+    QHBoxLayout *horizontalLayout_5;
+    QFrame *decodedControlFrame;
+    QHBoxLayout *horizontalLayout_6;
+    QCheckBox *decodedAutoscrollCheck;
+    QFrame *decodedLabelFrame;
+    QHBoxLayout *horizontalLayout_3;
+    QLabel *decodedDisplayedLabel;
     QPushButton *decodedFiltersBtn;
+    QSplitter *splitter;
+    QTableWidget *decodedList;
+    QPlainTextEdit *decodedText;
     QWidget *rawDecryptTab;
     QVBoxLayout *verticalLayout_2;
     QHBoxLayout *textPaneFrame;
@@ -162,34 +170,92 @@ public:
         decodeDisplayFrame->setFrameShape(QFrame::StyledPanel);
         decodeDisplayFrame->setFrameShadow(QFrame::Raised);
         verticalLayout_3 = new QVBoxLayout(decodeDisplayFrame);
-        verticalLayout_3->setSpacing(1);
+        verticalLayout_3->setSpacing(6);
         verticalLayout_3->setContentsMargins(11, 11, 11, 11);
         verticalLayout_3->setObjectName(QStringLiteral("verticalLayout_3"));
-        verticalLayout_3->setContentsMargins(-1, -1, -1, 0);
-        decodedList = new QListWidget(decodeDisplayFrame);
+        horizontalLayout_5 = new QHBoxLayout();
+        horizontalLayout_5->setSpacing(0);
+        horizontalLayout_5->setObjectName(QStringLiteral("horizontalLayout_5"));
+        decodedControlFrame = new QFrame(decodeDisplayFrame);
+        decodedControlFrame->setObjectName(QStringLiteral("decodedControlFrame"));
+        decodedControlFrame->setFrameShape(QFrame::StyledPanel);
+        decodedControlFrame->setFrameShadow(QFrame::Raised);
+        horizontalLayout_6 = new QHBoxLayout(decodedControlFrame);
+        horizontalLayout_6->setSpacing(6);
+        horizontalLayout_6->setContentsMargins(11, 11, 11, 11);
+        horizontalLayout_6->setObjectName(QStringLiteral("horizontalLayout_6"));
+        horizontalLayout_6->setContentsMargins(-1, 3, -1, 3);
+        decodedAutoscrollCheck = new QCheckBox(decodedControlFrame);
+        decodedAutoscrollCheck->setObjectName(QStringLiteral("decodedAutoscrollCheck"));
+        decodedAutoscrollCheck->setLayoutDirection(Qt::LeftToRight);
+        decodedAutoscrollCheck->setChecked(true);
+
+        horizontalLayout_6->addWidget(decodedAutoscrollCheck);
+
+
+        horizontalLayout_5->addWidget(decodedControlFrame);
+
+        decodedLabelFrame = new QFrame(decodeDisplayFrame);
+        decodedLabelFrame->setObjectName(QStringLiteral("decodedLabelFrame"));
+        decodedLabelFrame->setMinimumSize(QSize(0, 0));
+        decodedLabelFrame->setFrameShape(QFrame::StyledPanel);
+        decodedLabelFrame->setFrameShadow(QFrame::Raised);
+        horizontalLayout_3 = new QHBoxLayout(decodedLabelFrame);
+        horizontalLayout_3->setSpacing(6);
+        horizontalLayout_3->setContentsMargins(11, 11, 11, 11);
+        horizontalLayout_3->setObjectName(QStringLiteral("horizontalLayout_3"));
+        horizontalLayout_3->setContentsMargins(-1, 3, -1, 3);
+        decodedDisplayedLabel = new QLabel(decodedLabelFrame);
+        decodedDisplayedLabel->setObjectName(QStringLiteral("decodedDisplayedLabel"));
+
+        horizontalLayout_3->addWidget(decodedDisplayedLabel);
+
+        decodedFiltersBtn = new QPushButton(decodedLabelFrame);
+        decodedFiltersBtn->setObjectName(QStringLiteral("decodedFiltersBtn"));
+        decodedFiltersBtn->setMaximumSize(QSize(69, 16777215));
+
+        horizontalLayout_3->addWidget(decodedFiltersBtn);
+
+
+        horizontalLayout_5->addWidget(decodedLabelFrame);
+
+
+        verticalLayout_3->addLayout(horizontalLayout_5);
+
+        splitter = new QSplitter(decodeDisplayFrame);
+        splitter->setObjectName(QStringLiteral("splitter"));
+        splitter->setOrientation(Qt::Vertical);
+        splitter->setHandleWidth(2);
+        decodedList = new QTableWidget(splitter);
+        if (decodedList->columnCount() < 4)
+            decodedList->setColumnCount(4);
+        QTableWidgetItem *__qtablewidgetitem = new QTableWidgetItem();
+        decodedList->setHorizontalHeaderItem(0, __qtablewidgetitem);
+        QTableWidgetItem *__qtablewidgetitem1 = new QTableWidgetItem();
+        decodedList->setHorizontalHeaderItem(1, __qtablewidgetitem1);
+        QTableWidgetItem *__qtablewidgetitem2 = new QTableWidgetItem();
+        decodedList->setHorizontalHeaderItem(2, __qtablewidgetitem2);
+        QTableWidgetItem *__qtablewidgetitem3 = new QTableWidgetItem();
+        decodedList->setHorizontalHeaderItem(3, __qtablewidgetitem3);
         decodedList->setObjectName(QStringLiteral("decodedList"));
-
-        verticalLayout_3->addWidget(decodedList);
-
-        decodedText = new QPlainTextEdit(decodeDisplayFrame);
+        decodedList->setLayoutDirection(Qt::LeftToRight);
+        decodedList->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+        decodedList->setProperty("showDropIndicator", QVariant(false));
+        decodedList->setDragEnabled(false);
+        decodedList->setSortingEnabled(true);
+        splitter->addWidget(decodedList);
+        decodedList->horizontalHeader()->setDefaultSectionSize(60);
+        decodedList->horizontalHeader()->setMinimumSectionSize(43);
+        decodedList->verticalHeader()->setVisible(false);
+        decodedList->verticalHeader()->setHighlightSections(false);
+        decodedText = new QPlainTextEdit(splitter);
         decodedText->setObjectName(QStringLiteral("decodedText"));
+        splitter->addWidget(decodedText);
 
-        verticalLayout_3->addWidget(decodedText);
+        verticalLayout_3->addWidget(splitter);
 
 
         gridLayout_3->addWidget(decodeDisplayFrame, 0, 0, 1, 1);
-
-        horizontalLayout_4 = new QHBoxLayout();
-        horizontalLayout_4->setSpacing(6);
-        horizontalLayout_4->setObjectName(QStringLiteral("horizontalLayout_4"));
-        decodedFiltersBtn = new QPushButton(decodeTab);
-        decodedFiltersBtn->setObjectName(QStringLiteral("decodedFiltersBtn"));
-        decodedFiltersBtn->setMaximumSize(QSize(80, 16777215));
-
-        horizontalLayout_4->addWidget(decodedFiltersBtn);
-
-
-        gridLayout_3->addLayout(horizontalLayout_4, 1, 0, 1, 1);
 
         processTabs->addTab(decodeTab, QString());
         rawDecryptTab = new QWidget();
@@ -335,10 +401,11 @@ public:
         menuBar->addAction(menuSettings->menuAction());
 
         retranslateUi(exileSniffer);
-        QObject::connect(filtersBtn, SIGNAL(clicked()), exileSniffer, SLOT(showRawFiltersDLG()));
+        QObject::connect(decodedFiltersBtn, SIGNAL(clicked()), exileSniffer, SLOT(showRawFiltersDLG()));
         QObject::connect(bytesRowCombo, SIGNAL(activated(QString)), exileSniffer, SLOT(rawBytesRowChanged(QString)));
         QObject::connect(rawLinewrapCheck, SIGNAL(toggled(bool)), exileSniffer, SLOT(toggleRawLineWrap(bool)));
         QObject::connect(rawAutoScrollCheck, SIGNAL(toggled(bool)), exileSniffer, SLOT(toggleRawAutoScroll(bool)));
+        QObject::connect(decodedList, SIGNAL(clicked(QModelIndex)), exileSniffer, SLOT(decodedListClicked()));
 
         processTabs->setCurrentIndex(1);
 
@@ -354,7 +421,17 @@ public:
         statusLabel->setText(QApplication::translate("exileSniffer", "Status:", Q_NULLPTR));
         statusText->setText(QApplication::translate("exileSniffer", "No running Path of Exile clients found", Q_NULLPTR));
         processTabs->setTabText(processTabs->indexOf(interceptionTab), QApplication::translate("exileSniffer", "Interception", Q_NULLPTR));
+        decodedAutoscrollCheck->setText(QApplication::translate("exileSniffer", "Auto Scroll", Q_NULLPTR));
+        decodedDisplayedLabel->setText(QApplication::translate("exileSniffer", "Packets ( Displayed: Filtered: )", Q_NULLPTR));
         decodedFiltersBtn->setText(QApplication::translate("exileSniffer", "Filters", Q_NULLPTR));
+        QTableWidgetItem *___qtablewidgetitem = decodedList->horizontalHeaderItem(0);
+        ___qtablewidgetitem->setText(QApplication::translate("exileSniffer", "Time", Q_NULLPTR));
+        QTableWidgetItem *___qtablewidgetitem1 = decodedList->horizontalHeaderItem(1);
+        ___qtablewidgetitem1->setText(QApplication::translate("exileSniffer", "Sender", Q_NULLPTR));
+        QTableWidgetItem *___qtablewidgetitem2 = decodedList->horizontalHeaderItem(2);
+        ___qtablewidgetitem2->setText(QApplication::translate("exileSniffer", "Msg ID", Q_NULLPTR));
+        QTableWidgetItem *___qtablewidgetitem3 = decodedList->horizontalHeaderItem(3);
+        ___qtablewidgetitem3->setText(QApplication::translate("exileSniffer", "Summary", Q_NULLPTR));
         processTabs->setTabText(processTabs->indexOf(decodeTab), QApplication::translate("exileSniffer", "Decoder", Q_NULLPTR));
         ptHexPane->setHtml(QApplication::translate("exileSniffer", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"

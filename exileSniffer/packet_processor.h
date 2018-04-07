@@ -3,7 +3,7 @@
 #include "packet_capture_thread.h"
 #include "key_grabber_thread.h"
 
-enum eDecodingErr{ eNoErr, eErrUnderflow, eBadPacketID};
+enum eDecodingErr{ eNoErr, eErrUnderflow, eBadPacketID, ePktIDUnimplemented};
 
 
 class STREAMDATA {
@@ -39,8 +39,8 @@ private:
 	void handle_packet_to_loginserver(networkStreamID streamID, byte* data, unsigned int dataLen);
 	void handle_packet_from_patchserver(byte* data, unsigned int dataLen);
 	void handle_packet_to_patchserver(byte* data, unsigned int dataLen);
-	void handle_packet_from_gameserver(networkStreamID streamID, byte* data, unsigned int dataLen);
-	void handle_packet_to_gameserver(networkStreamID streamID, byte* data, unsigned int dataLen);
+	void handle_packet_from_gameserver(networkStreamID streamID, byte* data, unsigned int dataLen, long long timems);
+	void handle_packet_to_gameserver(networkStreamID streamID, byte* data, unsigned int dataLen, long long timems);
 
 	void deserialise_SRV_PKT_ENCAPSULATED(UIDecodedPkt *);
 	void deserialise_CLI_CHAT_MSG_ITEMS(UIDecodedPkt *);

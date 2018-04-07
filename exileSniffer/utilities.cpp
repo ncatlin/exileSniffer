@@ -133,3 +133,27 @@ bool checkPipe(HANDLE pipe, std::queue< std::vector<byte>> *pktQueue)
 		pktQueue->emplace(pkt);
 	}
 }
+
+std::wstring epochms_to_timestring(long long epochms)
+{
+	std::chrono::milliseconds dur(epochms);
+	std::chrono::time_point<std::chrono::system_clock> dt(dur);
+	std::time_t rawtime = std::chrono::system_clock::to_time_t(dt);
+
+	struct tm * timeinfo;
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+
+	wchar_t buf[100];
+	wcsftime(buf, 100, L"%b%d %H:%M:%S:", timeinfo);
+	std::wstring result = std::wstring(buf) + std::to_wstring((epochms % 1000));
+	return result;
+}
+
+long long ms_since_epoch()
+{
+	auto now = std::chrono::system_clock::now();
+	auto now_ms = std::chrono::time_point_cast< std::chrono::milliseconds>(now);
+	auto sinceEpoch = now_ms.time_since_epoch();
+	return sinceEpoch.count();
+}

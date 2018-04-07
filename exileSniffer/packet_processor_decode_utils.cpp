@@ -5,7 +5,7 @@
 void packet_processor::emit_decoding_err_msg(unsigned short msgID, unsigned short lastMsgID)
 {
 	stringstream errmsg;
-	errmsg << "ERROR (DECODING): #" << std::dec << errorCount << " - ";
+	errmsg << "ERROR (DECODING): #" << std::dec << errorCount++ << " - ";
 
 	switch (errorFlag)
 	{
@@ -14,21 +14,25 @@ void packet_processor::emit_decoding_err_msg(unsigned short msgID, unsigned shor
 		break;
 
 	case eDecodingErr::eBadPacketID:
-		errmsg << "Very high ID " << msgID <<
+		errmsg << "Very high ID 0x" << std::hex << msgID <<
 			". Decrypt out of sync, bad key/IV or processing " <<
-			"continuation packet as a new packet";
+			"continuation packet as a new packet. May also be an unusual high-ID packet.";
 		break;
 
 	case eDecodingErr::eNoErr:
 		errmsg << "No error flag set";
 		break;
 
+	case eDecodingErr::ePktIDUnimplemented:
+		errmsg << "No deserialiser implemented";
+		break;
+
 	default:
 		errmsg << "Bad error flag '" << errorFlag << "' set";
 		break;
 	}
-	errmsg << " processing msgID " << msgID << " at index "
-		<< decryptedIndex << " lastpacketID: " << lastMsgID;
+	errmsg << " processing msgID 0x" << std::hex << msgID << " at index "
+		<< decryptedIndex << " after previous packet ID 0x" << lastMsgID;
 	UIaddLogMsg(QString::fromStdString(errmsg.str()), activeClientPID, uiMsgQueue);
 }
 
@@ -56,7 +60,7 @@ unsigned short packet_processor::consumeUShort()
 	{
 		errorFlag = eDecodingErr::eErrUnderflow;
 		errorCount += 1;
-		return 0;
+		return 0xf00d;
 	}
 
 	unsigned short result = getUshort(decryptedBuffer + decryptedIndex);

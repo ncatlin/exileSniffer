@@ -63,13 +63,14 @@ void UI_RAWHEX_PKT::setData(byte *source, unsigned short length)
 
 }
 
-UIDecodedPkt::UIDecodedPkt(DWORD processID, streamType streamServer, byte isIncoming)
+UIDecodedPkt::UIDecodedPkt(DWORD processID, streamType streamServer, byte isIncoming, long long timeSeen)
 {
 	jsn.SetObject();
 	msgType = uiMsgType::eDecodedPacket;
+	PID = processID;
 	add_dword(L"processID", processID);
 
-	byte streamFlags = 0;
+
 	streamFlags |= isIncoming;
 
 	switch (streamServer) 
@@ -84,17 +85,13 @@ UIDecodedPkt::UIDecodedPkt(DWORD processID, streamType streamServer, byte isInco
 		streamFlags |= PKTBIT_PATCHSERVER;
 		break;
 	}
-	streamFlags |= streamServer;
+
 	add_byte(L"Flags", streamFlags);
 
-	isIncoming = (isIncoming == PKTBIT_INBOUND);
-	serverStream = streamServer;
+	isIncoming = ((streamFlags & PKTBIT_INBOUND) != 0);
+	mstime = timeSeen;
 
 	payload = jsn.AddMember(L"Payload", WValue(rapidjson::kObjectType), jsn.GetAllocator());
-
-	/*
-	createdtime = time(0);
-	*/
 }
 void UIDecodedPkt::add_dword(std::wstring name, DWORD dwordfield)
 {
@@ -109,7 +106,7 @@ void UIDecodedPkt::add_word(std::wstring name, ushort ushortfield)
 {
 	WValue nameVal(name.c_str(), jsn.GetAllocator());
 	if (payloadOperations)
-		jsn.AddMember(nameVal, ushortfield, jsn.GetAllocator());
+		payload.AddMember(nameVal, ushortfield, jsn.GetAllocator());
 	else
 		jsn.AddMember(nameVal, ushortfield, jsn.GetAllocator());
 }
@@ -118,7 +115,7 @@ void UIDecodedPkt::add_byte(std::wstring name, byte bytefield)
 {
 	WValue nameVal(name.c_str(), jsn.GetAllocator());
 	if (payloadOperations)
-		jsn.AddMember(nameVal, bytefield, jsn.GetAllocator());
+		payload.AddMember(nameVal, bytefield, jsn.GetAllocator());
 	else
 		jsn.AddMember(nameVal, bytefield, jsn.GetAllocator());
 }
@@ -128,7 +125,7 @@ void UIDecodedPkt::add_wstring(std::wstring name, std::wstring stringfield)
 	WValue nameVal(name.c_str(), jsn.GetAllocator());
 	WValue stringVal(stringfield.c_str(), jsn.GetAllocator());
 	if (payloadOperations)
-		jsn.AddMember(nameVal, stringVal, jsn.GetAllocator());
+		payload.AddMember(nameVal, stringVal, jsn.GetAllocator());
 	else
 		jsn.AddMember(nameVal, stringVal, jsn.GetAllocator());
 }

@@ -9,13 +9,48 @@ This is the UI thread - try not to hang it
 #include "utilities.h"
 #include "qtextedit.h"
 
+
 exileSniffer::exileSniffer(QWidget *parent)
 	: QMainWindow(parent)
 {
 	ui.setupUi(this);
+
+	setup_raw_stream_tab();
+	setup_decoded_messages_tab();
+
+	init_DecodedPktActioners();
+
+	start_threads();
+
+	Sleep(200);
+	//testing
+	for (int i = 0; i < 0; i++)
+	{
+		UIDecodedPkt *ui_decodedpkt =
+			new UIDecodedPkt(1234, eGame, PKTBIT_OUTBOUND, ms_since_epoch() + 23432);
+		ui_decodedpkt->setFailedDecode();
+		UI_DECODED_LIST_ENTRY listentry(*ui_decodedpkt);
+		listentry.summary = "Player used inventory item";
+		addDecodedListEntry(listentry);
+
+		ui_decodedpkt =
+			new UIDecodedPkt(1234, eLogin, PKTBIT_OUTBOUND, ms_since_epoch() + 23432);
+		UI_DECODED_LIST_ENTRY listentry1(*ui_decodedpkt);
+		listentry1.summary = "Player used inventory item";
+		addDecodedListEntry(listentry1);
+
+		ui_decodedpkt =
+			new UIDecodedPkt(1234, ePatch, PKTBIT_INBOUND, ms_since_epoch() + 23432);
+		UI_DECODED_LIST_ENTRY listentry2(*ui_decodedpkt);
+		listentry2.summary = "Player used inventory item";
+		addDecodedListEntry(listentry2);
+	}
+}
+
+void exileSniffer::setup_raw_stream_tab()
+{
 	rawFiltersFormUI.setupUi(&rawFilterForm);
 	connect(&rawFilterForm, SIGNAL(newrawFilters()), this, SLOT(updateRawFilters()));
-
 	toggleRawLineWrap(ui.rawLinewrapCheck->isChecked());
 
 	connect(ui.ptHexPane->verticalScrollBar(), SIGNAL(valueChanged(int)),
@@ -23,20 +58,15 @@ exileSniffer::exileSniffer(QWidget *parent)
 	connect(ui.ptASCIIPane->verticalScrollBar(), SIGNAL(valueChanged(int)),
 		ui.ptHexPane->verticalScrollBar(), SLOT(setValue(int)));
 	ui.ptHexPane->verticalScrollBar()->hide();
+}
 
-	init_DecodedPktActioners();
-
-	start_threads();
-
-
-	rapidjson::Document docjson;
-	docjson.SetObject();
-
-	//rapidjson::Value processID(3333);
-
-	docjson.AddMember("pid", rapidjson::Value(3333), docjson.GetAllocator());
-
-	std::cout << "docppid is " << docjson["pid"].GetInt64() << std::endl;
+void exileSniffer::setup_decoded_messages_tab()
+{
+	ui.decodedList->horizontalScrollBar()->setFixedHeight(10);
+	ui.decodedList->horizontalHeader()->resizeSection(HEADER_SECTION_TIME, 70);
+	ui.decodedList->horizontalHeader()->resizeSection(HEADER_SECTION_SENDER, 50);
+	ui.decodedList->horizontalHeader()->resizeSection(HEADER_SECTION_SUMMARY, 800);
+	ui.decodedList->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
 }
 
 void exileSniffer::start_threads()
@@ -229,7 +259,7 @@ void exileSniffer::print_raw_packet(UI_RAWHEX_PKT *pkt)
 	struct tm *tm = gmtime(&pkt->createdtime);
 	strftime(timestamp, sizeof(timestamp), "%H:%M:%S", tm);
 
-	hexdump << "#" << packetsRecorded << " " << timestamp << " ";
+	hexdump << "#" << rawCount_Recorded_Filtered.first << " " << timestamp << " ";
 
 	if (pkt->incoming)
 		hexdump << serverString(pkt->stream, "f") << " to POE Client";
@@ -278,12 +308,16 @@ bool exileSniffer::packet_passes_raw_filter(UI_RAWHEX_PKT *pkt, clientData *clie
 	return true;
 }
 
-void exileSniffer::handle_raw_packet_data(UI_RAWHEX_PKT *pkt)
+bool exileSniffer::packet_passes_decoded_filter(UIDecodedPkt& decoded, clientData *client)
 {
+	return true;
+}
 
+clientData * exileSniffer::get_client(DWORD pid)
+{
 	clientData *client = NULL;
 
-	if (pkt->pid == 0)
+	if (pid == 0)
 	{
 		//until we go down the effort path of associating ports with PIDs
 		//we will have to stick with placing unassigned logon packets to the
@@ -298,12 +332,20 @@ void exileSniffer::handle_raw_packet_data(UI_RAWHEX_PKT *pkt)
 	}
 	else
 	{
-		auto it = clients.find(pkt->pid);
+		auto it = clients.find(pid);
 		if (it != clients.end())
 		{
-			client = it->second;	
+			client = it->second;
 		}
 	}
+
+	return client;
+}
+
+void exileSniffer::handle_raw_packet_data(UI_RAWHEX_PKT *pkt)
+{
+
+	clientData *client = get_client(pkt->pid);
 
 	if (!client)
 	{
@@ -314,8 +356,8 @@ void exileSniffer::handle_raw_packet_data(UI_RAWHEX_PKT *pkt)
 	if (packet_passes_raw_filter(pkt, client))
 		print_raw_packet(pkt);
 	else
-		++packetsFiltered;
-	++packetsRecorded;
+		++rawCount_Recorded_Filtered.second;
+	++rawCount_Recorded_Filtered.first;
 
 	client->rawHexPackets.push_back(pkt);
 	updateRawFilterLabel();
@@ -342,11 +384,10 @@ void exileSniffer::reprintRawHex()
 
 
 
-	clientData *exampleclient = clients.begin()->second;
+	clientData *exampleclient = clients.begin()->second; //todo: pid for 'active' client
 	vector <UI_RAWHEX_PKT *> pkts = exampleclient->rawHexPackets;
 
-	packetsRecorded = 0;
-	packetsFiltered = 0;
+	rawCount_Recorded_Filtered.second = 0;
 
 	for (auto pktIt = pkts.begin(); pktIt != pkts.end(); pktIt++)
 	{
@@ -355,8 +396,7 @@ void exileSniffer::reprintRawHex()
 		if (packet_passes_raw_filter(pkt, exampleclient))
 			print_raw_packet(pkt);
 		else
-			++packetsFiltered;
-		++packetsRecorded;
+			++rawCount_Recorded_Filtered.second;
 	}
 	updateRawFilterLabel();
 }
@@ -364,10 +404,19 @@ void exileSniffer::reprintRawHex()
 void exileSniffer::updateRawFilterLabel()
 {
 	std::stringstream filterLabTxt;
-	filterLabTxt << std::dec << packetsRecorded << " Packets Captured";
-	if (packetsFiltered)
-		filterLabTxt << " / " << packetsFiltered << " Filtered";
+	filterLabTxt << std::dec << rawCount_Recorded_Filtered.first << " Packets Recorded";
+	if (rawCount_Recorded_Filtered.second)
+		filterLabTxt << " / " << rawCount_Recorded_Filtered.second << " Filtered";
 	ui.filterLabel->setText(QString::fromStdString(filterLabTxt.str()));
+}
+
+void exileSniffer::updateDecodedFilterLabel()
+{
+	std::stringstream filterLabTxt;
+	filterLabTxt << std::dec << "Packets ( Displayed: " << decodedCount_Displayed_Filtered.first <<
+	" / Filtered: " << decodedCount_Displayed_Filtered.second <<
+	" / Error: "<< decodedErrorPacketCount << " )";
+	ui.decodedDisplayedLabel->setText(QString::fromStdString(filterLabTxt.str()));
 }
 
 void exileSniffer::toggleRawLineWrap(bool wrap)
@@ -396,3 +445,9 @@ void exileSniffer::toggleRawAutoScroll(bool enabled)
 }
 
 
+void exileSniffer::decodedListClicked()
+{
+	//todo: user option to disable this
+	if (ui.decodedAutoscrollCheck->isChecked())
+		ui.decodedAutoscrollCheck->setChecked(false);
+}
