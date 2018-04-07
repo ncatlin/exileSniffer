@@ -35,6 +35,8 @@ class UI_DECODED_LIST_ENTRY
 			msTime = pktobj.time_processed_ms();
 			pktID = pktobj.messageID;
 			flags = pktobj.streamFlags;
+			if ((flags & PKTBIT_INBOUND) && (flags & PKTBIT_OUTBOUND))
+				std::cout << "errrrrrrr" << std::endl;
 			failedDecode = pktobj.decodeError();
 		}
 
@@ -98,35 +100,39 @@ class exileSniffer : public QMainWindow
 		void setRowColor(int row, QColor colour);
 
 	private:
-		void action_SRV_PKT_ENCAPSULATED(UIDecodedPkt& decobj);
-		void action_CLI_CHAT_MSG_ITEMS(UIDecodedPkt& decobj);
-		void action_CLI_CHAT_MSG(UIDecodedPkt& decobj);
-		void action_CLI_CHAT_COMMAND(UIDecodedPkt& decobj);
-		void action_SRV_CHAT_MESSAGE(UIDecodedPkt& decobj);
-		void action_SRV_SERVER_MESSAGE(UIDecodedPkt& decobj);
-		void action_CLI_LOGGED_OUT(UIDecodedPkt& decobj);
-		void action_CLI_PING_CHALLENGE(UIDecodedPkt& decobj);
-		void action_CLI_CLICKED_GROUND_ITEM(UIDecodedPkt& decobj);
-		void action_CLI_ACTION_PREDICTIVE(UIDecodedPkt& decobj);
+		void action_SRV_PKT_ENCAPSULATED(UIDecodedPkt&);
+		void action_CLI_CHAT_MSG_ITEMS(UIDecodedPkt&);
+		void action_CLI_CHAT_MSG(UIDecodedPkt&);
+		void action_CLI_CHAT_COMMAND(UIDecodedPkt&);
+		void action_SRV_CHAT_MESSAGE(UIDecodedPkt&);
+		void action_SRV_SERVER_MESSAGE(UIDecodedPkt&);
+		void action_CLI_LOGGED_OUT(UIDecodedPkt&);
+		void action_CLI_PING_CHALLENGE(UIDecodedPkt&);
+		void action_SRV_PING_RESPONSE(UIDecodedPkt&);
+		void action_CLI_CLICKED_GROUND_ITEM(UIDecodedPkt&);
+		void action_CLI_ACTION_PREDICTIVE(UIDecodedPkt&);
 
-		void action_CLI_PICKUP_ITEM(UIDecodedPkt& decobj);
-		void action_CLI_PLACE_ITEM(UIDecodedPkt& decobj);
-		void action_CLI_REMOVE_SOCKET(UIDecodedPkt& decobj);
-		void action_CLI_INSERT_SOCKET(UIDecodedPkt& decobj);
-		void action_CLI_LEVEL_SKILLGEM(UIDecodedPkt& decobj);
-		void action_CLI_SKILLPOINT_CHANGE(UIDecodedPkt& decobj);
-		void action_CLI_CANCEL_BUF(UIDecodedPkt& decobj);
-		void action_CLI_SET_HOTBARSKILL(UIDecodedPkt& decobj);
-		void action_CLI_USE_BELT_SLOT(UIDecodedPkt& decobj);
-		void action_CLI_USE_ITEM(UIDecodedPkt& decobj);
-		void action_CLI_REQUEST_PUBLICPARTIES(UIDecodedPkt& decobj);
-		void action_CLI_SKILLPANE_ACTION(UIDecodedPkt& decobj);
-		void action_CLI_MICROSTRANSACTIONPANE_ACTION(UIDecodedPkt& decobj);
-		void action_CLI_USED_SKILL(UIDecodedPkt& decobj);
-		void action_CLI_CLICK_OBJ(UIDecodedPkt& decobj);
-		void action_CLI_MOUSE_HELD(UIDecodedPkt& decobj);
-		void action_CLI_MOUSE_RELEASE(UIDecodedPkt& decobj);
-		void action_CLI_OPTOUT_TUTORIALS(UIDecodedPkt& decobj);
+		void action_CLI_PICKUP_ITEM(UIDecodedPkt&);
+		void action_CLI_PLACE_ITEM(UIDecodedPkt&);
+		void action_CLI_REMOVE_SOCKET(UIDecodedPkt&);
+		void action_CLI_INSERT_SOCKET(UIDecodedPkt&);
+		void action_CLI_LEVEL_SKILLGEM(UIDecodedPkt&);
+		void action_CLI_SKILLPOINT_CHANGE(UIDecodedPkt&);
+		void action_CLI_CANCEL_BUF(UIDecodedPkt&);
+		void action_CLI_SET_HOTBARSKILL(UIDecodedPkt&);
+		void action_CLI_USE_BELT_SLOT(UIDecodedPkt&);
+		void action_CLI_USE_ITEM(UIDecodedPkt&);
+		void action_CLI_REQUEST_PUBLICPARTIES(UIDecodedPkt&);
+		void action_CLI_SKILLPANE_ACTION(UIDecodedPkt&);
+		void action_CLI_MICROSTRANSACTIONPANE_ACTION(UIDecodedPkt&);
+		void action_CLI_USED_SKILL(UIDecodedPkt&);
+		void action_CLI_CLICK_OBJ(UIDecodedPkt&);
+		void action_CLI_MOUSE_HELD(UIDecodedPkt&);
+		void action_CLI_MOUSE_RELEASE(UIDecodedPkt&);
+		void action_SRV_MOBILE_USED_SKILL(UIDecodedPkt&);
+		void action_SRV_MOBILE_UPDATE_HMS(UIDecodedPkt&);
+		void action_SRV_HEARTBEAT(UIDecodedPkt&);
+		void action_CLI_OPTOUT_TUTORIALS(UIDecodedPkt&);
 
 	private:
 		Ui::exileSniffer ui;

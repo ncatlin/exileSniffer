@@ -8,7 +8,7 @@ This is the UI thread - try not to hang it
 #include "exileSniffer.h"
 #include "utilities.h"
 #include "qtextedit.h"
-
+#include "packetIDs.h"
 
 exileSniffer::exileSniffer(QWidget *parent)
 	: QMainWindow(parent)
@@ -221,13 +221,13 @@ std::string serverString(streamType server, string IP)
 	switch (server)
 	{
 	case streamType::eGame:
-		return "GameServer";
+		return "Server[Game]";
 	case streamType::eLogin:
-		return "LoginServer";
+		return "Server[Login]";
 	case streamType::ePatch:
-		return "PatchServer";
+		return "Server[Patch]";
 	default:
-		return "UnknownServer";
+		return "Server[Unknown]";
 	}
 }
 
@@ -262,10 +262,10 @@ void exileSniffer::print_raw_packet(UI_RAWHEX_PKT *pkt)
 	hexdump << "#" << rawCount_Recorded_Filtered.first << " " << timestamp << " ";
 
 	if (pkt->incoming)
-		hexdump << serverString(pkt->stream, "f") << " to POE Client";
+		hexdump << serverString(pkt->stream, "f") << " to PlayerClient";
 	else
-		hexdump << "POE Client to " << serverString(pkt->stream, "f");
-	hexdump << std::endl;
+		hexdump << "PlayerClient to " << serverString(pkt->stream, "f");
+	hexdump << "("<<std::dec<<pkt->pktSize<<" bytes)"<< std::endl;
 	asciidump << std::endl;
 
 
@@ -305,16 +305,20 @@ void exileSniffer::print_raw_packet(UI_RAWHEX_PKT *pkt)
 
 bool exileSniffer::packet_passes_raw_filter(UI_RAWHEX_PKT *pkt, clientData *client)
 {
-	//todo
-	if (pkt->startBytes == 0xd || pkt->startBytes == 0xe)
+	//todo user specified
+	if (pkt->startBytes == CLI_PING_CHALLENGE || 
+		pkt->startBytes == SRV_PING_RESPONSE || 
+		pkt->startBytes == SRV_HEARTBEAT)
 		return false;
 	return true;
 }
 
 bool exileSniffer::packet_passes_decoded_filter(UIDecodedPkt& decoded, clientData *client)
 {
-	//todo
-	if (decoded.messageID == 0xd || decoded.messageID == 0xe)
+	//todo user specified
+	if (decoded.messageID == CLI_PING_CHALLENGE || 
+		decoded.messageID == SRV_PING_RESPONSE || 
+		decoded.messageID == SRV_HEARTBEAT)
 		return false;
 	return true;
 }

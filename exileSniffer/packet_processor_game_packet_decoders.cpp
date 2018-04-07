@@ -13,6 +13,7 @@ void packet_processor::init_packetDeserialisers()
 	packetDeserialisers[CLI_CHAT_MSG_ITEMS] = (deserialiser)&packet_processor::deserialise_CLI_CHAT_MSG_ITEMS;
 	packetDeserialisers[CLI_CHAT_MESSAGE] = (deserialiser)&packet_processor::deserialise_CLI_CHAT_MSG;
 	packetDeserialisers[CLI_PING_CHALLENGE] = (deserialiser)&packet_processor::deserialise_CLI_PING_CHALLENGE;
+	packetDeserialisers[SRV_PING_RESPONSE] = (deserialiser)&packet_processor::deserialise_SRV_PING_RESPONSE;
 	packetDeserialisers[CLI_CHAT_COMMAND] = (deserialiser)&packet_processor::deserialise_CLI_CHAT_COMMAND;
 	packetDeserialisers[SRV_CHAT_MESSAGE] = (deserialiser)&packet_processor::deserialise_SRV_CHAT_MESSAGE;
 	packetDeserialisers[SRV_SERVER_MESSAGE] = (deserialiser)&packet_processor::deserialise_SRV_SERVER_MESSAGE;
@@ -41,24 +42,13 @@ void packet_processor::init_packetDeserialisers()
 	packetDeserialisers[CLI_CLICK_OBJ] = (deserialiser)&packet_processor::deserialise_CLI_CLICK_OBJ;
 	packetDeserialisers[CLI_MOUSE_HELD] = (deserialiser)&packet_processor::deserialise_CLI_MOUSE_HELD;
 	packetDeserialisers[CLI_MOUSE_RELEASE] = (deserialiser)&packet_processor::deserialise_CLI_MOUSE_RELEASE;
+	packetDeserialisers[SRV_MOBILE_USED_SKILL] = (deserialiser)&packet_processor::deserialise_SRV_MOBILE_USED_SKILL;
+	packetDeserialisers[SRV_MOBILE_UPDATE_HMS] = (deserialiser)&packet_processor::deserialise_SRV_MOBILE_UPDATE_HMS;
 	packetDeserialisers[CLI_OPTOUT_TUTORIALS] = (deserialiser)&packet_processor::deserialise_CLI_OPTOUT_TUTORIALS;
+
+	packetDeserialisers[SRV_HEARTBEAT] = (deserialiser)&packet_processor::deserialise_SRV_HEARTBEAT;
+	
 }
-
-/*
-pkt_CLI_CHAT_COMMAND packet_processor::deserialise_CLI_CHAT_COMMAND()
-{
-pkt_CLI_CHAT_COMMAND cliChatCmd(decryptedBuffer, decryptedIndex);
-/*---deserialise contents here---*/
-
-//todo
-
-/*---deserialising done---*/
-/*
-cliChatCmd.length = decryptedIndex - cliChatCmd.startIdx;
-return cliChatCmd;
-}
-
-*/
 
 /*
 this is deserialised within the processing loop as part of stream crypt resynchronisation
@@ -110,6 +100,11 @@ void packet_processor::deserialise_CLI_CHAT_MSG(UIDecodedPkt *uipkt)
 void packet_processor::deserialise_CLI_PING_CHALLENGE(UIDecodedPkt *uipkt)
 {
 	consume_add_dword(L"Challenge", uipkt);
+}
+
+void packet_processor::deserialise_SRV_PING_RESPONSE(UIDecodedPkt *uipkt)
+{
+	consume_add_dword(L"Response", uipkt);
 }
 
 void packet_processor::deserialise_CLI_CHAT_COMMAND(UIDecodedPkt *uipkt)
@@ -260,6 +255,57 @@ void packet_processor::deserialise_CLI_MOUSE_HELD(UIDecodedPkt *uipkt)
 void packet_processor::deserialise_CLI_MOUSE_RELEASE(UIDecodedPkt *uipkt)
 {
 	//no data expected
+}
+
+void packet_processor::deserialise_SRV_MOBILE_USED_SKILL(UIDecodedPkt *uipkt)
+{
+	consume_add_dword(L"User1", uipkt);
+	consume_add_dword(L"ID2", uipkt);
+	consume_add_word(L"Unk1", uipkt);
+	consume_add_byte(L"Modifier", uipkt);
+
+	//shouldnt actually do this - the 8 (high bit) is a signal to read another byte. 
+	//will wreck things when we get coords that under- or over- flow
+	//worry when it happens
+	unsigned short startCoord1 = consumeUShort() - 0x8000;
+	uipkt->add_word(L"StartCoord1",startCoord1);
+	unsigned short startCoord2 = consumeUShort() - 0x8000;
+	uipkt->add_word(L"StartCoord2", startCoord2);
+	unsigned short targCoord1 = consumeUShort() - 0x8000;
+	uipkt->add_word(L"TargCoord1", targCoord1);
+	unsigned short targCoord2 = consumeUShort() - 0x8000;
+	uipkt->add_word(L"TargCoord2", targCoord2);
+
+	consume_add_word(L"SkillID", uipkt);
+	consume_add_word(L"PkCount", uipkt);
+}
+
+
+void packet_processor::deserialise_SRV_MOBILE_UPDATE_HMS(UIDecodedPkt *uipkt)
+{
+	/*
+				0x00, 0x00, 0x01, 0x07, //objid
+				0x00, 0x00, 0x00, 0x00,	//possibly the obj that caused it?
+				0x00, 0x00, //???
+				0x00, 0x00,	0x00, 0x36, //amount
+				0x00, 0x00, 0x00, 0x00, //???
+				0x01, //0 life/1 mana/2 shield
+				0x00 //stat is dword?
+	*/
+
+	consume_add_dword(L"ObjID", uipkt);
+	consume_add_dword(L"Unk1", uipkt);
+	consume_add_word(L"Unk2", uipkt);
+	consume_add_dword(L"NewValue", uipkt);
+	consume_add_dword(L"Unk3", uipkt);
+	consume_add_byte(L"Stat", uipkt);
+	consume_add_byte(L"Unk4", uipkt); //possible more stats here
+
+}
+
+void packet_processor::deserialise_SRV_HEARTBEAT(UIDecodedPkt *uipkt)
+{
+	//nothing
 }
 
 void packet_processor::deserialise_CLI_OPTOUT_TUTORIALS(UIDecodedPkt *uipkt)

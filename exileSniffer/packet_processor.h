@@ -54,17 +54,18 @@ private:
 	void deserialise_SRV_SERVER_MESSAGE(UIDecodedPkt *);
 	void deserialise_CLI_LOGGED_OUT(UIDecodedPkt *);
 	void deserialise_CLI_PING_CHALLENGE(UIDecodedPkt *);
+	void deserialise_SRV_PING_RESPONSE(UIDecodedPkt *);
 	void deserialise_CLI_ACTION_PREDICTIVE(UIDecodedPkt *);
-	void deserialise_CLI_CLICKED_GROUND_ITEM(UIDecodedPkt *uipkt);
-	void deserialise_CLI_PICKUP_ITEM(UIDecodedPkt *uipkt);
-	void deserialise_CLI_PLACE_ITEM(UIDecodedPkt *uipkt);
-	void deserialise_CLI_REMOVE_SOCKET(UIDecodedPkt *uipkt);
-	void deserialise_CLI_INSERT_SOCKET(UIDecodedPkt *uipkt);
+	void deserialise_CLI_CLICKED_GROUND_ITEM(UIDecodedPkt *);
+	void deserialise_CLI_PICKUP_ITEM(UIDecodedPkt *);
+	void deserialise_CLI_PLACE_ITEM(UIDecodedPkt *);
+	void deserialise_CLI_REMOVE_SOCKET(UIDecodedPkt *);
+	void deserialise_CLI_INSERT_SOCKET(UIDecodedPkt *);
 
-	void deserialise_CLI_LEVEL_SKILLGEM(UIDecodedPkt *uipkt);
-	void deserialise_CLI_SKILLPOINT_CHANGE(UIDecodedPkt *uipkt);
-	void deserialise_CLI_CANCEL_BUF(UIDecodedPkt *uipkt);
-	void deserialise_CLI_SET_HOTBARSKILL(UIDecodedPkt *uipkt);
+	void deserialise_CLI_LEVEL_SKILLGEM(UIDecodedPkt *);
+	void deserialise_CLI_SKILLPOINT_CHANGE(UIDecodedPkt *);
+	void deserialise_CLI_CANCEL_BUF(UIDecodedPkt *);
+	void deserialise_CLI_SET_HOTBARSKILL(UIDecodedPkt *);
 
 	void deserialise_CLI_USE_BELT_SLOT(UIDecodedPkt *);
 	void deserialise_CLI_USE_ITEM(UIDecodedPkt *);
@@ -76,6 +77,9 @@ private:
 	void deserialise_CLI_CLICK_OBJ(UIDecodedPkt *);
 	void deserialise_CLI_MOUSE_HELD(UIDecodedPkt *);
 	void deserialise_CLI_MOUSE_RELEASE(UIDecodedPkt *);
+	void deserialise_SRV_MOBILE_USED_SKILL(UIDecodedPkt *);
+	void deserialise_SRV_MOBILE_UPDATE_HMS(UIDecodedPkt *);
+	void deserialise_SRV_HEARTBEAT(UIDecodedPkt *uipkt);
 	void deserialise_CLI_OPTOUT_TUTORIALS(UIDecodedPkt *);
 
 

@@ -46,6 +46,7 @@ void exileSniffer::init_DecodedPktActioners()
 	decodedPktActioners[CLI_CHAT_MSG_ITEMS] = &exileSniffer::action_CLI_CHAT_MSG_ITEMS;
 	decodedPktActioners[CLI_CHAT_MESSAGE] = &exileSniffer::action_CLI_CHAT_MSG;
 	decodedPktActioners[CLI_PING_CHALLENGE] = &exileSniffer::action_CLI_PING_CHALLENGE;
+	decodedPktActioners[SRV_PING_RESPONSE] = &exileSniffer::action_SRV_PING_RESPONSE;
 	decodedPktActioners[CLI_CHAT_COMMAND] = &exileSniffer::action_CLI_CHAT_COMMAND;
 	decodedPktActioners[SRV_CHAT_MESSAGE] = &exileSniffer::action_SRV_CHAT_MESSAGE;
 	decodedPktActioners[SRV_SERVER_MESSAGE] = &exileSniffer::action_SRV_SERVER_MESSAGE;
@@ -75,6 +76,8 @@ void exileSniffer::init_DecodedPktActioners()
 	decodedPktActioners[CLI_CLICK_OBJ] = &exileSniffer::action_CLI_CLICK_OBJ;
 	decodedPktActioners[CLI_MOUSE_HELD] = &exileSniffer::action_CLI_MOUSE_HELD;
 	decodedPktActioners[CLI_MOUSE_RELEASE] = &exileSniffer::action_CLI_MOUSE_RELEASE;
+	decodedPktActioners[SRV_MOBILE_USED_SKILL] = &exileSniffer::action_SRV_MOBILE_USED_SKILL;
+	decodedPktActioners[SRV_MOBILE_UPDATE_HMS] = &exileSniffer::action_SRV_MOBILE_UPDATE_HMS;
 	decodedPktActioners[CLI_OPTOUT_TUTORIALS] = &exileSniffer::action_CLI_OPTOUT_TUTORIALS;
 
 
@@ -190,7 +193,7 @@ void exileSniffer::action_CLI_CHAT_MSG_ITEMS(UIDecodedPkt& obj)
 	obj.toggle_payload_operations(true);
 
 	UI_DECODED_LIST_ENTRY listentry(obj);
-	listentry.summary = "Player sent chat message with with linked items";
+	listentry.summary = "Player(You) sent chat message with with linked items";
 	addDecodedListEntry(listentry);
 }
 
@@ -206,7 +209,7 @@ void exileSniffer::action_CLI_CHAT_COMMAND(UIDecodedPkt& decodedobj)
 	UINT32 unk1 = decodedobj.get_UInt32(L"Unk1");
 
 	wstringstream summary;
-	summary << "Player used command at commands.dat index: " << std::dec << commandsDatIndex <<
+	summary << "Player(You) used command at commands.dat index: " << std::dec << commandsDatIndex <<
 		" [unkVal 0x: " << std::hex << unk1 << "]";
 	UI_DECODED_LIST_ENTRY listentry(decodedobj);
 	listentry.summary = QString::fromStdWString(summary.str());
@@ -247,7 +250,7 @@ void exileSniffer::action_CLI_CHAT_MSG(UIDecodedPkt& decodedobj)
 	UI_DECODED_LIST_ENTRY listentry(decodedobj);
 	//todo - item or not
 	//todo - channel decode
-	listentry.summary = "Player spoke in chat: "+ QString::fromStdWString(decodedobj.get_wstring(L"Message"));
+	listentry.summary = "Player(You) spoke in chat: "+ QString::fromStdWString(decodedobj.get_wstring(L"Message"));
 	addDecodedListEntry(listentry);
 
 /*
@@ -274,6 +277,20 @@ void exileSniffer::action_CLI_PING_CHALLENGE(UIDecodedPkt& decodedobj)
 	addDecodedListEntry(listentry);
 }
 
+void exileSniffer::action_SRV_PING_RESPONSE(UIDecodedPkt& decodedobj)
+{
+	decodedobj.toggle_payload_operations(true);
+
+	UINT64 response = decodedobj.get_UInt64(L"Response");
+
+	UI_DECODED_LIST_ENTRY listentry(decodedobj);
+	listentry.summary = "Server sent HNC response 0x" + QString::number(response, 16);
+	addDecodedListEntry(listentry);
+}
+
+
+
+
 void exileSniffer::action_CLI_CLICKED_GROUND_ITEM(UIDecodedPkt& decodedobj)
 {
 	decodedobj.toggle_payload_operations(true);
@@ -283,7 +300,7 @@ void exileSniffer::action_CLI_CLICKED_GROUND_ITEM(UIDecodedPkt& decodedobj)
 	UINT32 modifier = decodedobj.get_UInt32(L"Modifier");
 
 	std::wstringstream summary;
-	summary << "Player clicked ground itemID 0x" << std::hex << targID << " Arg1: 0x" << Unk1;
+	summary << "Player(You) clicked ground itemID 0x" << std::hex << targID << " Arg1: 0x" << Unk1;
 
 	if (modifier)
 		summary << " [" << explainModifier(modifier) << "]";
@@ -302,9 +319,9 @@ void exileSniffer::action_CLI_ACTION_PREDICTIVE(UIDecodedPkt& decodedobj)
 	UINT32 modifier = decodedobj.get_UInt32(L"Modifier");
 
 	std::wstringstream summary;
-	summary << "Player used skillID 0x" << std::hex << skillID <<
+	summary << "Player(You) used skillID 0x" << std::hex << skillID <<
 		" on coord " << std::dec << coord1 << "," << coord2;
-	if (modifier)
+	if (modifier != 0x08) //standard mouse click
 		summary << "[" << explainModifier(modifier) << "]";
 
 	if (modifier > 0xf || !(modifier & 0x8))
@@ -325,7 +342,7 @@ void exileSniffer::action_CLI_PICKUP_ITEM(UIDecodedPkt& decodedobj)
 	UINT32 unk2 = decodedobj.get_UInt32(L"Unk2");
 
 	std::wstringstream summary;
-	summary << "Player picked up itemID 0x" << std::hex << itemID 
+	summary << "Player(You) picked up itemID 0x" << std::hex << itemID 
 		<< "in container " << slotToString(container) <<" < unk2: 0x"<<unk2<<">";
 
 	UI_DECODED_LIST_ENTRY listentry(decodedobj);
@@ -337,7 +354,7 @@ void exileSniffer::action_CLI_PLACE_ITEM(UIDecodedPkt& decodedobj)
 {
 	decodedobj.toggle_payload_operations(true);
 	UI_DECODED_LIST_ENTRY listentry(decodedobj);
-	listentry.summary = "Player placed item down";
+	listentry.summary = "Player(You) placed item down";
 	addDecodedListEntry(listentry);
 }
 
@@ -345,7 +362,7 @@ void exileSniffer::action_CLI_REMOVE_SOCKET(UIDecodedPkt& decodedobj)
 {
 	decodedobj.toggle_payload_operations(true);
 	UI_DECODED_LIST_ENTRY listentry(decodedobj);
-	listentry.summary = "Player removed from socket";
+	listentry.summary = "Player(You) emptied socket";
 	addDecodedListEntry(listentry);
 }
 
@@ -353,7 +370,7 @@ void exileSniffer::action_CLI_INSERT_SOCKET(UIDecodedPkt& decodedobj)
 {
 	decodedobj.toggle_payload_operations(true);
 	UI_DECODED_LIST_ENTRY listentry(decodedobj);
-	listentry.summary = "Player inserted into socket";
+	listentry.summary = "Player(You) inserted into socket";
 	addDecodedListEntry(listentry);
 }
 
@@ -361,7 +378,7 @@ void exileSniffer::action_CLI_LEVEL_SKILLGEM(UIDecodedPkt& decodedobj)
 {
 	decodedobj.toggle_payload_operations(true);
 	UI_DECODED_LIST_ENTRY listentry(decodedobj);
-	listentry.summary = "Player levelled a skillgem";
+	listentry.summary = "Player(You) levelled a skillgem";
 	addDecodedListEntry(listentry);
 }
 
@@ -369,7 +386,7 @@ void exileSniffer::action_CLI_SKILLPOINT_CHANGE(UIDecodedPkt& decodedobj)
 {
 	decodedobj.toggle_payload_operations(true);
 	UI_DECODED_LIST_ENTRY listentry(decodedobj);
-	listentry.summary = "Player added a skillpoint";
+	listentry.summary = "Player(You) added a skillpoint";
 	addDecodedListEntry(listentry);
 }
 
@@ -377,7 +394,7 @@ void exileSniffer::action_CLI_CANCEL_BUF(UIDecodedPkt& decodedobj)
 {
 	decodedobj.toggle_payload_operations(true);
 	UI_DECODED_LIST_ENTRY listentry(decodedobj);
-	listentry.summary = "Player cancelled a buff";
+	listentry.summary = "Player(You) cancelled a buff";
 	addDecodedListEntry(listentry);
 }
 
@@ -385,7 +402,7 @@ void exileSniffer::action_CLI_SET_HOTBARSKILL(UIDecodedPkt& decodedobj)
 {
 	decodedobj.toggle_payload_operations(true);
 	UI_DECODED_LIST_ENTRY listentry(decodedobj);
-	listentry.summary = "Player changed a hotbar skill";
+	listentry.summary = "Player(You) changed a hotbar skill";
 	addDecodedListEntry(listentry);
 }
 
@@ -396,7 +413,7 @@ void exileSniffer::action_CLI_USE_BELT_SLOT(UIDecodedPkt& decodedobj)
 	UINT64 slot = decodedobj.get_UInt32(L"Slot");
 
 	UI_DECODED_LIST_ENTRY listentry(decodedobj);
-	listentry.summary = "Player activated belt slot "+slot;
+	listentry.summary = "Player(You) activated belt slot "+slot;
 	addDecodedListEntry(listentry);
 }
 
@@ -404,7 +421,7 @@ void exileSniffer::action_CLI_USE_ITEM(UIDecodedPkt& decodedobj)
 {
 	decodedobj.toggle_payload_operations(true);
 	UI_DECODED_LIST_ENTRY listentry(decodedobj);
-	listentry.summary = "Player used inventory item X on item Y";
+	listentry.summary = "Player(You) used inventory item X on item Y";
 	addDecodedListEntry(listentry);
 }
 
@@ -420,7 +437,7 @@ void exileSniffer::action_CLI_SKILLPANE_ACTION(UIDecodedPkt& decodedobj)
 {
 	decodedobj.toggle_payload_operations(true);
 	UI_DECODED_LIST_ENTRY listentry(decodedobj);
-	listentry.summary = "Player used skillpane";
+	listentry.summary = "Player(You) used skillpane";
 	addDecodedListEntry(listentry);
 }
 
@@ -428,7 +445,7 @@ void exileSniffer::action_CLI_MICROSTRANSACTIONPANE_ACTION(UIDecodedPkt& decoded
 {
 	decodedobj.toggle_payload_operations(true);
 	UI_DECODED_LIST_ENTRY listentry(decodedobj);
-	listentry.summary = "Player opened microtransaction pane";
+	listentry.summary = "Player(You) opened microtransaction pane";
 	addDecodedListEntry(listentry);
 }
 
@@ -436,7 +453,7 @@ void exileSniffer::action_CLI_USED_SKILL(UIDecodedPkt& decodedobj)
 {
 	decodedobj.toggle_payload_operations(true);
 	UI_DECODED_LIST_ENTRY listentry(decodedobj);
-	listentry.summary = "Player used skill (lockstep)";
+	listentry.summary = "Player(You) used skill (lockstep)";
 	addDecodedListEntry(listentry);
 }
 
@@ -444,7 +461,7 @@ void exileSniffer::action_CLI_CLICK_OBJ(UIDecodedPkt& decodedobj)
 {
 	decodedobj.toggle_payload_operations(true);
 	UI_DECODED_LIST_ENTRY listentry(decodedobj);
-	listentry.summary = "Player clicked object x";
+	listentry.summary = "Player(You) clicked object x";
 	addDecodedListEntry(listentry);
 }
 
@@ -452,7 +469,7 @@ void exileSniffer::action_CLI_MOUSE_HELD(UIDecodedPkt& decodedobj)
 {
 	decodedobj.toggle_payload_operations(true);
 	UI_DECODED_LIST_ENTRY listentry(decodedobj);
-	listentry.summary = "Player is holding mouse";
+	listentry.summary = "Player(You) is holding mouse";
 	addDecodedListEntry(listentry);
 }
 
@@ -460,15 +477,91 @@ void exileSniffer::action_CLI_MOUSE_RELEASE(UIDecodedPkt& decodedobj)
 {
 	decodedobj.toggle_payload_operations(true);
 	UI_DECODED_LIST_ENTRY listentry(decodedobj);
-	listentry.summary = "Player released mouse";
+	listentry.summary = "Player(You) released mouse";
 	addDecodedListEntry(listentry);
 }
 
+void exileSniffer::action_SRV_MOBILE_USED_SKILL(UIDecodedPkt&decodedobj)
+{
+	decodedobj.toggle_payload_operations(true);
+
+	UINT64 user = decodedobj.get_UInt64(L"User1");
+	UINT64 id2 = decodedobj.get_UInt64(L"ID2");
+	UINT32 unk1 = decodedobj.get_UInt32(L"Unk1");
+	UINT32 modifier = decodedobj.get_UInt32(L"Modifier");
+
+	UINT32 startCoord1 = decodedobj.get_UInt32(L"StartCoord1");
+	UINT32 startCoord2 = decodedobj.get_UInt32(L"StartCoord2");
+	UINT32 targCoord1 = decodedobj.get_UInt32(L"TargCoord1");
+	UINT32 targCoord2 = decodedobj.get_UInt32(L"TargCoord2");
+	//stuff gonna break here after low/high coords -> handle high/low bits!
+
+	UINT32 skillID = decodedobj.get_UInt32(L"SkillID");
+	UINT32 PkCount = decodedobj.get_UInt32(L"PkCount");
+
+	wstringstream summary;
+	summary << "Entity ID 0x" << std::hex << user <<
+		" at (" << std::dec << startCoord1 << "," << startCoord2 << ")" <<
+		" used skill 0x" << skillID << " on targ 0x" << std::hex << id2 <<
+		" (" << std::dec << targCoord1 << "," << targCoord2 << ")" << explainModifier(modifier)
+		<< std::hex << " Unk1: 0x" << unk1;
+
+	UI_DECODED_LIST_ENTRY listentry(decodedobj);
+	listentry.summary = QString::fromStdWString(summary.str());
+	addDecodedListEntry(listentry);
+}
+
+void exileSniffer::action_SRV_MOBILE_UPDATE_HMS(UIDecodedPkt& decodedobj)
+{
+	decodedobj.toggle_payload_operations(true);
+
+	UINT64 id2 = decodedobj.get_UInt64(L"ObjID");
+	UINT64 unk1 = decodedobj.get_UInt64(L"Unk1");
+	UINT32 unk2 = decodedobj.get_UInt32(L"Unk2");
+
+	UINT64 val = decodedobj.get_UInt64(L"NewValue");
+	UINT64 unk3 = decodedobj.get_UInt64(L"Unk3");
+	UINT32 stat = decodedobj.get_UInt32(L"Stat");
+	UINT32 unk4 = decodedobj.get_UInt32(L"Unk4");
+
+
+	wstringstream summary;
+	summary << "Stat update - obj 0x" << std::hex << id2 << " (caused by 0x" << unk1 << "?)" <<
+		" - [";
+	switch (stat) {
+	case 0x0:
+		summary << L"Health";
+		break;
+	case 0x1:
+		summary << L"Mana";
+		break;
+	case 0x2:
+		summary << L"Shield";
+		break;
+	default:
+		summary << L"<Unknown stat 0x" << stat << ">";
+	}
+	summary << "] is now " << std::dec << val << " Unk4(more?): 0x"<<unk4<< std::endl;
+
+
+	UI_DECODED_LIST_ENTRY listentry(decodedobj);
+	listentry.summary = QString::fromStdWString(summary.str());
+	addDecodedListEntry(listentry);
+}
+
+void exileSniffer::action_SRV_HEARTBEAT(UIDecodedPkt& decodedobj)
+{
+	//maybe increment a counter or something
+	decodedobj.toggle_payload_operations(true);
+	UI_DECODED_LIST_ENTRY listentry(decodedobj);
+	listentry.summary = "Server Heartbeat";
+	addDecodedListEntry(listentry);
+}
 
 void exileSniffer::action_CLI_OPTOUT_TUTORIALS(UIDecodedPkt& decodedobj)
 {
 	decodedobj.toggle_payload_operations(true);
 	UI_DECODED_LIST_ENTRY listentry(decodedobj);
-	listentry.summary = "Player opted out of tutorials";
+	listentry.summary = "Player(You) opted out of tutorials";
 	addDecodedListEntry(listentry);
 }

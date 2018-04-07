@@ -88,7 +88,7 @@ UIDecodedPkt::UIDecodedPkt(DWORD processID, streamType streamServer, byte isInco
 
 	add_byte(L"Flags", streamFlags);
 
-	isIncoming = ((streamFlags & PKTBIT_INBOUND) != 0);
+	isIncoming = (streamFlags & PKTBIT_INBOUND);
 	mstime = timeSeen;
 
 	payload = jsn.AddMember(L"Payload", WValue(rapidjson::kObjectType), jsn.GetAllocator());
@@ -140,7 +140,7 @@ UINT32 UIDecodedPkt::get_UInt32(std::wstring name)
 		return it->value.GetUint();
 
 	std::wcerr << "JSON ERROR: No Int32 field named " << name <<
-		" in pktID 0x" << messageID;
+		" in pktID 0x" << std::hex << messageID;
 	if (payloadOperations)
 		std::wcerr << " payload" << std::endl;
 	else
@@ -158,7 +158,7 @@ UINT64 UIDecodedPkt::get_UInt64(std::wstring name)
 		return it->value.GetUint64();
 
 	std::wcerr << "JSON ERROR: No Int64 field named " << name <<
-		" in pktID 0x" << messageID;
+		" in pktID 0x" << std::hex << messageID;
 	if (payloadOperations)
 		std::wcerr << " payload" << std::endl;
 	else
@@ -176,7 +176,7 @@ std::wstring UIDecodedPkt::get_wstring(std::wstring name)
 		return it->value.GetString();
 
 	std::wcerr << "JSON ERROR: No string field named " << name <<
-		" in pktID 0x" << messageID;
+		" in pktID 0x" << std::hex << messageID;
 	if (payloadOperations)
 		std::wcerr << " payload" << std::endl;
 	else
