@@ -14,9 +14,9 @@ void packet_processor::emit_decoding_err_msg(unsigned short msgID, unsigned shor
 		break;
 
 	case eDecodingErr::eBadPacketID:
-		errmsg << "Very high ID 0x" << std::hex << msgID <<
-			". Decrypt out of sync, bad key/IV or processing " <<
-			"continuation packet as a new packet. May also be an unusual high-ID packet.";
+		errmsg << "Probably bad packet ID 0x" << std::hex << msgID <<
+			". Possible: Decrypt out of sync, bad key/IV," <<
+			" missed multi-packet blob or unusual valid packet ID.";
 		break;
 
 	case eDecodingErr::eNoErr:

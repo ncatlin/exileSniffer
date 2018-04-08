@@ -9,11 +9,13 @@ into meaningful data as the game client/server would interpret it
 
 void packet_processor::init_packetDeserialisers()
 {
-	//packetDeserialisers[pkt_SRV_PKT_ENCAPSULATED] //see packet_processor::handle_packet_from_gameserver
+	packetDeserialisers[SRV_PKT_ENCAPSULATED] = (deserialiser)&packet_processor::deserialise_SRV_PKT_ENCAPSULATED;
 	packetDeserialisers[CLI_CHAT_MSG_ITEMS] = (deserialiser)&packet_processor::deserialise_CLI_CHAT_MSG_ITEMS;
 	packetDeserialisers[CLI_CHAT_MESSAGE] = (deserialiser)&packet_processor::deserialise_CLI_CHAT_MSG;
 	packetDeserialisers[CLI_PING_CHALLENGE] = (deserialiser)&packet_processor::deserialise_CLI_PING_CHALLENGE;
 	packetDeserialisers[SRV_PING_RESPONSE] = (deserialiser)&packet_processor::deserialise_SRV_PING_RESPONSE;
+	packetDeserialisers[SRV_AREA_INFO] = (deserialiser)&packet_processor::deserialise_SRV_AREA_INFO;
+	packetDeserialisers[SRV_PRELOAD_MONSTER_LIST] = (deserialiser)&packet_processor::deserialise_SRV_PRELOAD_MONSTER_LIST;
 	packetDeserialisers[CLI_CHAT_COMMAND] = (deserialiser)&packet_processor::deserialise_CLI_CHAT_COMMAND;
 	packetDeserialisers[SRV_CHAT_MESSAGE] = (deserialiser)&packet_processor::deserialise_SRV_CHAT_MESSAGE;
 	packetDeserialisers[SRV_SERVER_MESSAGE] = (deserialiser)&packet_processor::deserialise_SRV_SERVER_MESSAGE;
@@ -21,7 +23,8 @@ void packet_processor::init_packetDeserialisers()
 
 	packetDeserialisers[CLI_CLICKED_GROUND_ITEM] = (deserialiser)&packet_processor::deserialise_CLI_CLICKED_GROUND_ITEM;
 	packetDeserialisers[CLI_ACTION_PREDICTIVE] = (deserialiser)&packet_processor::deserialise_CLI_ACTION_PREDICTIVE;
-
+	packetDeserialisers[SRV_PLAYER_ITEMS_DATA] = (deserialiser)&packet_processor::deserialise_SRV_PLAYER_ITEMS_DATA;
+	packetDeserialisers[SRV_INSTANCE_SERVER_DATA] = (deserialiser)&packet_processor::deserialise_SRV_INSTANCE_SERVER_DATA;
 	packetDeserialisers[CLI_PICKUP_ITEM] = (deserialiser)&packet_processor::deserialise_CLI_PICKUP_ITEM;
 	packetDeserialisers[CLI_PLACE_ITEM] = (deserialiser)&packet_processor::deserialise_CLI_PLACE_ITEM;
 	packetDeserialisers[CLI_REMOVE_SOCKET] = (deserialiser)&packet_processor::deserialise_CLI_REMOVE_SOCKET;
@@ -34,14 +37,18 @@ void packet_processor::init_packetDeserialisers()
 
 	packetDeserialisers[CLI_USE_BELT_SLOT] = (deserialiser)&packet_processor::deserialise_CLI_USE_BELT_SLOT;
 	packetDeserialisers[CLI_USE_ITEM] = (deserialiser)&packet_processor::deserialise_CLI_USE_ITEM;
+	packetDeserialisers[CLI_UNK_x56] = (deserialiser)&packet_processor::deserialise_CLI_UNK_x56;
 
 	packetDeserialisers[CLI_REQUEST_PUBLICPARTIES] = (deserialiser)&packet_processor::deserialise_CLI_REQUEST_PUBLICPARTIES;
 	packetDeserialisers[CLI_SKILLPANE_ACTION] = (deserialiser)&packet_processor::deserialise_CLI_SKILLPANE_ACTION;
 	packetDeserialisers[CLI_MICROSTRANSACTIONPANE_ACTION] = (deserialiser)&packet_processor::deserialise_CLI_MICROSTRANSACTIONPANE_ACTION;
+	packetDeserialisers[CLI_PACKET_EXIT] = (deserialiser)&packet_processor::deserialise_CLI_PACKET_EXIT;
 	packetDeserialisers[CLI_USED_SKILL] = (deserialiser)&packet_processor::deserialise_CLI_USED_SKILL;
 	packetDeserialisers[CLI_CLICK_OBJ] = (deserialiser)&packet_processor::deserialise_CLI_CLICK_OBJ;
 	packetDeserialisers[CLI_MOUSE_HELD] = (deserialiser)&packet_processor::deserialise_CLI_MOUSE_HELD;
 	packetDeserialisers[CLI_MOUSE_RELEASE] = (deserialiser)&packet_processor::deserialise_CLI_MOUSE_RELEASE;
+	packetDeserialisers[SRV_DISPLAY_BUILTIN_MSG] = (deserialiser)&packet_processor::deserialise_SRV_DISPLAY_BUILTIN_MSG;
+	packetDeserialisers[CLI_GUILD_CREATE] = (deserialiser)&packet_processor::deserialise_CLI_GUILD_CREATE;
 	packetDeserialisers[SRV_MOBILE_USED_SKILL] = (deserialiser)&packet_processor::deserialise_SRV_MOBILE_USED_SKILL;
 	packetDeserialisers[SRV_MOBILE_UPDATE_HMS] = (deserialiser)&packet_processor::deserialise_SRV_MOBILE_UPDATE_HMS;
 	packetDeserialisers[CLI_OPTOUT_TUTORIALS] = (deserialiser)&packet_processor::deserialise_CLI_OPTOUT_TUTORIALS;
@@ -57,7 +64,7 @@ this function only here for completeness - it should not be used!
 */
 void packet_processor::deserialise_SRV_PKT_ENCAPSULATED(UIDecodedPkt *uipkt)
 {
-	assert(false);
+
 }
 
 void packet_processor::deserialise_CLI_CHAT_MSG_ITEMS(UIDecodedPkt *uipkt)
@@ -107,6 +114,56 @@ void packet_processor::deserialise_SRV_PING_RESPONSE(UIDecodedPkt *uipkt)
 	consume_add_dword(L"Response", uipkt);
 }
 
+void packet_processor::deserialise_SRV_AREA_INFO(UIDecodedPkt* uipkt)
+{
+
+}
+
+void packet_processor::deserialise_SRV_PRELOAD_MONSTER_LIST(UIDecodedPkt* uipkt)
+{
+
+	std::vector<std::pair<ushort, byte>> preloadList;
+
+	unsigned short listCount = consumeUShort();
+	preloadList.resize(listCount);
+
+	//index into data/monstervarieties.dat 
+	for (int i = 0; i < listCount; i++)
+	{
+		preloadList.at(i).first = ntohs(consumeUShort());
+		if (errorFlag != eNoErr) return;
+	}
+
+	//0 = expected, 1 = ???
+	for (int i = 0; i < listCount; i++)
+	{
+		preloadList.at(i).second = consume_Byte();
+		if (errorFlag != eNoErr) return;
+	}
+
+	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+
+
+	WValue jsarray(rapidjson::kArrayType);
+	for (int i = 0; i < listCount; i++)
+	{
+		
+		std::cout << "Filling list " << std::dec << listCount << " members!"<<i << std::endl;
+		WValue pairArray(rapidjson::kArrayType);
+		pairArray.PushBack(WValue(preloadList.at(i).first), allocator);
+		pairArray.PushBack(WValue(preloadList.at(i).second), allocator);
+		
+		jsarray.PushBack(pairArray, allocator);
+	}
+	uipkt->payload.AddMember(L"PreloadList", jsarray, allocator);
+}
+
+void packet_processor::deserialise_SRV_PLAYER_ITEMS_DATA(UIDecodedPkt* uipkt)
+{
+
+}
+
+
 void packet_processor::deserialise_CLI_CHAT_COMMAND(UIDecodedPkt *uipkt)
 {
 	consume_add_byte(L"CommandID", uipkt);
@@ -147,6 +204,11 @@ void packet_processor::deserialise_CLI_ACTION_PREDICTIVE(UIDecodedPkt *uipkt)
 	consume_add_word(L"SkillID", uipkt);
 	consume_add_word(L"PkCount", uipkt);
 	consume_add_byte(L"Modifier", uipkt);
+}
+
+void packet_processor::deserialise_SRV_INSTANCE_SERVER_DATA(UIDecodedPkt *uipkt)
+{
+
 }
 
 void packet_processor::deserialise_CLI_PICKUP_ITEM(UIDecodedPkt *uipkt)
@@ -222,6 +284,11 @@ void packet_processor::deserialise_CLI_USE_ITEM(UIDecodedPkt *uipkt)
 }
 
 
+void packet_processor::deserialise_CLI_UNK_x56(UIDecodedPkt *uipkt)
+{
+	consume_add_byte(L"Arg", uipkt);
+}
+
 void packet_processor::deserialise_CLI_REQUEST_PUBLICPARTIES(UIDecodedPkt *uipkt)
 {
 	//todo
@@ -236,6 +303,12 @@ void packet_processor::deserialise_CLI_MICROSTRANSACTIONPANE_ACTION(UIDecodedPkt
 {
 	//todo
 }
+
+void packet_processor::deserialise_CLI_PACKET_EXIT(UIDecodedPkt *)
+{
+	//todo
+}
+
 
 void packet_processor::deserialise_CLI_USED_SKILL(UIDecodedPkt *uipkt)
 {
@@ -253,6 +326,16 @@ void packet_processor::deserialise_CLI_MOUSE_HELD(UIDecodedPkt *uipkt)
 }
 
 void packet_processor::deserialise_CLI_MOUSE_RELEASE(UIDecodedPkt *uipkt)
+{
+	//no data expected
+}
+
+void packet_processor::deserialise_SRV_DISPLAY_BUILTIN_MSG(UIDecodedPkt *uipkt)
+{
+	consume_add_dword(L"MsgID", uipkt);
+}
+
+void packet_processor::deserialise_CLI_GUILD_CREATE(UIDecodedPkt *uipkt)
 {
 	//no data expected
 }

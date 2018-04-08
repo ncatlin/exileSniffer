@@ -21,11 +21,13 @@ class packet_processor :
 {
 public:
 
-	packet_processor(key_grabber_thread *keyGrabPtr, SafeQueue<UI_MESSAGE>* uiq) 
-	{ keyGrabber = keyGrabPtr; uiMsgQueue = uiq;}
+	packet_processor(key_grabber_thread *keyGrabPtr, SafeQueue<UI_MESSAGE>* uiq)
+	{		keyGrabber = keyGrabPtr; uiMsgQueue = uiq; 	}
 	~packet_processor() {};
 
 private:
+	UIDecodedPkt * testpk;
+
 	void main_loop();
 
 	void init_packetDeserialisers();
@@ -54,9 +56,13 @@ private:
 	void deserialise_SRV_SERVER_MESSAGE(UIDecodedPkt *);
 	void deserialise_CLI_LOGGED_OUT(UIDecodedPkt *);
 	void deserialise_CLI_PING_CHALLENGE(UIDecodedPkt *);
-	void deserialise_SRV_PING_RESPONSE(UIDecodedPkt *);
-	void deserialise_CLI_ACTION_PREDICTIVE(UIDecodedPkt *);
+	void deserialise_SRV_PING_RESPONSE(UIDecodedPkt *);		
+	void deserialise_SRV_AREA_INFO(UIDecodedPkt*);
+	void deserialise_SRV_PRELOAD_MONSTER_LIST(UIDecodedPkt*);
+	void deserialise_SRV_PLAYER_ITEMS_DATA(UIDecodedPkt*);
 	void deserialise_CLI_CLICKED_GROUND_ITEM(UIDecodedPkt *);
+	void deserialise_CLI_ACTION_PREDICTIVE(UIDecodedPkt *);
+	void deserialise_SRV_INSTANCE_SERVER_DATA(UIDecodedPkt *);
 	void deserialise_CLI_PICKUP_ITEM(UIDecodedPkt *);
 	void deserialise_CLI_PLACE_ITEM(UIDecodedPkt *);
 	void deserialise_CLI_REMOVE_SOCKET(UIDecodedPkt *);
@@ -69,14 +75,18 @@ private:
 
 	void deserialise_CLI_USE_BELT_SLOT(UIDecodedPkt *);
 	void deserialise_CLI_USE_ITEM(UIDecodedPkt *);
-
+	
+	void deserialise_CLI_UNK_x56(UIDecodedPkt *);
 	void deserialise_CLI_REQUEST_PUBLICPARTIES(UIDecodedPkt *);
 	void deserialise_CLI_SKILLPANE_ACTION(UIDecodedPkt *);
 	void deserialise_CLI_MICROSTRANSACTIONPANE_ACTION(UIDecodedPkt *);
+	void deserialise_CLI_PACKET_EXIT(UIDecodedPkt *);
 	void deserialise_CLI_USED_SKILL(UIDecodedPkt *);
 	void deserialise_CLI_CLICK_OBJ(UIDecodedPkt *);
 	void deserialise_CLI_MOUSE_HELD(UIDecodedPkt *);
 	void deserialise_CLI_MOUSE_RELEASE(UIDecodedPkt *);
+	void deserialise_SRV_DISPLAY_BUILTIN_MSG(UIDecodedPkt *);
+	void deserialise_CLI_GUILD_CREATE(UIDecodedPkt *);
 	void deserialise_SRV_MOBILE_USED_SKILL(UIDecodedPkt *);
 	void deserialise_SRV_MOBILE_UPDATE_HMS(UIDecodedPkt *);
 	void deserialise_SRV_HEARTBEAT(UIDecodedPkt *uipkt);
@@ -91,12 +101,11 @@ private:
 	bool sanityCheckPacketID(unsigned short pktID);
 	void emit_decoding_err_msg(unsigned short msgID, unsigned short lastMsgID);
 
-	
-	void fillObjCodeMap();
-	bool lookup_areaCode(unsigned long code, std::string& result);
-	bool lookup_hash(unsigned long hash, std::string& result, std::string& category);
+
 
 private:
+	vector<UIDecodedPkt *> pktVec;
+
 	key_grabber_thread * keyGrabber;
 	std::map<networkStreamID, STREAMDATA> streamDatas;
 	map<unsigned long, std::pair<KEYDATA *, KEYDATA *> > pendingGameserverKeys;

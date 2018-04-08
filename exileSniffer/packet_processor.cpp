@@ -532,7 +532,7 @@ void packet_processor::handle_game_data(std::vector<byte> pkt)
 
 bool packet_processor::sanityCheckPacketID(unsigned short pktID)
 {
-	if (pktID > 0x220)
+	if (!pktID || pktID > 0x220)
 	{
 		errorFlag = eDecodingErr::eBadPacketID;
 		return false;
@@ -540,86 +540,7 @@ bool packet_processor::sanityCheckPacketID(unsigned short pktID)
 	return true;
 }
 
-bool packet_processor::lookup_areaCode(unsigned long code, std::string& result)
-{
-	auto areasIt = areaCodes.find(code);
-	if (areasIt != areaCodes.end())
-	{
-		result = areasIt->second;
-		return true;
-	}
 
-	std::stringstream failResString;
-	failResString << "<LookupFailure UnknownArea 0x" << std::hex << code << ">";
-	result = failResString.str();
-	return false;
-}
-
-bool packet_processor::lookup_hash(unsigned long hash, std::string& result, std::string& category)
-{
-	auto monstersIt = monsterHashes.find(hash);
-	if (monstersIt != monsterHashes.end())
-	{
-		result = monstersIt->second;
-		category = "Monster";
-		return true;
-	}
-
-	auto objectsIt = gameObjHashes.find(hash);
-	if (objectsIt != gameObjHashes.end())
-	{
-		result = objectsIt->second;
-		category = "Object";
-		return true;
-	}
-
-	auto chestsIt = chestHashes.find(hash);
-	if (chestsIt != chestHashes.end())
-	{
-		result = chestsIt->second;
-		category = "Chest";
-		return true;
-	}
-
-	auto charactersIt = characterHashes.find(hash);
-	if (charactersIt != characterHashes.end())
-	{
-		result = charactersIt->second;
-		category = "Character";
-		return true;
-	}
-
-	auto npcsIt = NPCHashes.find(hash);
-	if (npcsIt != NPCHashes.end())
-	{
-		result = npcsIt->second;
-		category = "NPC";
-		return true;
-	}
-
-	auto petsIt = petHashes.find(hash);
-	if (petsIt != petHashes.end())
-	{
-		result = petsIt->second;
-		category = "Pet";
-		return true;
-	}
-
-	auto itemsIt = itemHashes.find(hash);
-	if (itemsIt != itemHashes.end())
-	{
-		result = itemsIt->second;
-		category = "Item";
-		return true;
-	}
-
-	std::stringstream resString;
-	resString << "<0x" << std::hex << hash << ">";
-	result = resString.str();
-	category = "UnknownHash";
-
-	return false;
-}
 
 
 void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byte* data, 
@@ -633,6 +554,12 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 		{
 			unsigned long connectionID = getUlong(data + 2);
 
+			if (pendingGameserverKeys.find(connectionID) == pendingGameserverKeys.end())
+			{
+					UIaddLogMsg("Error: No pending gameserver key", activeClientPID, uiMsgQueue);
+					return;
+			}
+
 			streamObj->workingSendKey = pendingGameserverKeys.at(connectionID).first;
 			streamObj->toGameSalsa.SetKeyWithIV(
 				(byte *)streamObj->workingSendKey->salsakey, 32,
@@ -645,6 +572,7 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 
 			pendingGameserverKeys.erase(connectionID);
 
+			//todo: decoded ui packet
 
 			UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(
 				streamObj->workingSendKey->sourceProcess, eGame, false);
@@ -684,50 +612,40 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 	while (remainingDecrypted > 0)
 	{
 		unsigned short pktIDWord = consumeUShort();
-		if (errorFlag)
-		{
-			emit_decoding_err_msg(pktIDWord, streamObj->lastPktID);
-			break;
-		}
 
-		if (!sanityCheckPacketID(pktIDWord))
-		{
-			emit_decoding_err_msg(pktIDWord, streamObj->lastPktID);
-			break;
-		}
-
-		UIDecodedPkt *ui_decodedpkt = 
+		UIDecodedPkt *ui_decodedpkt =
 			new UIDecodedPkt(streamObj->workingSendKey->sourceProcess, eGame, PKTBIT_OUTBOUND, timems);
+		pktVec.push_back(ui_decodedpkt);
 		ui_decodedpkt->setBuffer(decryptedBuffer);
 		ui_decodedpkt->setStartOffset(decryptedIndex);
 		ui_decodedpkt->messageID = pktIDWord;
 		ui_decodedpkt->toggle_payload_operations(true);
 
-		auto it = packetDeserialisers.find(pktIDWord);
-		if (it != packetDeserialisers.end())
+		if (sanityCheckPacketID(pktIDWord) && errorFlag == eNoErr)
 		{
-			packet_processor::deserialiser deserialiserForPktID = it->second;
-			(this->*deserialiserForPktID)(ui_decodedpkt);
 
-			if (errorFlag == eNoErr)
-				ui_decodedpkt->setEndOffset(decryptedIndex);
-			else
-				ui_decodedpkt->setEndOffset(dataLen);
-		}
-		else
-		{
-			std::cout << "Unhandled Hex Payload msgID 0x" <<std::hex << pktIDWord <<std::endl;
-			for (int i = 0; i < dataLen; ++i)
+			auto it = packetDeserialisers.find(pktIDWord);
+			if (it != packetDeserialisers.end())
 			{
-				byte item = decryptedBuffer[i];
-				std::cout << std::setw(2) << (int)item;
-				if (i % 16 == 0) std::cout << std::endl;
+				packet_processor::deserialiser deserialiserForPktID = it->second;
+				(this->*deserialiserForPktID)(ui_decodedpkt);
+
+				if (errorFlag == eNoErr)
+					ui_decodedpkt->setEndOffset(decryptedIndex);
 			}
-			std::cout << std::endl;
+			else
+			{
+				std::cout << "Unhandled Hex Payload msgID <gamesrv in> 0x" << std::hex << pktIDWord << std::endl;
+				for (int i = 0; i < dataLen; ++i)
+				{
+					byte item = decryptedBuffer[i];
+					std::cout << std::setw(2) << (int)item;
+					if (i % 16 == 0) std::cout << std::endl;
+				}
+				std::cout << std::endl;
 
-			ui_decodedpkt->setEndOffset(dataLen);
-
-			errorFlag = eDecodingErr::ePktIDUnimplemented;
+				errorFlag = eDecodingErr::ePktIDUnimplemented;
+			}
 		}
 
 		if (errorFlag != eNoErr)
@@ -735,11 +653,10 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 			remainingDecrypted = 0;
 			emit_decoding_err_msg(pktIDWord, streamObj->lastPktID);
 			ui_decodedpkt->setFailedDecode();
+			ui_decodedpkt->setEndOffset(dataLen);
 		}
 
 		uiMsgQueue->addItem(ui_decodedpkt);
-
-
 		streamObj->lastPktID = pktIDWord;
 	}
 
@@ -761,37 +678,24 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 	unsigned int dataLen, long long timems)
 {
 
-	//first packet from gameserver starts 0005, followed by crypt which start 0012
+
 	STREAMDATA *streamObj = &streamDatas.at(streamID);
-
-	if (dataLen == 0) {
-
-		printf("Skipping datalen 0 packet from gameserver...\n");
-		return;
-	}
 
 	decryptedBuffer = new byte[dataLen];
 	memset(decryptedBuffer, 0, dataLen);
 
 	if (streamObj->packetCount == 1)
 	{
-		if (data[0] != 0 || data[1] != 5) {
-			std::cout << "assert 1" << std::endl;
-		}
-		assert(data[0] == 0 && data[1] == 5);
+		//first packet from gameserver starts 0005, followed by crypt which start 0012
+		ushort firstPktID = getUshort(data);
+		assert(firstPktID == SRV_PKT_ENCAPSULATED);
 
-
-			streamObj->fromGameSalsa.SetKeyWithIV(
-				(byte *)streamObj->workingRecvKey->salsakey, 32,
+		streamObj->fromGameSalsa.SetKeyWithIV(
+			(byte *)streamObj->workingRecvKey->salsakey, 32,
 				(byte *)streamObj->workingRecvKey->IV);
-			decryptedBuffer[0] = data[0];
-			decryptedBuffer[1] = data[1];
-			streamObj->fromGameSalsa.ProcessData(decryptedBuffer + 2, data + 2, dataLen - 2);
-			if (decryptedBuffer[2] != 0 || decryptedBuffer[3] != 0x12) {
-				std::cout << "assert 2" << std::endl;
-			}
-			assert(decryptedBuffer[2] == 0 && decryptedBuffer[3] == 0x12);
 
+		dataLen -= 2;
+		streamObj->fromGameSalsa.ProcessData(decryptedBuffer, data+2, dataLen);
 	}
 	else
 	{
@@ -801,6 +705,11 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 	if (unfinishedPacket)
 	{
 		std::cout << "todo: multipacket packets" << std::endl;
+		UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(streamObj->workingSendKey->sourceProcess, eGame, true);
+		msg->setData(decryptedBuffer, dataLen);
+		if (errorFlag != eNoErr)
+			msg->setErrorIndex(decryptedIndex);
+		uiMsgQueue->addItem(msg);
 		return;
 	}
 
@@ -811,50 +720,40 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 	while (remainingDecrypted > 0)
 	{
 		unsigned short pktIDWord = consumeUShort();
-		if (errorFlag)
-		{
-			emit_decoding_err_msg(pktIDWord, streamObj->lastPktID);
-			break;
-		}
-
-		if (!sanityCheckPacketID(pktIDWord))
-		{
-			emit_decoding_err_msg(pktIDWord, streamObj->lastPktID);
-			break;
-		}
 
 		UIDecodedPkt *ui_decodedpkt =
 			new UIDecodedPkt(streamObj->workingSendKey->sourceProcess, eGame, PKTBIT_INBOUND, timems);
+		pktVec.push_back(ui_decodedpkt);
+		
 		ui_decodedpkt->setBuffer(decryptedBuffer);
 		ui_decodedpkt->setStartOffset(decryptedIndex);
 		ui_decodedpkt->messageID = pktIDWord;
 		ui_decodedpkt->toggle_payload_operations(true);
 
-		auto it = packetDeserialisers.find(pktIDWord);
-		if (it != packetDeserialisers.end())
+		if (sanityCheckPacketID(pktIDWord) && errorFlag == eNoErr)
 		{
-			packet_processor::deserialiser deserialiserForPktID = it->second;
-			(this->*deserialiserForPktID)(ui_decodedpkt);
-
-			if (errorFlag == eNoErr)
-				ui_decodedpkt->setEndOffset(decryptedIndex);
-			else
-				ui_decodedpkt->setEndOffset(dataLen);
-		}
-		else
-		{
-			std::cout << "Unhandled Hex Payload msgID 0x" << std::hex << pktIDWord << std::endl;
-			for (int i = 0; i < dataLen; ++i)
+			map<unsigned short, deserialiser>::iterator it = packetDeserialisers.find(pktIDWord);
+			if (it != packetDeserialisers.end())
 			{
-				byte item = decryptedBuffer[i];
-				std::cout << std::setw(2) << (int)item;
-				if (i % 16 == 0) std::cout << std::endl;
+				packet_processor::deserialiser deserialiserForPktID = it->second;
+				(this->*deserialiserForPktID)(ui_decodedpkt);
+				if (errorFlag == eNoErr)
+					ui_decodedpkt->setEndOffset(decryptedIndex);
+				
 			}
-			std::cout << std::endl;
+			else
+			{
+				std::cout << "Unhandled Hex Payload msgID <gamesrv in> 0x" << std::hex << pktIDWord << std::endl;
+				for (int i = 0; i < dataLen; ++i)
+				{
+					byte item = decryptedBuffer[i];
+					std::cout << std::setw(2) << (int)item;
+					if (i % 16 == 0) std::cout << std::endl;
+				}
+				std::cout << std::endl;
 
-			ui_decodedpkt->setEndOffset(dataLen);
-
-			errorFlag = eDecodingErr::ePktIDUnimplemented;
+				errorFlag = eDecodingErr::ePktIDUnimplemented;
+			}
 		}
 
 		if (errorFlag != eNoErr)
@@ -862,53 +761,39 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 			remainingDecrypted = 0;
 			emit_decoding_err_msg(pktIDWord, streamObj->lastPktID);
 			ui_decodedpkt->setFailedDecode();
+			ui_decodedpkt->setEndOffset(dataLen);
 		}
 
 		uiMsgQueue->addItem(ui_decodedpkt);
-
-
 		streamObj->lastPktID = pktIDWord;
 	}
 
-
-
+	//print the whole blob in the raw log
 	UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(streamObj->workingSendKey->sourceProcess, eGame, true);
 	msg->setData(decryptedBuffer, dataLen);
 	if (errorFlag != eNoErr)
 		msg->setErrorIndex(decryptedIndex);
 	uiMsgQueue->addItem(msg);
-
 }
 
 
 bool packet_processor::process_packet_loop()
 {
-	/*
-	std::cout << "writing to log " << "N:\\code\\POEcode\\poeSRE\\clientX\\Debug\\latestconndump.txt" << std::endl;
-	outfile = std::ofstream("N:\\code\\POEcode\\poeSRE\\clientX\\Debug\\latestconndump.txt",
-		std::ofstream::out | std::ofstream::app | std::ofstream::binary);
-
-	if (!outfile.is_open())
-		outfile = std::ofstream("latestconndump.txt",
-			std::ofstream::out | std::ofstream::app | std::ofstream::binary);
-
-	outfile << std::endl << std::endl << "New sniffing session" << std::endl << std::endl;
-	*/
 	std::vector<byte> pkt;
 	std::queue< std::vector<byte>> pktQueue;
+
 	while (true)
 	{
-		bool updated = false;
-
-		if (checkPipe(patchpipe, &pktQueue))
+		//highest priority - only check patch/login if game is quiet
+		if (checkPipe(gamepipe, &pktQueue))
 		{
 			while (!pktQueue.empty())
 			{
 				pkt = pktQueue.front();
-				handle_patch_data(pkt);
+				handle_game_data(pkt);
 				pktQueue.pop();
 			}
-			updated = true;
+			continue;
 		}
 
 		if (checkPipe(loginpipe, &pktQueue))
@@ -919,106 +804,29 @@ bool packet_processor::process_packet_loop()
 				handle_login_data(pkt);
 				pktQueue.pop();
 			}
-			updated = true;
+			continue;
 		}
 
-		if (checkPipe(gamepipe, &pktQueue))
+		if (checkPipe(patchpipe, &pktQueue))
 		{
 			while (!pktQueue.empty())
 			{
 				pkt = pktQueue.front();
-				handle_game_data(pkt);
+				handle_patch_data(pkt);
 				pktQueue.pop();
 			}
-			updated = true;
 		}
-
-		if (!updated)
-			Sleep(30);
+		else
+			Sleep(10);
 	}
 	return true;
 }
 
-void genericHashesLoad(rapidjson::Value& itemsDoc, std::map <unsigned long, std::string>& targMap)
-{
-	rapidjson::Value::ConstMemberIterator recordsIt = itemsDoc.MemberBegin();
-	for (; recordsIt != itemsDoc.MemberEnd(); recordsIt++)
-	{
-		std::string hashString = recordsIt->name.GetString();
-		unsigned long hash = std::stoul(hashString);
-		targMap[hash] = recordsIt->value.GetString();
-	}
-}
 
-void packet_processor::fillObjCodeMap()
-{
-
-	char buffer[65536];
-
-	FILE* pFile;
-	std::string filename = "ggpk_exports.json";
-	fopen_s(&pFile, filename.c_str(), "rb");
-	if (!pFile)
-	{
-		std::cerr << "Warning: Could not open " << filename << " for reading. Abandoning Load." << std::endl;
-		return;
-	}
-
-	//load it all from json
-	rapidjson::Document jsondoc;
-	rapidjson::FileReadStream is(pFile, buffer, sizeof(buffer));
-	jsondoc.ParseStream<0, rapidjson::UTF8<>, rapidjson::FileReadStream>(is);
-
-	fclose(pFile);
-
-	if (!jsondoc.IsObject())
-	{
-		std::cerr << "Warning: Corrupt ggpk_exports file. Abandoning Load." << std::endl;
-		if (jsondoc.HasParseError())
-		{
-			std::cerr << "\t rapidjson parse error " << jsondoc.GetParseError()
-				<< " at offset " << jsondoc.GetErrorOffset() << std::endl;
-		}
-		return;
-	}
-
-	rapidjson::Value& monsterVarietyIndexDoc = jsondoc.FindMember("MonsterVarietiesIndex")->value;
-	rapidjson::Value::ConstValueIterator recordsIt = monsterVarietyIndexDoc.Begin();
-	for (; recordsIt != monsterVarietyIndexDoc.End(); recordsIt++)
-	{
-		monsterVarieties.push_back(recordsIt->GetString());
-	}
-
-
-	rapidjson::Value& monsterVarietyDoc = jsondoc.FindMember("MonsterVarietiesHashes")->value;
-	genericHashesLoad(monsterVarietyDoc, monsterHashes);
-
-	rapidjson::Value& areaCodesDoc = jsondoc.FindMember("AreaCodes")->value;
-	genericHashesLoad(areaCodesDoc, areaCodes);
-
-	rapidjson::Value& objectRegisterDoc = jsondoc.FindMember("ObjRegisterHashes")->value;
-	genericHashesLoad(objectRegisterDoc, gameObjHashes);
-
-	rapidjson::Value& chestsDoc = jsondoc.FindMember("ChestHashes")->value;
-	genericHashesLoad(chestsDoc, chestHashes);
-
-	rapidjson::Value& petsDoc = jsondoc.FindMember("PetHashes")->value;
-	genericHashesLoad(petsDoc, petHashes);
-
-	rapidjson::Value& charactersDoc = jsondoc.FindMember("CharacterHashes")->value;
-	genericHashesLoad(charactersDoc, characterHashes);
-
-	rapidjson::Value& npcsDoc = jsondoc.FindMember("NPCHashes")->value;
-	genericHashesLoad(npcsDoc, NPCHashes);
-
-	rapidjson::Value& itemsDoc = jsondoc.FindMember("ItemHashes")->value;
-	genericHashesLoad(itemsDoc, itemHashes);
-}
 
 
 void packet_processor::main_loop()
 {
-	fillObjCodeMap();
 	init_packetDeserialisers();
 
 	unsigned int errCount = 0;

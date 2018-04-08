@@ -18,33 +18,44 @@ exileSniffer::exileSniffer(QWidget *parent)
 	setup_raw_stream_tab();
 	setup_decoded_messages_tab();
 
+	fill_gamedata_lists();
+
 	init_DecodedPktActioners();
+
 
 	start_threads();
 
-	Sleep(200);
-	//testing
+
 	for (int i = 0; i < 0; i++)
 	{
 		UIDecodedPkt *ui_decodedpkt =
 			new UIDecodedPkt(1234, eGame, PKTBIT_OUTBOUND, ms_since_epoch() + 23432);
-		ui_decodedpkt->setFailedDecode();
+		ui_decodedpkt->messageID = SRV_PRELOAD_MONSTER_LIST;
 		UI_DECODED_LIST_ENTRY listentry(*ui_decodedpkt);
 		listentry.summary = "Player used inventory item";
-		addDecodedListEntry(listentry);
+		addDecodedListEntry(listentry, ui_decodedpkt);
 
-		ui_decodedpkt =
-			new UIDecodedPkt(1234, eLogin, PKTBIT_OUTBOUND, ms_since_epoch() + 23432);
-		UI_DECODED_LIST_ENTRY listentry1(*ui_decodedpkt);
-		listentry1.summary = "Player used inventory item";
-		addDecodedListEntry(listentry1);
+		WValue &payload = ui_decodedpkt->payload;
+		rapidjson::Document::AllocatorType& allocator = ui_decodedpkt->jsn.GetAllocator();
+		payload.AddMember(L"PreloadList", WValue(rapidjson::kArrayType), allocator);
+		WValue &jsarray = payload.FindMember(L"PreloadList")->value;
+		for (int i = 0; i < 56; i++)
+		{
+			WValue pairArray(rapidjson::kArrayType);
+			pairArray.PushBack(WValue(1412), allocator);
+			pairArray.PushBack(WValue(555), allocator);
 
-		ui_decodedpkt =
-			new UIDecodedPkt(1234, ePatch, PKTBIT_INBOUND, ms_since_epoch() + 23432);
-		UI_DECODED_LIST_ENTRY listentry2(*ui_decodedpkt);
-		listentry2.summary = "Player used inventory item";
-		addDecodedListEntry(listentry2);
+			jsarray.PushBack(pairArray, allocator);
+		}
+
+		auto it = payload.FindMember(L"PreloadList");
+		if (it != payload.MemberEnd())
+		{
+			std::cout << "%%%%%%%%%%%%%%%%%aa list " << std::dec <<
+				it->value.GetArray().Size() << " members in 0x" << std::hex << ui_decodedpkt << std::endl;
+		}
 	}
+
 }
 
 void exileSniffer::setup_raw_stream_tab()
@@ -80,6 +91,7 @@ void exileSniffer::start_threads()
 	keyGrabber = new key_grabber_thread(&uiMsgQueue);
 	std::thread keyGrabberInstance(&key_grabber_thread::ThreadEntry, keyGrabber);
 	keyGrabberInstance.detach();
+
 
 	//start a thread to process streams
 	packetProcessor = new packet_processor(keyGrabber, &uiMsgQueue);
@@ -140,6 +152,7 @@ void exileSniffer::action_UI_Msg(UI_MESSAGE *msg)
 	}
 	case uiMsgType::eDecodedPacket:
 	{
+		deleteAfterUse = false; //archived
 		UIDecodedPkt &uiDecodedMsg = *((UIDecodedPkt *)msg);
 		if(!uiDecodedMsg.decodeError())
 			action_decoded_packet(uiDecodedMsg); 
@@ -460,4 +473,233 @@ void exileSniffer::decodedListClicked()
 	//todo: user option to disable this
 	if (ui.decodedAutoscrollCheck->isChecked())
 		ui.decodedAutoscrollCheck->setChecked(false);
+}
+
+void genericHashesLoad(rapidjson::Value& itemsDoc, std::map <unsigned long, std::string>& targMap)
+{
+	rapidjson::Value::ConstMemberIterator recordsIt = itemsDoc.MemberBegin();
+	for (; recordsIt != itemsDoc.MemberEnd(); recordsIt++)
+	{
+		std::string hashString = recordsIt->name.GetString();
+		unsigned long hash = std::stoul(hashString);
+		targMap[hash] = recordsIt->value.GetString();
+	}
+}
+
+bool exileSniffer::lookup_areaCode(unsigned long code, std::string& result)
+{
+	auto areasIt = areaCodes.find(code);
+	if (areasIt != areaCodes.end())
+	{
+		result = areasIt->second;
+		return true;
+	}
+
+	std::stringstream failResString;
+	failResString << "<LookupFailure UnknownArea 0x" << std::hex << code << ">";
+	result = failResString.str();
+	return false;
+}
+
+bool exileSniffer::lookup_hash(unsigned long hash, std::string& result, std::string& category)
+{
+	auto monstersIt = monsterHashes.find(hash);
+	if (monstersIt != monsterHashes.end())
+	{
+		result = monstersIt->second;
+		category = "Monster";
+		return true;
+	}
+
+	auto objectsIt = gameObjHashes.find(hash);
+	if (objectsIt != gameObjHashes.end())
+	{
+		result = objectsIt->second;
+		category = "Object";
+		return true;
+	}
+
+	auto chestsIt = chestHashes.find(hash);
+	if (chestsIt != chestHashes.end())
+	{
+		result = chestsIt->second;
+		category = "Chest";
+		return true;
+	}
+
+	auto charactersIt = characterHashes.find(hash);
+	if (charactersIt != characterHashes.end())
+	{
+		result = charactersIt->second;
+		category = "Character";
+		return true;
+	}
+
+	auto npcsIt = NPCHashes.find(hash);
+	if (npcsIt != NPCHashes.end())
+	{
+		result = npcsIt->second;
+		category = "NPC";
+		return true;
+	}
+
+	auto petsIt = petHashes.find(hash);
+	if (petsIt != petHashes.end())
+	{
+		result = petsIt->second;
+		category = "Pet";
+		return true;
+	}
+
+	auto itemsIt = itemHashes.find(hash);
+	if (itemsIt != itemHashes.end())
+	{
+		result = itemsIt->second;
+		category = "Item";
+		return true;
+	}
+
+	std::stringstream resString;
+	resString << "<0x" << std::hex << hash << ">";
+	result = resString.str();
+	category = "UnknownHash";
+
+	return false;
+}
+
+void exileSniffer::fill_gamedata_lists()
+{
+
+	char buffer[65536];
+
+	FILE* pFile;
+	std::string filename = "ggpk_exports.json";
+	fopen_s(&pFile, filename.c_str(), "rb");
+	if (!pFile)
+	{
+		std::cerr << "Warning: Could not open " << filename << " for reading. Abandoning Load." << std::endl;
+		return;
+	}
+
+	//load it all from json
+	rapidjson::Document jsondoc;
+	rapidjson::FileReadStream is(pFile, buffer, sizeof(buffer));
+	jsondoc.ParseStream<0, rapidjson::UTF8<>, rapidjson::FileReadStream>(is);
+
+	fclose(pFile);
+
+	if (!jsondoc.IsObject())
+	{
+		std::cerr << "Warning: Corrupt ggpk_exports file. Abandoning Load." << std::endl;
+		if (jsondoc.HasParseError())
+		{
+			std::cerr << "\t rapidjson parse error " << jsondoc.GetParseError()
+				<< " at offset " << jsondoc.GetErrorOffset() << std::endl;
+		}
+		return;
+	}
+
+	rapidjson::Value& monsterVarietyIndexDoc = jsondoc.FindMember("MonsterVarietiesIndex")->value;
+	rapidjson::Value::ConstValueIterator recordsIt = monsterVarietyIndexDoc.Begin();
+	for (; recordsIt != monsterVarietyIndexDoc.End(); recordsIt++)
+	{
+		monsterVarieties.push_back(recordsIt->GetString());
+	}
+
+
+	rapidjson::Value& monsterVarietyDoc = jsondoc.FindMember("MonsterVarietiesHashes")->value;
+	genericHashesLoad(monsterVarietyDoc, monsterHashes);
+
+	rapidjson::Value& areaCodesDoc = jsondoc.FindMember("AreaCodes")->value;
+	genericHashesLoad(areaCodesDoc, areaCodes);
+
+	rapidjson::Value& objectRegisterDoc = jsondoc.FindMember("ObjRegisterHashes")->value;
+	genericHashesLoad(objectRegisterDoc, gameObjHashes);
+
+	rapidjson::Value& chestsDoc = jsondoc.FindMember("ChestHashes")->value;
+	genericHashesLoad(chestsDoc, chestHashes);
+
+	rapidjson::Value& petsDoc = jsondoc.FindMember("PetHashes")->value;
+	genericHashesLoad(petsDoc, petHashes);
+
+	rapidjson::Value& charactersDoc = jsondoc.FindMember("CharacterHashes")->value;
+	genericHashesLoad(charactersDoc, characterHashes);
+
+	rapidjson::Value& npcsDoc = jsondoc.FindMember("NPCHashes")->value;
+	genericHashesLoad(npcsDoc, NPCHashes);
+
+	rapidjson::Value& itemsDoc = jsondoc.FindMember("ItemHashes")->value;
+	genericHashesLoad(itemsDoc, itemHashes);
+}
+
+
+void exileSniffer::decodedCellActivated(int row, int col)
+{
+	ui.decodedText->clear();
+
+	QTableWidgetItem *item = ui.decodedList->item(row, 0);
+	UIDecodedPkt* obj = (UIDecodedPkt*)item->data(Qt::UserRole).value<UIDecodedPkt*>();
+
+	if (!obj->decodeError())
+	{
+		auto it = decodedPktActioners.find(obj->messageID);
+		if (it != decodedPktActioners.end())
+		{
+			exileSniffer::actionFunc f = it->second;
+			QString detailedAnalysis;
+			(this->*f)(*obj, &detailedAnalysis);
+			if(!detailedAnalysis.isEmpty())
+				ui.decodedText->insertPlainText(detailedAnalysis + "\n\n");
+		}
+		else
+		{
+			stringstream err;
+			err << "ERROR! no action setup for displayed pkt id 0x" << std::hex << obj->messageID;
+			add_metalog_update(QString::fromStdString(err.str()), obj->clientProcessID());
+		}
+	}
+
+
+	std::wstringstream hexdump;
+
+	char timestamp[20];
+
+	hexdump << epochms_to_timestring(obj->time_processed_ms()) << " ";
+
+	size_t bytessize = obj->bufferOffsets.second - obj->bufferOffsets.first + 2; //+2 packet id bytes
+
+	if (obj->streamFlags & PKTBIT_INBOUND)
+		hexdump << "server" << " to PlayerClient";
+	else
+		hexdump << "PlayerClient to " << "server"; //serverString(pkt->stream, "f");
+	hexdump << "(" << std::dec << bytessize << " bytes)" << std::endl;
+
+	
+	byte *bufStart = obj->originalbuf + obj->bufferOffsets.first - 2;
+
+	hexdump << std::setfill(L'0') << std::uppercase << L" ";
+	for (int i = 0; i < bytessize; ++i)
+	{
+		byte item = bufStart[i];
+
+		if (item)
+			hexdump << " " << std::hex << std::setw(2) << (int)item;
+		else
+			hexdump << " 00";
+
+		//if (item >= ' ' && item <= '~')
+		//	asciidump << (char)item;
+		//else
+		//	asciidump << '.';//replace unprintable with dots
+
+		if ((i + 1) % UIhexPacketsPerRow == 0)
+		{
+			hexdump << std::endl << " ";
+			//asciidump << std::endl;
+		}
+	}
+	hexdump << "\n" << std::endl << std::nouppercase;
+	
+	std::wstring hexdumpstring = hexdump.str();
+	ui.decodedText->insertPlainText(QString::fromStdWString(hexdumpstring));
 }

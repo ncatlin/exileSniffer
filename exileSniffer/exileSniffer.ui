@@ -243,6 +243,12 @@
               <property name="dragEnabled">
                <bool>false</bool>
               </property>
+              <property name="selectionMode">
+               <enum>QAbstractItemView::SingleSelection</enum>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
               <property name="sortingEnabled">
                <bool>true</bool>
               </property>
@@ -279,7 +285,14 @@
                </property>
               </column>
              </widget>
-             <widget class="QPlainTextEdit" name="decodedText"/>
+             <widget class="QPlainTextEdit" name="decodedText">
+              <property name="font">
+               <font>
+                <family>Courier New</family>
+                <pointsize>11</pointsize>
+               </font>
+              </property>
+             </widget>
             </widget>
            </item>
           </layout>
@@ -645,6 +658,22 @@ p, li { white-space: pre-wrap; }
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>decodedList</sender>
+   <signal>cellPressed(int,int)</signal>
+   <receiver>exileSniffer</receiver>
+   <slot>decodedCellActivated(int,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>412</x>
+     <y>247</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>413</x>
+     <y>336</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>showRawFiltersDLG()</slot>
@@ -652,5 +681,6 @@ p, li { white-space: pre-wrap; }
   <slot>toggleRawLineWrap(bool)</slot>
   <slot>toggleRawAutoScroll(bool)</slot>
   <slot>decodedListClicked()</slot>
+  <slot>decodedCellActivated(int,int)</slot>
  </slots>
 </ui>

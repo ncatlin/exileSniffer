@@ -10,3 +10,4 @@ bool checkPipe(HANDLE pipe, std::queue< std::vector<byte>> *pktQueue);
 
 std::wstring epochms_to_timestring(long long epochms);
 long long ms_since_epoch();
+

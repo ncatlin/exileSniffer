@@ -74,6 +74,10 @@ public:
 	void add_word(std::wstring name, ushort ushortfield);
 	void add_byte(std::wstring name, byte bytefield);
 	void add_wstring(std::wstring name, std::wstring stringfield);
+	void add_array(std::wstring name, WValue value);
+	//auto getAllocator() { return jsn.GetAllocator(); }
+	rapidjson::GenericDocument<rapidjson::UTF16<> >& getJSON() {	return jsn;	}
+	//WValue& payload() { return jsn.FindMember(L"Payload")->value; }
 
 	std::wstring get_wstring(std::wstring name);
 	UINT32 get_UInt32(std::wstring name);
@@ -91,17 +95,19 @@ public:
 	ushort messageID;
 	byte streamFlags = 0;
 	byte *originalbuf = NULL;
-	std::pair<ushort, short> bufferOffsets;
+	std::pair<ushort, ushort> bufferOffsets;
+
+	rapidjson::GenericDocument<rapidjson::UTF16<> > jsn;
+	WValue& payload = jsn;
 
 private:
 	DWORD PID;
 	bool failedDecode = false;
 	bool payloadOperations = false;
 	long long mstime;
-
-	rapidjson::GenericDocument<rapidjson::UTF16<> > jsn;
-	WValue payload;
 };
+
+Q_DECLARE_METATYPE(UIDecodedPkt *);
 
 void UIaddLogMsg(QString msg, DWORD clientPID, SafeQueue<UI_MESSAGE> *uiMsgQueue);
 void UIaddLogMsg(std::string msg, DWORD clientPID, SafeQueue<UI_MESSAGE> *uiMsgQueue);

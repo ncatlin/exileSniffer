@@ -141,7 +141,6 @@ std::wstring epochms_to_timestring(long long epochms)
 	std::time_t rawtime = std::chrono::system_clock::to_time_t(dt);
 
 	struct tm * timeinfo;
-	time(&rawtime);
 	timeinfo = localtime(&rawtime);
 
 	wchar_t buf[100];

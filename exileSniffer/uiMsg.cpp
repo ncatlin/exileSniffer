@@ -66,6 +66,10 @@ void UI_RAWHEX_PKT::setData(byte *source, unsigned short length)
 UIDecodedPkt::UIDecodedPkt(DWORD processID, streamType streamServer, byte isIncoming, long long timeSeen)
 {
 	jsn.SetObject();
+
+	jsn.AddMember(L"Payload", WValue(rapidjson::kObjectType), jsn.GetAllocator());
+	payload = jsn.FindMember(L"Payload")->value;
+
 	msgType = uiMsgType::eDecodedPacket;
 	PID = processID;
 	add_dword(L"processID", processID);
@@ -91,7 +95,6 @@ UIDecodedPkt::UIDecodedPkt(DWORD processID, streamType streamServer, byte isInco
 	isIncoming = (streamFlags & PKTBIT_INBOUND);
 	mstime = timeSeen;
 
-	payload = jsn.AddMember(L"Payload", WValue(rapidjson::kObjectType), jsn.GetAllocator());
 }
 
 void UIDecodedPkt::add_dword(std::wstring name, DWORD dwordfield)
@@ -125,15 +128,25 @@ void UIDecodedPkt::add_wstring(std::wstring name, std::wstring stringfield)
 {
 	WValue nameVal(name.c_str(), jsn.GetAllocator());
 	WValue stringVal(stringfield.c_str(), jsn.GetAllocator());
+
 	if (payloadOperations)
 		payload.AddMember(nameVal, stringVal, jsn.GetAllocator());
 	else
 		jsn.AddMember(nameVal, stringVal, jsn.GetAllocator());
 }
 
+void UIDecodedPkt::add_array(std::wstring name, WValue array)
+{
+	WValue nameVal(name.c_str(), jsn.GetAllocator());
+
+	if (payloadOperations)
+		payload.AddMember(nameVal, array, jsn.GetAllocator());
+	else
+		jsn.AddMember(nameVal, array, jsn.GetAllocator());
+}
+
 UINT32 UIDecodedPkt::get_UInt32(std::wstring name)
 {
-
 	auto it = payloadOperations ? payload.FindMember(name.c_str())
 		: jsn.FindMember(name.c_str());
 	if (it != payload.MemberEnd() && it->value.IsUint())
@@ -151,7 +164,6 @@ UINT32 UIDecodedPkt::get_UInt32(std::wstring name)
 
 UINT64 UIDecodedPkt::get_UInt64(std::wstring name)
 {
-
 	auto it = payloadOperations ? payload.FindMember(name.c_str())
 		: jsn.FindMember(name.c_str());
 	if (it != payload.MemberEnd() && it->value.IsUint64())
@@ -169,7 +181,6 @@ UINT64 UIDecodedPkt::get_UInt64(std::wstring name)
 
 std::wstring UIDecodedPkt::get_wstring(std::wstring name)
 {
-
 	auto it = payloadOperations ? payload.FindMember(name.c_str()) 
 								: jsn.FindMember(name.c_str());
 	if (it != payload.MemberEnd() && it->value.IsString())

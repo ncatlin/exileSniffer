@@ -242,6 +242,8 @@ public:
         decodedList->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
         decodedList->setProperty("showDropIndicator", QVariant(false));
         decodedList->setDragEnabled(false);
+        decodedList->setSelectionMode(QAbstractItemView::SingleSelection);
+        decodedList->setSelectionBehavior(QAbstractItemView::SelectRows);
         decodedList->setSortingEnabled(true);
         splitter->addWidget(decodedList);
         decodedList->horizontalHeader()->setDefaultSectionSize(60);
@@ -250,6 +252,10 @@ public:
         decodedList->verticalHeader()->setHighlightSections(false);
         decodedText = new QPlainTextEdit(splitter);
         decodedText->setObjectName(QStringLiteral("decodedText"));
+        QFont font2;
+        font2.setFamily(QStringLiteral("Courier New"));
+        font2.setPointSize(11);
+        decodedText->setFont(font2);
         splitter->addWidget(decodedText);
 
         verticalLayout_3->addWidget(splitter);
@@ -269,10 +275,10 @@ public:
         textPaneFrame->setObjectName(QStringLiteral("textPaneFrame"));
         ptHexPane = new QTextEdit(rawDecryptTab);
         ptHexPane->setObjectName(QStringLiteral("ptHexPane"));
-        QFont font2;
-        font2.setFamily(QStringLiteral("Courier New"));
-        font2.setPointSize(8);
-        ptHexPane->setFont(font2);
+        QFont font3;
+        font3.setFamily(QStringLiteral("Courier New"));
+        font3.setPointSize(8);
+        ptHexPane->setFont(font3);
         ptHexPane->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
         ptHexPane->setLineWrapMode(QTextEdit::NoWrap);
         ptHexPane->setReadOnly(true);
@@ -282,9 +288,9 @@ public:
 
         ptASCIIPane = new QTextEdit(rawDecryptTab);
         ptASCIIPane->setObjectName(QStringLiteral("ptASCIIPane"));
-        QFont font3;
-        font3.setFamily(QStringLiteral("Courier New"));
-        ptASCIIPane->setFont(font3);
+        QFont font4;
+        font4.setFamily(QStringLiteral("Courier New"));
+        ptASCIIPane->setFont(font4);
         ptASCIIPane->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
         ptASCIIPane->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
@@ -406,6 +412,7 @@ public:
         QObject::connect(rawLinewrapCheck, SIGNAL(toggled(bool)), exileSniffer, SLOT(toggleRawLineWrap(bool)));
         QObject::connect(rawAutoScrollCheck, SIGNAL(toggled(bool)), exileSniffer, SLOT(toggleRawAutoScroll(bool)));
         QObject::connect(decodedList, SIGNAL(clicked(QModelIndex)), exileSniffer, SLOT(decodedListClicked()));
+        QObject::connect(decodedList, SIGNAL(cellPressed(int,int)), exileSniffer, SLOT(decodedCellActivated(int,int)));
 
         processTabs->setCurrentIndex(1);
 
