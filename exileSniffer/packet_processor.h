@@ -106,6 +106,7 @@ private:
 private:
 	vector<UIDecodedPkt *> pktVec;
 
+	networkStreamID lastActiveConnectionID;
 	key_grabber_thread * keyGrabber;
 	std::map<networkStreamID, STREAMDATA> streamDatas;
 	map<unsigned long, std::pair<KEYDATA *, KEYDATA *> > pendingGameserverKeys;

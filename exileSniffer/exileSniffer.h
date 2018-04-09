@@ -13,7 +13,7 @@
 
 #include "rawFilterForm.h"
 #include "ui_rawfilterform.h"
-
+#include <fstream>
 
 #define HEADER_SECTION_TIME 0
 #define HEADER_SECTION_SENDER 1
@@ -156,7 +156,7 @@ class exileSniffer : public QMainWindow
 		void action_CLI_OPTOUT_TUTORIALS(UIDecodedPkt&, QString*);
 
 	private:
-
+		std::ofstream outfile;
 		Ui::exileSniffer ui;
 		Ui::rawFilterForm rawFiltersFormUI;
 		derivedRawFilterForm rawFilterForm;

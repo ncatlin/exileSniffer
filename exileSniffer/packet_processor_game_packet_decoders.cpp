@@ -147,8 +147,6 @@ void packet_processor::deserialise_SRV_PRELOAD_MONSTER_LIST(UIDecodedPkt* uipkt)
 	WValue jsarray(rapidjson::kArrayType);
 	for (int i = 0; i < listCount; i++)
 	{
-		
-		std::cout << "Filling list " << std::dec << listCount << " members!"<<i << std::endl;
 		WValue pairArray(rapidjson::kArrayType);
 		pairArray.PushBack(WValue(preloadList.at(i).first), allocator);
 		pairArray.PushBack(WValue(preloadList.at(i).second), allocator);
@@ -208,7 +206,40 @@ void packet_processor::deserialise_CLI_ACTION_PREDICTIVE(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_SRV_INSTANCE_SERVER_DATA(UIDecodedPkt *uipkt)
 {
+	consume_add_dword(L"Unk1", uipkt);
+	consume_add_dword(L"Unk2", uipkt);
+	consume_add_dword(L"AreaCode", uipkt);
+	consume_add_dword(L"Unk3", uipkt);
+	DWORD nextConnectionID = consume_DWORD();
+	uipkt->add_dword(L"NextConnectionID", nextConnectionID);
+	consume_add_word(L"Port", uipkt);
+	consume_add_dword(L"IP", uipkt);
 
+	//std::cout << std::hex << "[" << pktId << "] New game server data. AREA TRANSITION" << std::endl;
+	//std::cout << "\tGameserver: " << serverIP.str() << ":" << std::dec << port << std::hex << std::endl;
+
+	decryptedIndex += 20; //0?
+
+
+	KEYDATA *key1A = new KEYDATA;
+	KEYDATA *key1B = new KEYDATA;
+	memcpy(key1A->salsakey, decryptedBuffer + decryptedIndex, 32);
+	memcpy(key1B->salsakey, decryptedBuffer + decryptedIndex, 32);
+	decryptedIndex += 32;
+
+	if (key1A->salsakey[0] == 0 && key1A->salsakey[3] == 0 && key1A->salsakey[7])
+	{
+		std::cout << "Discarding bad key in area transition" << std::endl;
+		return; //probably an old zero-ed out key
+	}
+
+	memcpy(key1A->IV, decryptedBuffer + decryptedIndex, 8);
+	decryptedIndex += 16;
+	memcpy(key1B->IV, decryptedBuffer + decryptedIndex, 8);
+
+	key1A->sourceProcess = key1B->sourceProcess = uipkt->clientProcessID();
+	key1A->foundAddress = key1B->foundAddress = SENT_BY_SERVER;
+	pendingGameserverKeys[nextConnectionID] = make_pair(key1A, key1B);
 }
 
 void packet_processor::deserialise_CLI_PICKUP_ITEM(UIDecodedPkt *uipkt)

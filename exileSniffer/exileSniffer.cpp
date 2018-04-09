@@ -9,6 +9,7 @@ This is the UI thread - try not to hang it
 #include "utilities.h"
 #include "qtextedit.h"
 #include "packetIDs.h"
+#include <fstream>
 
 exileSniffer::exileSniffer(QWidget *parent)
 	: QMainWindow(parent)
@@ -25,6 +26,16 @@ exileSniffer::exileSniffer(QWidget *parent)
 
 	start_threads();
 
+	printf("Starting packet processing!\n");
+	std::cout << "writing to log " << "N:\\code\\POEcode\\poeSRE\\clientX\\Debug\\latestconndump.txt" << std::endl;
+	outfile = std::ofstream("N:\\code\\POEcode\\poeSRE\\clientX\\Debug\\latestconndump.txt",
+		std::ofstream::out | std::ofstream::app | std::ofstream::binary);
+
+	if (!outfile.is_open())
+		outfile = std::ofstream("latestconndump.txt",
+			std::ofstream::out | std::ofstream::app | std::ofstream::binary);
+
+	outfile << std::endl << std::endl << "New sniffing session" << std::endl << std::endl;
 
 	for (int i = 0; i < 0; i++)
 	{
@@ -312,6 +323,7 @@ void exileSniffer::print_raw_packet(UI_RAWHEX_PKT *pkt)
 	//todo: work out position from bytes*2 + bytes*space + bytes/bytesperline*space
 	//if (pkt->decodeFailed)
 	//	hexdumpstring.at()
+	outfile << hexdumpstring << std::endl;
 	insertRawText(hexdumpstring, asciidump.str());
 
 }

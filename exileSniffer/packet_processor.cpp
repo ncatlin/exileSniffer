@@ -102,6 +102,7 @@ void packet_processor::handle_patch_data(std::vector<byte> pkt)
 
 	byte *data = (byte *)next_token;
 
+	lastActiveConnectionID = streamID;
 
 	if (isIncoming)
 	{
@@ -482,6 +483,7 @@ void packet_processor::handle_login_data(std::vector<byte> pkt)
 	STREAMDATA *streamObj = &streamDatas[streamID];
 	printf("[%ld]: Login data (%ld bytes) ", streamObj->packetCount, dataLen);
 
+	lastActiveConnectionID = streamID;
 	if (isIncoming)
 	{
 		handle_packet_from_loginserver(streamID, data, dataLen);
@@ -521,6 +523,7 @@ void packet_processor::handle_game_data(std::vector<byte> pkt)
 
 	if (dataLen > 0)
 	{
+		lastActiveConnectionID = streamID;
 		if (isIncoming)
 			handle_packet_from_gameserver(streamID, data, dataLen, msProcessed);
 		else
@@ -556,16 +559,30 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 
 			if (pendingGameserverKeys.find(connectionID) == pendingGameserverKeys.end())
 			{
+				if (!pendingGameserverKeys.empty())
+				{
+					std::cout << "no pending for conid but found a key... trying";
+					streamObj->workingSendKey = pendingGameserverKeys.begin()->second.first;
+					streamObj->workingRecvKey = pendingGameserverKeys.begin()->second.second;
+					pendingGameserverKeys.clear();
+				}
+				else
+				{
 					UIaddLogMsg("Error: No pending gameserver key", activeClientPID, uiMsgQueue);
 					return;
+				}
 			}
-
-			streamObj->workingSendKey = pendingGameserverKeys.at(connectionID).first;
+			else
+			{
+				streamObj->workingSendKey = pendingGameserverKeys.at(connectionID).first;
+				streamObj->workingRecvKey = pendingGameserverKeys.at(connectionID).second;
+			}
+			
 			streamObj->toGameSalsa.SetKeyWithIV(
 				(byte *)streamObj->workingSendKey->salsakey, 32,
 				(byte *)streamObj->workingSendKey->IV);
 
-			streamObj->workingRecvKey = pendingGameserverKeys.at(connectionID).second;
+			
 			streamObj->toGameSalsa.SetKeyWithIV(
 				(byte *)streamObj->workingSendKey->salsakey, 32,
 				(byte *)streamObj->workingSendKey->IV);
@@ -597,6 +614,14 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 	decryptedBuffer = new byte[dataLen+1];
 	memset(decryptedBuffer, 0, dataLen+1);
 	streamObj->toGameSalsa.ProcessData(decryptedBuffer, data, dataLen);
+
+
+
+	UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(streamObj->workingSendKey->sourceProcess, eGame, false);
+	msg->setData(decryptedBuffer, dataLen);
+	if (errorFlag != eNoErr)
+		msg->setErrorIndex(decryptedIndex);
+	uiMsgQueue->addItem(msg);
 
 	if (unfinishedPacket)
 	{
@@ -662,12 +687,6 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 
 
 
-	UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(streamObj->workingSendKey->sourceProcess, eGame, false);
-	msg->setData(decryptedBuffer, dataLen);
-	if (errorFlag != eNoErr)
-		msg->setErrorIndex(decryptedIndex);
-	uiMsgQueue->addItem(msg);
-
 }
 
 /*
@@ -702,10 +721,17 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 		streamObj->fromGameSalsa.ProcessData(decryptedBuffer, data, dataLen);
 	}
 
+	//print the whole blob in the raw log
+	UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(streamObj->workingRecvKey->sourceProcess, eGame, true);
+	msg->setData(decryptedBuffer, dataLen);
+	if (errorFlag != eNoErr)
+		msg->setErrorIndex(decryptedIndex);
+	uiMsgQueue->addItem(msg);
+
 	if (unfinishedPacket)
 	{
 		std::cout << "todo: multipacket packets" << std::endl;
-		UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(streamObj->workingSendKey->sourceProcess, eGame, true);
+		UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(streamObj->workingRecvKey->sourceProcess, eGame, true);
 		msg->setData(decryptedBuffer, dataLen);
 		if (errorFlag != eNoErr)
 			msg->setErrorIndex(decryptedIndex);
@@ -722,7 +748,7 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 		unsigned short pktIDWord = consumeUShort();
 
 		UIDecodedPkt *ui_decodedpkt =
-			new UIDecodedPkt(streamObj->workingSendKey->sourceProcess, eGame, PKTBIT_INBOUND, timems);
+			new UIDecodedPkt(streamObj->workingRecvKey->sourceProcess, eGame, PKTBIT_INBOUND, timems);
 		pktVec.push_back(ui_decodedpkt);
 		
 		ui_decodedpkt->setBuffer(decryptedBuffer);
@@ -768,12 +794,7 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 		streamObj->lastPktID = pktIDWord;
 	}
 
-	//print the whole blob in the raw log
-	UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(streamObj->workingSendKey->sourceProcess, eGame, true);
-	msg->setData(decryptedBuffer, dataLen);
-	if (errorFlag != eNoErr)
-		msg->setErrorIndex(decryptedIndex);
-	uiMsgQueue->addItem(msg);
+
 }
 
 
