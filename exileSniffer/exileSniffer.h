@@ -91,7 +91,7 @@ class exileSniffer : public QMainWindow
 		void init_DecodedPktActioners();
 		void start_threads();
 		void fill_gamedata_lists();
-		bool lookup_areaCode(unsigned long code, std::string& result);
+		bool lookup_areaCode(unsigned long code, std::wstring& result);
 		bool lookup_hash(unsigned long hash, std::string& result, std::string& category);
 
 		void action_UI_Msg(UI_MESSAGE *msg);
@@ -126,7 +126,7 @@ class exileSniffer : public QMainWindow
 		void action_SRV_PRELOAD_MONSTER_LIST(UIDecodedPkt&, QString*);
 		void action_CLI_CLICKED_GROUND_ITEM(UIDecodedPkt&, QString*);
 		void action_CLI_ACTION_PREDICTIVE(UIDecodedPkt&, QString*);
-		void action_SRV_PLAYER_ITEMS_DATA(UIDecodedPkt&, QString*);
+		void action_SRV_PLAYER_ITEMS(UIDecodedPkt&, QString*);
 		void action_SRV_INSTANCE_SERVER_DATA(UIDecodedPkt&, QString*);
 		void action_CLI_PICKUP_ITEM(UIDecodedPkt&, QString*);
 		void action_CLI_PLACE_ITEM(UIDecodedPkt&, QString*);
@@ -136,11 +136,15 @@ class exileSniffer : public QMainWindow
 		void action_CLI_SKILLPOINT_CHANGE(UIDecodedPkt&, QString*);
 		void action_CLI_CANCEL_BUF(UIDecodedPkt&, QString*);
 		void action_CLI_SET_HOTBARSKILL(UIDecodedPkt&, QString*);
+		void action_SRV_SKILL_SLOTS_LIST(UIDecodedPkt&, QString*);
+		
 		void action_CLI_USE_BELT_SLOT(UIDecodedPkt&, QString*);
 		void action_CLI_USE_ITEM(UIDecodedPkt&, QString*);
 
 		void action_CLI_UNK_x56(UIDecodedPkt&, QString*);
 		void action_CLI_REQUEST_PUBLICPARTIES(UIDecodedPkt&, QString*);
+		void action_SRV_RESPOND_PUBLICPARTIES(UIDecodedPkt&, QString*);
+		void action_SRV_SLOT_ITEMSLIST(UIDecodedPkt&, QString*);
 		void action_CLI_SKILLPANE_ACTION(UIDecodedPkt&, QString*);
 		void action_CLI_MICROSTRANSACTIONPANE_ACTION(UIDecodedPkt&, QString*);
 		void action_CLI_PACKET_EXIT(UIDecodedPkt&, QString*);
@@ -152,9 +156,11 @@ class exileSniffer : public QMainWindow
 		void action_CLI_GUILD_CREATE(UIDecodedPkt&, QString*);
 		void action_SRV_MOBILE_USED_SKILL(UIDecodedPkt&, QString*);
 		void action_SRV_MOBILE_UPDATE_HMS(UIDecodedPkt&, QString*);
-		void action_SRV_HEARTBEAT(UIDecodedPkt&, QString*);
+		void action_SRV_UNKNOWN_0x111(UIDecodedPkt&, QString*);
 		void action_CLI_OPTOUT_TUTORIALS(UIDecodedPkt&, QString*);
-
+		void action_SRV_HEARTBEAT(UIDecodedPkt&, QString*);
+		void action_SRV_ADD_OBJECT(UIDecodedPkt&, QString*);
+		
 	private:
 		std::ofstream outfile;
 		Ui::exileSniffer ui;

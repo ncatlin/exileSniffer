@@ -59,7 +59,7 @@ private:
 	void deserialise_SRV_PING_RESPONSE(UIDecodedPkt *);		
 	void deserialise_SRV_AREA_INFO(UIDecodedPkt*);
 	void deserialise_SRV_PRELOAD_MONSTER_LIST(UIDecodedPkt*);
-	void deserialise_SRV_PLAYER_ITEMS_DATA(UIDecodedPkt*);
+	void deserialise_SRV_PLAYER_ITEMS(UIDecodedPkt*);
 	void deserialise_CLI_CLICKED_GROUND_ITEM(UIDecodedPkt *);
 	void deserialise_CLI_ACTION_PREDICTIVE(UIDecodedPkt *);
 	void deserialise_SRV_INSTANCE_SERVER_DATA(UIDecodedPkt *);
@@ -72,12 +72,16 @@ private:
 	void deserialise_CLI_SKILLPOINT_CHANGE(UIDecodedPkt *);
 	void deserialise_CLI_CANCEL_BUF(UIDecodedPkt *);
 	void deserialise_CLI_SET_HOTBARSKILL(UIDecodedPkt *);
-
+	void deserialise_SRV_SKILL_SLOTS_LIST(UIDecodedPkt *);
+	
 	void deserialise_CLI_USE_BELT_SLOT(UIDecodedPkt *);
 	void deserialise_CLI_USE_ITEM(UIDecodedPkt *);
 	
 	void deserialise_CLI_UNK_x56(UIDecodedPkt *);
 	void deserialise_CLI_REQUEST_PUBLICPARTIES(UIDecodedPkt *);
+	void deserialise_SRV_RESPOND_PUBLICPARTIES(UIDecodedPkt *);
+	void deserialise_SRV_SLOT_ITEMSLIST(UIDecodedPkt *);
+
 	void deserialise_CLI_SKILLPANE_ACTION(UIDecodedPkt *);
 	void deserialise_CLI_MICROSTRANSACTIONPANE_ACTION(UIDecodedPkt *);
 	void deserialise_CLI_PACKET_EXIT(UIDecodedPkt *);
@@ -89,14 +93,16 @@ private:
 	void deserialise_CLI_GUILD_CREATE(UIDecodedPkt *);
 	void deserialise_SRV_MOBILE_USED_SKILL(UIDecodedPkt *);
 	void deserialise_SRV_MOBILE_UPDATE_HMS(UIDecodedPkt *);
-	void deserialise_SRV_HEARTBEAT(UIDecodedPkt *uipkt);
+	void deserialise_SRV_UNKNOWN_0x111(UIDecodedPkt *);
 	void deserialise_CLI_OPTOUT_TUTORIALS(UIDecodedPkt *);
-
+	void deserialise_SRV_HEARTBEAT(UIDecodedPkt *uipkt);
+	void deserialise_SRV_ADD_OBJECT(UIDecodedPkt *uipkt);
 
 	byte consume_Byte();
 	unsigned short consumeUShort();
 	unsigned long consume_DWORD();
 	std::wstring consumeWString(size_t bytesLength);
+	void discard_data(ushort byteCount);
 
 	bool sanityCheckPacketID(unsigned short pktID);
 	void emit_decoding_err_msg(unsigned short msgID, unsigned short lastMsgID);

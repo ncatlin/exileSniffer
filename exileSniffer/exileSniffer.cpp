@@ -498,18 +498,21 @@ void genericHashesLoad(rapidjson::Value& itemsDoc, std::map <unsigned long, std:
 	}
 }
 
-bool exileSniffer::lookup_areaCode(unsigned long code, std::string& result)
+bool exileSniffer::lookup_areaCode(unsigned long code, std::wstring& result)
 {
+	//todo json 16
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+
 	auto areasIt = areaCodes.find(code);
 	if (areasIt != areaCodes.end())
 	{
-		result = areasIt->second;
+		result = converter.from_bytes(areasIt->second);
 		return true;
 	}
 
 	std::stringstream failResString;
 	failResString << "<LookupFailure UnknownArea 0x" << std::hex << code << ">";
-	result = failResString.str();
+	result = converter.from_bytes(failResString.str());
 	return false;
 }
 

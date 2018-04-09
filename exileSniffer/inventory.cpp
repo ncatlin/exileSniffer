@@ -32,7 +32,7 @@ std::wstring slotToString(DWORD slot)
 	default:
 		{
 		std::wstringstream err;
-		err << L"<TODO container 0x"<<std::hex<<slot;
+		err << L"<TODO container 0x"<<std::hex<<slot<<">";
 		return err.str();
 		}
 	}

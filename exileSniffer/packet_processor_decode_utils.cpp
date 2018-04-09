@@ -80,10 +80,23 @@ unsigned long packet_processor::consume_DWORD()
 		return 0;
 	}
 
-	unsigned short result = getUlong(decryptedBuffer + decryptedIndex);
+	DWORD result = getUlong(decryptedBuffer + decryptedIndex);
 	decryptedIndex += 4;
 	remainingDecrypted -= 4;
 	return result;
+}
+
+void packet_processor::discard_data(ushort byteCount)
+{
+	if (errorFlag != eDecodingErr::eNoErr) return;
+	if (remainingDecrypted < byteCount)
+	{
+		errorFlag = eDecodingErr::eErrUnderflow;
+		errorCount += 1;
+	}
+
+	decryptedIndex += byteCount;
+	remainingDecrypted -= byteCount;
 }
 
 std::wstring packet_processor::consumeWString(size_t bytesLength)

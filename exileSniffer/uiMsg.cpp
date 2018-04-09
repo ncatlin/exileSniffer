@@ -169,12 +169,17 @@ UINT64 UIDecodedPkt::get_UInt64(std::wstring name)
 	if (it != payload.MemberEnd() && it->value.IsUint64())
 		return it->value.GetUint64();
 
-	std::wcerr << "JSON ERROR: No Int64 field named " << name <<
+
+	std::wstringstream err;
+	err << "JSON ERROR: No Int64 field named " << name <<
 		" in pktID 0x" << std::hex << messageID;
 	if (payloadOperations)
-		std::wcerr << " payload" << std::endl;
+		err << " payload" << std::endl;
 	else
-		std::wcerr << " metadata" << std::endl;
+		err << " metadata" << std::endl;
+
+	std::wcerr << err.str() <<std::endl;//todo: static ui queue so we can do this
+	//add_metalog_update(err.str(), clientProcessID());
 
 	return 0xffffffffffffffff;
 }
