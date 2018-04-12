@@ -3,6 +3,9 @@
 
 std::wstring slotToString(DWORD slot)
 {
+	if (slot > 0x20)
+		return L"Stash Tab " + std::to_wstring((slot-0x20));
+
 	switch (slot)
 	{
 	case INVENTORY_SLOT_BAG:
@@ -26,9 +29,13 @@ std::wstring slotToString(DWORD slot)
 	case INVENTORY_SLOT_BOOTS:
 		return L"Boot";
 	case INVENTORY_SLOT_BELT:
-		return L"Boot";
-	case INVENTORY_SLOT_POTIONS:
 		return L"Belt";
+	case INVENTORY_SLOT_POTIONS:
+		return L"Potions";
+	case INVENTORY_SLOT_LWEAP_ALT:
+		return L"LHandAlt";
+	case INVENTORY_SLOT_RWEAP_ALT:
+		return L"RHandAlt";
 	default:
 		{
 		std::wstringstream err;

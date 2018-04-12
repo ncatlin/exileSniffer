@@ -709,6 +709,9 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 		ushort firstPktID = getUshort(data);
 		assert(firstPktID == SRV_PKT_ENCAPSULATED);
 
+		//if (streamObj->workingRecvKey == 0)
+
+
 		streamObj->fromGameSalsa.SetKeyWithIV(
 			(byte *)streamObj->workingRecvKey->salsakey, 32,
 				(byte *)streamObj->workingRecvKey->IV);

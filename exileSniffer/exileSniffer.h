@@ -124,9 +124,10 @@ class exileSniffer : public QMainWindow
 		void action_SRV_PING_RESPONSE(UIDecodedPkt&, QString*);
 		void action_SRV_AREA_INFO(UIDecodedPkt&, QString*);
 		void action_SRV_PRELOAD_MONSTER_LIST(UIDecodedPkt&, QString*);
+		void action_SRV_UNK_0x13(UIDecodedPkt&, QString *);
+		void action_SRV_PLAYER_ITEMS(UIDecodedPkt&, QString*);
 		void action_CLI_CLICKED_GROUND_ITEM(UIDecodedPkt&, QString*);
 		void action_CLI_ACTION_PREDICTIVE(UIDecodedPkt&, QString*);
-		void action_SRV_PLAYER_ITEMS(UIDecodedPkt&, QString*);
 		void action_SRV_INSTANCE_SERVER_DATA(UIDecodedPkt&, QString*);
 		void action_CLI_PICKUP_ITEM(UIDecodedPkt&, QString*);
 		void action_CLI_PLACE_ITEM(UIDecodedPkt&, QString*);
@@ -142,8 +143,10 @@ class exileSniffer : public QMainWindow
 		void action_CLI_USE_ITEM(UIDecodedPkt&, QString*);
 
 		void action_CLI_UNK_x56(UIDecodedPkt&, QString*);
+		void action_SRV_UNK_ACCT_SOCIAL_NAME(UIDecodedPkt&, QString*);
 		void action_CLI_REQUEST_PUBLICPARTIES(UIDecodedPkt&, QString*);
 		void action_SRV_RESPOND_PUBLICPARTIES(UIDecodedPkt&, QString*);
+		void action_SRV_CREATE_ITEM(UIDecodedPkt&, QString*);
 		void action_SRV_SLOT_ITEMSLIST(UIDecodedPkt&, QString*);
 		void action_CLI_SKILLPANE_ACTION(UIDecodedPkt&, QString*);
 		void action_CLI_MICROSTRANSACTIONPANE_ACTION(UIDecodedPkt&, QString*);
@@ -155,8 +158,12 @@ class exileSniffer : public QMainWindow
 		void action_SRV_DISPLAY_BUILTIN_MSG(UIDecodedPkt&, QString*);
 		void action_CLI_GUILD_CREATE(UIDecodedPkt&, QString*);
 		void action_SRV_MOBILE_USED_SKILL(UIDecodedPkt&, QString*);
+		void action_SRV_MOBILE_UNK_0xeb(UIDecodedPkt&, QString*);
 		void action_SRV_MOBILE_UPDATE_HMS(UIDecodedPkt&, QString*);
+		void action_SRV_STAT_CHANGED(UIDecodedPkt&, QString*);
+		void action_CLI_REQUEST_PLAYERID(UIDecodedPkt&, QString *);
 		void action_SRV_UNKNOWN_0x111(UIDecodedPkt&, QString*);
+		void action_SRV_NOTIFY_PLAYERID(UIDecodedPkt&, QString *);
 		void action_CLI_OPTOUT_TUTORIALS(UIDecodedPkt&, QString*);
 		void action_SRV_HEARTBEAT(UIDecodedPkt&, QString*);
 		void action_SRV_ADD_OBJECT(UIDecodedPkt&, QString*);

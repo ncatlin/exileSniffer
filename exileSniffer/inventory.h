@@ -13,6 +13,8 @@
 #define INVENTORY_SLOT_BOOTS 0xa
 #define INVENTORY_SLOT_BELT 0xb
 #define INVENTORY_SLOT_POTIONS 0xc
+#define INVENTORY_SLOT_LWEAP_ALT 0xf
+#define INVENTORY_SLOT_RWEAP_ALT 0x10
 
 
 std::wstring slotToString(DWORD slot);

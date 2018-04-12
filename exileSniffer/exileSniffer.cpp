@@ -11,6 +11,7 @@ This is the UI thread - try not to hang it
 #include "packetIDs.h"
 #include <fstream>
 
+
 exileSniffer::exileSniffer(QWidget *parent)
 	: QMainWindow(parent)
 {
@@ -87,7 +88,7 @@ void exileSniffer::setup_decoded_messages_tab()
 	ui.decodedList->horizontalScrollBar()->setFixedHeight(10);
 	ui.decodedList->horizontalHeader()->resizeSection(HEADER_SECTION_TIME, 70);
 	ui.decodedList->horizontalHeader()->resizeSection(HEADER_SECTION_SENDER, 50);
-	ui.decodedList->horizontalHeader()->resizeSection(HEADER_SECTION_SUMMARY, 800);
+	ui.decodedList->horizontalHeader()->resizeSection(HEADER_SECTION_SUMMARY, 450);
 	ui.decodedList->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
 }
 
@@ -343,7 +344,8 @@ bool exileSniffer::packet_passes_decoded_filter(UIDecodedPkt& decoded, clientDat
 	//todo user specified
 	if (decoded.messageID == CLI_PING_CHALLENGE || 
 		decoded.messageID == SRV_PING_RESPONSE || 
-		decoded.messageID == SRV_HEARTBEAT)
+		decoded.messageID == SRV_HEARTBEAT || 
+		decoded.messageID == SRV_CHAT_MESSAGE)
 		return false;
 	return true;
 }

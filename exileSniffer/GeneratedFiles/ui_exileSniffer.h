@@ -240,9 +240,10 @@ public:
         decodedList->setObjectName(QStringLiteral("decodedList"));
         decodedList->setLayoutDirection(Qt::LeftToRight);
         decodedList->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+        decodedList->setEditTriggers(QAbstractItemView::NoEditTriggers);
         decodedList->setProperty("showDropIndicator", QVariant(false));
         decodedList->setDragEnabled(false);
-        decodedList->setSelectionMode(QAbstractItemView::SingleSelection);
+        decodedList->setSelectionMode(QAbstractItemView::NoSelection);
         decodedList->setSelectionBehavior(QAbstractItemView::SelectRows);
         decodedList->setSortingEnabled(true);
         splitter->addWidget(decodedList);
