@@ -66,14 +66,19 @@ void exileSniffer::init_DecodedPktActioners()
 	decodedPktActioners[CLI_INSERT_SOCKET] = &exileSniffer::action_CLI_INSERT_SOCKET;
 
 	decodedPktActioners[CLI_LEVEL_SKILLGEM] = &exileSniffer::action_CLI_LEVEL_SKILLGEM;
+	decodedPktActioners[CLI_UNK_0x20] = &exileSniffer::action_CLI_UNK_0x20;
 	decodedPktActioners[CLI_SKILLPOINT_CHANGE] = &exileSniffer::action_CLI_SKILLPOINT_CHANGE;
 	decodedPktActioners[CLI_CANCEL_BUF] = &exileSniffer::action_CLI_CANCEL_BUF;
+	decodedPktActioners[CLI_UNK_0x2c] = &exileSniffer::action_CLI_UNK_0x2c;
 	decodedPktActioners[CLI_SET_HOTBARSKILL] = &exileSniffer::action_CLI_SET_HOTBARSKILL;
 	decodedPktActioners[SRV_SKILL_SLOTS_LIST] = &exileSniffer::action_SRV_SKILL_SLOTS_LIST;
 
 	decodedPktActioners[CLI_USE_BELT_SLOT] = &exileSniffer::action_CLI_USE_BELT_SLOT;
 	decodedPktActioners[CLI_USE_ITEM] = &exileSniffer::action_CLI_USE_ITEM;
 
+	decodedPktActioners[CLI_SEND_PARTY_INVITE] = &exileSniffer::action_CLI_SEND_PARTY_INVITE;
+
+	decodedPktActioners[CLI_CREATE_PUBLICPARTY] = &exileSniffer::action_CLI_CREATE_PUBLICPARTY;
 	decodedPktActioners[CLI_UNK_x56] = &exileSniffer::action_CLI_UNK_x56;
 	decodedPktActioners[SRV_UNK_ACCT_SOCIAL_NAME] = &exileSniffer::action_SRV_UNK_ACCT_SOCIAL_NAME;
 	
@@ -81,6 +86,12 @@ void exileSniffer::init_DecodedPktActioners()
 	decodedPktActioners[SRV_RESPOND_PUBLICPARTIES] = &exileSniffer::action_SRV_RESPOND_PUBLICPARTIES;
 	decodedPktActioners[SRV_CREATE_ITEM] = &exileSniffer::action_SRV_CREATE_ITEM;
 	decodedPktActioners[SRV_SLOT_ITEMSLIST] = &exileSniffer::action_SRV_SLOT_ITEMSLIST;
+
+	decodedPktActioners[UNK_MESSAGE_0x70] = &exileSniffer::action_UNK_MESSAGE_0x70;
+	decodedPktActioners[UNK_MESSAGE_0x73] = &exileSniffer::action_UNK_MESSAGE_0x73;
+	decodedPktActioners[CLI_SET_STATUS_MESSAGE] = &exileSniffer::action_CLI_SET_STATUS_MESSAGE;
+
+	decodedPktActioners[CLI_SWAPPED_WEAPONS] = &exileSniffer::action_CLI_SWAPPED_WEAPONS;
 	decodedPktActioners[CLI_SKILLPANE_ACTION] = &exileSniffer::action_CLI_SKILLPANE_ACTION;
 	decodedPktActioners[CLI_MICROSTRANSACTIONPANE_ACTION] = &exileSniffer::action_CLI_MICROSTRANSACTIONPANE_ACTION;
 	decodedPktActioners[CLI_PACKET_EXIT] = &exileSniffer::action_CLI_PACKET_EXIT;
@@ -88,19 +99,27 @@ void exileSniffer::init_DecodedPktActioners()
 	decodedPktActioners[CLI_CLICK_OBJ] = &exileSniffer::action_CLI_CLICK_OBJ;
 	decodedPktActioners[CLI_MOUSE_HELD] = &exileSniffer::action_CLI_MOUSE_HELD;
 	decodedPktActioners[CLI_MOUSE_RELEASE] = &exileSniffer::action_CLI_MOUSE_RELEASE;
-	decodedPktActioners[SRV_DISPLAY_BUILTIN_MSG] = &exileSniffer::action_SRV_DISPLAY_BUILTIN_MSG;
+	decodedPktActioners[SRV_CHAT_CHANNEL_ID] = &exileSniffer::action_SRV_CHAT_CHANNEL_ID;
 	decodedPktActioners[CLI_GUILD_CREATE] = &exileSniffer::action_CLI_GUILD_CREATE;
+	decodedPktActioners[SRV_UNK_0xE6] = &exileSniffer::action_SRV_UNK_0xE6;
 	decodedPktActioners[SRV_MOBILE_USED_SKILL] = &exileSniffer::action_SRV_MOBILE_USED_SKILL;
 	decodedPktActioners[SRV_MOBILE_UNK_0xeb] = &exileSniffer::action_SRV_MOBILE_UNK_0xeb;
+	decodedPktActioners[SRV_MOBILE_UNK_0xee] = &exileSniffer::action_SRV_MOBILE_UNK_0xee;
+	decodedPktActioners[SRV_MOBILE_UNK_0xef] = &exileSniffer::action_SRV_MOBILE_UNK_0xef;
 	decodedPktActioners[SRV_MOBILE_UPDATE_HMS] = &exileSniffer::action_SRV_MOBILE_UPDATE_HMS;
 	decodedPktActioners[SRV_STAT_CHANGED] = &exileSniffer::action_SRV_STAT_CHANGED;
+	decodedPktActioners[SRV_UNK_0xf2] = &exileSniffer::action_SRV_UNK_0xf2;
+	decodedPktActioners[SRV_UNK_0xf3] = &exileSniffer::action_SRV_UNK_0xf3;
+	decodedPktActioners[SRV_START_EFFECT] = &exileSniffer::action_SRV_START_BUFF;
+	decodedPktActioners[SRV_END_EFFECT] = &exileSniffer::action_SRV_END_EFFECT;
 	decodedPktActioners[CLI_REQUEST_PLAYERID] = &exileSniffer::action_CLI_REQUEST_PLAYERID;
-	decodedPktActioners[SRV_UNKNOWN_0x111] = &exileSniffer::action_SRV_UNKNOWN_0x111;
 	decodedPktActioners[SRV_NOTIFY_PLAYERID] = &exileSniffer::action_SRV_NOTIFY_PLAYERID;
+	decodedPktActioners[SRV_UNKNOWN_0x111] = &exileSniffer::action_SRV_UNKNOWN_0x111;
 	decodedPktActioners[CLI_OPTOUT_TUTORIALS] = &exileSniffer::action_CLI_OPTOUT_TUTORIALS;
 	decodedPktActioners[SRV_HEARTBEAT] = &exileSniffer::action_SRV_HEARTBEAT;
 	decodedPktActioners[SRV_ADD_OBJECT] = &exileSniffer::action_SRV_ADD_OBJECT;
-
+	decodedPktActioners[SRV_IDNOTIFY_0x136] = &exileSniffer::action_SRV_IDNOTIFY_0x136;
+	decodedPktActioners[SRV_IDNOTIFY_0x137] = &exileSniffer::action_SRV_IDNOTIFY_0x137;
 
 }
 
@@ -297,20 +316,87 @@ void exileSniffer::action_SRV_CHAT_MESSAGE(UIDecodedPkt& obj, QString *analysis)
 void exileSniffer::action_SRV_SERVER_MESSAGE(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
+
+	//this is the row in the ggpk.dat file "BackendErrors.dat"
+	UINT32 ggpkDatRow = obj.get_UInt32(L"BackendErrorsRow") - 1;
+	UINT32 devID = obj.get_UInt32(L"DevID");
+	UINT32 TextModifier = obj.get_UInt32(L"TextModifier");
+
+
+
 	if (!analysis)
 	{
+		wstringstream summary;
+		if (devID == 0xffff)
+		{
+			if (TextModifier) //todo: this is not boolean
+				summary << "Server displayed pinned";
+			else
+				summary << "Server displayed standard";
+		}
+		else
+		{
+			if (TextModifier)
+				summary << "Dev " << devID << " displayed fancy";
+			else
+				summary << "Dev " << devID << "displayed standard";
+		}
+
+		summary << "msgID " << ggpkDatRow;
+
+
 		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Server sent message";
+		listentry.summary = QString::fromStdWString(summary.str());
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
+
+	wstringstream analysisStream;
+	analysisStream << std::dec;
+	analysisStream << "GGPK row: " << ggpkDatRow << std::endl;
+	analysisStream << "Dev ID: " << devID << std::endl;
+	analysisStream << std::hex;
+	analysisStream << "Modifier: " <<TextModifier << std::endl;
+	analysisStream << "UnkDWORD: " << obj.get_UInt64(L"Unk4") << std::endl;
+
+	WValue &preloadList = obj.payload.FindMember(L"PairList")->value;
+	if (preloadList.Size() == 0)
+		analysisStream << "No argument pairs supplied" << std::endl;
+	else
+	{
+		analysisStream << "Argument pairs:" << std::endl;
+		for (auto pairit = preloadList.Begin(); pairit != preloadList.End(); pairit++)
+		{
+			WValue &pair = *pairit;
+			//signedness may depend on type
+			//all sorts of types which need dealing with
+			analysisStream << "\tType " << 
+				pair[0].GetUint() << ": " << pair[1].GetUint64() << std::endl;
+		}
+	}
+
+	analysisStream << std::endl;
+
+	auto stringlist = obj.payload.FindMember(L"StringList");
+	if (stringlist->value.Size() == 0)
+		analysisStream << "No strings supplied" << std::endl;
+	else
+	{
+		analysisStream << "String pairs:" << std::endl;
+		for (auto stringit = stringlist->value.Begin(); stringit != stringlist->value.End(); stringit++)
+		{
+			//signedness may depend on type
+			analysisStream << "\t" << stringit->GetString() << std::endl;
+		}
+	}
+	*analysis = QString::fromStdWString(analysisStream.str());
 }
 
 void exileSniffer::action_CLI_LOGGED_OUT(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
-	UINT32 arg = obj.get_UInt32(L"Unk1");
+	UINT32 arg = obj.get_UInt32(L"Arg");
 
 	if (!analysis)
 	{
@@ -691,13 +777,14 @@ void exileSniffer::action_CLI_CLICKED_GROUND_ITEM(UIDecodedPkt& obj, QString *an
 	obj.toggle_payload_operations(true);
 
 	UINT64 targID = obj.get_UInt64(L"TargID");
-	UINT64 Unk1 = obj.get_UInt64(L"Unk1");
+	UINT32 skillID = obj.get_UInt32(L"SkillID");
+	UINT32 seq = obj.get_UInt32(L"Sequence");
 	UINT32 modifier = obj.get_UInt32(L"Modifier");
 	if (!analysis)
 	{
 
 		std::wstringstream summary;
-		summary << "Player(You) clicked ground itemID 0x" << std::hex << targID << " Arg1: 0x" << Unk1;
+		summary << "Player(You) clicked itemID 0x" << std::hex << targID << " Skill: 0x" << skillID;
 
 		if (modifier)
 			summary << " [" << explainModifier(modifier) << "]";
@@ -705,6 +792,7 @@ void exileSniffer::action_CLI_CLICKED_GROUND_ITEM(UIDecodedPkt& obj, QString *an
 		if (modifier > 0xf || !(modifier & 0x8))
 			summary << " <!Unusual modifier 0x" << std::hex << modifier << " - what are you doing?>";
 
+		summary << " seq: 0x" << seq;
 		UI_DECODED_LIST_ENTRY listentry(obj);
 		listentry.summary = QString::fromStdWString(summary.str());
 		addDecodedListEntry(listentry, &obj);
@@ -821,6 +909,25 @@ void exileSniffer::action_CLI_LEVEL_SKILLGEM(UIDecodedPkt& obj, QString *analysi
 	}
 }
 
+void exileSniffer::action_CLI_UNK_0x20(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+	if (!analysis)
+	{
+		std::wstringstream summary;
+		summary << "unk packet 0x20 (skill maybe)";
+		//summary << "Unknown social/account name " << obj.get_wstring(L"Name") << std::hex;
+		//summary << "  -  Other data: 0x" << obj.get_UInt64(L"Unk1") << ", 0x" << obj.get_UInt64(L"Unk2")
+		//	<< ", 0x" << obj.get_UInt32(L"Unk3") << ", 0x" << obj.get_UInt32(L"Unk4");
+
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
+
 void exileSniffer::action_CLI_SKILLPOINT_CHANGE(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
@@ -840,6 +947,18 @@ void exileSniffer::action_CLI_CANCEL_BUF(UIDecodedPkt& obj, QString *analysis)
 	{
 		UI_DECODED_LIST_ENTRY listentry(obj);
 		listentry.summary = "Player(You) cancelled a buff";
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
+void exileSniffer::action_CLI_UNK_0x2c(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+	if (!analysis)
+	{
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = "Unknown packet 0x2c. Unk size bytes read (4 seen) + 13 bytes at end";
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
@@ -870,10 +989,13 @@ void exileSniffer::action_SRV_SKILL_SLOTS_LIST(UIDecodedPkt& obj, QString *analy
 
 	//todo - lookup the id and match with the associated skillgem or action
 	std::wstringstream analysisStream;
-	analysisStream << std::hex << "Primary skill bar:" << std::endl;
+
+	analysisStream << std::hex;
+	analysisStream << "Primary skill bar:" << std::endl;
 	analysisStream << "\tSkill 1 ID: 0x" << obj.get_UInt32(L"Skill1") << std::endl;
 	analysisStream << "\tSkill 2 ID: 0x" << obj.get_UInt32(L"Skill2") << std::endl;
 	analysisStream << "\tSkill 3 ID: 0x" << obj.get_UInt32(L"Skill3") << std::endl;
+
 	analysisStream << "Secondary skill bar:" << std::endl;
 	analysisStream << "\tSkill 4 ID: 0x" << obj.get_UInt32(L"Skill4") << std::endl;
 	analysisStream << "\tSkill 5 ID: 0x" << obj.get_UInt32(L"Skill5") << std::endl;
@@ -894,7 +1016,7 @@ void exileSniffer::action_CLI_USE_BELT_SLOT(UIDecodedPkt& obj, QString *analysis
 	if (!analysis)
 	{
 		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player(You) activated belt slot "+slot;
+		listentry.summary = "Activated belt slot "+slot;
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
@@ -906,7 +1028,38 @@ void exileSniffer::action_CLI_USE_ITEM(UIDecodedPkt& obj, QString *analysis)
 	if (!analysis)
 	{
 		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player(You) used inventory item X on item Y";
+		listentry.summary = "Used inventory item X on item Y";
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
+void exileSniffer::action_CLI_SEND_PARTY_INVITE(UIDecodedPkt& obj, QString* analysis)
+{
+	obj.toggle_payload_operations(true);
+	if (!analysis)
+	{
+		std::wstringstream summary;
+		summary << "Invited other player \"" << obj.get_wstring(L"Name") << "\" to party";
+
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
+
+void exileSniffer::action_CLI_CREATE_PUBLICPARTY(UIDecodedPkt& obj, QString*analysis)
+{
+	obj.toggle_payload_operations(true);
+	if (!analysis)
+	{
+		std::wstringstream summary;
+		summary << "Created public party called: \"" << obj.get_wstring(L"Name") << "\"";
+
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = listentry.summary = QString::fromStdWString(summary.str());
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
@@ -924,7 +1077,7 @@ void exileSniffer::action_CLI_UNK_x56(UIDecodedPkt& obj, QString *analysis)
 	{
 		UI_DECODED_LIST_ENTRY listentry(obj);
 		if (arg != 1)
-			listentry.summary = "Client sent packet 0x56 - (usual 1 as argument)";
+			listentry.summary = "Sent packet 0x56 - (usual 1 as argument)";
 		else
 			listentry.summary = "!Client packet 0x56 has new argument!: " + QString::number(arg);
 		addDecodedListEntry(listentry, &obj);
@@ -978,7 +1131,7 @@ void exileSniffer::action_SRV_CREATE_ITEM(UIDecodedPkt& obj, QString *analysis)
 	if (!analysis)
 	{
 		wstringstream summary;
-		summary << "Server sent new item in inventory";
+		summary << "Server sent new item in inventory <todo decode>";
 		UI_DECODED_LIST_ENTRY listentry(obj);
 		listentry.summary = QString::fromStdWString(summary.str());
 		addDecodedListEntry(listentry, &obj);
@@ -1057,7 +1210,74 @@ void exileSniffer::action_SRV_SLOT_ITEMSLIST(UIDecodedPkt& obj, QString *analysi
 	*analysis = QString::fromStdWString(analysisStream.str());
 }
 
+void exileSniffer::action_UNK_MESSAGE_0x70(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
 
+	DWORD data1 = obj.get_UInt64(L"Arg");
+
+	if (!analysis)
+	{
+		wstringstream summary;
+		summary << "Server msg 0x70. Data: 0x" << std::hex << data1;
+
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
+void exileSniffer::action_UNK_MESSAGE_0x73(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+
+	DWORD data1 = obj.get_UInt64(L"Data1");
+	std::wstring string1 = obj.get_wstring(L"String1");
+	std::wstring string2 = obj.get_wstring(L"String2");
+
+	if (!analysis)
+	{
+		wstringstream summary;
+		summary << "Server msg 0x73. Data: 0x" << std::hex << data1 << ". Str1: " << string1 
+			<< ", String2: "<<string2 <<" (bad strings? Different length data...)";
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
+void exileSniffer::action_CLI_SET_STATUS_MESSAGE(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+
+	if (!analysis)
+	{
+		std::wstringstream summary;
+		summary << "Set status text: \"" << obj.get_wstring(L"StatusText") << "\"";
+
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
+
+void exileSniffer::action_CLI_SWAPPED_WEAPONS(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+
+	byte arg = obj.get_UInt32(L"Byte");
+	if (!analysis)
+	{
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = "Player swapped weapons slot "+QString::number(arg,10);
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
 
 void exileSniffer::action_CLI_SKILLPANE_ACTION(UIDecodedPkt& obj, QString *analysis)
 {
@@ -1131,16 +1351,19 @@ void exileSniffer::action_CLI_MOUSE_RELEASE(UIDecodedPkt& obj, QString *analysis
 	}
 }
 
-void exileSniffer::action_SRV_DISPLAY_BUILTIN_MSG(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_CHAT_CHANNEL_ID(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
-	UINT64 msgID = obj.get_UInt64(L"MsgID");
-
+	UINT32 channelID = obj.get_UInt64(L"ChannelID");
+	UINT32 type = obj.get_UInt64(L"Type");
+	UINT32 language = obj.get_UInt64(L"Language");
 	if (!analysis)
 	{
 		wstringstream summary;
-		summary << "Server displayed built-in msg ID 0x" << std::hex << msgID;
+		summary << "Joined chat channel ID 0x" << std::dec << channelID <<
+			", Type: 0x" << std::hex << type <<
+			", Language: " << std::dec << language << std::endl;
 
 		UI_DECODED_LIST_ENTRY listentry(obj);
 		listentry.summary = QString::fromStdWString(summary.str());
@@ -1160,6 +1383,38 @@ void exileSniffer::action_CLI_GUILD_CREATE(UIDecodedPkt& obj, QString *analysis)
 		return;
 	}
 }
+
+
+void exileSniffer::action_SRV_UNK_0xE6(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+
+	UINT32 list1Len = obj.get_UInt64(L"List1Len");
+	UINT32 list2Len = obj.get_UInt64(L"List2Len");
+	UINT32 list3Len = obj.get_UInt64(L"List3Len");
+	UINT32 list4Len = obj.get_UInt64(L"List4Len");
+	UINT32 list5Len = obj.get_UInt64(L"List5Len");
+	UINT32 list6Len = obj.get_UInt64(L"List6Len");
+	
+	if (!analysis)
+	{
+		wstringstream summary;
+		summary <<"Unk item packet 0xe6. List lengths: " << std::dec <<
+			"1: " << list1Len << ", "
+			"2: " << list2Len << ", "
+			"3: " << list3Len << ", "
+			"4: " << list4Len << ", "
+			"5: " << list5Len << ", "
+			"6 (items - not decoded!): " << list6Len << std::endl;
+
+
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
 
 void exileSniffer::action_CLI_PACKET_EXIT(UIDecodedPkt& obj, QString *analysis)
 {
@@ -1206,9 +1461,9 @@ void exileSniffer::action_SRV_MOBILE_USED_SKILL(UIDecodedPkt& obj, QString *anal
 	*/
 	obj.toggle_payload_operations(true);
 
-	UINT64 user = obj.get_UInt64(L"User1");
-	UINT64 id2 = obj.get_UInt64(L"ID2");
-	UINT32 unk1 = obj.get_UInt32(L"Unk1");
+	DWORD ID1 = obj.get_UInt64(L"ID1");
+	DWORD ID2 = obj.get_UInt64(L"ID2");
+	UINT32 ID3 = obj.get_UInt32(L"ID3");
 	UINT32 modifier = obj.get_UInt32(L"Modifier"); 
 
 
@@ -1225,15 +1480,16 @@ void exileSniffer::action_SRV_MOBILE_USED_SKILL(UIDecodedPkt& obj, QString *anal
 	if (!analysis)
 	{
 		wstringstream summary;
-		summary << "Entity ID 0x" << std::hex << user << "/id2 0x"<< id2 <<
-			" (" << std::dec << startCoord1 << "," << startCoord2 << ")" << std::hex <<
-			" used skill 0x" << skillID << 
-			" -> (" << std::dec << targCoord1 << "," << targCoord2 << ")" << explainModifier(modifier)
-			<< std::hex << " Unk1: 0x" << unk1 << ", Modifier: 0x" << modifier;
+		summary << "Entity ID (0x" << std::hex << ID1 << ", 0x" << ID2 << ", 0x" << ID3 << ") coord (" <<
+			std::dec << startCoord1 << "," << startCoord2 << ")" << std::hex <<
+			" used skill 0x" << skillID;
+		if (modifier != 0x80)
+			summary << " [" << explainModifier(modifier) << "]";
+		summary <<"	-> ("<< std::dec << targCoord1 << "," << targCoord2 << ")" << std::hex;
 		if (modifier & 0x80)
 		{
-			UINT64 unk2 = obj.get_UInt64(L"Unk2");
-			summary << " [ TargetID: 0x" << unk2 << "]";
+			UINT64 targID = obj.get_UInt64(L"TargID");
+			summary << " [ TargetID: 0x" << targID << "]";
 		}
 
 		UI_DECODED_LIST_ENTRY listentry(obj);
@@ -1245,14 +1501,14 @@ void exileSniffer::action_SRV_MOBILE_USED_SKILL(UIDecodedPkt& obj, QString *anal
 
 void exileSniffer::action_SRV_MOBILE_UNK_0xeb(UIDecodedPkt& obj, QString *analysis)
 {
-	UINT64 id1 = obj.get_UInt64(L"ID1");
-	UINT64 id2 = obj.get_UInt64(L"ID2");
-	UINT32 unk1 = obj.get_UInt32(L"Unk1");
+	DWORD ID1 = obj.get_UInt64(L"ID1");
+	DWORD ID2 = obj.get_UInt64(L"ID2");
+	UINT32 ID3 = obj.get_UInt32(L"ID3");
 	if (!analysis)
 	{
 
 		wstringstream summary;
-		summary << std::hex << "Unk skill packet 0xeb. ID1: 0x" << id1 << ", ID2: 0x" << id2 << " unk1(skill?): 0x" << unk1;
+		summary << std::hex << "Unk skill packet 0xeb <confirmhit?>. objID (0x" << std::hex << ID1 << ", 0x" << ID2 << ", 0x" << ID3 << ") ";
 
 		UI_DECODED_LIST_ENTRY listentry(obj);
 		listentry.summary = QString::fromStdWString(summary.str());
@@ -1262,13 +1518,82 @@ void exileSniffer::action_SRV_MOBILE_UNK_0xeb(UIDecodedPkt& obj, QString *analys
 
 }
 
+void exileSniffer::action_SRV_MOBILE_UNK_0xee(UIDecodedPkt& obj, QString *analysis)
+{
+	DWORD ID1 = obj.get_UInt64(L"ID1");
+	DWORD ID2 = obj.get_UInt64(L"ID2");
+	UINT32 ID3 = obj.get_UInt32(L"ID3");
+
+	UINT32 s1 = obj.get_UInt32(L"S1");
+	UINT32 b1 = obj.get_UInt32(L"B1");
+	UINT32 b2 = obj.get_UInt32(L"B2");
+	DWORD64 d1 = obj.get_UInt64(L"D1");
+
+	UINT32 skillid = obj.get_UInt32(L"SkillID");
+
+	UINT32 zerobyte = obj.get_UInt32(L"ZeroByte");
+	
+	wstringstream summary;
+	summary << std::hex << "Unk 0xee. objID (0x" << std::hex << ID1 << ", 0x" << ID2 << ", 0x" << ID3 << ") " <<
+		", SBBD: 0x" << s1 << "," << b1 << "," << b2 << "," << d1 << ". SkillID: 0x" << skillid;
+
+
+	if (skillid & 0x400) //if XX4XX
+	{
+		summary << ", SkillID_4XX- 0x" << obj.get_UInt32(L"SkillBit400");
+	}
+
+	if (skillid >= 0x4000 && skillid < 0x8000)
+	{
+		summary << ", SkillID_4-8k- 0x" << obj.get_UInt32(L"SkillByte4k8k");
+	}
+
+	//todo add the other bits
+	if (!analysis)
+	{
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+
+	*analysis = QString::fromStdWString(summary.str());
+}
+
+void exileSniffer::action_SRV_MOBILE_UNK_0xef(UIDecodedPkt& obj, QString *analysis)
+{
+	DWORD ID1 = obj.get_UInt64(L"ID1");
+	DWORD ID2 = obj.get_UInt64(L"ID2");
+	UINT32 ID3 = obj.get_UInt32(L"ID3");
+
+	UINT32 s1 = obj.get_UInt32(L"S1");
+	UINT32 b1 = obj.get_UInt32(L"B1");
+	UINT32 b2 = obj.get_UInt32(L"B2");
+	DWORD64 d1 = obj.get_UInt64(L"D1");
+
+	UINT32 UnkEndB = obj.get_UInt32(L"UnkEndB");
+	if (!analysis)
+	{
+
+		wstringstream summary;
+		summary << std::hex << "Unk 0xef. objID (0x" << std::hex << ID1 << ", 0x" << ID2 << ", 0x" << ID3 << ") "
+			", SBBD: 0x" << s1<<","<<b1<<","<<b2<<","<<d1<<". EndByte: 0x"<<UnkEndB;
+
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
+
 void exileSniffer::action_SRV_MOBILE_UPDATE_HMS(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
-	UINT64 id2 = obj.get_UInt64(L"ObjID");
-	UINT64 unk1 = obj.get_UInt64(L"Unk1");
-	UINT32 unk2 = obj.get_UInt32(L"Unk2");
+	DWORD ID1 = obj.get_UInt64(L"ID1");
+	DWORD ID2 = obj.get_UInt64(L"ID2");
+	UINT32 ID3 = obj.get_UInt32(L"ID3");
 
 	UINT64 val = obj.get_UInt64(L"NewValue");
 	UINT64 unk3 = obj.get_UInt64(L"Unk3");
@@ -1279,7 +1604,7 @@ void exileSniffer::action_SRV_MOBILE_UPDATE_HMS(UIDecodedPkt& obj, QString *anal
 	{
 
 		wstringstream summary;
-		summary << "Stat update - obj 0x" << std::hex << id2 << " (caused by 0x" << unk1 << "?)" <<
+		summary << "Stat update - objID (0x" << std::hex << ID1 << ", 0x" << ID2 << ", 0x" << ID3 << ") - "<<
 			" - [";
 		switch (stat) {
 		case 0x0:
@@ -1304,15 +1629,25 @@ void exileSniffer::action_SRV_MOBILE_UPDATE_HMS(UIDecodedPkt& obj, QString *anal
 	}
 }
 
-void exileSniffer::action_SRV_STAT_CHANGED(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_STAT_CHANGED(UIDecodedPkt& obj, QString *analysis)//0xf1
 {
 	obj.toggle_payload_operations(true);
-	DWORD objID = obj.get_UInt64(L"ObjID");
+	DWORD ID1 = obj.get_UInt64(L"ID1");
+	DWORD ID2 = obj.get_UInt64(L"ID2");
+	UINT32 ID3 = obj.get_UInt32(L"ID3");
+
+	size_t listSize = 0;
+	auto plit = obj.payload.FindMember(L"PairList");
+	if (plit != obj.payload.MemberEnd())
+	{
+		listSize = plit->value.Size();
+	}
 
 	if (!analysis)
 	{
 		std::wstringstream summary;
-		summary << "Stat change for object ID 0x" <<std::hex << objID;
+		summary << "Stat change for object ID (0x" << std::hex << ID1 << ", 0x" << ID2 << ", 0x" << ID3 << ") - " <<
+			std::dec<<listSize<<" stats changed";
 
 		UI_DECODED_LIST_ENTRY listentry(obj);
 		listentry.summary = QString::fromStdWString(summary.str());
@@ -1320,6 +1655,127 @@ void exileSniffer::action_SRV_STAT_CHANGED(UIDecodedPkt& obj, QString *analysis)
 		return;
 	}
 
+	wstringstream analysisStream;
+	analysisStream << "Stat change for object ID (0x" << std::hex << ID1 << ", 0x" << ID2 << ", 0x" << ID3 << ")" << std::endl;
+
+	if (plit != obj.payload.MemberEnd())
+	{
+		analysisStream << "Stat Pairs:" << std::endl;
+		WValue &blist5 = plit->value;
+		for (auto pairlistit = blist5.Begin(); pairlistit != blist5.End(); pairlistit++)
+		{
+
+			WValue &pair = *pairlistit;
+			analysisStream << "\t0x" << pair[0].GetUint64() << ", 0x" << pair[1].GetUint64() << std::endl;
+		}
+		analysisStream << std::endl;
+	}
+
+	*analysis = QString::fromStdWString(analysisStream.str());
+}
+
+void exileSniffer::action_SRV_UNK_0xf2(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+	DWORD ID1 = obj.get_UInt64(L"ID1");
+	DWORD ID2 = obj.get_UInt64(L"ID2");
+	UINT32 ID3 = obj.get_UInt32(L"ID3");
+
+	DWORD DW1 = obj.get_UInt64(L"DW1");
+
+	if (!analysis)
+	{
+		std::wstringstream summary;
+		summary << std::hex << "Pkt 0xf2. ID (0x" << ID1 << ", 0x" << ID2 << ", 0x" << ID3 << ") DWORDS- 0x" << DW1 ;
+
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
+
+
+void exileSniffer::action_SRV_UNK_0xf3(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+	DWORD ID1 = obj.get_UInt64(L"ID1");
+	DWORD ID2 = obj.get_UInt64(L"ID2");
+	UINT32 ID3 = obj.get_UInt32(L"ID3");
+
+	DWORD DW1 = obj.get_UInt64(L"DW1");
+	DWORD DW2 = obj.get_UInt64(L"DW2");
+	DWORD DW3 = obj.get_UInt64(L"DW3");
+	DWORD DW4 = obj.get_UInt64(L"DW4");
+
+	if (!analysis)
+	{
+		std::wstringstream summary;
+		summary << std::hex << "Pkt 0xf3. ID (0x"<< ID1 << ", 0x" << ID2 << ", 0x" << ID3 << ") DWORDS- 0x"<<DW1<<", 0x"<<DW2<<", 0x"<<DW3<<", 0x"<<DW4;
+
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
+void exileSniffer::action_SRV_START_BUFF(UIDecodedPkt& obj, QString *analysis) //0xfa
+{
+	obj.toggle_payload_operations(true);
+	DWORD ID1 = obj.get_UInt64(L"ID1");
+	DWORD ID2 = obj.get_UInt64(L"ID2");
+	UINT32 ID3 = obj.get_UInt32(L"ID3");
+
+
+	ushort buffID = obj.get_UInt32(L"BuffID");
+	ushort buffDefinitionsRow = obj.get_UInt32(L"BuffDefinitionsRow");
+	DWORD UnkDWord3 = obj.get_UInt64(L"ID2");
+	ushort PotionSlot = obj.get_UInt32(L"PotionSlot");
+	ushort controlByte = obj.get_UInt32(L"ID2");
+
+	if (!analysis)
+	{
+		std::wstringstream summary;
+		summary << std::hex << "Buff 0x"<< buffID<<" started. ID (0x" << ID1 << ", 0x" << ID2 << ", 0x" << ID3 << ") ControlBits: 0x" << controlByte <<
+			"Other args - buffRow: 0x" << buffDefinitionsRow << ", C: 0x" << UnkDWord3 << ", Potion: 0x" << PotionSlot;
+
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+
+	wstringstream analysisStream;
+	analysisStream << std::hex;
+	analysisStream << "ID (0x" << ID1 << ", 0x" << ID2 << ", 0x" << ID3 << ")";
+	analysisStream << "BuffId: 0x" << buffID << std::endl;
+	analysisStream << "ControlBits: 0x" << controlByte << std::endl;
+	analysisStream << "Index into buffDefinitions.dat: " <<std::dec<< buffDefinitionsRow << std::endl;
+	analysisStream << "Other args: 0x" << UnkDWord3 << ", Potion 0x" << PotionSlot << std::endl;
+
+	*analysis = QString::fromStdWString(analysisStream.str());
+}
+
+void exileSniffer::action_SRV_END_EFFECT(UIDecodedPkt& obj, QString *analysis) //0xfb
+{
+	obj.toggle_payload_operations(true);
+	DWORD ID1 = obj.get_UInt64(L"ID1");
+	DWORD ID2 = obj.get_UInt64(L"ID2");
+	UINT32 ID3 = obj.get_UInt32(L"ID3");
+
+	ushort BuffID = obj.get_UInt32(L"BuffID");
+	if (!analysis)
+	{
+		std::wstringstream summary;
+		summary << std::hex << "Buff 0x"<<BuffID<<" ended. ID (0x"<< ID1 << ", 0x" << ID2 << ", 0x" << ID3 << ")";
+
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
 }
 
 void exileSniffer::action_CLI_REQUEST_PLAYERID(UIDecodedPkt& obj, QString *analysis)
@@ -1334,6 +1790,30 @@ void exileSniffer::action_CLI_REQUEST_PLAYERID(UIDecodedPkt& obj, QString *analy
 	}
 
 	*analysis = "No additional data expected";
+}
+
+void exileSniffer::action_SRV_NOTIFY_PLAYERID(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+	DWORD ID1 = obj.get_UInt64(L"ID1");
+	DWORD ID2 = obj.get_UInt64(L"ID2");
+	UINT32 ID3 = obj.get_UInt32(L"ID3");
+
+	if (!analysis)
+	{
+		std::wstringstream summary;
+		summary << std::hex << "Server notified client of playerID. (ID1 0x"<< ID1 << ", ID2: 0x" << ID2 << " ID3: 0x" << ID3 << ")";
+
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+
+	wstringstream analysisStream;
+	analysisStream << std::hex << "Server notified client of playerID. ID1 0x"
+		<< ID1 << ", ID2: 0x" << ID2 << " ID3: 0x" << ID3;
+	QString::fromStdWString(analysisStream.str());
 }
 
 void exileSniffer::action_SRV_UNKNOWN_0x111(UIDecodedPkt& obj, QString *analysis)
@@ -1364,31 +1844,6 @@ void exileSniffer::action_SRV_UNKNOWN_0x111(UIDecodedPkt& obj, QString *analysis
 	}
 
 
-}
-
-void exileSniffer::action_SRV_NOTIFY_PLAYERID(UIDecodedPkt& obj, QString *analysis)
-{
-	obj.toggle_payload_operations(true);
-	DWORD ID1 = obj.get_UInt64(L"ID1");
-	DWORD ID2 = obj.get_UInt64(L"ID2");
-	ushort ID3 = obj.get_UInt64(L"ID3");
-
-	if (!analysis)
-	{
-		std::wstringstream summary;
-		summary << std::hex << "Server notified client of playerID. ID1 0x"
-			<< ID1 << ", ID2: 0x" << ID2 << " ID3: 0x" << ID3;
-
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
-		return;
-	}
-
-	wstringstream analysisStream;
-	analysisStream << std::hex << "Server notified client of playerID. ID1 0x"
-		<< ID1 << ", ID2: 0x" << ID2 << " ID3: 0x" << ID3;
-	QString::fromStdWString(analysisStream.str());
 }
 
 
@@ -1422,10 +1877,12 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
-	DWORD objectID = obj.get_UInt64(L"ObjID");
-	DWORD unk1 = obj.get_UInt64(L"unkID1");
-	ushort unk2 = obj.get_UInt32(L"ObjID");
+	DWORD ID1 = obj.get_UInt64(L"ID1");
+	DWORD ID2 = obj.get_UInt64(L"ID2");
+	UINT32 ID3 = obj.get_UInt32(L"ID3");
+
 	DWORD objHash = obj.get_UInt64(L"objHash");
+
 	DWORD dataLen = obj.get_UInt32(L"DataLen");
 
 
@@ -1438,7 +1895,49 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 	{
 		wstringstream summary;
 		summary << std::hex << converter.from_bytes(hashCategory) << " added <"<<converter.from_bytes(hashResult)<<
-			"> ID 0x" << objectID <<" ("<<std::dec<<dataLen<<" bytes)";
+			"> ID (0x" << ID1 << "," << ID2 << ",0x" << ID3 << ")" <<" <"<<std::dec<<dataLen<<" bytes>";
+
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
+void exileSniffer::action_SRV_IDNOTIFY_0x136(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+
+	DWORD ID1 = obj.get_UInt64(L"ID1");
+	DWORD ID2 = obj.get_UInt64(L"ID2");
+	UINT32 ID3 = obj.get_UInt32(L"ID3");
+
+	DWORD dataLen = obj.get_UInt32(L"DataLen");
+
+	if (!analysis)
+	{
+		wstringstream summary;
+		summary << std::hex <<"0x136 (sequel to AddObj135). ID- (0x" << ID1 << "," << ID2 << ",0x"<< ID3 <<") -<"<<std::dec<<dataLen<<" bytes>";
+
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
+void exileSniffer::action_SRV_IDNOTIFY_0x137(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+
+	DWORD ID1 = obj.get_UInt64(L"ID1");
+	DWORD ID2 = obj.get_UInt64(L"ID2");
+	UINT32 ID3 = obj.get_UInt32(L"ID3");
+
+	if (!analysis)
+	{
+		wstringstream summary;
+		summary << std::hex << "ObjID notify 0x137. ID- (0x" << ID1 << "," << ID2 << ",0x" << ID3 << ")";
 
 		UI_DECODED_LIST_ENTRY listentry(obj);
 		listentry.summary = QString::fromStdWString(summary.str());

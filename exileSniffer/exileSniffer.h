@@ -134,20 +134,30 @@ class exileSniffer : public QMainWindow
 		void action_CLI_REMOVE_SOCKET(UIDecodedPkt&, QString*);
 		void action_CLI_INSERT_SOCKET(UIDecodedPkt&, QString*);
 		void action_CLI_LEVEL_SKILLGEM(UIDecodedPkt&, QString*);
+		void action_CLI_UNK_0x20(UIDecodedPkt&, QString*);
 		void action_CLI_SKILLPOINT_CHANGE(UIDecodedPkt&, QString*);
 		void action_CLI_CANCEL_BUF(UIDecodedPkt&, QString*);
+		void action_CLI_UNK_0x2c(UIDecodedPkt&, QString*);
 		void action_CLI_SET_HOTBARSKILL(UIDecodedPkt&, QString*);
 		void action_SRV_SKILL_SLOTS_LIST(UIDecodedPkt&, QString*);
 		
 		void action_CLI_USE_BELT_SLOT(UIDecodedPkt&, QString*);
 		void action_CLI_USE_ITEM(UIDecodedPkt&, QString*);
 
+		void action_CLI_SEND_PARTY_INVITE(UIDecodedPkt&, QString*);
+
+		void action_CLI_CREATE_PUBLICPARTY(UIDecodedPkt&, QString*);
 		void action_CLI_UNK_x56(UIDecodedPkt&, QString*);
 		void action_SRV_UNK_ACCT_SOCIAL_NAME(UIDecodedPkt&, QString*);
 		void action_CLI_REQUEST_PUBLICPARTIES(UIDecodedPkt&, QString*);
 		void action_SRV_RESPOND_PUBLICPARTIES(UIDecodedPkt&, QString*);
 		void action_SRV_CREATE_ITEM(UIDecodedPkt&, QString*);
 		void action_SRV_SLOT_ITEMSLIST(UIDecodedPkt&, QString*);
+		void action_UNK_MESSAGE_0x70(UIDecodedPkt&, QString*);
+		void action_UNK_MESSAGE_0x73(UIDecodedPkt&, QString*);
+		void action_CLI_SET_STATUS_MESSAGE(UIDecodedPkt&, QString*);
+
+		void action_CLI_SWAPPED_WEAPONS(UIDecodedPkt&, QString*);
 		void action_CLI_SKILLPANE_ACTION(UIDecodedPkt&, QString*);
 		void action_CLI_MICROSTRANSACTIONPANE_ACTION(UIDecodedPkt&, QString*);
 		void action_CLI_PACKET_EXIT(UIDecodedPkt&, QString*);
@@ -155,18 +165,27 @@ class exileSniffer : public QMainWindow
 		void action_CLI_CLICK_OBJ(UIDecodedPkt&, QString*);
 		void action_CLI_MOUSE_HELD(UIDecodedPkt&, QString*);
 		void action_CLI_MOUSE_RELEASE(UIDecodedPkt&, QString*);
-		void action_SRV_DISPLAY_BUILTIN_MSG(UIDecodedPkt&, QString*);
+		void action_SRV_CHAT_CHANNEL_ID(UIDecodedPkt&, QString*);
 		void action_CLI_GUILD_CREATE(UIDecodedPkt&, QString*);
+		void action_SRV_UNK_0xE6(UIDecodedPkt&, QString*);	
 		void action_SRV_MOBILE_USED_SKILL(UIDecodedPkt&, QString*);
 		void action_SRV_MOBILE_UNK_0xeb(UIDecodedPkt&, QString*);
+		void action_SRV_MOBILE_UNK_0xee(UIDecodedPkt&, QString*);
+		void action_SRV_MOBILE_UNK_0xef(UIDecodedPkt&, QString*);
 		void action_SRV_MOBILE_UPDATE_HMS(UIDecodedPkt&, QString*);
 		void action_SRV_STAT_CHANGED(UIDecodedPkt&, QString*);
+		void action_SRV_UNK_0xf2(UIDecodedPkt&, QString*);
+		void action_SRV_UNK_0xf3(UIDecodedPkt&, QString*);
+		void action_SRV_START_BUFF(UIDecodedPkt&, QString*);
+		void action_SRV_END_EFFECT(UIDecodedPkt&, QString*);
 		void action_CLI_REQUEST_PLAYERID(UIDecodedPkt&, QString *);
 		void action_SRV_UNKNOWN_0x111(UIDecodedPkt&, QString*);
 		void action_SRV_NOTIFY_PLAYERID(UIDecodedPkt&, QString *);
 		void action_CLI_OPTOUT_TUTORIALS(UIDecodedPkt&, QString*);
 		void action_SRV_HEARTBEAT(UIDecodedPkt&, QString*);
 		void action_SRV_ADD_OBJECT(UIDecodedPkt&, QString*);
+		void action_SRV_IDNOTIFY_0x136(UIDecodedPkt&, QString*);
+		void action_SRV_IDNOTIFY_0x137(UIDecodedPkt&, QString*);
 		
 	private:
 		std::ofstream outfile;

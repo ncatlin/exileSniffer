@@ -70,21 +70,30 @@ private:
 	void deserialise_CLI_INSERT_SOCKET(UIDecodedPkt *);
 
 	void deserialise_CLI_LEVEL_SKILLGEM(UIDecodedPkt *);
+	void deserialise_CLI_UNK_0x20(UIDecodedPkt *);
 	void deserialise_CLI_SKILLPOINT_CHANGE(UIDecodedPkt *);
 	void deserialise_CLI_CANCEL_BUF(UIDecodedPkt *);
+	void deserialise_CLI_UNK_0x2c(UIDecodedPkt *);
 	void deserialise_CLI_SET_HOTBARSKILL(UIDecodedPkt *);
 	void deserialise_SRV_SKILL_SLOTS_LIST(UIDecodedPkt *);
 	
 	void deserialise_CLI_USE_BELT_SLOT(UIDecodedPkt *);
 	void deserialise_CLI_USE_ITEM(UIDecodedPkt *);
-	
+
+	void deserialise_CLI_SEND_PARTY_INVITE(UIDecodedPkt *);
+
+	void deserialise_CLI_CREATE_PUBLICPARTY(UIDecodedPkt *);
 	void deserialise_CLI_UNK_x56(UIDecodedPkt *);
 	void deserialise_SRV_UNK_ACCT_SOCIAL_NAME(UIDecodedPkt *);
 	void deserialise_CLI_REQUEST_PUBLICPARTIES(UIDecodedPkt *);
 	void deserialise_SRV_RESPOND_PUBLICPARTIES(UIDecodedPkt *);
 	void deserialise_SRV_CREATE_ITEM(UIDecodedPkt *);
 	void deserialise_SRV_SLOT_ITEMSLIST(UIDecodedPkt *);
+	void deserialise_UNK_MESSAGE_0x70(UIDecodedPkt *uipkt);
+	void deserialise_UNK_MESSAGE_0x73(UIDecodedPkt *uipkt);
+	void deserialise_CLI_SET_STATUS_MESSAGE(UIDecodedPkt *uipkt);
 
+	void deserialise_CLI_SWAPPED_WEAPONS(UIDecodedPkt *uipkt);
 	void deserialise_CLI_SKILLPANE_ACTION(UIDecodedPkt *);
 	void deserialise_CLI_MICROSTRANSACTIONPANE_ACTION(UIDecodedPkt *);
 	void deserialise_CLI_PACKET_EXIT(UIDecodedPkt *);
@@ -92,18 +101,32 @@ private:
 	void deserialise_CLI_CLICK_OBJ(UIDecodedPkt *);
 	void deserialise_CLI_MOUSE_HELD(UIDecodedPkt *);
 	void deserialise_CLI_MOUSE_RELEASE(UIDecodedPkt *);
-	void deserialise_SRV_DISPLAY_BUILTIN_MSG(UIDecodedPkt *);
+	void deserialise_SRV_CHAT_CHANNEL_ID(UIDecodedPkt *);
 	void deserialise_CLI_GUILD_CREATE(UIDecodedPkt *);
+
+	void deserialise_SRV_UNK_0xE6(UIDecodedPkt *);
 	void deserialise_SRV_MOBILE_USED_SKILL(UIDecodedPkt *);
 	void deserialise_SRV_MOBILE_UNK_0xeb(UIDecodedPkt*);
+	void deserialise_SRV_MOBILE_UNK_0xee(UIDecodedPkt *);
+	void deserialise_SRV_MOBILE_UNK_0xef(UIDecodedPkt *);
+
 	void deserialise_SRV_MOBILE_UPDATE_HMS(UIDecodedPkt *);
+
 	void deserialise_SRV_STAT_CHANGED(UIDecodedPkt *);
+	void deserialise_SRV_UNK_0xf2(UIDecodedPkt *);
+	void deserialise_SRV_UNK_0xf3(UIDecodedPkt *);
+	void deserialise_SRV_START_EFFECT(UIDecodedPkt *);
+	void deserialise_SRV_END_EFFECT(UIDecodedPkt *);
+
 	void deserialise_CLI_REQUEST_PLAYERID(UIDecodedPkt *);
 	void deserialise_SRV_NOTIFY_PLAYERID(UIDecodedPkt *);
 	void deserialise_SRV_UNKNOWN_0x111(UIDecodedPkt *);
 	void deserialise_CLI_OPTOUT_TUTORIALS(UIDecodedPkt *);
 	void deserialise_SRV_HEARTBEAT(UIDecodedPkt *uipkt);
 	void deserialise_SRV_ADD_OBJECT(UIDecodedPkt *uipkt);
+	void deserialise_SRV_IDNOTIFY_0x136(UIDecodedPkt *uipkt);
+	void deserialise_SRV_IDNOTIFY_0x137(UIDecodedPkt *uipkt);
+	
 
 	byte consume_Byte();
 	unsigned short consumeUShort();
