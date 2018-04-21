@@ -160,7 +160,9 @@ void packet_processor::handle_packet_from_loginserver(networkStreamID streamID, 
 				(const byte *)keyCandidate->IV);
 			streamObj->fromLoginSalsa.ProcessData(decryptedBuffer, data, dataLen);
 
-			unsigned short packetID = getUshort(decryptedBuffer);
+			
+			unsigned short packetID = ntohs(getUshort(decryptedBuffer));
+			cout << "pkt from loginserveR: " << packetID << std::endl;
 			if (packetID == 0x0004)
 			{
 				keyCandidate->used = true;
@@ -323,6 +325,7 @@ void packet_processor::handle_packet_to_loginserver(networkStreamID streamID, by
 				//every two seconds relax the memory scan filters
 				if(msWaited % 2000 == 0)
 					keyGrabber->relaxScanFilters();
+
 				continue;
 			}
 
@@ -636,7 +639,7 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 
 	while (remainingDecrypted > 0)
 	{
-		unsigned short pktIDWord = consumeUShort();
+		unsigned short pktIDWord = ntohs(consumeUShort());
 
 		UIDecodedPkt *ui_decodedpkt =
 			new UIDecodedPkt(streamObj->workingSendKey->sourceProcess, eGame, PKTBIT_OUTBOUND, timems);
@@ -706,7 +709,7 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 	if (streamObj->packetCount == 1)
 	{
 		//first packet from gameserver starts 0005, followed by crypt which start 0012
-		ushort firstPktID = getUshort(data);
+		ushort firstPktID = ntohs(getUshort(data));
 		assert(firstPktID == SRV_PKT_ENCAPSULATED);
 
 		//if (streamObj->workingRecvKey == 0)
@@ -748,7 +751,7 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 
 	while (remainingDecrypted > 0)
 	{
-		unsigned short pktIDWord = consumeUShort();
+		unsigned short pktIDWord = ntohs(consumeUShort());
 
 		UIDecodedPkt *ui_decodedpkt =
 			new UIDecodedPkt(streamObj->workingRecvKey->sourceProcess, eGame, PKTBIT_INBOUND, timems);

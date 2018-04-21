@@ -53,17 +53,26 @@ S->C UnkPkID: 0xef size: 23 bytes
 #define CLI_USE_BELT_SLOT 0x0037
 #define CLI_USE_ITEM 0x0038
 
-#define SRVPK_STASH_INFO 0x3f
+#define SRV_STASH_INFO 0x3f
+
+#define CLI_UNK_0x41 0x41
 
 #define CLI_SEND_PARTY_INVITE 0x50
 
-#define CLI_CREATE_PUBLICPARTY 0x55
-#define CLI_UNK_x56 (CLI_CREATE_PUBLICPARTY+1)
+#define CLI_TRY_JOIN_PARTY 0x52
+#define CLI_DISBAND_PUBLIC_PARTY (CLI_TRY_JOIN_PARTY+1) //0x53
 
-#define SRV_UNK_ACCT_SOCIAL_NAME 0x58
+#define CLI_CREATE_PUBLICPARTY 0x55
+#define CLI_UNK_x56 (CLI_CREATE_PUBLICPARTY+1) //0x56
+#define CLI_GET_PARTY_DETAILS (CLI_UNK_x56 + 1) //0x57
+#define SRV_FRIENDSLIST (CLI_GET_PARTY_DETAILS+1) //0x58
+
+#define SRV_PARTY_DETAILS 0x5a
+#define SRV_PARTY_ENDED 0x5b //one dword party id arg -- unimplemented
 
 #define CLI_REQUEST_PUBLICPARTIES 0x5d
-#define SRV_RESPOND_PUBLICPARTIES (CLI_REQUEST_PUBLICPARTIES+1)
+#define SRV_PUBLIC_PARTY_LIST (CLI_REQUEST_PUBLICPARTIES+1)
+
 
 #define SRV_CREATE_ITEM 0x6d
 #define SRV_SLOT_ITEMSLIST (SRV_CREATE_ITEM+1)
@@ -74,11 +83,31 @@ S->C UnkPkID: 0xef size: 23 bytes
 
 #define CLI_SWAPPED_WEAPONS 0x7f
 
+//define 0x8f seen when leaving duel queue
+//define 0x90 seen when leaving duel queue
+
+
 #define CLI_SKILLPANE_ACTION 0x98
+
 #define SRV_SKILLPANE_DATA 0x9b
-#define CLI_MICROSTRANSACTIONPANE_ACTION 0x9f
+
+#define CLI_MICROTRANSACTION_SHOP_ACTION 0x9f
+
+#define SRV_MICROTRANSACTION_SHOP_DETAILS 0xa1
+#define SRV_UNK_A3 0xa3
+#define SRV_CHAT_CHANNEL_ID 0xa4
+
+#define CLI_GUILD_CREATE 0xAD
+
 
 #define CLI_PACKET_EXIT 0xc0
+#define CLI_PACKET_EXIT_2 0xc1 //unimplemented
+#define CLI_DUEL_CHALLENGE 0xc2 //unimplemented
+#define SRV_DUEL_RESPONSE 0xc3 //unimplemented
+#define SRV_DUEL_CHALLENGE 0xc4 //namestring, byte. unimplemented
+
+#define CLI_VISIT_HIDEOUT 0xce //unimplmented. 00 CE [namestring] [dword]
+
 
 #define CLI_USED_SKILL 0xd8
 #define CLI_CLICK_OBJ (CLI_USED_SKILL+1) //0xd9
@@ -86,14 +115,13 @@ S->C UnkPkID: 0xef size: 23 bytes
 
 #define CLI_MOUSE_RELEASE 0xdc
 
-#define SRV_MICROSTRANSACTIONSPANE_RESP 0xa1
-#define SRV_CHAT_CHANNEL_ID 0xa4
+#define CLI_OPEN_WORLD_SCREEN 0xe0
 
-#define CLI_GUILD_CREATE 0xAD
 
 #define SRV_UNK_0xE6 0xe6
-#define SRV_MOBILE_USED_SKILL 0xea
-#define SRV_MOBILE_UNK_0xeb 0xeb
+#define SRV_ITEM_REMOVED 0xe9 
+#define SRV_MOBILE_START_SKILL 0xea
+#define SRV_MOBILE_FINISH_SKILL 0xeb
 
 #define SRV_MOBILE_UNK_0xef 0xef
 #define SRV_MOBILE_UNK_0xee 0xee
@@ -113,6 +141,6 @@ S->C UnkPkID: 0xef size: 23 bytes
 #define CLI_OPTOUT_TUTORIALS 0x11c //gets 0xff response
 #define SRV_HEARTBEAT 0x132
 #define SRV_ADD_OBJECT 0x135
-#define SRV_IDNOTIFY_0x136 0x136
+#define SRV_UPDATE_OBJECT 0x136
 #define SRV_IDNOTIFY_0x137 0x137
 #define SRV_UNK_13A 0x13a

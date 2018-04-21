@@ -76,14 +76,17 @@ void exileSniffer::init_DecodedPktActioners()
 	decodedPktActioners[CLI_USE_BELT_SLOT] = &exileSniffer::action_CLI_USE_BELT_SLOT;
 	decodedPktActioners[CLI_USE_ITEM] = &exileSniffer::action_CLI_USE_ITEM;
 
+	decodedPktActioners[CLI_UNK_0x41] = &exileSniffer::action_CLI_UNK_0x41;
+	decodedPktActioners[SRV_STASH_INFO] = &exileSniffer::action_SRV_STASH_INFO;
 	decodedPktActioners[CLI_SEND_PARTY_INVITE] = &exileSniffer::action_CLI_SEND_PARTY_INVITE;
-
+	decodedPktActioners[CLI_DISBAND_PUBLIC_PARTY] = &exileSniffer::action_CLI_DISBAND_PUBLIC_PARTY;
 	decodedPktActioners[CLI_CREATE_PUBLICPARTY] = &exileSniffer::action_CLI_CREATE_PUBLICPARTY;
 	decodedPktActioners[CLI_UNK_x56] = &exileSniffer::action_CLI_UNK_x56;
-	decodedPktActioners[SRV_UNK_ACCT_SOCIAL_NAME] = &exileSniffer::action_SRV_UNK_ACCT_SOCIAL_NAME;
+	decodedPktActioners[CLI_GET_PARTY_DETAILS] = &exileSniffer::action_CLI_GET_PARTY_DETAILS;
+	decodedPktActioners[SRV_FRIENDSLIST] = &exileSniffer::action_SRV_FRIENDSLIST;
 	
 	decodedPktActioners[CLI_REQUEST_PUBLICPARTIES] = &exileSniffer::action_CLI_REQUEST_PUBLICPARTIES;
-	decodedPktActioners[SRV_RESPOND_PUBLICPARTIES] = &exileSniffer::action_SRV_RESPOND_PUBLICPARTIES;
+	decodedPktActioners[SRV_PUBLIC_PARTY_LIST] = &exileSniffer::action_SRV_PUBLIC_PARTY_LIST;
 	decodedPktActioners[SRV_CREATE_ITEM] = &exileSniffer::action_SRV_CREATE_ITEM;
 	decodedPktActioners[SRV_SLOT_ITEMSLIST] = &exileSniffer::action_SRV_SLOT_ITEMSLIST;
 
@@ -93,7 +96,9 @@ void exileSniffer::init_DecodedPktActioners()
 
 	decodedPktActioners[CLI_SWAPPED_WEAPONS] = &exileSniffer::action_CLI_SWAPPED_WEAPONS;
 	decodedPktActioners[CLI_SKILLPANE_ACTION] = &exileSniffer::action_CLI_SKILLPANE_ACTION;
-	decodedPktActioners[CLI_MICROSTRANSACTIONPANE_ACTION] = &exileSniffer::action_CLI_MICROSTRANSACTIONPANE_ACTION;
+	decodedPktActioners[CLI_MICROTRANSACTION_SHOP_ACTION] = &exileSniffer::action_CLI_MICROTRANSACTION_SHOP_ACTION;
+	decodedPktActioners[SRV_MICROTRANSACTION_SHOP_DETAILS] = &exileSniffer::action_SRV_MICROTRANSACTION_SHOP_DETAILS;
+	decodedPktActioners[SRV_UNK_A3] = &exileSniffer::action_SRV_UNK_A3;
 	decodedPktActioners[CLI_PACKET_EXIT] = &exileSniffer::action_CLI_PACKET_EXIT;
 	decodedPktActioners[CLI_USED_SKILL] = &exileSniffer::action_CLI_USED_SKILL;
 	decodedPktActioners[CLI_CLICK_OBJ] = &exileSniffer::action_CLI_CLICK_OBJ;
@@ -102,8 +107,9 @@ void exileSniffer::init_DecodedPktActioners()
 	decodedPktActioners[SRV_CHAT_CHANNEL_ID] = &exileSniffer::action_SRV_CHAT_CHANNEL_ID;
 	decodedPktActioners[CLI_GUILD_CREATE] = &exileSniffer::action_CLI_GUILD_CREATE;
 	decodedPktActioners[SRV_UNK_0xE6] = &exileSniffer::action_SRV_UNK_0xE6;
-	decodedPktActioners[SRV_MOBILE_USED_SKILL] = &exileSniffer::action_SRV_MOBILE_USED_SKILL;
-	decodedPktActioners[SRV_MOBILE_UNK_0xeb] = &exileSniffer::action_SRV_MOBILE_UNK_0xeb;
+	decodedPktActioners[SRV_ITEM_REMOVED] = &exileSniffer::action_SRV_ITEM_REMOVED;
+	decodedPktActioners[SRV_MOBILE_START_SKILL] = &exileSniffer::action_SRV_MOBILE_START_SKILL;
+	decodedPktActioners[SRV_MOBILE_FINISH_SKILL] = &exileSniffer::action_SRV_MOBILE_FINISH_SKILL;
 	decodedPktActioners[SRV_MOBILE_UNK_0xee] = &exileSniffer::action_SRV_MOBILE_UNK_0xee;
 	decodedPktActioners[SRV_MOBILE_UNK_0xef] = &exileSniffer::action_SRV_MOBILE_UNK_0xef;
 	decodedPktActioners[SRV_MOBILE_UPDATE_HMS] = &exileSniffer::action_SRV_MOBILE_UPDATE_HMS;
@@ -118,7 +124,7 @@ void exileSniffer::init_DecodedPktActioners()
 	decodedPktActioners[CLI_OPTOUT_TUTORIALS] = &exileSniffer::action_CLI_OPTOUT_TUTORIALS;
 	decodedPktActioners[SRV_HEARTBEAT] = &exileSniffer::action_SRV_HEARTBEAT;
 	decodedPktActioners[SRV_ADD_OBJECT] = &exileSniffer::action_SRV_ADD_OBJECT;
-	decodedPktActioners[SRV_IDNOTIFY_0x136] = &exileSniffer::action_SRV_IDNOTIFY_0x136;
+	decodedPktActioners[SRV_UPDATE_OBJECT] = &exileSniffer::action_SRV_UPDATE_OBJECT;
 	decodedPktActioners[SRV_IDNOTIFY_0x137] = &exileSniffer::action_SRV_IDNOTIFY_0x137;
 
 }
@@ -550,7 +556,7 @@ void exileSniffer::action_SRV_AREA_INFO(UIDecodedPkt& obj, QString *analysis)
 			activeCategory = hashCategory;
 		}
 
-		analysisStream << "\t\"" << converter.from_bytes(result_hash.first) << "\" <0x" << result_hash.second << ">" << std::endl;
+		analysisStream << "\t\"" << converter.from_bytes(result_hash.first) << "\"" << std::endl;
 	}
 	analysisStream << std::endl;
 
@@ -1034,6 +1040,37 @@ void exileSniffer::action_CLI_USE_ITEM(UIDecodedPkt& obj, QString *analysis)
 	}
 }
 
+
+void exileSniffer::action_CLI_UNK_0x41(UIDecodedPkt& obj, QString* analysis)
+{
+	obj.toggle_payload_operations(true);
+	if (!analysis)
+	{
+		std::wstringstream summary;
+		summary << "Unk pkt 0x41";
+
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
+void exileSniffer::action_SRV_STASH_INFO(UIDecodedPkt& obj, QString* analysis)
+{
+	obj.toggle_payload_operations(true);
+	if (!analysis)
+	{
+		std::wstringstream summary;
+		summary << "Stash(?) info from server";
+
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
 void exileSniffer::action_CLI_SEND_PARTY_INVITE(UIDecodedPkt& obj, QString* analysis)
 {
 	obj.toggle_payload_operations(true);
@@ -1050,13 +1087,44 @@ void exileSniffer::action_CLI_SEND_PARTY_INVITE(UIDecodedPkt& obj, QString* anal
 }
 
 
+void exileSniffer::action_CLI_TRY_JOIN_PARTY(UIDecodedPkt& obj, QString*analysis)
+{
+	obj.toggle_payload_operations(true);
+	if (!analysis)
+	{
+		std::wstringstream summary;
+		summary << "Sent request to join public party ID 0x" << std::hex << obj.get_UInt64(L"ID");
+
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
+void exileSniffer::action_CLI_DISBAND_PUBLIC_PARTY(UIDecodedPkt& obj, QString*analysis)
+{
+	obj.toggle_payload_operations(true);
+	if (!analysis)
+	{
+		std::wstringstream summary;
+		summary << "Disbanded public party ID 0x" << std::hex << obj.get_UInt64(L"ID");
+
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
 void exileSniffer::action_CLI_CREATE_PUBLICPARTY(UIDecodedPkt& obj, QString*analysis)
 {
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
 		std::wstringstream summary;
-		summary << "Created public party called: \"" << obj.get_wstring(L"Name") << "\"";
+		summary << "Created public party called: \"" 
+			<< obj.get_wstring(L"Name") << "\" - arg 0x" << std::hex << obj.get_UInt32(L"Arg");
 
 		UI_DECODED_LIST_ENTRY listentry(obj);
 		listentry.summary = listentry.summary = QString::fromStdWString(summary.str());
@@ -1084,8 +1152,26 @@ void exileSniffer::action_CLI_UNK_x56(UIDecodedPkt& obj, QString *analysis)
 		return;
 	}
 }
-void exileSniffer::action_SRV_UNK_ACCT_SOCIAL_NAME(UIDecodedPkt& obj, QString *analysis)
+
+void exileSniffer::action_CLI_GET_PARTY_DETAILS(UIDecodedPkt& obj, QString*analysis)
 {
+	obj.toggle_payload_operations(true);
+	if (!analysis)
+	{
+		std::wstringstream summary;
+		summary << "Send joined request for public party 0x" << std::hex << obj.get_UInt64(L"ID");
+
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
+
+void exileSniffer::action_SRV_FRIENDSLIST(UIDecodedPkt& obj, QString *analysis)
+{
+
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
@@ -1101,19 +1187,32 @@ void exileSniffer::action_SRV_UNK_ACCT_SOCIAL_NAME(UIDecodedPkt& obj, QString *a
 	}
 }
 
+void exileSniffer::action_SRV_PARTY_DETAILS(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+	if (!analysis)
+	{
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = "Server sent details for public party " + obj.get_UInt64(L"ID");
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
+
 void exileSniffer::action_CLI_REQUEST_PUBLICPARTIES(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
 		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Client requested latest public parties";
+		listentry.summary = "Client requested latest public parties - arg " + obj.get_UInt32(L"Arg");
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
 }
 
-void exileSniffer::action_SRV_RESPOND_PUBLICPARTIES(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_PUBLIC_PARTY_LIST(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 	if (!analysis)
@@ -1123,6 +1222,8 @@ void exileSniffer::action_SRV_RESPOND_PUBLICPARTIES(UIDecodedPkt& obj, QString *
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
+
+
 }
 
 void exileSniffer::action_SRV_CREATE_ITEM(UIDecodedPkt& obj, QString *analysis)
@@ -1291,7 +1392,7 @@ void exileSniffer::action_CLI_SKILLPANE_ACTION(UIDecodedPkt& obj, QString *analy
 	}
 }
 
-void exileSniffer::action_CLI_MICROSTRANSACTIONPANE_ACTION(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_CLI_MICROTRANSACTION_SHOP_ACTION(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 	if (!analysis)
@@ -1302,6 +1403,31 @@ void exileSniffer::action_CLI_MICROSTRANSACTIONPANE_ACTION(UIDecodedPkt& obj, QS
 		return;
 	}
 }
+
+void exileSniffer::action_SRV_MICROTRANSACTION_SHOP_DETAILS(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+	if (!analysis)
+	{
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = "Transaction pane details from server";
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
+void exileSniffer::action_SRV_UNK_A3(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+	if (!analysis)
+	{
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = "Unk message A3 from server";
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
 
 void exileSniffer::action_CLI_USED_SKILL(UIDecodedPkt& obj, QString *analysis)
 {
@@ -1355,9 +1481,9 @@ void exileSniffer::action_SRV_CHAT_CHANNEL_ID(UIDecodedPkt& obj, QString *analys
 {
 	obj.toggle_payload_operations(true);
 
-	UINT32 channelID = obj.get_UInt64(L"ChannelID");
-	UINT32 type = obj.get_UInt64(L"Type");
-	UINT32 language = obj.get_UInt64(L"Language");
+	UINT32 channelID = obj.get_UInt32(L"ChannelID");
+	UINT32 type = obj.get_UInt32(L"Type");
+	UINT32 language = obj.get_UInt32(L"Language");
 	if (!analysis)
 	{
 		wstringstream summary;
@@ -1428,7 +1554,22 @@ void exileSniffer::action_CLI_PACKET_EXIT(UIDecodedPkt& obj, QString *analysis)
 	}
 }
 
-void exileSniffer::action_SRV_MOBILE_USED_SKILL(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_ITEM_REMOVED(UIDecodedPkt& obj, QString *analysis)
+{
+	if (!analysis)
+	{
+
+		wstringstream summary;
+		summary << std::hex << "Item removed";
+
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
+void exileSniffer::action_SRV_MOBILE_START_SKILL(UIDecodedPkt& obj, QString *analysis)
 {
 	/*
 	00 EA 
@@ -1480,11 +1621,13 @@ void exileSniffer::action_SRV_MOBILE_USED_SKILL(UIDecodedPkt& obj, QString *anal
 	if (!analysis)
 	{
 		wstringstream summary;
-		summary << "Entity ID (0x" << std::hex << ID1 << ", 0x" << ID2 << ", 0x" << ID3 << ") coord (" <<
+		summary << "Entity ID (0x" << std::hex << ID1 << "," << ID2 << "," << ID3 << ") @(" <<
 			std::dec << startCoord1 << "," << startCoord2 << ")" << std::hex <<
-			" used skill 0x" << skillID;
-		if (modifier != 0x80)
-			summary << " [" << explainModifier(modifier) << "]";
+			" started skill 0x" << skillID<< " activation";
+
+		std::wstring modDetails = explainModifier(modifier);
+		if (!modDetails.empty())
+			summary << " [" << modDetails << "]";
 		summary <<"	-> ("<< std::dec << targCoord1 << "," << targCoord2 << ")" << std::hex;
 		if (modifier & 0x80)
 		{
@@ -1499,7 +1642,7 @@ void exileSniffer::action_SRV_MOBILE_USED_SKILL(UIDecodedPkt& obj, QString *anal
 	}
 }
 
-void exileSniffer::action_SRV_MOBILE_UNK_0xeb(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_MOBILE_FINISH_SKILL(UIDecodedPkt& obj, QString *analysis)
 {
 	DWORD ID1 = obj.get_UInt64(L"ID1");
 	DWORD ID2 = obj.get_UInt64(L"ID2");
@@ -1508,7 +1651,7 @@ void exileSniffer::action_SRV_MOBILE_UNK_0xeb(UIDecodedPkt& obj, QString *analys
 	{
 
 		wstringstream summary;
-		summary << std::hex << "Unk skill packet 0xeb <confirmhit?>. objID (0x" << std::hex << ID1 << ", 0x" << ID2 << ", 0x" << ID3 << ") ";
+		summary << std::hex << "ObjID (0x" << std::hex << ID1 << ", 0x" << ID2 << ", 0x" << ID3 << ") finished skill activation";
 
 		UI_DECODED_LIST_ENTRY listentry(obj);
 		listentry.summary = QString::fromStdWString(summary.str());
@@ -1891,20 +2034,142 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 	std::string hashCategory;
 	lookup_hash(objHash, hashResult, hashCategory);
 
+	DWORD coord1 = obj.get_UInt64(L"Coord1");
+	DWORD coord2 = obj.get_UInt64(L"Coord2");
+
 	if (!analysis)
 	{
 		wstringstream summary;
 		summary << std::hex << converter.from_bytes(hashCategory) << " added <"<<converter.from_bytes(hashResult)<<
-			"> ID (0x" << ID1 << "," << ID2 << ",0x" << ID3 << ")" <<" <"<<std::dec<<dataLen<<" bytes>";
+			"> ID (0x" << ID1 << "," << ID2 << ",0x" << ID3 << ")" <<"@ "<<std::dec<<coord1<<","<<coord2<<
+			"<"<<dataLen<<" bytes>";
 
 		UI_DECODED_LIST_ENTRY listentry(obj);
 		listentry.summary = QString::fromStdWString(summary.str());
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
+
+	wstringstream analysisStream;
+
+	analysisStream << std::hex << "ID 0x" << ID1 << ", 0x" << ID2 << ", 0x" << ID3 << std::endl;
+	analysisStream << "Hash: 0x" << objHash << " - " 
+		<< converter.from_bytes(hashCategory) << "-" 
+		<< converter.from_bytes(hashResult) << std::endl;
+	analysisStream << "Datalen: " << std::dec << dataLen << std::endl;
+	analysisStream << "UnkByte 0: " << std::hex << obj.get_UInt32(L"UnkByte0") << std::endl;
+	analysisStream << "Coords: " << std::dec << coord1 << "," << coord2 << std::endl;
+
+	analysisStream << std::hex;
+	DWORD unkdword1 = ntohl(obj.get_UInt64(L"UnkDword1"));
+	if (unkdword1 != 0)
+	{
+		lookup_hash(unkdword1, hashResult, hashCategory);
+		analysisStream << "Unk DWORD After Coords: 0x" << unkdword1 << " - "
+			<< converter.from_bytes(hashCategory) << "-"
+			<< converter.from_bytes(hashResult) << std::endl;
+	}
+	analysisStream << "Unk byte 1: 0x" << obj.get_UInt32(L"UnkByte1") << std::endl;
+	byte controlByte1 = obj.get_UInt32(L"ControlByte1");
+	analysisStream << "Control byte 1: 0x" << controlByte1 << std::endl;
+
+	if (controlByte1 & 0x20)
+	{
+		analysisStream << "\tcontrolByte1 bit 0x20 set!" << std::endl;
+		analysisStream << "\t  Arg 1: 0x" << obj.get_UInt64(L"Unk_b20_1");
+			analysisStream << ", 2: 0x" << obj.get_UInt64(L"Unk_b20_2");
+			analysisStream << ", 3: 0x" << obj.get_UInt64(L"Unk_b20_3") << std::endl;
+	}
+
+	if (controlByte1 & 0x4)
+	{
+		analysisStream << "\tcontrolByte1 bit 0x4 set!" << std::endl;
+		analysisStream << "\t  Arg 1: 0x" << obj.get_UInt64(L"Unk_b4_1");
+		analysisStream << ", 2: 0x" << obj.get_UInt64(L"Unk_b4_2") << std::endl;
+	}
+
+	if (controlByte1 & 0x40)
+	{
+		analysisStream << "\tcontrolByte1 bit 0x40 set!" << std::endl;
+		analysisStream << "\t  Arg 1: 0x" << obj.get_UInt64(L"Unk_b40_1");
+		analysisStream << ", 2: 0x" << obj.get_UInt64(L"Unk_b40_2") << std::endl;
+	}
+
+	analysisStream << std::endl;
+
+	auto it = obj.payload.FindMember(L"StatList");
+	if (it != obj.payload.MemberEnd())
+	{
+		WValue &statList = it->value;
+		analysisStream << std::dec << statList.Size() << " Stats:" << std::endl;
+
+		for (auto statit = statList.Begin(); statit != statList.End(); statit++)
+		{
+			WValue &pair = *statit;
+			DWORD statIndex = pair[0].GetUint64() - 1;
+			analysisStream << "\t" <<
+				converter.from_bytes(statDescriptions.at(statIndex))
+				<< ": " << pair[1].GetInt64() << std::endl;
+		}
+	}
+	else
+		analysisStream << "No stat list";
+
+	analysisStream << std::dec << std::endl;
+	analysisStream << "Current Health " << obj.get_UInt64(L"CurrentHealth") << std::endl;
+	analysisStream << "Reserved Health (absolute): " << obj.get_UInt64(L"ReservedHealth") << std::endl;
+	analysisStream << "Reserved Health (%): " << obj.get_UInt32(L"ReservedPercentHealth") << std::endl;
+	analysisStream << "Unk Health: " << obj.get_UInt64(L"HealthUnk") << std::endl;
+
+	analysisStream << "Current Mana " << obj.get_UInt64(L"CurrentMana") << std::endl;
+	analysisStream << "Reserved Mana (absolute): " << obj.get_UInt64(L"ReservedMana") << std::endl;
+	analysisStream << "Reserved Mana (%): " << obj.get_UInt32(L"ReservedPercentMana") << std::endl;
+	analysisStream << "Unk Mana: " << obj.get_UInt64(L"ManaUnk") << std::endl;
+
+	analysisStream << "Current Shield " << obj.get_UInt64(L"CurrentShield") << std::endl;
+	analysisStream << "[?]Reserved Shield (absolute): " << obj.get_UInt64(L"ShieldUnk1") << std::endl;
+	analysisStream << "[?]Reserved Shield (%): " << obj.get_UInt32(L"ShieldUnk2") << std::endl;
+	analysisStream << "[?]Unk Shield: " << obj.get_UInt64(L"ShieldUnk3") << std::endl;
+	analysisStream << "Unk Value after HMS: " << obj.get_UInt64(L"UnkDWORDEndHMS") << std::endl;
+
+	analysisStream << std::dec << std::endl;
+
+	it = obj.payload.FindMember(L"BuffList");
+	if (it != obj.payload.MemberEnd())
+	{
+		WValue &buffList = it->value;
+		analysisStream << std::dec << buffList.Size() << " Buffs:" << std::endl;
+
+		for (auto buffit = buffList.Begin(); buffit != buffList.End(); buffit++)
+		{
+			WValue &obj = *buffit;
+
+			analysisStream << "Buff " << obj.FindMember(L"BuffID")->value.GetUint() << std::endl;
+			ushort defsrow = obj.FindMember(L"BuffDefinitionsRow")->value.GetUint();
+			analysisStream << "\tBuffDefinitions.dat row " << defsrow << " - " << "?" << std::endl;
+			ushort visualsrow = obj.FindMember(L"BuffVisualsRow")->value.GetUint();
+			analysisStream << "\tBuffVisuals.dat row " << visualsrow << " - " << "?" << std::endl;
+
+			analysisStream << std::hex;
+			analysisStream << "\tUnkDword1 0x:" << obj.FindMember(L"UnkDword1")->value.GetUint64() << std::endl;
+			analysisStream << "\tUnkShort2 0x:" << obj.FindMember(L"UnkShort2")->value.GetUint() << std::endl;
+			analysisStream << "\tUnkDword3 0x:" << obj.FindMember(L"UnkDword3")->value.GetUint64() << std::endl;
+			analysisStream << "\tUnkShort4 0x:" << obj.FindMember(L"UnkShort4")->value.GetUint() << std::endl;
+			analysisStream << "\tUnkShort5 0x:" << obj.FindMember(L"UnkShort5")->value.GetUint() << std::endl;
+			analysisStream << "\tUnkShort6 0x:" << obj.FindMember(L"UnkShort6")->value.GetUint() << std::endl;
+			analysisStream << "\tUnkShort7 0x:" << obj.FindMember(L"UnkShort7")->value.GetUint() << std::endl;
+			analysisStream << "\tUnkShort8 0x:" << obj.FindMember(L"UnkShort8")->value.GetUint() << std::endl;
+			analysisStream << "\tUnkByte9 0x:" << obj.FindMember(L"UnkByte9")->value.GetUint() << std::endl;
+			analysisStream << std::endl;
+		}
+	}
+	else
+		analysisStream << "No stat list";
+
+	*analysis = QString::fromStdWString(analysisStream.str());
 }
 
-void exileSniffer::action_SRV_IDNOTIFY_0x136(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_UPDATE_OBJECT(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 

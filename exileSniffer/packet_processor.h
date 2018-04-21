@@ -47,6 +47,8 @@ private:
 	inline void consume_add_byte(std::wstring name, UIDecodedPkt *uipkt) {	uipkt->add_byte(name, consume_Byte());}
 	inline void consume_add_word(std::wstring name, UIDecodedPkt *uipkt) { uipkt->add_word(name, consumeUShort()); }
 	inline void consume_add_dword(std::wstring name, UIDecodedPkt *uipkt) { uipkt->add_dword(name, consume_DWORD()); }
+	inline void consume_add_word_ntoh(std::wstring name, UIDecodedPkt *uipkt) { uipkt->add_word(name, ntohs(consumeUShort())); }
+	inline void consume_add_dword_ntoh(std::wstring name, UIDecodedPkt *uipkt) { uipkt->add_dword(name, ntohl(consume_DWORD())); }
 
 	void deserialise_SRV_PKT_ENCAPSULATED(UIDecodedPkt *);
 	void deserialise_CLI_CHAT_MSG_ITEMS(UIDecodedPkt *);
@@ -58,6 +60,7 @@ private:
 	void deserialise_CLI_PING_CHALLENGE(UIDecodedPkt *);
 	void deserialise_SRV_PING_RESPONSE(UIDecodedPkt *);		
 	void deserialise_SRV_AREA_INFO(UIDecodedPkt*);
+
 	void deserialise_SRV_PRELOAD_MONSTER_LIST(UIDecodedPkt*);
 	void deserialise_SRV_UNK_0x13(UIDecodedPkt *);
 	void deserialise_SRV_PLAYER_ITEMS(UIDecodedPkt*);
@@ -72,6 +75,7 @@ private:
 	void deserialise_CLI_LEVEL_SKILLGEM(UIDecodedPkt *);
 	void deserialise_CLI_UNK_0x20(UIDecodedPkt *);
 	void deserialise_CLI_SKILLPOINT_CHANGE(UIDecodedPkt *);
+
 	void deserialise_CLI_CANCEL_BUF(UIDecodedPkt *);
 	void deserialise_CLI_UNK_0x2c(UIDecodedPkt *);
 	void deserialise_CLI_SET_HOTBARSKILL(UIDecodedPkt *);
@@ -79,14 +83,23 @@ private:
 	
 	void deserialise_CLI_USE_BELT_SLOT(UIDecodedPkt *);
 	void deserialise_CLI_USE_ITEM(UIDecodedPkt *);
+	void deserialise_CLI_UNK_0x41(UIDecodedPkt *);
+	void deserialise_SRV_STASH_INFO(UIDecodedPkt *);
 
 	void deserialise_CLI_SEND_PARTY_INVITE(UIDecodedPkt *);
 
+	void deserialise_CLI_TRY_JOIN_PARTY(UIDecodedPkt *);
+	void deserialise_CLI_DISBAND_PUBLIC_PARTY(UIDecodedPkt *);
 	void deserialise_CLI_CREATE_PUBLICPARTY(UIDecodedPkt *);
 	void deserialise_CLI_UNK_x56(UIDecodedPkt *);
-	void deserialise_SRV_UNK_ACCT_SOCIAL_NAME(UIDecodedPkt *);
+	void deserialise_CLI_GET_PARTY_DETAILS(UIDecodedPkt*);
+	void deserialise_SRV_FRIENDSLIST(UIDecodedPkt *);
+
+	void deserialise_SRV_PARTY_DETAILS(UIDecodedPkt *);
+
 	void deserialise_CLI_REQUEST_PUBLICPARTIES(UIDecodedPkt *);
-	void deserialise_SRV_RESPOND_PUBLICPARTIES(UIDecodedPkt *);
+	void deserialise_SRV_PUBLIC_PARTY_LIST(UIDecodedPkt *);
+
 	void deserialise_SRV_CREATE_ITEM(UIDecodedPkt *);
 	void deserialise_SRV_SLOT_ITEMSLIST(UIDecodedPkt *);
 	void deserialise_UNK_MESSAGE_0x70(UIDecodedPkt *uipkt);
@@ -94,19 +107,34 @@ private:
 	void deserialise_CLI_SET_STATUS_MESSAGE(UIDecodedPkt *uipkt);
 
 	void deserialise_CLI_SWAPPED_WEAPONS(UIDecodedPkt *uipkt);
+
 	void deserialise_CLI_SKILLPANE_ACTION(UIDecodedPkt *);
-	void deserialise_CLI_MICROSTRANSACTIONPANE_ACTION(UIDecodedPkt *);
+
+	void deserialise_SRV_SKILLPANE_DATA(UIDecodedPkt *);
+
+	void deserialise_CLI_MICROTRANSACTION_SHOP_ACTION(UIDecodedPkt *);
+	void deserialise_SRV_MICROTRANSACTION_SHOP_DETAILS(UIDecodedPkt *);
+	void deserialise_SRV_UNK_A3(UIDecodedPkt *);
+	void deserialise_SRV_CHAT_CHANNEL_ID(UIDecodedPkt *);
+
+	void deserialise_CLI_GUILD_CREATE(UIDecodedPkt *);
+
 	void deserialise_CLI_PACKET_EXIT(UIDecodedPkt *);
+
 	void deserialise_CLI_USED_SKILL(UIDecodedPkt *);
+
 	void deserialise_CLI_CLICK_OBJ(UIDecodedPkt *);
 	void deserialise_CLI_MOUSE_HELD(UIDecodedPkt *);
 	void deserialise_CLI_MOUSE_RELEASE(UIDecodedPkt *);
-	void deserialise_SRV_CHAT_CHANNEL_ID(UIDecodedPkt *);
-	void deserialise_CLI_GUILD_CREATE(UIDecodedPkt *);
+
+	void deserialise_CLI_OPEN_WORLD_SCREEN(UIDecodedPkt *);
 
 	void deserialise_SRV_UNK_0xE6(UIDecodedPkt *);
-	void deserialise_SRV_MOBILE_USED_SKILL(UIDecodedPkt *);
-	void deserialise_SRV_MOBILE_UNK_0xeb(UIDecodedPkt*);
+
+	void deserialise_SRV_ITEM_REMOVED(UIDecodedPkt *);
+	void deserialise_SRV_MOBILE_START_SKILL(UIDecodedPkt *);
+	void deserialise_SRV_MOBILE_FINISH_SKILL(UIDecodedPkt *);
+
 	void deserialise_SRV_MOBILE_UNK_0xee(UIDecodedPkt *);
 	void deserialise_SRV_MOBILE_UNK_0xef(UIDecodedPkt *);
 
@@ -124,7 +152,7 @@ private:
 	void deserialise_CLI_OPTOUT_TUTORIALS(UIDecodedPkt *);
 	void deserialise_SRV_HEARTBEAT(UIDecodedPkt *uipkt);
 	void deserialise_SRV_ADD_OBJECT(UIDecodedPkt *uipkt);
-	void deserialise_SRV_IDNOTIFY_0x136(UIDecodedPkt *uipkt);
+	void deserialise_SRV_UPDATE_OBJECT(UIDecodedPkt *uipkt);
 	void deserialise_SRV_IDNOTIFY_0x137(UIDecodedPkt *uipkt);
 	
 

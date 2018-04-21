@@ -334,8 +334,10 @@ bool exileSniffer::packet_passes_raw_filter(UI_RAWHEX_PKT *pkt, clientData *clie
 	//todo user specified
 	if (pkt->startBytes == CLI_PING_CHALLENGE || 
 		pkt->startBytes == SRV_PING_RESPONSE || 
-		pkt->startBytes == SRV_HEARTBEAT)
+		pkt->startBytes == SRV_HEARTBEAT ||
+		pkt->startBytes == SRV_CHAT_MESSAGE)
 		return false;
+
 	return true;
 }
 
@@ -623,6 +625,13 @@ void exileSniffer::fill_gamedata_lists()
 		monsterVarieties.push_back(recordsIt->GetString());
 	}
 
+	rapidjson::Value& statIndexDoc = jsondoc.FindMember("StatIndexes")->value;
+	recordsIt = statIndexDoc.Begin();
+	for (; recordsIt != statIndexDoc.End(); recordsIt++)
+	{
+		statDescriptions.push_back(recordsIt->GetString());
+	}
+
 
 	rapidjson::Value& monsterVarietyDoc = jsondoc.FindMember("MonsterVarietiesHashes")->value;
 	genericHashesLoad(monsterVarietyDoc, monsterHashes);
@@ -647,6 +656,10 @@ void exileSniffer::fill_gamedata_lists()
 
 	rapidjson::Value& itemsDoc = jsondoc.FindMember("ItemHashes")->value;
 	genericHashesLoad(itemsDoc, itemHashes);
+
+
+
+
 }
 
 

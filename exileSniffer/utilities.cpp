@@ -16,12 +16,12 @@ std::string timestamp()
 
 unsigned int getUlong(void *ptr)
 {
-	return htonl(*(DWORD*)(ptr));
+	return *(DWORD*)(ptr);
 }
 
 unsigned int getUshort(void *ptr)
 {
-	return htons(*(unsigned short*)(ptr));
+	return *(unsigned short*)(ptr);
 }
 
 std::wstring mb_to_utf8(std::string utf16_string)

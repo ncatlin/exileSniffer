@@ -245,7 +245,7 @@ public:
         decodedList->setDragEnabled(false);
         decodedList->setSelectionMode(QAbstractItemView::NoSelection);
         decodedList->setSelectionBehavior(QAbstractItemView::SelectRows);
-        decodedList->setSortingEnabled(true);
+        decodedList->setSortingEnabled(false);
         splitter->addWidget(decodedList);
         decodedList->horizontalHeader()->setDefaultSectionSize(60);
         decodedList->horizontalHeader()->setMinimumSectionSize(43);
