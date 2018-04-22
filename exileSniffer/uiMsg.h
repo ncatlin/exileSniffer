@@ -87,7 +87,9 @@ public:
 	void setStartOffset(unsigned short off) { bufferOffsets.first = off; }
 	void setEndOffset(unsigned short off) { bufferOffsets.second = off; }
 	void setFailedDecode() { failedDecode = true; }
+	void setAbandoned() { abandoned = true; }
 	bool decodeError() { return failedDecode; }
+	bool wasAbandoned() { return abandoned; }
 	long long time_processed_ms() { return mstime; }
 	DWORD clientProcessID() { return PID; }
 
@@ -103,6 +105,7 @@ public:
 private:
 	DWORD PID;
 	bool failedDecode = false;
+	bool abandoned = false;
 	bool payloadOperations = false;
 	long long mstime;
 };

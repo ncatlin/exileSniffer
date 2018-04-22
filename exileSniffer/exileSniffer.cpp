@@ -166,10 +166,16 @@ void exileSniffer::action_UI_Msg(UI_MESSAGE *msg)
 	{
 		deleteAfterUse = false; //archived
 		UIDecodedPkt &uiDecodedMsg = *((UIDecodedPkt *)msg);
+
 		if(!uiDecodedMsg.decodeError())
 			action_decoded_packet(uiDecodedMsg); 
 		else
-			action_undecoded_packet(uiDecodedMsg);
+		{
+			if (uiDecodedMsg.wasAbandoned())
+				action_decoded_packet(uiDecodedMsg);
+			else
+				action_undecoded_packet(uiDecodedMsg);
+		}
 		break;
 	}
 	}
@@ -507,8 +513,8 @@ bool exileSniffer::lookup_areaCode(unsigned long code, std::wstring& result)
 	//todo json 16
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
-	auto areasIt = areaCodes.find(code);
-	if (areasIt != areaCodes.end())
+	auto areasIt = ggpk.areaCodes.find(code);
+	if (areasIt != ggpk.areaCodes.end())
 	{
 		result = converter.from_bytes(areasIt->second);
 		return true;
@@ -522,56 +528,56 @@ bool exileSniffer::lookup_areaCode(unsigned long code, std::wstring& result)
 
 bool exileSniffer::lookup_hash(unsigned long hash, std::string& result, std::string& category)
 {
-	auto monstersIt = monsterHashes.find(hash);
-	if (monstersIt != monsterHashes.end())
+	auto monstersIt = ggpk.monsterHashes.find(hash);
+	if (monstersIt != ggpk.monsterHashes.end())
 	{
 		result = monstersIt->second;
 		category = "Monster";
 		return true;
 	}
 
-	auto objectsIt = gameObjHashes.find(hash);
-	if (objectsIt != gameObjHashes.end())
+	auto objectsIt = ggpk.gameObjHashes.find(hash);
+	if (objectsIt != ggpk.gameObjHashes.end())
 	{
 		result = objectsIt->second;
 		category = "Object";
 		return true;
 	}
 
-	auto chestsIt = chestHashes.find(hash);
-	if (chestsIt != chestHashes.end())
+	auto chestsIt = ggpk.chestHashes.find(hash);
+	if (chestsIt != ggpk.chestHashes.end())
 	{
 		result = chestsIt->second;
 		category = "Chest";
 		return true;
 	}
 
-	auto charactersIt = characterHashes.find(hash);
-	if (charactersIt != characterHashes.end())
+	auto charactersIt = ggpk.characterHashes.find(hash);
+	if (charactersIt != ggpk.characterHashes.end())
 	{
 		result = charactersIt->second;
 		category = "Character";
 		return true;
 	}
 
-	auto npcsIt = NPCHashes.find(hash);
-	if (npcsIt != NPCHashes.end())
+	auto npcsIt = ggpk.NPCHashes.find(hash);
+	if (npcsIt != ggpk.NPCHashes.end())
 	{
 		result = npcsIt->second;
 		category = "NPC";
 		return true;
 	}
 
-	auto petsIt = petHashes.find(hash);
-	if (petsIt != petHashes.end())
+	auto petsIt = ggpk.petHashes.find(hash);
+	if (petsIt != ggpk.petHashes.end())
 	{
 		result = petsIt->second;
 		category = "Pet";
 		return true;
 	}
 
-	auto itemsIt = itemHashes.find(hash);
-	if (itemsIt != itemHashes.end())
+	auto itemsIt = ggpk.itemHashes.find(hash);
+	if (itemsIt != ggpk.itemHashes.end())
 	{
 		result = itemsIt->second;
 		category = "Item";
@@ -622,40 +628,53 @@ void exileSniffer::fill_gamedata_lists()
 	rapidjson::Value::ConstValueIterator recordsIt = monsterVarietyIndexDoc.Begin();
 	for (; recordsIt != monsterVarietyIndexDoc.End(); recordsIt++)
 	{
-		monsterVarieties.push_back(recordsIt->GetString());
+		ggpk.monsterVarieties.push_back(recordsIt->GetString());
 	}
 
 	rapidjson::Value& statIndexDoc = jsondoc.FindMember("StatIndexes")->value;
 	recordsIt = statIndexDoc.Begin();
 	for (; recordsIt != statIndexDoc.End(); recordsIt++)
 	{
-		statDescriptions.push_back(recordsIt->GetString());
+		ggpk.statDescriptions.push_back(recordsIt->GetString());
 	}
 
+	rapidjson::Value& buffDefsDoc = jsondoc.FindMember("BuffDefinitions")->value;
+	recordsIt = buffDefsDoc.Begin();
+	for (; recordsIt != buffDefsDoc.End(); recordsIt++)
+	{
+		ggpk.buffDefinitions.push_back(recordsIt->GetString());
+	}
+	
+	rapidjson::Value& buffVisDoc = jsondoc.FindMember("BuffVisuals")->value;
+	recordsIt = buffVisDoc.Begin();
+	for (; recordsIt != buffVisDoc.End(); recordsIt++)
+	{
+		ggpk.buffVisuals.push_back(recordsIt->GetString());
+	}
 
 	rapidjson::Value& monsterVarietyDoc = jsondoc.FindMember("MonsterVarietiesHashes")->value;
-	genericHashesLoad(monsterVarietyDoc, monsterHashes);
+	genericHashesLoad(monsterVarietyDoc, ggpk.monsterHashes);
 
 	rapidjson::Value& areaCodesDoc = jsondoc.FindMember("AreaCodes")->value;
-	genericHashesLoad(areaCodesDoc, areaCodes);
+	genericHashesLoad(areaCodesDoc, ggpk.areaCodes);
 
 	rapidjson::Value& objectRegisterDoc = jsondoc.FindMember("ObjRegisterHashes")->value;
-	genericHashesLoad(objectRegisterDoc, gameObjHashes);
+	genericHashesLoad(objectRegisterDoc, ggpk.gameObjHashes);
 
 	rapidjson::Value& chestsDoc = jsondoc.FindMember("ChestHashes")->value;
-	genericHashesLoad(chestsDoc, chestHashes);
+	genericHashesLoad(chestsDoc, ggpk.chestHashes);
 
 	rapidjson::Value& petsDoc = jsondoc.FindMember("PetHashes")->value;
-	genericHashesLoad(petsDoc, petHashes);
+	genericHashesLoad(petsDoc, ggpk.petHashes);
 
 	rapidjson::Value& charactersDoc = jsondoc.FindMember("CharacterHashes")->value;
-	genericHashesLoad(charactersDoc, characterHashes);
+	genericHashesLoad(charactersDoc, ggpk.characterHashes);
 
 	rapidjson::Value& npcsDoc = jsondoc.FindMember("NPCHashes")->value;
-	genericHashesLoad(npcsDoc, NPCHashes);
+	genericHashesLoad(npcsDoc, ggpk.NPCHashes);
 
 	rapidjson::Value& itemsDoc = jsondoc.FindMember("ItemHashes")->value;
-	genericHashesLoad(itemsDoc, itemHashes);
+	genericHashesLoad(itemsDoc, ggpk.itemHashes);
 
 
 
@@ -680,6 +699,11 @@ void exileSniffer::decodedCellActivated(int row, int col)
 			(this->*f)(*obj, &detailedAnalysis);
 			if(!detailedAnalysis.isEmpty())
 				ui.decodedText->insertPlainText(detailedAnalysis + "\n\n");
+			if (obj->wasAbandoned())
+			{
+				QString warn = "\tWARNING: Packet not decoded fully - processing abandoned\n\n";
+				ui.decodedText->insertPlainText(warn);
+			}
 		}
 		else
 		{

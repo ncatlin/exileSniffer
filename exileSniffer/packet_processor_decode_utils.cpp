@@ -9,6 +9,9 @@ void packet_processor::emit_decoding_err_msg(unsigned short msgID, unsigned shor
 
 	switch (errorFlag)
 	{
+	case eDecodingErr::eAbandoned:
+		return;
+
 	case eDecodingErr::eErrUnderflow:
 		errmsg << "Underflow";
 		break;
@@ -36,7 +39,7 @@ void packet_processor::emit_decoding_err_msg(unsigned short msgID, unsigned shor
 	UIaddLogMsg(QString::fromStdString(errmsg.str()), activeClientPID, uiMsgQueue);
 }
 
-unsigned char packet_processor::consume_Byte()
+UINT8 packet_processor::consume_Byte()
 {
 	if (errorFlag != eDecodingErr::eNoErr) return 0;
 	if (remainingDecrypted < 1)
@@ -53,7 +56,7 @@ unsigned char packet_processor::consume_Byte()
 	return result;
 }
 
-unsigned short packet_processor::consumeUShort()
+UINT16 packet_processor::consumeUShort()
 {
 	if (errorFlag != eDecodingErr::eNoErr) return 0;
 	if (remainingDecrypted < 2)
@@ -70,7 +73,7 @@ unsigned short packet_processor::consumeUShort()
 	return result;
 }
 
-unsigned long packet_processor::consume_DWORD()
+UINT32 packet_processor::consume_DWORD()
 {
 	if (errorFlag != eDecodingErr::eNoErr) return 0;
 	if (remainingDecrypted < 4)
@@ -86,6 +89,7 @@ unsigned long packet_processor::consume_DWORD()
 	return result;
 }
 
+//moves 'byteCount' bytes forward in the buffer without storing the data
 void packet_processor::discard_data(ushort byteCount)
 {
 	if (errorFlag != eDecodingErr::eNoErr) return;
@@ -97,6 +101,20 @@ void packet_processor::discard_data(ushort byteCount)
 
 	decryptedIndex += byteCount;
 	remainingDecrypted -= byteCount;
+}
+
+/*
+stop processing any more of the packet.
+intended for use when we don't know how to process the rest
+of the packet
+*/
+void packet_processor::abandon_processing()
+{
+	errorFlag = eDecodingErr::eAbandoned;
+	errorCount += 1;
+
+	decryptedIndex += remainingDecrypted;
+	remainingDecrypted = 0;
 }
 
 std::wstring packet_processor::consumeWString(size_t bytesLength)
@@ -121,7 +139,7 @@ std::wstring packet_processor::consumeWString(size_t bytesLength)
 	return msg;
 }
 
-DWORD packet_processor::customSizeByteGet()
+UINT32 packet_processor::customSizeByteGet()
 {
 	unsigned char startByte = consume_Byte();
 
@@ -173,7 +191,7 @@ DWORD packet_processor::customSizeByteGet()
 }
 
 
-DWORD packet_processor::customSizeByteGet_signed()
+INT32 packet_processor::customSizeByteGet_signed()
 {
 	unsigned char startByte = consume_Byte();
 	DWORD result;

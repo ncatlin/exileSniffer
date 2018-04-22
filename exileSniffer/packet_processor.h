@@ -3,7 +3,8 @@
 #include "packet_capture_thread.h"
 #include "key_grabber_thread.h"
 
-enum eDecodingErr{ eNoErr, eErrUnderflow, eBadPacketID, ePktIDUnimplemented};
+enum eDecodingErr{ eNoErr, eErrUnderflow, 
+	eBadPacketID, ePktIDUnimplemented, eAbandoned};
 
 
 class STREAMDATA {
@@ -156,13 +157,14 @@ private:
 	void deserialise_SRV_IDNOTIFY_0x137(UIDecodedPkt *uipkt);
 	
 
-	byte consume_Byte();
-	unsigned short consumeUShort();
-	unsigned long consume_DWORD();
+	UINT8 consume_Byte();
+	UINT16 consumeUShort();
+	UINT32 consume_DWORD();
 	std::wstring consumeWString(size_t bytesLength);
 	void discard_data(ushort byteCount);
-	DWORD customSizeByteGet();
-	DWORD customSizeByteGet_signed();
+	void abandon_processing();
+	UINT32 customSizeByteGet();
+	INT32 customSizeByteGet_signed();
 
 	bool sanityCheckPacketID(unsigned short pktID);
 	void emit_decoding_err_msg(unsigned short msgID, unsigned short lastMsgID);

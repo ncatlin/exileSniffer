@@ -1501,7 +1501,7 @@ void packet_processor::deserialise_SRV_ADD_OBJECT(UIDecodedPkt *uipkt)
 		DWORD first = customSizeByteGet();
 		pair.PushBack((UINT64)first, allocator);
 
-		DWORD second = customSizeByteGet_signed();
+		INT64 second = customSizeByteGet_signed();
 		pair.PushBack((INT64)second, allocator);
 		statlist.PushBack(pair, allocator);
 	}
@@ -1524,10 +1524,10 @@ void packet_processor::deserialise_SRV_ADD_OBJECT(UIDecodedPkt *uipkt)
 
 	consume_add_dword_ntoh(L"UnkDWORDEndHMS", uipkt);
 
-	
+	uipkt->add_byte(L"UnkByte_PreBuffs", consume_Byte());
 
 	WValue bufflist(rapidjson::kArrayType);
-	byte buffCount = consume_Byte();
+	ushort buffCount = consumeUShort();
 	for (int i = 0; i < buffCount; i++)
 	{
 		WValue buffObj(rapidjson::kObjectType);
@@ -1546,6 +1546,15 @@ void packet_processor::deserialise_SRV_ADD_OBJECT(UIDecodedPkt *uipkt)
 		bufflist.PushBack(buffObj, allocator);
 	}
 	uipkt->payload.AddMember(L"BuffList", bufflist, allocator);
+
+	ushort nameLen = ntohs(consumeUShort());
+	std::cout << std::dec<< "namelen " << nameLen << std::endl;
+	discard_data(3); //?????
+
+	std::wstring msg = consumeWString(nameLen * 2);
+	uipkt->add_wstring(L"Name", msg);
+
+	abandon_processing();
 }
 
 //same as 0x135 but no hash DWORD

@@ -660,6 +660,12 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 
 				if (errorFlag == eNoErr)
 					ui_decodedpkt->setEndOffset(decryptedIndex);
+				else
+					if (errorFlag == eAbandoned)
+					{
+						errorFlag = eNoErr;
+						ui_decodedpkt->setAbandoned();
+					}
 			}
 			else
 			{
@@ -771,7 +777,12 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 				(this->*deserialiserForPktID)(ui_decodedpkt);
 				if (errorFlag == eNoErr)
 					ui_decodedpkt->setEndOffset(decryptedIndex);
-				
+				else
+					if (errorFlag == eAbandoned)
+					{
+						errorFlag = eNoErr;
+						ui_decodedpkt->setAbandoned();
+					}
 			}
 			else
 			{
