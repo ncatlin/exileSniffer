@@ -49,7 +49,7 @@ class UI_DECODED_LIST_ENTRY
 		QString sender() { return ((flags & PKTBIT_INBOUND) ? "Server" : "Client"); }
 		byte pktFlags() { return flags; }
 		bool badDecode() { return failedDecode; }
-		std::pair<byte *, ushort> bytesBuf() { 
+		std::pair<vector<byte> *, ushort> bytesBuf() {
 			return make_pair(originalbuf + bufferOffsets.first, 
 				bufferOffsets.second - bufferOffsets.first);
 		}
@@ -64,7 +64,7 @@ class UI_DECODED_LIST_ENTRY
 		byte flags;
 		long long msTime;
 		unsigned short pktID;
-		byte *originalbuf;
+		vector<byte> *originalbuf;
 		std::pair <ushort, ushort> bufferOffsets;
 };
 

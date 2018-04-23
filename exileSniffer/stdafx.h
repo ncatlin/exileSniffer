@@ -32,7 +32,6 @@ rapidjson for ggpk data
 #include <tchar.h>
 #include <string>
 #include <locale>
-#include <queue>
 #include <codecvt>
 #include <sstream>
 #include <iomanip>
@@ -40,6 +39,8 @@ rapidjson for ggpk data
 #include <thread>
 #include <iostream>
 #include <array>
+#include <queue>
+#include <deque>
 
 #include "rapidjson\document.h"
 #include "rapidjson\filereadstream.h" 

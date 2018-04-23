@@ -39,51 +39,110 @@ void packet_processor::emit_decoding_err_msg(unsigned short msgID, unsigned shor
 	UIaddLogMsg(QString::fromStdString(errmsg.str()), activeClientPID, uiMsgQueue);
 }
 
+/*
+todo... method of getting stuff from the next packet in the case of underflow
+*/
+void packet_processor::continue_gamebuffer_next_packet()
+{
+	std::vector<byte> pkt;
+	int attemptsCount = 0;
+
+	pendingPktQueue.pop_front();
+	STREAMDATA *streamObj = &streamDatas[currentMsgStreamID];
+	streamObj->packetCount++;
+
+	while (true)
+	{
+		checkPipe(gamepipe, &pendingPktQueue);
+
+		for (auto it = pendingPktQueue.begin(); it != pendingPktQueue.end(); it++)
+		{
+			pkt = *it;
+
+			char *next_token = (char *)pkt.data();
+
+			char *streamID_s = strtok_s(next_token, ",", &next_token);
+			networkStreamID streamID = (networkStreamID)atoi(streamID_s);
+			char *incoming = strtok_s(next_token, ",", &next_token);
+			bool isIncoming = (*incoming == '1');
+
+			if (streamID == currentMsgStreamID && isIncoming == currentMsgIncoming)
+			{
+				
+
+				char *timeprocessed = strtok_s(next_token, ",", &next_token);
+				char *dLen = strtok_s(next_token, ",", &next_token);
+				byte *data = (byte *)next_token;
+
+				unsigned int dataLen = atoi(dLen);
+				std::cout << std::dec<<"nextdlen " << dataLen <<", remaining:"<<remainingDecrypted<< std::endl;
+				size_t originalSize = decryptedBuffer->size();
+				decryptedBuffer->resize(originalSize + dataLen, 0);
+
+				if (isIncoming)
+				{
+					streamObj->fromGameSalsa.ProcessData(decryptedBuffer->data()+originalSize,
+						data, dataLen);
+				}
+				else
+				{
+					streamObj->toGameSalsa.ProcessData(decryptedBuffer->data() + originalSize,
+						data, dataLen);
+				}
+
+				remainingDecrypted += dataLen;
+
+				//move it to the front to be popped off
+				pendingPktQueue.erase(it);
+				pendingPktQueue.push_front(pkt); 
+				return;
+			}
+		}
+		if (attemptsCount++ > 10)
+		{
+			stringstream err;
+			err << "WARNING: Long wait for continuation data stream " << currentMsgStreamID <<
+				" incoming: " << currentMsgIncoming;
+			UIaddLogMsg(QString::fromStdString(err.str()), activeClientPID, uiMsgQueue);
+		}
+		Sleep(50);
+	}
+}
+
 UINT8 packet_processor::consume_Byte()
 {
 	if (errorFlag != eDecodingErr::eNoErr) return 0;
-	if (remainingDecrypted < 1)
-	{
-		errorFlag = eDecodingErr::eErrUnderflow;
-		errorCount += 1;
-		return 0;
-	}
 
-	unsigned char result = decryptedBuffer[decryptedIndex];
+	while (remainingDecrypted < 1)
+		continue_gamebuffer_next_packet();
+
+	unsigned char result = decryptedBuffer->at(decryptedIndex);
 	decryptedIndex += 1;
 	remainingDecrypted -= 1;
-
 	return result;
 }
 
 UINT16 packet_processor::consumeUShort()
 {
 	if (errorFlag != eDecodingErr::eNoErr) return 0;
-	if (remainingDecrypted < 2)
-	{
-		errorFlag = eDecodingErr::eErrUnderflow;
-		errorCount += 1;
-		return 0xf00d;
-	}
 
-	unsigned short result = getUshort(decryptedBuffer + decryptedIndex);
+	while (remainingDecrypted < 2)
+		continue_gamebuffer_next_packet();
+
+	unsigned short result = getUshort(&decryptedBuffer->at(decryptedIndex));
 	decryptedIndex += 2;
 	remainingDecrypted -= 2;
-
 	return result;
 }
 
 UINT32 packet_processor::consume_DWORD()
 {
 	if (errorFlag != eDecodingErr::eNoErr) return 0;
-	if (remainingDecrypted < 4)
-	{
-		errorFlag = eDecodingErr::eErrUnderflow;
-		errorCount += 1;
-		return 0;
-	}
 
-	DWORD result = getUlong(decryptedBuffer + decryptedIndex);
+	while (remainingDecrypted < 4)
+		continue_gamebuffer_next_packet();
+
+	DWORD result = getUlong(&decryptedBuffer->at(decryptedIndex));
 	decryptedIndex += 4;
 	remainingDecrypted -= 4;
 	return result;
@@ -93,11 +152,9 @@ UINT32 packet_processor::consume_DWORD()
 void packet_processor::discard_data(ushort byteCount)
 {
 	if (errorFlag != eDecodingErr::eNoErr) return;
-	if (remainingDecrypted < byteCount)
-	{
-		errorFlag = eDecodingErr::eErrUnderflow;
-		errorCount += 1;
-	}
+
+	while (remainingDecrypted < byteCount)
+		continue_gamebuffer_next_packet();
 
 	decryptedIndex += byteCount;
 	remainingDecrypted -= byteCount;
@@ -123,14 +180,12 @@ std::wstring packet_processor::consumeWString(size_t bytesLength)
 	if (errorFlag != eDecodingErr::eNoErr) return L"<exileSniffer Decoding Error>";
 	if (bytesLength == 0)
 		return L"";
-	if (remainingDecrypted < bytesLength)
-	{
-		errorFlag = eDecodingErr::eErrUnderflow;
-		errorCount += 1;
-		return L"<exileSniffer Decoding Error>";
-	}
 
-	std::string msgmb(decryptedBuffer + decryptedIndex, decryptedBuffer + decryptedIndex + bytesLength);
+	while (remainingDecrypted < bytesLength)
+		continue_gamebuffer_next_packet();
+
+	std::string msgmb(decryptedBuffer->data() + decryptedIndex, 
+		decryptedBuffer->data() + decryptedIndex + bytesLength);
 	std::wstring msg = mb_to_utf8(msgmb);
 
 	decryptedIndex += bytesLength;

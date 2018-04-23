@@ -296,16 +296,16 @@ void exileSniffer::print_raw_packet(UI_RAWHEX_PKT *pkt)
 		hexdump << serverString(pkt->stream, "f") << " to PlayerClient";
 	else
 		hexdump << "PlayerClient to " << serverString(pkt->stream, "f");
-	hexdump << "("<<std::dec<<pkt->pktSize<<" bytes)"<< std::endl;
+	hexdump << "("<<std::dec<<pkt->pktBytes->size()<<" bytes)"<< std::endl;
 	asciidump << std::endl;
 
 
 	stringstream::pos_type bytesStart = hexdump.tellp();
 
 	hexdump << std::setfill('0') << std::uppercase << " ";
-	for (int i = 0; i < pkt->pktSize; ++i)
+	for (int i = 0; i < pkt->pktBytes->size(); ++i)
 	{
-		byte item = pkt->pktBytes[i];
+		byte item = pkt->pktBytes->at(i);
 
 		if (item)
 			hexdump << " " << std::hex << std::setw(2) << (int)item ;
@@ -720,7 +720,11 @@ void exileSniffer::decodedCellActivated(int row, int col)
 
 	hexdump << epochms_to_timestring(obj->time_processed_ms()) << " ";
 
-	size_t bytessize = obj->bufferOffsets.second - obj->bufferOffsets.first + 2; //+2 packet id bytes
+	size_t bytessize;
+	if (obj->decodeError())
+		bytessize = obj->originalbuf->size() - obj->bufferOffsets.first;
+	else
+		bytessize = obj->bufferOffsets.second - obj->bufferOffsets.first;
 
 	if (obj->streamFlags & PKTBIT_INBOUND)
 		hexdump << "server" << " to PlayerClient";
@@ -728,13 +732,12 @@ void exileSniffer::decodedCellActivated(int row, int col)
 		hexdump << "PlayerClient to " << "server"; //serverString(pkt->stream, "f");
 	hexdump << "(" << std::dec << bytessize << " bytes)" << std::endl;
 
+	size_t bufStart = obj->bufferOffsets.first;
 	
-	byte *bufStart = obj->originalbuf + obj->bufferOffsets.first - 2;
-
 	hexdump << std::setfill(L'0') << std::uppercase << L" ";
 	for (int i = 0; i < bytessize; ++i)
 	{
-		byte item = bufStart[i];
+		byte item = obj->originalbuf->at(bufStart + i);
 
 		if (item)
 			hexdump << " " << std::hex << std::setw(2) << (int)item;

@@ -44,7 +44,7 @@ class UI_RAWHEX_PKT : public UI_MESSAGE
 {
 public:
 	UI_RAWHEX_PKT(DWORD processID, streamType streamServer, bool isIncoming);
-	void setData(byte *source, unsigned short length);
+	void setData(vector<byte> *source);
 	void setErrorIndex(unsigned short idx) {
 		decodeFailed = true;
 		failLocation = idx;
@@ -56,9 +56,8 @@ public:
 	streamType stream;
 	bool incoming;
 
-	byte* pktBytes;
+	vector<byte>* pktBytes;
 	unsigned short startBytes;
-	unsigned short pktSize = 0;
 
 	bool decodeFailed = false;
 	unsigned short failLocation = 0;
@@ -83,7 +82,7 @@ public:
 	UINT32 get_UInt32(std::wstring name);
 	UINT64 get_UInt64(std::wstring name);
 	
-	void setBuffer(byte *buf) { originalbuf = buf; }
+	void setBuffer(vector<byte> *buf) { originalbuf = buf; }
 	void setStartOffset(unsigned short off) { bufferOffsets.first = off; }
 	void setEndOffset(unsigned short off) { bufferOffsets.second = off; }
 	void setFailedDecode() { failedDecode = true; }
@@ -96,7 +95,7 @@ public:
 public:
 	ushort messageID;
 	byte streamFlags = 0;
-	byte *originalbuf = NULL;
+	vector<byte> *originalbuf = NULL;
 	std::pair<ushort, ushort> bufferOffsets;
 
 	rapidjson::GenericDocument<rapidjson::UTF16<> > jsn;

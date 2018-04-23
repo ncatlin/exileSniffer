@@ -34,16 +34,17 @@ private:
 	void init_packetDeserialisers();
 
 	bool process_packet_loop();
-	void handle_patch_data(std::vector<byte> pkt);
-	void handle_login_data(std::vector<byte> pkt);
-	void handle_game_data(std::vector<byte> pkt);
+	void handle_patch_data(byte* data);
+	void handle_login_data(byte* data);
+	bool handle_game_data(byte* data);
 
-	void handle_packet_from_loginserver(networkStreamID streamID, byte* data, unsigned int dataLen);
-	void handle_packet_to_loginserver(networkStreamID streamID, byte* data, unsigned int dataLen);
+	void handle_packet_from_loginserver(byte* data, unsigned int dataLen);
+	void handle_packet_to_loginserver(byte* data, unsigned int dataLen);
 	void handle_packet_from_patchserver(byte* data, unsigned int dataLen);
 	void handle_packet_to_patchserver(byte* data, unsigned int dataLen);
-	void handle_packet_from_gameserver(networkStreamID streamID, byte* data, unsigned int dataLen, long long timems);
-	void handle_packet_to_gameserver(networkStreamID streamID, byte* data, unsigned int dataLen, long long timems);
+	void handle_packet_from_gameserver(byte* data, unsigned int dataLen, long long timems);
+	void handle_packet_to_gameserver(byte* data, unsigned int dataLen, long long timems);
+
 
 	inline void consume_add_byte(std::wstring name, UIDecodedPkt *uipkt) {	uipkt->add_byte(name, consume_Byte());}
 	inline void consume_add_word(std::wstring name, UIDecodedPkt *uipkt) { uipkt->add_word(name, consumeUShort()); }
@@ -168,13 +169,13 @@ private:
 
 	bool sanityCheckPacketID(unsigned short pktID);
 	void emit_decoding_err_msg(unsigned short msgID, unsigned short lastMsgID);
-
+	void continue_gamebuffer_next_packet();
 
 
 private:
-	vector<UIDecodedPkt *> pktVec;
+	vector<UIDecodedPkt *> deserialisedPkts;
+	std::deque< std::vector<byte>> pendingPktQueue;
 
-	networkStreamID lastActiveConnectionID;
 	key_grabber_thread * keyGrabber;
 	std::map<networkStreamID, STREAMDATA> streamDatas;
 	map<unsigned long, std::pair<KEYDATA *, KEYDATA *> > pendingGameserverKeys;
@@ -184,12 +185,16 @@ private:
 	typedef void (packet_processor::*deserialiser)(UIDecodedPkt *);
 	map<unsigned short, deserialiser> packetDeserialisers;
 
+	//used for continuing multi-packet messages
+	networkStreamID currentMsgStreamID;
+	bool currentMsgIncoming;
+
 	HANDLE patchpipe = NULL;
 	HANDLE loginpipe = NULL;
 	HANDLE gamepipe = NULL;
 
 	DWORD activeClientPID = 0;
-	byte *decryptedBuffer = NULL;
+	vector<byte> *decryptedBuffer = NULL;
 	size_t remainingDecrypted = 0, decryptedIndex = 0;
 	eDecodingErr errorFlag = eDecodingErr::eNoErr;
 	unsigned long errorCount = 0;

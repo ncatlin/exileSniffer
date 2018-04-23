@@ -87,7 +87,7 @@ HANDLE connectPipe(std::wstring pipename)
 	return sniffpipe;
 }
 
-bool checkPipe(HANDLE pipe, std::queue< std::vector<byte>> *pktQueue)
+bool checkPipe(HANDLE pipe, std::deque< std::vector<byte>> *pktQueue)
 {
 	DWORD available, remainingSize;
 	if (!PeekNamedPipe(pipe, NULL, NULL, NULL, &available, &remainingSize) || !available)
@@ -130,7 +130,7 @@ bool checkPipe(HANDLE pipe, std::queue< std::vector<byte>> *pktQueue)
 		}
 		if (dataRead != pkt.size())
 			pkt.resize(dataRead);
-		pktQueue->emplace(pkt);
+		pktQueue->push_back(pkt);
 	}
 }
 

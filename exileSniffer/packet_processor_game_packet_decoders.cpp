@@ -226,10 +226,10 @@ void packet_processor::deserialise_SRV_CHAT_MESSAGE(UIDecodedPkt *uipkt)
 	for (int i = 0; i < itemCount; i++)
 	{
 		WValue itemObj(rapidjson::kObjectType);
-		itemObj.AddMember(L"ChatIndex", WValue((UINT64)consume_DWORD()), allocator);
+		itemObj.AddMember(L"ChatIndex", WValue((UINT32)consume_DWORD()), allocator);
 		ushort modsLen = ntohs(consumeUShort());
 		DWORD hash = consume_DWORD();
-		itemObj.AddMember(L"ItemHash", WValue((UINT64)hash), allocator);
+		itemObj.AddMember(L"ItemHash", WValue((UINT32)hash), allocator);
 		discard_data(modsLen - sizeof(hash));
 		itemArray.PushBack(itemObj, allocator);
 	}
@@ -257,7 +257,7 @@ void packet_processor::deserialise_SRV_SERVER_MESSAGE(UIDecodedPkt *uipkt)
 		byte p1 = consume_Byte();
 		pair.PushBack(p1, allocator);
 		DWORD p2 = consume_DWORD();
-		pair.PushBack((UINT64)p2, allocator);
+		pair.PushBack((UINT32)p2, allocator);
 		pairArray.PushBack(pair, allocator);
 	}
 	uipkt->payload.AddMember(L"PairList", pairArray, allocator);
@@ -379,7 +379,7 @@ void packet_processor::deserialise_SRV_AREA_INFO(UIDecodedPkt* uipkt)
 	ushort hashCount = ntohs(consumeUShort());
 	for (int i = 0; i < hashCount; i++)
 	{
-		WValue preloadhash((UINT64)ntohl(consume_DWORD()));
+		WValue preloadhash((UINT32)ntohl(consume_DWORD()));
 		preloadHashList.PushBack(preloadhash, allocator);
 		if (errorFlag != eNoErr) return;
 	}
@@ -438,10 +438,10 @@ void packet_processor::deserialise_SRV_AREA_INFO(UIDecodedPkt* uipkt)
 			WValue pair(rapidjson::kArrayType);
 
 			DWORD first = customSizeByteGet();
-			pair.PushBack((UINT64)first, allocator);
+			pair.PushBack((UINT32)first, allocator);
 
 			DWORD second = customSizeByteGet_signed();
-			pair.PushBack((UINT64)second, allocator);
+			pair.PushBack((UINT32)second, allocator);
 
 			list6.PushBack(pair, allocator);
 		}
@@ -536,8 +536,8 @@ void packet_processor::deserialise_SRV_UNK_0x13(UIDecodedPkt * uipkt)
 	{
 		WValue blobobj(rapidjson::kObjectType);
 
-		blobobj.AddMember(L"DW1", (UINT64)consume_DWORD(), allocator);
-		blobobj.AddMember(L"DW2", (UINT64)consume_DWORD(), allocator);
+		blobobj.AddMember(L"DW1", (UINT32)consume_DWORD(), allocator);
+		blobobj.AddMember(L"DW2", (UINT32)consume_DWORD(), allocator);
 
 		ushort stringlen_words = ntohs(consumeUShort());
 		wstring unkstr = consumeWString(stringlen_words * 2);
@@ -548,14 +548,14 @@ void packet_processor::deserialise_SRV_UNK_0x13(UIDecodedPkt * uipkt)
 		byte controlByte = consume_Byte();
 		blobobj.AddMember(L"ControlByte", controlByte, allocator);
 		blobobj.AddMember(L"Short2", consumeUShort(), allocator);
-		blobobj.AddMember(L"DW3", (UINT64)consume_DWORD(), allocator);
-		blobobj.AddMember(L"DW4", (UINT64)consume_DWORD(), allocator);
+		blobobj.AddMember(L"DW3", (UINT32)consume_DWORD(), allocator);
+		blobobj.AddMember(L"DW4", (UINT32)consume_DWORD(), allocator);
 		blobobj.AddMember(L"Byte2", consume_Byte(), allocator);
 
 		if (controlByte > 0x80)
 		{
-			blobobj.AddMember(L"DW_8_1", (UINT64)consume_DWORD(), allocator);
-			blobobj.AddMember(L"DW_8_2", (UINT64)consume_DWORD(), allocator);
+			blobobj.AddMember(L"DW_8_1", (UINT32)consume_DWORD(), allocator);
+			blobobj.AddMember(L"DW_8_2", (UINT32)consume_DWORD(), allocator);
 		}
 		if (controlByte & 0x40)
 		{
@@ -926,7 +926,7 @@ void packet_processor::deserialise_SRV_PUBLIC_PARTY_LIST(UIDecodedPkt *uipkt)
 	for (int i = 0; i < listingCount; i++)
 	{
 		WValue partyDetails(rapidjson::kObjectType);
-		partyDetails.AddMember(L"ID", (UINT64)consume_DWORD(), allocator);
+		partyDetails.AddMember(L"ID", (UINT32)consume_DWORD(), allocator);
 
 		ushort stringlen = ntohs(consumeUShort());
 		wstring name = consumeWString(stringlen * 2);
@@ -997,12 +997,12 @@ void packet_processor::deserialise_SRV_SLOT_ITEMSLIST(UIDecodedPkt *uipkt)
 		//todo - move this into own func deserialiseItem()
 		WValue itemObj(rapidjson::kObjectType);
 
-		itemObj.AddMember(L"InstanceID", WValue((UINT64)ntohl(consume_DWORD())), allocator);
+		itemObj.AddMember(L"InstanceID", WValue((UINT32)ntohl(consume_DWORD())), allocator);
 		itemObj.AddMember(L"PosX", WValue(consume_Byte()), allocator);
 		itemObj.AddMember(L"PosY", WValue(consume_Byte()), allocator);
 		ushort modsLen = ntohs(consumeUShort());
 		DWORD hash = consume_DWORD();
-		itemObj.AddMember(L"ItemHash", WValue((UINT64)hash), allocator);
+		itemObj.AddMember(L"ItemHash", WValue((UINT32)hash), allocator);
 		//skip item data for now, apart from the hash so we at least know item type
 		discard_data(modsLen - sizeof(hash));
 
@@ -1025,8 +1025,10 @@ void packet_processor::deserialise_UNK_MESSAGE_0x73(UIDecodedPkt *uipkt)
 {
 	consume_add_dword_ntoh(L"Data1", uipkt); //todo - this is not fixed at 4, its just what ive seen it as
 	ushort strlen1 = ntohs(consumeUShort());
+	std::cout << " 73 s1 len: " << std::dec << (strlen1*2) << ", rem: "<<remainingDecrypted<< std::endl;
 	uipkt->add_wstring(L"String1",consumeWString(strlen1 * 2));
 	ushort strlen2 = ntohs(consumeUShort());
+	std::cout << " 73 s2 len: " << std::dec << (strlen2*2) << ", rem: " << remainingDecrypted << std::endl;
 	uipkt->add_wstring(L"String2", consumeWString(strlen2 * 2));
 }
 
@@ -1291,10 +1293,10 @@ void packet_processor::deserialise_SRV_STAT_CHANGED(UIDecodedPkt *uipkt)
 		WValue pair(rapidjson::kArrayType);
 
 		DWORD first = customSizeByteGet();
-		pair.PushBack((UINT64)first, allocator);
+		pair.PushBack((UINT32)first, allocator);
 
 		DWORD second = customSizeByteGet_signed();
-		pair.PushBack((UINT64)second, allocator);
+		pair.PushBack((UINT32)second, allocator);
 
 		pairlist.PushBack(pair, allocator);
 	}
@@ -1448,6 +1450,8 @@ void packet_processor::deserialise_SRV_HEARTBEAT(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_SRV_ADD_OBJECT(UIDecodedPkt *uipkt)
 {
+	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+
 	//10 bytes all retrieved at once
 	consume_add_dword_ntoh(L"ID1", uipkt);
 	consume_add_dword_ntoh(L"ID2", uipkt);
@@ -1455,11 +1459,22 @@ void packet_processor::deserialise_SRV_ADD_OBJECT(UIDecodedPkt *uipkt)
 
 	consume_add_dword_ntoh(L"objHash", uipkt);
 
-	unsigned short dataLen = consumeUShort();
+	unsigned short dataLen = ntohs(consumeUShort());
 	uipkt->add_word(L"DataLen", dataLen);
 	
-	consume_add_byte(L"UnkByte0", uipkt);
+	byte listsize1 = consume_Byte();
+	WValue list1(rapidjson::kArrayType);
+	for (int i = 0; i < listsize1; i++)
+	{
+		DWORD unkposshash1 = consume_DWORD(); //hash? 0xb350ac3a
+		DWORD unknum2 = consume_DWORD();  //11
 
+		WValue pair(rapidjson::kArrayType);
+		pair.PushBack((UINT32)unkposshash1, allocator);
+		pair.PushBack((UINT32)unknum2, allocator);
+		list1.PushBack(pair, allocator);
+	}
+	uipkt->payload.AddMember(L"List1", list1, allocator);
 
 	uipkt->add_dword(L"Coord1", consume_DWORD());
 	uipkt->add_dword(L"Coord2", consume_DWORD());
@@ -1489,20 +1504,25 @@ void packet_processor::deserialise_SRV_ADD_OBJECT(UIDecodedPkt *uipkt)
 		consume_add_dword_ntoh(L"Unk_b40_2", uipkt);
 	}
 
+	//get objthing.  0x14078c790
+	//one byte
+	//if 1, 4, 8
+
+	//get objthing 2
+	// byte * 3
 
 	//get stats. only valid for players probably.
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	
 	WValue statlist(rapidjson::kArrayType);
 	byte statcount = customSizeByteGet();
 	for (int i = 0; i < statcount; i++)
 	{
-		WValue pair(rapidjson::kArrayType);
-
 		DWORD first = customSizeByteGet();
-		pair.PushBack((UINT64)first, allocator);
+		INT32 second = customSizeByteGet_signed();
 
-		INT64 second = customSizeByteGet_signed();
-		pair.PushBack((INT64)second, allocator);
+		WValue pair(rapidjson::kArrayType);
+		pair.PushBack((UINT32)first, allocator);
+		pair.PushBack((INT32)second, allocator);
 		statlist.PushBack(pair, allocator);
 	}
 	uipkt->payload.AddMember(L"StatList", statlist, allocator);
@@ -1534,9 +1554,9 @@ void packet_processor::deserialise_SRV_ADD_OBJECT(UIDecodedPkt *uipkt)
 		buffObj.AddMember(L"BuffID", consumeUShort(), allocator);
 		buffObj.AddMember(L"BuffDefinitionsRow", consumeUShort(), allocator);
 		buffObj.AddMember(L"BuffVisualsRow", consumeUShort(), allocator);
-		buffObj.AddMember(L"UnkDword1", (UINT64)consume_DWORD(), allocator);
+		buffObj.AddMember(L"UnkDword1", (UINT32)consume_DWORD(), allocator);
 		buffObj.AddMember(L"UnkShort2", consumeUShort(), allocator);
-		buffObj.AddMember(L"UnkDword3", (UINT64)consume_DWORD(), allocator);
+		buffObj.AddMember(L"UnkDword3", (UINT32)consume_DWORD(), allocator);
 		buffObj.AddMember(L"UnkShort4", consumeUShort(), allocator);
 		buffObj.AddMember(L"UnkShort5", consumeUShort(), allocator);
 		buffObj.AddMember(L"UnkShort6", consumeUShort(), allocator);
@@ -1548,7 +1568,7 @@ void packet_processor::deserialise_SRV_ADD_OBJECT(UIDecodedPkt *uipkt)
 	uipkt->payload.AddMember(L"BuffList", bufflist, allocator);
 
 	ushort nameLen = ntohs(consumeUShort());
-	std::cout << std::dec<< "namelen " << nameLen << std::endl;
+
 	discard_data(3); //?????
 
 	std::wstring msg = consumeWString(nameLen * 2);

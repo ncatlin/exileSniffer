@@ -51,12 +51,11 @@ UI_RAWHEX_PKT::UI_RAWHEX_PKT(DWORD processID, streamType streamServer, bool isIn
 	msgType = uiMsgType::ePacketHex;
 }
 
-void UI_RAWHEX_PKT::setData(byte *source, unsigned short length)
+void UI_RAWHEX_PKT::setData(vector<byte> *source)
 {
 	pktBytes = source;
-	pktSize = length;
 
-	if (length < 2) return;
+	if (source->size() < 2) return;
 
 
 	startBytes = getUshort(source);

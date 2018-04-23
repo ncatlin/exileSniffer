@@ -48,14 +48,14 @@ void packet_processor::handle_packet_from_patchserver(byte* data, unsigned int d
 		return;
 	}
 	case 4:
-		printf("\tFolder info response: <Effort>\n", (char)data[1], (char)data[2], (char)data[3]);
+		printf("\tFolder info response: <Effort>\n");
 		return;
 
 	case 6:
 		printf("\tPatch note response: <Effort>\n");
 		return;
 	}
-	printf("\tUnhandled pkt type: %d, len %d\n", pktType, dataLen);
+	printf("\tUnhandled pkt type: %d, len %ld\n", pktType, dataLen);
 }
 
 
@@ -81,38 +81,36 @@ void packet_processor::handle_packet_to_patchserver(byte* data, unsigned int dat
 		return;
 
 	}
-	printf("\tUnhandled pkt type: %d, len %d\n", pktType, dataLen);
+	printf("\tUnhandled pkt type: %d, len %ld\n", pktType, dataLen);
 }
 
-void packet_processor::handle_patch_data(std::vector<byte> pkt)
+void packet_processor::handle_patch_data(byte* data)
 {
-	char *next_token = (char *)pkt.data();
+	char *next_token = (char *)data;
 
 	char *streamID_s = strtok_s(next_token, ",", &next_token);
 	networkStreamID streamID = (networkStreamID)atoi(streamID_s);
 
 	char *incoming = strtok_s(next_token, ",", &next_token);
-	bool isIncoming = (*incoming == '1') ? true : false;
+	currentMsgIncoming = (*incoming == '1') ? true : false;
 
 	char *timeprocessed = strtok_s(next_token, ",", &next_token);
 	long long msProcessed = atoll(timeprocessed);
 
 	char *dLen = strtok_s(next_token, ",", &next_token);
-	unsigned int dataLen = atoi(dLen);
+	unsigned int payloadLen = atoi(dLen);
 
-	byte *data = (byte *)next_token;
+	byte *payload = (byte *)next_token;
 
-	lastActiveConnectionID = streamID;
-
-	if (isIncoming)
+	if (currentMsgIncoming)
 	{
-		printf("Server patch data (%ld bytes):\n", dataLen);
-		handle_packet_from_patchserver(data, dataLen);
+		printf("Server patch data (%ld bytes):\n", payloadLen);
+		handle_packet_from_patchserver(payload, payloadLen);
 	}
 	else
 	{
-		printf("Client patch data (%ld bytes):\n", dataLen);
-		handle_packet_to_patchserver(data, dataLen);
+		printf("Client patch data (%ld bytes):\n", payloadLen);
+		handle_packet_to_patchserver(payload, payloadLen);
 	}
 }
 
@@ -120,24 +118,22 @@ void packet_processor::handle_patch_data(std::vector<byte> pkt)
 
 
 
-void packet_processor::handle_packet_from_loginserver(networkStreamID streamID, byte* data, unsigned int dataLen)
+void packet_processor::handle_packet_from_loginserver(byte* data, unsigned int dataLen)
 {
-	STREAMDATA *streamObj = &streamDatas.at(streamID);
+	STREAMDATA *streamObj = &streamDatas.at(currentMsgStreamID);
 
 	//ignore ephemeral public key
 	if (streamObj->packetCount < 2) //warning - a null packet is ignored
 	{
 		UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(0, eLogin, true);
-		byte *plainTextBuf = new byte[dataLen];
-		std::copy(data, data + dataLen, plainTextBuf);
-		msg->setData(data, dataLen);
+		vector<byte>*plainTextBuf = new vector<byte>(data, data+dataLen);
+		msg->setData(plainTextBuf);
 		uiMsgQueue->addItem(msg);
 		return;
 	}
 
-	decryptedBuffer = new byte[dataLen];
-
-	memset(decryptedBuffer, 0, dataLen);
+	decryptedBuffer = new vector<byte>;
+	decryptedBuffer->resize(dataLen, 0);
 
 	if (!streamObj->workingRecvKey)
 	{
@@ -145,7 +141,7 @@ void packet_processor::handle_packet_from_loginserver(networkStreamID streamID, 
 
 		while (!streamObj->workingRecvKey)
 		{
-			KEYDATA *keyCandidate = keyGrabber->getUnusedMemoryKey(streamID, true);
+			KEYDATA *keyCandidate = keyGrabber->getUnusedMemoryKey(currentMsgStreamID, true);
 			if (!keyCandidate) {
 				std::cout << "no unused memkey in from login!" << std::endl;
 				Sleep(1200);
@@ -158,15 +154,15 @@ void packet_processor::handle_packet_from_loginserver(networkStreamID streamID, 
 			streamObj->fromLoginSalsa.SetKeyWithIV((const byte *)keyCandidate->salsakey, 
 				32, 
 				(const byte *)keyCandidate->IV);
-			streamObj->fromLoginSalsa.ProcessData(decryptedBuffer, data, dataLen);
+			streamObj->fromLoginSalsa.ProcessData(decryptedBuffer->data(), data, dataLen);
 
 			
-			unsigned short packetID = ntohs(getUshort(decryptedBuffer));
+			unsigned short packetID = ntohs(getUshort(decryptedBuffer->data()));
 			cout << "pkt from loginserveR: " << packetID << std::endl;
 			if (packetID == 0x0004)
 			{
 				keyCandidate->used = true;
-				keyGrabber->claimKey(keyCandidate, streamID);
+				keyGrabber->claimKey(keyCandidate, currentMsgStreamID);
 
 				UIaddLogMsg("Loginserver receive key recovered",
 					keyCandidate->sourceProcess,
@@ -190,29 +186,29 @@ void packet_processor::handle_packet_from_loginserver(networkStreamID streamID, 
 			}
 		}
 
-		std::cout << "Character List (" << (int)decryptedBuffer[45] << " characters)" << std::endl;
+		std::cout << "Character List (" << (int)decryptedBuffer->at(45) << " characters)" << std::endl;
 
 		for (int i = 0; i < dataLen; ++i)
 		{
-			byte item = decryptedBuffer[i];
+			byte item = decryptedBuffer->at(i);
 			std::cout << std::hex << std::setw(2) << (int)item;
 			if (i % 16 == 0) std::cout << std::endl;
 		}
 
 		UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(streamObj->workingRecvKey->sourceProcess, eLogin, true);
-		msg->setData(decryptedBuffer, dataLen);
+		msg->setData(decryptedBuffer);
 		uiMsgQueue->addItem(msg);
 		return;
 	}
 
-	streamObj->fromLoginSalsa.ProcessData(decryptedBuffer, data, dataLen);
+	streamObj->fromLoginSalsa.ProcessData(decryptedBuffer->data(), data, dataLen);
 	/*
 	UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(streamObj->workingRecvKey->sourceProcess, eLogin, true);
 	msg->setData(decryptedBuffer, dataLen);
 	uiMsgQueue->addItem(msg);
 	*/
 
-	char pktType = decryptedBuffer[1];
+	char pktType = decryptedBuffer->at(1);
 	switch (pktType)
 	{
 	case LSRV_GAMESERVER_INFO:
@@ -221,19 +217,19 @@ void packet_processor::handle_packet_from_loginserver(networkStreamID streamID, 
 		//outfile << "Got gameserver info from loginserver" << std::endl;
 		unsigned int pktidx = 2;
 
-		unsigned long connectionID = getUlong(decryptedBuffer + 10);
+		unsigned long connectionID = getUlong(&decryptedBuffer->at(10));
 		std::cout << "Got key for connection ID " << std::hex << connectionID << std::endl;
 
 		pktidx = 17;
-		unsigned int port = (decryptedBuffer[17] << 8) + decryptedBuffer[18];
+		unsigned int port = (decryptedBuffer->at(17) << 8) + decryptedBuffer->at(18);
 		std::stringstream serverIP;
-		serverIP << (int)decryptedBuffer[19] << ".";
-		serverIP << (int)decryptedBuffer[20] << ".";
-		serverIP << (int)decryptedBuffer[21] << ".";
-		serverIP << (int)decryptedBuffer[22] << ":" << std::dec << port;
+		serverIP << (int)decryptedBuffer->at(19) << ".";
+		serverIP << (int)decryptedBuffer->at(20) << ".";
+		serverIP << (int)decryptedBuffer->at(21) << ".";
+		serverIP << (int)decryptedBuffer->at(22) << ":" << std::dec << port;
 		std::cout << "\tGameserver: " << serverIP.str() << std::endl;
 
-		DWORD *keyblob = (DWORD *)((byte*)decryptedBuffer + 43);
+		DWORD *keyblob = (DWORD *)(&decryptedBuffer->at(43));
 
 
 		KEYDATA *key1A = new KEYDATA;
@@ -280,7 +276,7 @@ void packet_processor::handle_packet_from_loginserver(networkStreamID streamID, 
 		std::cout << "Hex Payload: " << std::endl;
 		for (int i = 0; i < dataLen; ++i)
 		{
-			byte item = decryptedBuffer[i];
+			byte item = decryptedBuffer->at(i);
 			std::cout << std::hex << std::setw(2) << (int)item;
 			if (i % 16 == 0) std::cout << std::endl;
 		}
@@ -290,9 +286,9 @@ void packet_processor::handle_packet_from_loginserver(networkStreamID streamID, 
 
 }
 
-void packet_processor::handle_packet_to_loginserver(networkStreamID streamID, byte* data, unsigned int dataLen)
+void packet_processor::handle_packet_to_loginserver(byte* data, unsigned int dataLen)
 {
-	STREAMDATA *streamObj = &streamDatas.at(streamID);
+	STREAMDATA *streamObj = &streamDatas.at(currentMsgStreamID);
 	if (streamObj->packetCount == 0)
 	{
 		/*
@@ -300,16 +296,17 @@ void packet_processor::handle_packet_to_loginserver(networkStreamID streamID, by
 		(byte)data[0], (byte)data[1], dataLen - 2);
 		*/
 		UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(0, eLogin, false);
-		byte *plainTextBuf = new byte[dataLen];
-		std::copy(data, data + dataLen, plainTextBuf);
-		msg->setData(data, dataLen);
+		vector<byte>*plainTextBuf = new vector<byte>(data, data + dataLen);
+		msg->setData(plainTextBuf);
 		uiMsgQueue->addItem(msg);
+
 		return;
 	}
 
 
-	byte *decryptedBuffer = new byte[dataLen];
-	memset(decryptedBuffer, 0, dataLen);
+	vector<byte> *decryptedBuffer = new vector<byte>;
+	decryptedBuffer->resize(dataLen, 0);
+
 	if (!streamObj->workingSendKey)
 	{
 		unsigned int msWaited = 0;
@@ -318,7 +315,7 @@ void packet_processor::handle_packet_to_loginserver(networkStreamID streamID, by
 		{
 
 			//should use hint here, but have to reliably find corresponding stream
-			KEYDATA *keyCandidate = keyGrabber->getUnusedMemoryKey(streamID, false);
+			KEYDATA *keyCandidate = keyGrabber->getUnusedMemoryKey(currentMsgStreamID, false);
 			if (!keyCandidate) {
 				Sleep(200);
 				msWaited += 200;
@@ -335,12 +332,12 @@ void packet_processor::handle_packet_to_loginserver(networkStreamID streamID, by
 			streamObj->toLoginSalsa.SetKeyWithIV((byte *)keyCandidate->salsakey,
 				32,
 				(byte *)keyCandidate->IV);
-			streamObj->toLoginSalsa.ProcessData(decryptedBuffer, data, dataLen);
+			streamObj->toLoginSalsa.ProcessData(decryptedBuffer->data(), data, dataLen);
 
-			if (decryptedBuffer[0] == 0 && decryptedBuffer[1] == 3)
+			if (decryptedBuffer->at(0) == 0 && decryptedBuffer->at(1) == 3)
 			{
 				keyCandidate->used = true;
-				keyGrabber->claimKey(keyCandidate, streamID);
+				keyGrabber->claimKey(keyCandidate, currentMsgStreamID);
 
 				UIaddLogMsg("Loginserver send key recovered", 
 					keyCandidate->sourceProcess, 
@@ -352,13 +349,15 @@ void packet_processor::handle_packet_to_loginserver(networkStreamID streamID, by
 		}
 
 		UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(streamObj->workingSendKey->sourceProcess, eLogin, false);
-		msg->setData(decryptedBuffer, dataLen);
+		msg->setData(decryptedBuffer);
 		uiMsgQueue->addItem(msg);
 
 		std::cout << std::setfill('0');
-		std::cout << std::hex << std::setw(2) << "ID2: 0x" << (int)decryptedBuffer[5] << (int)decryptedBuffer[4] << (int)decryptedBuffer[3] << (int)decryptedBuffer[2] << std::endl;
-		unsigned int emailLen = decryptedBuffer[7] * 2;
-		if (decryptedBuffer[6] != 0)
+		std::cout << std::hex << std::setw(2) << "ID2: 0x" << 
+			(int)decryptedBuffer->at(5) << (int)decryptedBuffer->at(4) <<
+			(int)decryptedBuffer->at(3) << (int)decryptedBuffer->at(2) << std::endl;
+		unsigned int emailLen = decryptedBuffer->at(7) * 2;
+		if (decryptedBuffer->at(6) != 0)
 			printf("Warning, long login email not handled\n");
 		std::wstring email(reinterpret_cast<wchar_t*>(decryptedBuffer + 8), (emailLen) / sizeof(wchar_t));
 		std::wcout << "\tUsername: " << email << std::endl;
@@ -367,7 +366,7 @@ void packet_processor::handle_packet_to_loginserver(networkStreamID streamID, by
 		std::cout << "\tPOE.exe hash: ";
 		for (int i = 0; i < 32; ++i)
 		{
-			byte item = decryptedBuffer[pktindex + i];
+			byte item = decryptedBuffer->at(pktindex + i);
 			std::cout << std::hex << std::setw(2) << (int)item;
 		}
 		std::cout << std::endl;
@@ -376,7 +375,7 @@ void packet_processor::handle_packet_to_loginserver(networkStreamID streamID, by
 		std::cout << "\tuser creds: ";
 		for (int i = 0; i < 32; ++i)
 		{
-			byte item = decryptedBuffer[pktindex + i];
+			byte item = decryptedBuffer->at(pktindex + i);
 			std::cout << std::hex << std::setw(2) << (int)item;
 		}
 		std::cout << std::endl;
@@ -385,27 +384,27 @@ void packet_processor::handle_packet_to_loginserver(networkStreamID streamID, by
 		std::cout << "\tMAC hash: ";
 		for (int i = 0; i < 32; ++i)
 		{
-			byte item = decryptedBuffer[pktindex + i];
+			byte item = decryptedBuffer->at(pktindex + i);
 			std::cout << std::hex << std::setw(2) << (int)item;
 		}
 		std::cout << std::endl;
 
 		pktindex += 32;
 
-		std::cout << "\tPW save1: " << (int)(decryptedBuffer[pktindex++]) << std::endl;
-		std::cout << "\tPW save2: " << (int)(decryptedBuffer[pktindex]) << std::endl;
+		std::cout << "\tPW save1: " << (int)(decryptedBuffer->at(pktindex++)) << std::endl;
+		std::cout << "\tPW save2: " << (int)(decryptedBuffer->at(pktindex)) << std::endl;
 
 		return;
 	}
 
-	streamObj->toLoginSalsa.ProcessData(decryptedBuffer, data, dataLen);
+	streamObj->toLoginSalsa.ProcessData(decryptedBuffer->data(), data, dataLen);
 
 	std::cout << "Sent to login server...\n\n";
 	std::cout << "\nhex:\n";
 	std::cout << std::setfill('0');
 	for (int i = 0; i < dataLen; ++i)
 	{
-		byte item = decryptedBuffer[i];
+		byte item = decryptedBuffer->at(i);
 		if (item)
 			std::cout << std::hex << std::setw(2) << (int)item << " ";
 		else
@@ -416,10 +415,10 @@ void packet_processor::handle_packet_to_loginserver(networkStreamID streamID, by
 	std::cout.flush();
 	
 	UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(streamObj->workingSendKey->sourceProcess, eLogin, false);
-	msg->setData(decryptedBuffer, dataLen);
+	msg->setData(decryptedBuffer);
 	uiMsgQueue->addItem(msg);
 
-	char pktType = decryptedBuffer[1];
+	char pktType = decryptedBuffer->at(1);
 	switch (pktType)
 	{
 	case 01:
@@ -431,8 +430,8 @@ void packet_processor::handle_packet_to_loginserver(networkStreamID streamID, by
 	{
 		printf("Play request\n");
 
-		unsigned int charNameLen = decryptedBuffer[3] * 2;
-		if (decryptedBuffer[2] != 0)
+		unsigned int charNameLen = decryptedBuffer->at(3) * 2;
+		if (decryptedBuffer->at(2) != 0)
 			printf("Warning, long login charname not handled\n");
 		std::wstring charn(reinterpret_cast<wchar_t*>(decryptedBuffer + 4), (charNameLen) / sizeof(wchar_t));
 		std::wcout << "\tSelected Char: " << charn << std::endl;
@@ -442,16 +441,16 @@ void packet_processor::handle_packet_to_loginserver(networkStreamID streamID, by
 	}
 	case 11:
 	{
-		std::cout << "Character selection sent to login server by number: " << (int)decryptedBuffer[6] << std::endl;
+		std::cout << "Character selection sent to login server by number: " << (int)decryptedBuffer->at(6) << std::endl;
 		return;
 	}
 	default:
-		printf("Client sent unknown packet to login server: 0x%x\n", decryptedBuffer[1]);
+		printf("Client sent unknown packet to login server: 0x%x\n", decryptedBuffer->at(1));
 
 		std::cout << "Hex Payload: " << std::endl;
 		for (int i = 0; i < dataLen; ++i)
 		{
-			byte item = decryptedBuffer[i];
+			byte item = decryptedBuffer->at(i);
 			std::cout << std::hex << std::setw(2) << (int)item;
 			if (i % 16 == 0) std::cout << std::endl;
 		}
@@ -462,78 +461,83 @@ void packet_processor::handle_packet_to_loginserver(networkStreamID streamID, by
 
 }
 
-void packet_processor::handle_login_data(std::vector<byte> pkt)
+void packet_processor::handle_login_data(byte* data)
 {
 
-	char *next_token = (char *)pkt.data();
+	char *next_token = (char *)data;
 
 	char *streamID_s = strtok_s(next_token, ",", &next_token);
-	networkStreamID streamID = (networkStreamID)atoi(streamID_s);
+	currentMsgStreamID = (networkStreamID)atoi(streamID_s);
 
 	char *incoming = strtok_s(next_token, ",", &next_token);
-	bool isIncoming = (*incoming == '1') ? true : false;
+	currentMsgIncoming = (*incoming == '1') ? true : false;
 
 	char *timeprocessed = strtok_s(next_token, ",", &next_token);
 	long long msProcessed = atoll(timeprocessed);
 
-	char *dLen = strtok_s(next_token, ",", &next_token);
-	unsigned int dataLen = atoi(dLen);
-	if (!dataLen)
+	char *pLen = strtok_s(next_token, ",", &next_token);
+	unsigned int payloadLen = atoi(pLen);
+	if (!payloadLen)
 		return;
 
-	byte *data = (byte *)next_token;
+	byte *payload = (byte *)next_token;
 
-	STREAMDATA *streamObj = &streamDatas[streamID];
-	printf("[%ld]: Login data (%ld bytes) ", streamObj->packetCount, dataLen);
+	STREAMDATA *streamObj = &streamDatas[currentMsgStreamID];
+	printf("[%ld]: Login data (%ld bytes) ", streamObj->packetCount, payloadLen);
 
-	lastActiveConnectionID = streamID;
-	if (isIncoming)
+	if (currentMsgIncoming)
 	{
-		handle_packet_from_loginserver(streamID, data, dataLen);
+		handle_packet_from_loginserver(payload, payloadLen);
 	}
 	else
 	{
-		handle_packet_to_loginserver(streamID, data, dataLen);
+		handle_packet_to_loginserver(payload, payloadLen);
 	}
 
 
 	++streamObj->packetCount;
 }
 
-void packet_processor::handle_game_data(std::vector<byte> pkt)
+bool packet_processor::handle_game_data(byte* data)
 {
 
-	char *next_token = (char *)pkt.data();
+	char *next_token = (char *)data;
 
 	char *streamID_s = strtok_s(next_token, ",", &next_token);
-	networkStreamID streamID = (networkStreamID)atoi(streamID_s);
-	STREAMDATA *streamObj = &streamDatas[streamID];
+	currentMsgStreamID = (networkStreamID)atoi(streamID_s);
+	STREAMDATA *streamObj = &streamDatas[currentMsgStreamID];
 
 	char *incoming = strtok_s(next_token, ",", &next_token);
-	bool isIncoming = (*incoming == '1');
+	currentMsgIncoming = (*incoming == '1');
+
+	//the keys are established during handling of the first packet to the gameserver
+	//sometimes we will process the response from the gameserver first, causing badness.
+	//this delays processing of recv data until we have a recv key
+	if (currentMsgIncoming && streamObj->workingRecvKey == NULL)
+		return false;
 
 	char *timeprocessed = strtok_s(next_token, ",", &next_token);
 	long long msProcessed = atoll(timeprocessed);
 
-	char *dLen = strtok_s(next_token, ",", &next_token);
-	unsigned int dataLen = atoi(dLen);
-	if (!dataLen)
-		return;
+	char *pLen = strtok_s(next_token, ",", &next_token);
+	unsigned int payloadLen = atoi(pLen);
+	if (!payloadLen)
+		return true;
 
 	//std::cout << "handling game data, size "<<std::dec <<dataLen<<" incoming- "<<(int)isIncoming << std::endl;
 
-	byte *data = (byte *)next_token;
+	byte *payload = (byte *)next_token;
 
-	if (dataLen > 0)
+	if (payloadLen > 0)
 	{
-		lastActiveConnectionID = streamID;
-		if (isIncoming)
-			handle_packet_from_gameserver(streamID, data, dataLen, msProcessed);
+		if (currentMsgIncoming)
+			handle_packet_from_gameserver(payload, payloadLen, msProcessed);
 		else
-			handle_packet_to_gameserver(streamID, data, dataLen, msProcessed);
+			handle_packet_to_gameserver(payload, payloadLen, msProcessed);
 	}
 
 	++streamObj->packetCount;
+	return true;
 }
 
 bool packet_processor::sanityCheckPacketID(unsigned short pktID)
@@ -549,12 +553,12 @@ bool packet_processor::sanityCheckPacketID(unsigned short pktID)
 
 
 
-void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byte* data, 
+void packet_processor::handle_packet_to_gameserver(byte* data, 
 	unsigned int dataLen, long long timems)
 {
 
-	STREAMDATA *streamObj = &streamDatas.at(streamID);
-	if (streamObj->packetCount == 0)
+	STREAMDATA *streamObj = &streamDatas.at(currentMsgStreamID);
+	if (streamObj->workingSendKey == NULL)
 	{
 		if (data[0] == 0 && data[1] == 3)
 		{
@@ -596,9 +600,8 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 
 			UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(
 				streamObj->workingSendKey->sourceProcess, eGame, false);
-			byte *plainTextBuf = new byte[dataLen];
-			std::copy(data, data + dataLen, plainTextBuf);
-			msg->setData(plainTextBuf, dataLen);
+			vector<byte> *plainTextBuf = new vector<byte>(data, data+dataLen);
+			msg->setData(plainTextBuf);
 			uiMsgQueue->addItem(msg);
 
 		}
@@ -614,14 +617,14 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 	raw decoder and pointers into it are held by the decodedpackets. 
 	Don't want to make a bunch of copies because it will balloon in size with long running streams
 	*/
-	decryptedBuffer = new byte[dataLen+1];
-	memset(decryptedBuffer, 0, dataLen+1);
-	streamObj->toGameSalsa.ProcessData(decryptedBuffer, data, dataLen);
+	decryptedBuffer = new vector<byte>;
+	decryptedBuffer->resize(dataLen, 0);
+	streamObj->toGameSalsa.ProcessData(decryptedBuffer->data(), data, dataLen);
 
 
 
 	UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(streamObj->workingSendKey->sourceProcess, eGame, false);
-	msg->setData(decryptedBuffer, dataLen);
+	msg->setData(decryptedBuffer);
 	if (errorFlag != eNoErr)
 		msg->setErrorIndex(decryptedIndex);
 	uiMsgQueue->addItem(msg);
@@ -643,36 +646,37 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 
 		UIDecodedPkt *ui_decodedpkt =
 			new UIDecodedPkt(streamObj->workingSendKey->sourceProcess, eGame, PKTBIT_OUTBOUND, timems);
-		pktVec.push_back(ui_decodedpkt);
-		ui_decodedpkt->setBuffer(decryptedBuffer);
+		deserialisedPkts.push_back(ui_decodedpkt);
 		ui_decodedpkt->setStartOffset(decryptedIndex);
 		ui_decodedpkt->messageID = pktIDWord;
 		ui_decodedpkt->toggle_payload_operations(true);
 
 		if (sanityCheckPacketID(pktIDWord) && errorFlag == eNoErr)
 		{
-
+			//find and run deserialiser for this packet
 			auto it = packetDeserialisers.find(pktIDWord);
 			if (it != packetDeserialisers.end())
 			{
 				packet_processor::deserialiser deserialiserForPktID = it->second;
 				(this->*deserialiserForPktID)(ui_decodedpkt);
 
-				if (errorFlag == eNoErr)
+				if (errorFlag == eNoErr || errorFlag == eAbandoned)
+				{
 					ui_decodedpkt->setEndOffset(decryptedIndex);
-				else
+
 					if (errorFlag == eAbandoned)
 					{
 						errorFlag = eNoErr;
 						ui_decodedpkt->setAbandoned();
 					}
+				}
 			}
 			else
 			{
 				std::cout << "Unhandled Hex Payload msgID <gamesrv in> 0x" << std::hex << pktIDWord << std::endl;
 				for (int i = 0; i < dataLen; ++i)
 				{
-					byte item = decryptedBuffer[i];
+					byte item = decryptedBuffer->at(i);
 					std::cout << std::setw(2) << (int)item;
 					if (i % 16 == 0) std::cout << std::endl;
 				}
@@ -681,6 +685,9 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 				errorFlag = eDecodingErr::ePktIDUnimplemented;
 			}
 		}
+
+		//warning - can be resized during deserialisation - only store pointers afterwards
+		ui_decodedpkt->setBuffer(decryptedBuffer);
 
 		if (errorFlag != eNoErr)
 		{
@@ -702,15 +709,15 @@ void packet_processor::handle_packet_to_gameserver(networkStreamID streamID, byt
 aside from the handling of crypt at the start, the from_ and to_ gameserver functions
 are equivalent. could merge them.
 */
-void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, byte* data, 
+void packet_processor::handle_packet_from_gameserver(byte* data, 
 	unsigned int dataLen, long long timems)
 {
 
 
-	STREAMDATA *streamObj = &streamDatas.at(streamID);
+	STREAMDATA *streamObj = &streamDatas.at(currentMsgStreamID);
 
-	decryptedBuffer = new byte[dataLen];
-	memset(decryptedBuffer, 0, dataLen);
+	decryptedBuffer = new vector<byte>;
+	decryptedBuffer->resize(dataLen, 0);
 
 	if (streamObj->packetCount == 1)
 	{
@@ -726,16 +733,16 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 				(byte *)streamObj->workingRecvKey->IV);
 
 		dataLen -= 2;
-		streamObj->fromGameSalsa.ProcessData(decryptedBuffer, data+2, dataLen);
+		streamObj->fromGameSalsa.ProcessData(decryptedBuffer->data(), data+2, dataLen);
 	}
 	else
 	{
-		streamObj->fromGameSalsa.ProcessData(decryptedBuffer, data, dataLen);
+		streamObj->fromGameSalsa.ProcessData(decryptedBuffer->data(), data, dataLen);
 	}
 
 	//print the whole blob in the raw log
 	UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(streamObj->workingRecvKey->sourceProcess, eGame, true);
-	msg->setData(decryptedBuffer, dataLen);
+	msg->setData(decryptedBuffer);
 	if (errorFlag != eNoErr)
 		msg->setErrorIndex(decryptedIndex);
 	uiMsgQueue->addItem(msg);
@@ -744,7 +751,7 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 	{
 		std::cout << "todo: multipacket packets" << std::endl;
 		UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(streamObj->workingRecvKey->sourceProcess, eGame, true);
-		msg->setData(decryptedBuffer, dataLen);
+		msg->setData(decryptedBuffer);
 		if (errorFlag != eNoErr)
 			msg->setErrorIndex(decryptedIndex);
 		uiMsgQueue->addItem(msg);
@@ -761,35 +768,38 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 
 		UIDecodedPkt *ui_decodedpkt =
 			new UIDecodedPkt(streamObj->workingRecvKey->sourceProcess, eGame, PKTBIT_INBOUND, timems);
-		pktVec.push_back(ui_decodedpkt);
+		deserialisedPkts.push_back(ui_decodedpkt);
 		
-		ui_decodedpkt->setBuffer(decryptedBuffer);
-		ui_decodedpkt->setStartOffset(decryptedIndex);
+		ui_decodedpkt->setStartOffset(decryptedIndex - 2);
 		ui_decodedpkt->messageID = pktIDWord;
 		ui_decodedpkt->toggle_payload_operations(true);
 
 		if (sanityCheckPacketID(pktIDWord) && errorFlag == eNoErr)
 		{
+			//find and run deserialiser for this packet
 			map<unsigned short, deserialiser>::iterator it = packetDeserialisers.find(pktIDWord);
 			if (it != packetDeserialisers.end())
 			{
 				packet_processor::deserialiser deserialiserForPktID = it->second;
 				(this->*deserialiserForPktID)(ui_decodedpkt);
-				if (errorFlag == eNoErr)
+
+				if (errorFlag == eNoErr || errorFlag == eAbandoned)
+				{
 					ui_decodedpkt->setEndOffset(decryptedIndex);
-				else
+
 					if (errorFlag == eAbandoned)
 					{
 						errorFlag = eNoErr;
 						ui_decodedpkt->setAbandoned();
 					}
+				}
 			}
 			else
 			{
 				std::cout << "Unhandled Hex Payload msgID <gamesrv in> 0x" << std::hex << pktIDWord << std::endl;
 				for (int i = 0; i < dataLen; ++i)
 				{
-					byte item = decryptedBuffer[i];
+					byte item = decryptedBuffer->at(i);
 					std::cout << std::setw(2) << (int)item;
 					if (i % 16 == 0) std::cout << std::endl;
 				}
@@ -798,6 +808,9 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 				errorFlag = eDecodingErr::ePktIDUnimplemented;
 			}
 		}
+
+		//warning - can be resized during deserialisation - only store pointers afterwards
+		ui_decodedpkt->setBuffer(decryptedBuffer);
 
 		if (errorFlag != eNoErr)
 		{
@@ -818,40 +831,63 @@ void packet_processor::handle_packet_from_gameserver(networkStreamID streamID, b
 bool packet_processor::process_packet_loop()
 {
 	std::vector<byte> pkt;
-	std::queue< std::vector<byte>> pktQueue;
 
 	while (true)
 	{
 		//highest priority - only check patch/login if game is quiet
-		if (checkPipe(gamepipe, &pktQueue))
+		if (checkPipe(gamepipe, &pendingPktQueue))
 		{
-			while (!pktQueue.empty())
+			bool done = false;
+			while (!pendingPktQueue.empty())
 			{
-				pkt = pktQueue.front();
-				handle_game_data(pkt);
-				pktQueue.pop();
+				pkt = pendingPktQueue.front();
+				done = handle_game_data(pkt.data());
+				if(done)
+					pendingPktQueue.pop_front();
+				else
+				{
+					//tried to handle first response before first send so no key to read recv
+					//wait until first send done
+					while (!done)
+					{
+						Sleep(100);
+						checkPipe(gamepipe, &pendingPktQueue);
+
+						auto it = pendingPktQueue.begin();
+						for (; it != pendingPktQueue.end(); it++)
+						{
+							pkt = *it;
+							done = handle_game_data(pkt.data());
+							if (done)
+								break;
+						}
+
+						if (done)
+							pendingPktQueue.erase(it);
+					}
+				}
 			}
 			continue;
 		}
 
-		if (checkPipe(loginpipe, &pktQueue))
+		if (checkPipe(loginpipe, &pendingPktQueue))
 		{
-			while (!pktQueue.empty())
+			while (!pendingPktQueue.empty())
 			{
-				pkt = pktQueue.front();
-				handle_login_data(pkt);
-				pktQueue.pop();
+				pkt = pendingPktQueue.front();
+				handle_login_data(pkt.data());
+				pendingPktQueue.pop_front();
 			}
 			continue;
 		}
 
-		if (checkPipe(patchpipe, &pktQueue))
+		if (checkPipe(patchpipe, &pendingPktQueue))
 		{
-			while (!pktQueue.empty())
+			while (!pendingPktQueue.empty())
 			{
-				pkt = pktQueue.front();
-				handle_patch_data(pkt);
-				pktQueue.pop();
+				pkt = pendingPktQueue.front();
+				handle_patch_data(pkt.data());
+				pendingPktQueue.pop_front();
 			}
 		}
 		else

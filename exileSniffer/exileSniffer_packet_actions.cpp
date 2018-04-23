@@ -187,9 +187,9 @@ void exileSniffer::action_undecoded_packet(UIDecodedPkt& obj)
 {
 	obj.toggle_payload_operations(true);
 
-	size_t sizeAfterID = obj.bufferOffsets.second - obj.bufferOffsets.first;
+	size_t sizeAfterID = obj.originalbuf->size() - obj.bufferOffsets.first;
 	wstringstream summary;
-	summary << "Undecoded packet or multipacket blob ("
+	summary << "Undecoded packet or multipacket blob (~ "
 		<< std::dec << sizeAfterID << " byte";
 	summary << ((sizeAfterID == 1) ? ")" : "s)");
 
@@ -382,7 +382,7 @@ void exileSniffer::action_SRV_SERVER_MESSAGE(UIDecodedPkt& obj, QString *analysi
 			//signedness may depend on type
 			//all sorts of types which need dealing with
 			analysisStream << "\tType " << 
-				pair[0].GetUint() << ": " << pair[1].GetUint64() << std::endl;
+				pair[0].GetUint() << ": " << pair[1].GetUint() << std::endl;
 		}
 	}
 
@@ -449,7 +449,7 @@ void exileSniffer::action_CLI_PING_CHALLENGE(UIDecodedPkt& obj, QString *analysi
 {
 	obj.toggle_payload_operations(true);
 
-	UINT64 challenge = obj.get_UInt32(L"Challenge");
+	UINT32 challenge = obj.get_UInt32(L"Challenge");
 
 	if (!analysis)
 	{
@@ -464,7 +464,7 @@ void exileSniffer::action_SRV_PING_RESPONSE(UIDecodedPkt& obj, QString *analysis
 {
 	obj.toggle_payload_operations(true);
 
-	UINT64 response = obj.get_UInt32(L"Response");
+	UINT32 response = obj.get_UInt32(L"Response");
 
 	if (!analysis)
 	{
@@ -540,7 +540,7 @@ void exileSniffer::action_SRV_AREA_INFO(UIDecodedPkt& obj, QString *analysis)
 	vector<std::pair<std::string, std::pair<std::string, DWORD>>> preloadVec;
 	for (auto it = preloadList.Begin(); it != preloadList.End(); it++)
 	{
-		DWORD hash = it->GetUint64();
+		DWORD hash = it->GetUint();
 		std::string hashResult;
 		std::string hashCategory;
 		lookup_hash(hash, hashResult, hashCategory);
@@ -618,7 +618,7 @@ void exileSniffer::action_SRV_AREA_INFO(UIDecodedPkt& obj, QString *analysis)
 		{
 			
 			WValue &pair = *pairlistit;
-			analysisStream << "\t0x" << pair[0].GetUint64() << ", 0x" << pair[1].GetUint64() << std::endl;
+			analysisStream << "\t0x" << pair[0].GetUint() << ", 0x" << pair[1].GetUint() << std::endl;
 		}
 		analysisStream << std::endl;
 	}
@@ -712,7 +712,7 @@ void exileSniffer::action_SRV_UNK_0x13(UIDecodedPkt& obj, QString *analysis)
 
 	std::wstring endString = obj.payload.FindMember(L"EndString")->value.GetString();
 	DWORD endShort = obj.payload.FindMember(L"EndShort")->value.GetUint();
-	DWORD endDWORD = obj.payload.FindMember(L"EndDWORD")->value.GetUint64();
+	DWORD endDWORD = obj.payload.FindMember(L"EndDWORD")->value.GetUint();
 
 
 	if (!analysis)
@@ -735,21 +735,21 @@ void exileSniffer::action_SRV_UNK_0x13(UIDecodedPkt& obj, QString *analysis)
 	{
 		analysisStream << "Blob: " << std::dec << i << std::hex <<std::endl;
 		analysisStream << "-------" << std::endl;
-		analysisStream << "DW1: 0x" << listit->FindMember(L"DW1")->value.GetUint64() << std::endl;
-		analysisStream << "DW2: 0x" << listit->FindMember(L"DW2")->value.GetUint64() << std::endl;
+		analysisStream << "DW1: 0x" << listit->FindMember(L"DW1")->value.GetUint() << std::endl;
+		analysisStream << "DW2: 0x" << listit->FindMember(L"DW2")->value.GetUint() << std::endl;
 		analysisStream << "String: "<< listit->FindMember(L"UnkString")->value.GetString() << std::endl;
 		analysisStream << "Short1: 0x" << listit->FindMember(L"Short1")->value.GetUint() << std::endl;
 		analysisStream << "Short2: 0x" << listit->FindMember(L"Short2")->value.GetUint() << std::endl;
-		analysisStream << "DW3: 0x" << listit->FindMember(L"DW3")->value.GetUint64() << std::endl;
-		analysisStream << "DW4: 0x" << listit->FindMember(L"DW4")->value.GetUint64() << std::endl;
+		analysisStream << "DW3: 0x" << listit->FindMember(L"DW3")->value.GetUint() << std::endl;
+		analysisStream << "DW4: 0x" << listit->FindMember(L"DW4")->value.GetUint() << std::endl;
 		analysisStream << "Byte2: 0x" << listit->FindMember(L"Byte2")->value.GetUint() << std::endl;
 		analysisStream << "ControlByte: 0x" << listit->FindMember(L"ControlByte")->value.GetUint() << std::endl;
 
 		auto CB_GT_0x80it = listit->FindMember(L"DW_8_1");
 		if (CB_GT_0x80it != listit->MemberEnd())//controlByte > 0x80)
 		{
-			analysisStream << "DW_8_1: 0x" << listit->FindMember(L"DW_8_1")->value.GetUint64() << std::endl;
-			analysisStream << "DW_8_2: 0x" << listit->FindMember(L"DW_8_2")->value.GetUint64() << std::endl;
+			analysisStream << "DW_8_1: 0x" << listit->FindMember(L"DW_8_1")->value.GetUint() << std::endl;
+			analysisStream << "DW_8_2: 0x" << listit->FindMember(L"DW_8_2")->value.GetUint() << std::endl;
 		}
 
 		auto CB_GTE_0x40it = listit->FindMember(L"Byte_b7");
@@ -787,7 +787,7 @@ void exileSniffer::action_CLI_CLICKED_GROUND_ITEM(UIDecodedPkt& obj, QString *an
 {
 	obj.toggle_payload_operations(true);
 
-	UINT64 targID = obj.get_UInt32(L"TargID");
+	UINT32 targID = obj.get_UInt32(L"TargID");
 	UINT32 skillID = obj.get_UInt32(L"SkillID");
 	UINT32 seq = obj.get_UInt32(L"Sequence");
 	UINT32 modifier = obj.get_UInt32(L"Modifier");
@@ -814,8 +814,8 @@ void exileSniffer::action_CLI_CLICKED_GROUND_ITEM(UIDecodedPkt& obj, QString *an
 void exileSniffer::action_CLI_ACTION_PREDICTIVE(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
-	UINT64 coord1 = obj.get_UInt32(L"TargCoord1");
-	UINT64 coord2 = obj.get_UInt32(L"TargCoord2");
+	UINT32 coord1 = obj.get_UInt32(L"TargCoord1");
+	UINT32 coord2 = obj.get_UInt32(L"TargCoord2");
 	UINT32 skillID = obj.get_UInt32(L"SkillID");
 	UINT32 PkCount = obj.get_UInt32(L"PkCount");
 	UINT32 modifier = obj.get_UInt32(L"Modifier");
@@ -855,8 +855,8 @@ void exileSniffer::action_SRV_INSTANCE_SERVER_DATA(UIDecodedPkt& obj, QString *a
 void exileSniffer::action_CLI_PICKUP_ITEM(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
-	UINT64 container = obj.get_UInt32(L"Container");
-	UINT64 itemID = obj.get_UInt32(L"ItemID");
+	UINT32 container = obj.get_UInt32(L"Container");
+	UINT32 itemID = obj.get_UInt32(L"ItemID");
 	UINT32 unk2 = obj.get_UInt32(L"Unk2");
 
 	std::wstringstream summary;
@@ -1022,7 +1022,7 @@ void exileSniffer::action_CLI_USE_BELT_SLOT(UIDecodedPkt& obj, QString *analysis
 {
 	obj.toggle_payload_operations(true);
 
-	UINT64 slot = obj.get_UInt32(L"Slot");
+	UINT32 slot = obj.get_UInt32(L"Slot");
 
 	if (!analysis)
 	{
@@ -1297,10 +1297,10 @@ void exileSniffer::action_SRV_SLOT_ITEMSLIST(UIDecodedPkt& obj, QString *analysi
 
 		for (auto it = itemList.Begin(); it != itemList.End(); it++)
 		{
-			DWORD instanceID = it->FindMember(L"InstanceID")->value.GetUint64();
+			DWORD instanceID = it->FindMember(L"InstanceID")->value.GetUint();
 			ushort posX = it->FindMember(L"PosX")->value.GetUint();
 			ushort posY = it->FindMember(L"PosY")->value.GetUint();
-			DWORD hash = it->FindMember(L"ItemHash")->value.GetUint64();
+			DWORD hash = it->FindMember(L"ItemHash")->value.GetUint();
 			std::string itemname, category;
 			lookup_hash(hash, itemname, category);
 
@@ -1636,7 +1636,7 @@ void exileSniffer::action_SRV_MOBILE_START_SKILL(UIDecodedPkt& obj, QString *ana
 		summary <<"	-> ("<< std::dec << targCoord1 << "," << targCoord2 << ")" << std::hex;
 		if (modifier & 0x80)
 		{
-			UINT64 targID = obj.get_UInt32(L"TargID");
+			UINT32 targID = obj.get_UInt32(L"TargID");
 			summary << " [ TargetID: 0x" << targID << "]";
 		}
 
@@ -1743,8 +1743,8 @@ void exileSniffer::action_SRV_MOBILE_UPDATE_HMS(UIDecodedPkt& obj, QString *anal
 	DWORD ID2 = obj.get_UInt32(L"ID2");
 	UINT32 ID3 = obj.get_UInt32(L"ID3");
 
-	UINT64 val = obj.get_UInt32(L"NewValue");
-	UINT64 unk3 = obj.get_UInt32(L"Unk3");
+	UINT32 val = obj.get_UInt32(L"NewValue");
+	UINT32 unk3 = obj.get_UInt32(L"Unk3");
 	UINT32 stat = obj.get_UInt32(L"Stat");
 	UINT32 unk4 = obj.get_UInt32(L"Unk4");
 
@@ -1814,7 +1814,7 @@ void exileSniffer::action_SRV_STAT_CHANGED(UIDecodedPkt& obj, QString *analysis)
 		{
 
 			WValue &pair = *pairlistit;
-			analysisStream << "\t0x" << pair[0].GetUint64() << ", 0x" << pair[1].GetUint64() << std::endl;
+			analysisStream << "\t0x" << pair[0].GetUint() << ", 0x" << pair[1].GetUint() << std::endl;
 		}
 		analysisStream << std::endl;
 	}
@@ -2061,8 +2061,26 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 	analysisStream << "Hash: 0x" << objHash << " - " 
 		<< converter.from_bytes(hashCategory) << "-" 
 		<< converter.from_bytes(hashResult) << std::endl;
+
+	//possibly need to intepret this differently based on hashcategory. following is for players
+
 	analysisStream << "Datalen: " << std::dec << dataLen << std::endl;
-	analysisStream << "UnkByte 0: " << std::hex << obj.get_UInt32(L"UnkByte0") << std::endl;
+
+	auto it = obj.payload.FindMember(L"List1");
+	if (it != obj.payload.MemberEnd())
+	{
+		WValue &list1 = it->value;
+		analysisStream << std::dec << list1.Size() << std::hex << " List1:" << std::endl;
+
+		for (auto listit = list1.Begin(); listit != list1.End(); listit++)
+		{
+			WValue &pair = *listit;
+			DWORD possHash = pair[0].GetUint();
+			DWORD val2 = pair[1].GetUint();
+			analysisStream << "\t 0x" << possHash << ": 0x" << val2 << std::endl;
+		}
+	}
+
 	analysisStream << "Coords: " << std::dec << coord1 << "," << coord2 << std::endl;
 
 	analysisStream << std::hex;
@@ -2102,24 +2120,24 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 
 	analysisStream << std::endl;
 
-	auto it = obj.payload.FindMember(L"StatList");
+	it = obj.payload.FindMember(L"StatList");
 	if (it != obj.payload.MemberEnd())
 	{
 		WValue &statList = it->value;
 		analysisStream << std::dec << statList.Size() << " Stats:" << std::endl;
-
+		std::cout << "getting stats\n" << std::endl;
 		for (auto statit = statList.Begin(); statit != statList.End(); statit++)
 		{
 			WValue &pair = *statit;
-			DWORD statIndex = pair[0].GetUint64() - 1;
+			DWORD statIndex = pair[0].GetUint() - 1;
 			analysisStream << "\t" <<
 				converter.from_bytes(ggpk.statDescriptions.at(statIndex))
-				<< ": " << pair[1].GetInt64() << std::endl;
+				<< ": " << pair[1].GetInt() << std::endl;
 		}
 	}
 	else
 		analysisStream << "No stat list";
-
+	std::cout << "gyt stats\n" << std::endl;
 	analysisStream << std::dec << std::endl;
 	analysisStream << "Current Health: " << obj.get_UInt32(L"CurrentHealth") << std::endl;
 	analysisStream << "Reserved Health (absolute): " << obj.get_UInt32(L"ReservedHealth") << std::endl;
@@ -2166,9 +2184,9 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 				<< "\"" << std::endl;
 
 			analysisStream << std::hex;
-			analysisStream << "\tUnkDword1 0x:" << buff.FindMember(L"UnkDword1")->value.GetUint64() << std::endl;
+			analysisStream << "\tUnkDword1 0x:" << buff.FindMember(L"UnkDword1")->value.GetUint() << std::endl;
 			analysisStream << "\tUnkShort2 0x:" << buff.FindMember(L"UnkShort2")->value.GetUint() << std::endl;
-			analysisStream << "\tUnkDword3 0x:" << buff.FindMember(L"UnkDword3")->value.GetUint64() << std::endl;
+			analysisStream << "\tUnkDword3 0x:" << buff.FindMember(L"UnkDword3")->value.GetUint() << std::endl;
 			analysisStream << "\tUnkShort4 0x:" << buff.FindMember(L"UnkShort4")->value.GetUint() << std::endl;
 			analysisStream << "\tUnkShort5 0x:" << buff.FindMember(L"UnkShort5")->value.GetUint() << std::endl;
 			analysisStream << "\tUnkShort6 0x:" << buff.FindMember(L"UnkShort6")->value.GetUint() << std::endl;
