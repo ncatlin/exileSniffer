@@ -2028,23 +2028,17 @@ void exileSniffer::action_SRV_UNKNOWN_0x118(UIDecodedPkt& obj, QString *analysis
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
-	UINT32 index = obj.get_UInt32(L"Index");
-	UINT32 PossHash = obj.get_UInt32(L"PossHash");
+	UINT32 unk1 = obj.get_UInt32(L"Unk1");
+	UINT32 unk2 = obj.get_UInt32(L"Unk2");
 	UINT32 unk3 = obj.get_UInt32(L"Unk3");
 	UINT32 unk4a = obj.get_UInt32(L"Unk4a");
 	UINT32 unk4b = obj.get_UInt32(L"Unk4b");
 
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	std::string hashResult;
-	std::string hashCategory;
-	ggpk.lookup_hash(PossHash, hashResult, hashCategory);
-
 	wstringstream analysisStream;
 	analysisStream << "This is an item as it would appear on the second list of an 0x111 pkt" << std::endl;
 	analysisStream << std::hex;
-	analysisStream << "Index: 0x" << index << std::endl;
-	analysisStream << "PossHash: 0x" << PossHash << " - " << converter.from_bytes(hashCategory) << 
-		" - " << converter.from_bytes(hashResult) << std::endl;
+	analysisStream << "Unk1: 0x" << unk1 << std::endl;
+	analysisStream << "Unk2: 0x" << unk2 << std::endl;
 	analysisStream << "Unk3: 0x" << unk3 << std::endl;
 	analysisStream << "Unk4: 0x" << unk4a <<"," << unk4b << std::endl;
 

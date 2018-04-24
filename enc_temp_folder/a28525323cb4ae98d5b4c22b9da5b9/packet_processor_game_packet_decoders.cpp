@@ -638,14 +638,13 @@ void packet_processor::deserialise_SRV_INSTANCE_SERVER_DATA(UIDecodedPkt *uipkt)
 	if (key1A->salsakey[0] == 0 && key1A->salsakey[3] == 0 && key1A->salsakey[7])
 	{
 		std::cout << "Discarding bad key in area transition" << std::endl;
-		consume_blob(32);
 		return; //probably an old zero-ed out key
 	}
 
 	memcpy(key1A->IV, decryptedBuffer->data() + decryptedIndex, 8);
 	consume_blob(16);
 	memcpy(key1B->IV, decryptedBuffer->data() + decryptedIndex, 8);
-	consume_blob(16);
+	consume_blob(8);
 
 	key1A->sourceProcess = key1B->sourceProcess = uipkt->clientProcessID();
 	key1A->foundAddress = key1B->foundAddress = SENT_BY_SERVER;
@@ -1428,9 +1427,9 @@ void packet_processor::deserialise_SRV_UNKNOWN_0x111(UIDecodedPkt *uipkt)
 	uipkt->add_word(L"Count2", count2);
 	for (int i = 0; i < count; i++)
 	{
-		consume_DWORD(); //index?
+		consume_DWORD();
 
-		consume_DWORD(); //hash?
+		consume_DWORD();
 
 		consume_DWORD();
 
@@ -1442,12 +1441,12 @@ void packet_processor::deserialise_SRV_UNKNOWN_0x111(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_SRV_UNKNOWN_0x118(UIDecodedPkt *uipkt)
 {
-	consume_add_dword_ntoh(L"Index", uipkt);
-	consume_add_dword_ntoh(L"PossHash", uipkt);
+	consume_add_dword_ntoh(L"Unk1", uipkt);
+	consume_add_dword_ntoh(L"Unk2", uipkt);
 	consume_add_dword_ntoh(L"Unk3", uipkt);
 	//todo - 8 byte data type. we have the technology.
-	consume_add_dword_ntoh(L"Unk4a", uipkt);
-	consume_add_dword_ntoh(L"Unk4b", uipkt);
+	consume_add_dword_ntoh(L"Unk4_P1", uipkt);
+	consume_add_dword_ntoh(L"Unk4_P2", uipkt);
 }
 
 

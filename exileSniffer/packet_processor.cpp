@@ -217,7 +217,7 @@ void packet_processor::handle_packet_from_loginserver(byte* data, unsigned int d
 		//outfile << "Got gameserver info from loginserver" << std::endl;
 		unsigned int pktidx = 2;
 
-		unsigned long connectionID = getUlong(&decryptedBuffer->at(10));
+		unsigned long connectionID = ntohl(getUlong(&decryptedBuffer->at(10)));
 		std::cout << "Got key for connection ID " << std::hex << connectionID << std::endl;
 
 		pktidx = 17;
@@ -562,7 +562,7 @@ void packet_processor::handle_packet_to_gameserver(byte* data,
 	{
 		if (data[0] == 0 && data[1] == 3)
 		{
-			unsigned long connectionID = getUlong(data + 2);
+			unsigned long connectionID = ntohl(getUlong(data + 2));
 
 			if (pendingGameserverKeys.find(connectionID) == pendingGameserverKeys.end())
 			{

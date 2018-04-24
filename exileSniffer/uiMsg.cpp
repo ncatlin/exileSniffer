@@ -58,7 +58,7 @@ void UI_RAWHEX_PKT::setData(vector<byte> *source)
 	if (source->size() < 2) return;
 
 
-	startBytes = getUshort(source);
+	startBytes = ntohs(getUshort(source->data()));
 
 }
 
