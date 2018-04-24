@@ -319,7 +319,7 @@ void key_grabber_thread::memoryScanWorker(GAMECLIENTINFO *gameClient)
 		{
 			DWORD lasterr = GetLastError();
 			if (lasterr != ERROR_PARTIAL_COPY)
-				std::cout << " readprocmem err 0x" << std::hex << lasterr << std::endl;
+				std::cout << " ReadProcessMem err 0x" << std::dec << lasterr << std::endl;
 			//Sleep(50);
 		}
 	}

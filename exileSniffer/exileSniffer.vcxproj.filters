@@ -75,6 +75,9 @@
     <ClCompile Include="packet_processor_game_packet_decoders.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="gameDataStore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -111,6 +114,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inventory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gameDataStore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

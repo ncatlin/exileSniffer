@@ -96,6 +96,7 @@ void packet_processor::init_packetDeserialisers()
 	packetDeserialisers[CLI_REQUEST_PLAYERID] = (deserialiser)&packet_processor::deserialise_CLI_REQUEST_PLAYERID;
 	packetDeserialisers[SRV_NOTIFY_PLAYERID] = (deserialiser)&packet_processor::deserialise_SRV_NOTIFY_PLAYERID;
 	packetDeserialisers[SRV_UNKNOWN_0x111] = (deserialiser)&packet_processor::deserialise_SRV_UNKNOWN_0x111;
+	packetDeserialisers[SRV_UNKNOWN_0x118] = (deserialiser)&packet_processor::deserialise_SRV_UNKNOWN_0x118;
 	packetDeserialisers[CLI_OPTOUT_TUTORIALS] = (deserialiser)&packet_processor::deserialise_CLI_OPTOUT_TUTORIALS;
 	packetDeserialisers[SRV_HEARTBEAT] = (deserialiser)&packet_processor::deserialise_SRV_HEARTBEAT;
 	packetDeserialisers[SRV_ADD_OBJECT] = (deserialiser)&packet_processor::deserialise_SRV_ADD_OBJECT;
@@ -230,7 +231,7 @@ void packet_processor::deserialise_SRV_CHAT_MESSAGE(UIDecodedPkt *uipkt)
 		ushort modsLen = ntohs(consumeUShort());
 		DWORD hash = consume_DWORD();
 		itemObj.AddMember(L"ItemHash", WValue((UINT32)hash), allocator);
-		discard_data(modsLen - sizeof(hash));
+		consume_blob(modsLen - sizeof(hash));
 		itemArray.PushBack(itemObj, allocator);
 	}
 	uipkt->payload.AddMember(L"ItemList", itemArray, allocator);
@@ -623,14 +624,14 @@ void packet_processor::deserialise_SRV_INSTANCE_SERVER_DATA(UIDecodedPkt *uipkt)
 	//std::cout << std::hex << "[" << pktId << "] New game server data. AREA TRANSITION" << std::endl;
 	//std::cout << "\tGameserver: " << serverIP.str() << ":" << std::dec << port << std::hex << std::endl;
 
-	discard_data(20);//0?
+	consume_blob(20);//0?
 
 
 	KEYDATA *key1A = new KEYDATA;
 	KEYDATA *key1B = new KEYDATA;
 	memcpy(key1A->salsakey, decryptedBuffer + decryptedIndex, 32);
 	memcpy(key1B->salsakey, decryptedBuffer + decryptedIndex, 32);
-	discard_data(32);
+	consume_blob(32);
 
 	if (key1A->salsakey[0] == 0 && key1A->salsakey[3] == 0 && key1A->salsakey[7])
 	{
@@ -639,9 +640,9 @@ void packet_processor::deserialise_SRV_INSTANCE_SERVER_DATA(UIDecodedPkt *uipkt)
 	}
 
 	memcpy(key1A->IV, decryptedBuffer + decryptedIndex, 8);
-	discard_data(16);
+	consume_blob(16);
 	memcpy(key1B->IV, decryptedBuffer + decryptedIndex, 8);
-	discard_data(8);
+	consume_blob(8);
 
 	key1A->sourceProcess = key1B->sourceProcess = uipkt->clientProcessID();
 	key1A->foundAddress = key1B->foundAddress = SENT_BY_SERVER;
@@ -723,7 +724,7 @@ void packet_processor::deserialise_CLI_UNK_0x2c(UIDecodedPkt *uipkt)
 		consume_Byte();
 	}
 	
-	discard_data(19);
+	consume_blob(19);
 
 }
 
@@ -1004,7 +1005,7 @@ void packet_processor::deserialise_SRV_SLOT_ITEMSLIST(UIDecodedPkt *uipkt)
 		DWORD hash = consume_DWORD();
 		itemObj.AddMember(L"ItemHash", WValue((UINT32)hash), allocator);
 		//skip item data for now, apart from the hash so we at least know item type
-		discard_data(modsLen - sizeof(hash));
+		consume_blob(modsLen - sizeof(hash));
 
 
 		itemArray.PushBack(itemObj, allocator);
@@ -1108,11 +1109,11 @@ void packet_processor::deserialise_CLI_GUILD_CREATE(UIDecodedPkt *uipkt)
 void packet_processor::deserialise_SRV_UNK_0xE6(UIDecodedPkt *uipkt)
 {
 	byte list1Len = consume_Byte();
-	discard_data(list1Len * 2);
+	consume_blob(list1Len * 2);
 	byte list2Len = consume_Byte();
-	discard_data(list2Len * 2);
+	consume_blob(list2Len * 2);
 	byte list3Len = consume_Byte();
-	discard_data(list3Len * 2);
+	consume_blob(list3Len * 2);
 
 	byte list4Len = consume_Byte();
 	for (int i = 0; i < list4Len; i++)
@@ -1436,6 +1437,16 @@ void packet_processor::deserialise_SRV_UNKNOWN_0x111(UIDecodedPkt *uipkt)
 
 }
 
+void packet_processor::deserialise_SRV_UNKNOWN_0x118(UIDecodedPkt *uipkt)
+{
+	consume_add_dword_ntoh(L"Unk1", uipkt);
+	consume_add_dword_ntoh(L"Unk2", uipkt);
+	consume_add_dword_ntoh(L"Unk3", uipkt);
+	//todo - 8 byte data type. we have the technology.
+	consume_add_dword_ntoh(L"Unk4_P1", uipkt);
+	consume_add_dword_ntoh(L"Unk4_P2", uipkt);
+}
+
 
 
 void packet_processor::deserialise_CLI_OPTOUT_TUTORIALS(UIDecodedPkt *uipkt)
@@ -1448,20 +1459,13 @@ void packet_processor::deserialise_SRV_HEARTBEAT(UIDecodedPkt *uipkt)
 	//nothing
 }
 
-void packet_processor::deserialise_SRV_ADD_OBJECT(UIDecodedPkt *uipkt)
+void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t objBlobDataLen)
 {
 	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
 
-	//10 bytes all retrieved at once
-	consume_add_dword_ntoh(L"ID1", uipkt);
-	consume_add_dword_ntoh(L"ID2", uipkt);
-	consume_add_word_ntoh(L"ID3", uipkt);
+	//rewind back to start of blob
+	rewind_buffer(objBlobDataLen);
 
-	consume_add_dword_ntoh(L"objHash", uipkt);
-
-	unsigned short dataLen = ntohs(consumeUShort());
-	uipkt->add_word(L"DataLen", dataLen);
-	
 	byte listsize1 = consume_Byte();
 	WValue list1(rapidjson::kArrayType);
 	for (int i = 0; i < listsize1; i++)
@@ -1511,8 +1515,7 @@ void packet_processor::deserialise_SRV_ADD_OBJECT(UIDecodedPkt *uipkt)
 	//get objthing 2
 	// byte * 3
 
-	//get stats. only valid for players probably.
-	
+
 	WValue statlist(rapidjson::kArrayType);
 	byte statcount = customSizeByteGet();
 	for (int i = 0; i < statcount; i++)
@@ -1531,7 +1534,7 @@ void packet_processor::deserialise_SRV_ADD_OBJECT(UIDecodedPkt *uipkt)
 	uipkt->add_dword(L"ReservedHealth", (consume_DWORD()));
 	uipkt->add_byte(L"ReservedPercentHealth", consume_Byte());
 	uipkt->add_dword(L"HealthUnk", (consume_DWORD()));
-	
+
 	uipkt->add_dword(L"CurrentMana", (consume_DWORD()));
 	uipkt->add_dword(L"ReservedMana", (consume_DWORD()));
 	uipkt->add_byte(L"ReservedPercentMana", consume_Byte());
@@ -1548,6 +1551,13 @@ void packet_processor::deserialise_SRV_ADD_OBJECT(UIDecodedPkt *uipkt)
 
 	WValue bufflist(rapidjson::kArrayType);
 	ushort buffCount = consumeUShort();
+
+	size_t blobRemaining = objBlobDataLen - (restorePoint.savedIndex - decryptedIndex);
+	if ((buffCount * 27) > blobRemaining) {
+		errorFlag = eErrUnderflow;
+		return;
+	}
+
 	for (int i = 0; i < buffCount; i++)
 	{
 		WValue buffObj(rapidjson::kObjectType);
@@ -1569,12 +1579,61 @@ void packet_processor::deserialise_SRV_ADD_OBJECT(UIDecodedPkt *uipkt)
 
 	ushort nameLen = ntohs(consumeUShort());
 
-	discard_data(3); //?????
+	consume_blob(3); //?????
 
+	blobRemaining = objBlobDataLen - (restorePoint.savedIndex - decryptedIndex);
+	if (nameLen > blobRemaining) {
+		errorFlag = eErrUnderflow;
+		return;
+	}
 	std::wstring msg = consumeWString(nameLen * 2);
 	uipkt->add_wstring(L"Name", msg);
 
-	abandon_processing();
+	if (errorFlag != eNoErr)
+		return;
+
+	//C: Restore index to start of next packet
+	restore_buffer();
+	std::cout << " done 135, indx: " << std::dec << decryptedIndex << ", " << remainingDecrypted << std::endl;
+}
+
+void packet_processor::deserialise_SRV_ADD_OBJECT(UIDecodedPkt *uipkt)
+{
+	
+
+	//10 bytes all retrieved at once
+	consume_add_dword_ntoh(L"ID1", uipkt);
+	consume_add_dword_ntoh(L"ID2", uipkt);
+	consume_add_word_ntoh(L"ID3", uipkt);
+
+	DWORD objMurmurHash = ntohl(consume_DWORD());
+	uipkt->add_dword(L"objHash", objMurmurHash);
+
+	unsigned short objBlobDataLen = ntohs(consumeUShort());
+	uipkt->add_word(L"DataLen", objBlobDataLen);
+
+
+
+	/*
+	add_obj is easy to deserialise but difficult to parse
+	deserialise it cleanly and rewind the index to attempt parsing
+	even if we mess it up we can restore index to the start of the 
+	next message without ruining things
+	*/
+	vector <byte> payload;
+	consume_blob(objBlobDataLen, payload);
+
+	if (errorFlag != eNoErr) return;
+
+	std::string hashResult;
+	std::string hashCategory;
+	ggpk->lookup_hash(objMurmurHash, hashResult, hashCategory);
+
+	if (hashCategory == "Character")
+		SRV_ADD_OBJ_decode_character(uipkt, objBlobDataLen);
+	//object
+	//npc
+	
 }
 
 //same as 0x135 but no hash DWORD
@@ -1587,7 +1646,7 @@ void packet_processor::deserialise_SRV_UPDATE_OBJECT(UIDecodedPkt *uipkt)
 	unsigned short dataLen = consumeUShort();
 	//byte arrayIndex = consume_Byte();
 	//ushort controlBits = consumeUShort();
-	discard_data(dataLen); //todo
+	consume_blob(dataLen); //todo
 }
 
 void packet_processor::deserialise_SRV_IDNOTIFY_0x137(UIDecodedPkt *uipkt)

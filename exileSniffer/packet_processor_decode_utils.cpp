@@ -51,6 +51,8 @@ void packet_processor::continue_gamebuffer_next_packet()
 	STREAMDATA *streamObj = &streamDatas[currentMsgStreamID];
 	streamObj->packetCount++;
 
+	this->currentMsgMultiPacket = true;
+
 	while (true)
 	{
 		checkPipe(gamepipe, &pendingPktQueue);
@@ -75,7 +77,6 @@ void packet_processor::continue_gamebuffer_next_packet()
 				byte *data = (byte *)next_token;
 
 				unsigned int dataLen = atoi(dLen);
-				std::cout << std::dec<<"nextdlen " << dataLen <<", remaining:"<<remainingDecrypted<< std::endl;
 				size_t originalSize = decryptedBuffer->size();
 				decryptedBuffer->resize(originalSize + dataLen, 0);
 
@@ -114,7 +115,10 @@ UINT8 packet_processor::consume_Byte()
 	if (errorFlag != eDecodingErr::eNoErr) return 0;
 
 	while (remainingDecrypted < 1)
+	{
+		if (errorFlag != eDecodingErr::eNoErr) return 0;
 		continue_gamebuffer_next_packet();
+	}
 
 	unsigned char result = decryptedBuffer->at(decryptedIndex);
 	decryptedIndex += 1;
@@ -127,7 +131,10 @@ UINT16 packet_processor::consumeUShort()
 	if (errorFlag != eDecodingErr::eNoErr) return 0;
 
 	while (remainingDecrypted < 2)
+	{
+		if (errorFlag != eDecodingErr::eNoErr) return 0;
 		continue_gamebuffer_next_packet();
+	}
 
 	unsigned short result = getUshort(&decryptedBuffer->at(decryptedIndex));
 	decryptedIndex += 2;
@@ -140,7 +147,10 @@ UINT32 packet_processor::consume_DWORD()
 	if (errorFlag != eDecodingErr::eNoErr) return 0;
 
 	while (remainingDecrypted < 4)
+	{
+		if (errorFlag != eDecodingErr::eNoErr) return 0;
 		continue_gamebuffer_next_packet();
+	}
 
 	DWORD result = getUlong(&decryptedBuffer->at(decryptedIndex));
 	decryptedIndex += 4;
@@ -148,16 +158,65 @@ UINT32 packet_processor::consume_DWORD()
 	return result;
 }
 
-//moves 'byteCount' bytes forward in the buffer without storing the data
-void packet_processor::discard_data(ushort byteCount)
+void packet_processor::consume_blob(ushort byteCount)
 {
 	if (errorFlag != eDecodingErr::eNoErr) return;
+	if (byteCount > 10000)
+	{
+		errorFlag = eDecodingErr::eErrUnderflow;
+		return;
+	}
 
 	while (remainingDecrypted < byteCount)
+	{
+		if (errorFlag != eDecodingErr::eNoErr) return;
 		continue_gamebuffer_next_packet();
+	}
 
 	decryptedIndex += byteCount;
 	remainingDecrypted -= byteCount;
+}
+
+void packet_processor::consume_blob(ushort byteCount, vector <byte>& blobBuf)
+{
+	if (errorFlag != eDecodingErr::eNoErr) return;
+	if (byteCount > 10000)
+	{
+		errorFlag = eDecodingErr::eErrUnderflow;
+		return;
+	}
+
+	while (remainingDecrypted < byteCount)
+	{
+		if (errorFlag != eDecodingErr::eNoErr) return;
+		continue_gamebuffer_next_packet();
+	}
+
+	blobBuf = vector<byte>(decryptedBuffer->data() + decryptedIndex,
+		decryptedBuffer->data() + decryptedIndex + byteCount);
+
+	decryptedIndex += byteCount;
+	remainingDecrypted -= byteCount;
+}
+
+void packet_processor::rewind_buffer(size_t countBytes)
+{
+	assert(!restorePoint.active);
+	restorePoint.active = true;
+
+	restorePoint.savedIndex = decryptedIndex;
+	restorePoint.savedRemaining = remainingDecrypted;
+	decryptedIndex -= countBytes;
+	remainingDecrypted += countBytes;
+}
+
+void packet_processor::restore_buffer()
+{
+	assert(restorePoint.active);
+	restorePoint.active = false;
+
+	this->decryptedIndex = restorePoint.savedIndex;
+	this->remainingDecrypted = restorePoint.savedRemaining;
 }
 
 /*
@@ -182,7 +241,10 @@ std::wstring packet_processor::consumeWString(size_t bytesLength)
 		return L"";
 
 	while (remainingDecrypted < bytesLength)
+	{
+		if (errorFlag != eDecodingErr::eNoErr) return 0;
 		continue_gamebuffer_next_packet();
+	}
 
 	std::string msgmb(decryptedBuffer->data() + decryptedIndex, 
 		decryptedBuffer->data() + decryptedIndex + bytesLength);

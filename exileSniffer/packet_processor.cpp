@@ -629,12 +629,6 @@ void packet_processor::handle_packet_to_gameserver(byte* data,
 		msg->setErrorIndex(decryptedIndex);
 	uiMsgQueue->addItem(msg);
 
-	if (unfinishedPacket)
-	{
-		std::cout << "todo: multipacket packets" << std::endl;
-		return;
-	}
-
 	remainingDecrypted = dataLen;
 	decryptedIndex = 0;
 	errorFlag = eNoErr;
@@ -697,6 +691,11 @@ void packet_processor::handle_packet_to_gameserver(byte* data,
 			ui_decodedpkt->setEndOffset(dataLen);
 		}
 
+		if (currentMsgMultiPacket)
+		{
+			ui_decodedpkt->setMultiPacket();
+			currentMsgMultiPacket = false;
+		}
 		uiMsgQueue->addItem(ui_decodedpkt);
 		streamObj->lastPktID = pktIDWord;
 	}
@@ -746,17 +745,6 @@ void packet_processor::handle_packet_from_gameserver(byte* data,
 	if (errorFlag != eNoErr)
 		msg->setErrorIndex(decryptedIndex);
 	uiMsgQueue->addItem(msg);
-
-	if (unfinishedPacket)
-	{
-		std::cout << "todo: multipacket packets" << std::endl;
-		UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(streamObj->workingRecvKey->sourceProcess, eGame, true);
-		msg->setData(decryptedBuffer);
-		if (errorFlag != eNoErr)
-			msg->setErrorIndex(decryptedIndex);
-		uiMsgQueue->addItem(msg);
-		return;
-	}
 
 	remainingDecrypted = dataLen;
 	decryptedIndex = 0;

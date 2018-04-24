@@ -8,6 +8,7 @@
 #include "packet_processor.h"
 #include "uiMsg.h"
 #include "clientData.h"
+#include "gameDataStore.h"
 
 #include "ui_exileSniffer.h"
 
@@ -90,9 +91,7 @@ class exileSniffer : public QMainWindow
 		void setup_decoded_messages_tab();
 		void init_DecodedPktActioners();
 		void start_threads();
-		void fill_gamedata_lists();
-		bool lookup_areaCode(unsigned long code, std::wstring& result);
-		bool lookup_hash(unsigned long hash, std::string& result, std::string& category);
+
 
 		void action_UI_Msg(UI_MESSAGE *msg);
 		void add_metalog_update(QString msg, DWORD pid);
@@ -210,6 +209,7 @@ class exileSniffer : public QMainWindow
 		void action_SRV_END_EFFECT(UIDecodedPkt&, QString*);
 		void action_CLI_REQUEST_PLAYERID(UIDecodedPkt&, QString *);
 		void action_SRV_UNKNOWN_0x111(UIDecodedPkt&, QString*);
+		void action_SRV_UNKNOWN_0x118(UIDecodedPkt&, QString*);
 		void action_SRV_NOTIFY_PLAYERID(UIDecodedPkt&, QString *);
 		void action_CLI_OPTOUT_TUTORIALS(UIDecodedPkt&, QString*);
 		void action_SRV_HEARTBEAT(UIDecodedPkt&, QString*);
@@ -240,24 +240,7 @@ class exileSniffer : public QMainWindow
 		const long long startMSSinceEpoch = ms_since_epoch();
 
 private:
-	struct {
-		std::map <unsigned long, std::string> gameObjHashes;
-		std::map <unsigned long, std::string> monsterHashes;
-		std::map <unsigned long, std::string> chestHashes;
-		std::map <unsigned long, std::string> characterHashes;
-		std::map <unsigned long, std::string> NPCHashes;
-		std::map <unsigned long, std::string> petHashes;
-		std::map <unsigned long, std::string> itemHashes;
-		std::map <unsigned long, std::string> areaCodes;
-
-
-		std::vector <std::string> monsterVarieties;
-		std::vector <std::string> statDescriptions;
-		std::vector <std::string> buffDefinitions;
-		std::vector <std::string> buffVisuals;
-
-	} ggpk;
-
+	gameDataStore ggpk;
 	
 private:
 	packet_capture_thread * packetSniffer;

@@ -20,8 +20,6 @@ exileSniffer::exileSniffer(QWidget *parent)
 	setup_raw_stream_tab();
 	setup_decoded_messages_tab();
 
-	fill_gamedata_lists();
-
 	init_DecodedPktActioners();
 
 
@@ -106,7 +104,7 @@ void exileSniffer::start_threads()
 
 
 	//start a thread to process streams
-	packetProcessor = new packet_processor(keyGrabber, &uiMsgQueue);
+	packetProcessor = new packet_processor(keyGrabber, &uiMsgQueue, ggpk);
 	std::thread packetProcessorInstance(&packet_processor::ThreadEntry, packetProcessor);
 	packetProcessorInstance.detach();
 
@@ -497,189 +495,6 @@ void exileSniffer::decodedListClicked()
 		ui.decodedAutoscrollCheck->setChecked(false);
 }
 
-void genericHashesLoad(rapidjson::Value& itemsDoc, std::map <unsigned long, std::string>& targMap)
-{
-	rapidjson::Value::ConstMemberIterator recordsIt = itemsDoc.MemberBegin();
-	for (; recordsIt != itemsDoc.MemberEnd(); recordsIt++)
-	{
-		std::string hashString = recordsIt->name.GetString();
-		unsigned long hash = std::stoul(hashString);
-		targMap[hash] = recordsIt->value.GetString();
-	}
-}
-
-bool exileSniffer::lookup_areaCode(unsigned long code, std::wstring& result)
-{
-	//todo json 16
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-
-	auto areasIt = ggpk.areaCodes.find(code);
-	if (areasIt != ggpk.areaCodes.end())
-	{
-		result = converter.from_bytes(areasIt->second);
-		return true;
-	}
-
-	std::stringstream failResString;
-	failResString << "<LookupFailure UnknownArea 0x" << std::hex << code << ">";
-	result = converter.from_bytes(failResString.str());
-	return false;
-}
-
-bool exileSniffer::lookup_hash(unsigned long hash, std::string& result, std::string& category)
-{
-	auto monstersIt = ggpk.monsterHashes.find(hash);
-	if (monstersIt != ggpk.monsterHashes.end())
-	{
-		result = monstersIt->second;
-		category = "Monster";
-		return true;
-	}
-
-	auto objectsIt = ggpk.gameObjHashes.find(hash);
-	if (objectsIt != ggpk.gameObjHashes.end())
-	{
-		result = objectsIt->second;
-		category = "Object";
-		return true;
-	}
-
-	auto chestsIt = ggpk.chestHashes.find(hash);
-	if (chestsIt != ggpk.chestHashes.end())
-	{
-		result = chestsIt->second;
-		category = "Chest";
-		return true;
-	}
-
-	auto charactersIt = ggpk.characterHashes.find(hash);
-	if (charactersIt != ggpk.characterHashes.end())
-	{
-		result = charactersIt->second;
-		category = "Character";
-		return true;
-	}
-
-	auto npcsIt = ggpk.NPCHashes.find(hash);
-	if (npcsIt != ggpk.NPCHashes.end())
-	{
-		result = npcsIt->second;
-		category = "NPC";
-		return true;
-	}
-
-	auto petsIt = ggpk.petHashes.find(hash);
-	if (petsIt != ggpk.petHashes.end())
-	{
-		result = petsIt->second;
-		category = "Pet";
-		return true;
-	}
-
-	auto itemsIt = ggpk.itemHashes.find(hash);
-	if (itemsIt != ggpk.itemHashes.end())
-	{
-		result = itemsIt->second;
-		category = "Item";
-		return true;
-	}
-
-	std::stringstream resString;
-	resString << "<0x" << std::hex << hash << ">";
-	result = resString.str();
-	category = "UnknownHash";
-
-	return false;
-}
-
-void exileSniffer::fill_gamedata_lists()
-{
-
-	char buffer[65536];
-
-	FILE* pFile;
-	std::string filename = "ggpk_exports.json";
-	fopen_s(&pFile, filename.c_str(), "rb");
-	if (!pFile)
-	{
-		std::cerr << "Warning: Could not open " << filename << " for reading. Abandoning Load." << std::endl;
-		return;
-	}
-
-	//load it all from json
-	rapidjson::Document jsondoc;
-	rapidjson::FileReadStream is(pFile, buffer, sizeof(buffer));
-	jsondoc.ParseStream<0, rapidjson::UTF8<>, rapidjson::FileReadStream>(is);
-
-	fclose(pFile);
-
-	if (!jsondoc.IsObject())
-	{
-		std::cerr << "Warning: Corrupt ggpk_exports file. Abandoning Load." << std::endl;
-		if (jsondoc.HasParseError())
-		{
-			std::cerr << "\t rapidjson parse error " << jsondoc.GetParseError()
-				<< " at offset " << jsondoc.GetErrorOffset() << std::endl;
-		}
-		return;
-	}
-
-	rapidjson::Value& monsterVarietyIndexDoc = jsondoc.FindMember("MonsterVarietiesIndex")->value;
-	rapidjson::Value::ConstValueIterator recordsIt = monsterVarietyIndexDoc.Begin();
-	for (; recordsIt != monsterVarietyIndexDoc.End(); recordsIt++)
-	{
-		ggpk.monsterVarieties.push_back(recordsIt->GetString());
-	}
-
-	rapidjson::Value& statIndexDoc = jsondoc.FindMember("StatIndexes")->value;
-	recordsIt = statIndexDoc.Begin();
-	for (; recordsIt != statIndexDoc.End(); recordsIt++)
-	{
-		ggpk.statDescriptions.push_back(recordsIt->GetString());
-	}
-
-	rapidjson::Value& buffDefsDoc = jsondoc.FindMember("BuffDefinitions")->value;
-	recordsIt = buffDefsDoc.Begin();
-	for (; recordsIt != buffDefsDoc.End(); recordsIt++)
-	{
-		ggpk.buffDefinitions.push_back(recordsIt->GetString());
-	}
-	
-	rapidjson::Value& buffVisDoc = jsondoc.FindMember("BuffVisuals")->value;
-	recordsIt = buffVisDoc.Begin();
-	for (; recordsIt != buffVisDoc.End(); recordsIt++)
-	{
-		ggpk.buffVisuals.push_back(recordsIt->GetString());
-	}
-
-	rapidjson::Value& monsterVarietyDoc = jsondoc.FindMember("MonsterVarietiesHashes")->value;
-	genericHashesLoad(monsterVarietyDoc, ggpk.monsterHashes);
-
-	rapidjson::Value& areaCodesDoc = jsondoc.FindMember("AreaCodes")->value;
-	genericHashesLoad(areaCodesDoc, ggpk.areaCodes);
-
-	rapidjson::Value& objectRegisterDoc = jsondoc.FindMember("ObjRegisterHashes")->value;
-	genericHashesLoad(objectRegisterDoc, ggpk.gameObjHashes);
-
-	rapidjson::Value& chestsDoc = jsondoc.FindMember("ChestHashes")->value;
-	genericHashesLoad(chestsDoc, ggpk.chestHashes);
-
-	rapidjson::Value& petsDoc = jsondoc.FindMember("PetHashes")->value;
-	genericHashesLoad(petsDoc, ggpk.petHashes);
-
-	rapidjson::Value& charactersDoc = jsondoc.FindMember("CharacterHashes")->value;
-	genericHashesLoad(charactersDoc, ggpk.characterHashes);
-
-	rapidjson::Value& npcsDoc = jsondoc.FindMember("NPCHashes")->value;
-	genericHashesLoad(npcsDoc, ggpk.NPCHashes);
-
-	rapidjson::Value& itemsDoc = jsondoc.FindMember("ItemHashes")->value;
-	genericHashesLoad(itemsDoc, ggpk.itemHashes);
-
-
-
-
-}
 
 
 void exileSniffer::decodedCellActivated(int row, int col)

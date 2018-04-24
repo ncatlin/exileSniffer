@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "packet_capture_thread.h"
 #include "key_grabber_thread.h"
+#include "gameDataStore.h"
 
 enum eDecodingErr{ eNoErr, eErrUnderflow, 
 	eBadPacketID, ePktIDUnimplemented, eAbandoned};
@@ -22,8 +23,10 @@ class packet_processor :
 {
 public:
 
-	packet_processor(key_grabber_thread *keyGrabPtr, SafeQueue<UI_MESSAGE>* uiq)
-	{		keyGrabber = keyGrabPtr; uiMsgQueue = uiq; 	}
+	packet_processor(key_grabber_thread *keyGrabPtr, SafeQueue<UI_MESSAGE>* uiq, gameDataStore& ggpkRef)
+	{
+		keyGrabber = keyGrabPtr; uiMsgQueue = uiq; ggpk = &ggpkRef;
+	}
 	~packet_processor() {};
 
 private:
@@ -151,9 +154,13 @@ private:
 	void deserialise_CLI_REQUEST_PLAYERID(UIDecodedPkt *);
 	void deserialise_SRV_NOTIFY_PLAYERID(UIDecodedPkt *);
 	void deserialise_SRV_UNKNOWN_0x111(UIDecodedPkt *);
+	void deserialise_SRV_UNKNOWN_0x118(UIDecodedPkt *);
 	void deserialise_CLI_OPTOUT_TUTORIALS(UIDecodedPkt *);
 	void deserialise_SRV_HEARTBEAT(UIDecodedPkt *uipkt);
 	void deserialise_SRV_ADD_OBJECT(UIDecodedPkt *uipkt);
+
+	void SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t objBlobDataLen);
+
 	void deserialise_SRV_UPDATE_OBJECT(UIDecodedPkt *uipkt);
 	void deserialise_SRV_IDNOTIFY_0x137(UIDecodedPkt *uipkt);
 	
@@ -162,10 +169,13 @@ private:
 	UINT16 consumeUShort();
 	UINT32 consume_DWORD();
 	std::wstring consumeWString(size_t bytesLength);
-	void discard_data(ushort byteCount);
+	void consume_blob(ushort byteCount);
+	void consume_blob(ushort byteCount, vector <byte>& blobBuf);
 	void abandon_processing();
 	UINT32 customSizeByteGet();
 	INT32 customSizeByteGet_signed();
+	void rewind_buffer(size_t countBytes);
+	void restore_buffer();
 
 	bool sanityCheckPacketID(unsigned short pktID);
 	void emit_decoding_err_msg(unsigned short msgID, unsigned short lastMsgID);
@@ -175,8 +185,10 @@ private:
 private:
 	vector<UIDecodedPkt *> deserialisedPkts;
 	std::deque< std::vector<byte>> pendingPktQueue;
+	gameDataStore* ggpk = NULL;
 
 	key_grabber_thread * keyGrabber;
+
 	std::map<networkStreamID, STREAMDATA> streamDatas;
 	map<unsigned long, std::pair<KEYDATA *, KEYDATA *> > pendingGameserverKeys;
 	map<networkStreamID, unsigned long> connectionIDStreamIDmapping;
@@ -196,10 +208,16 @@ private:
 	DWORD activeClientPID = 0;
 	vector<byte> *decryptedBuffer = NULL;
 	size_t remainingDecrypted = 0, decryptedIndex = 0;
+
 	eDecodingErr errorFlag = eDecodingErr::eNoErr;
 	unsigned long errorCount = 0;
 
-	bool unfinishedPacket = false;
+	bool currentMsgMultiPacket = false;
+	struct {
+		bool active = false;
+		size_t savedIndex;
+		size_t savedRemaining;
+	} restorePoint;
 
 	std::map <unsigned long, std::string> gameObjHashes;
 	std::map <unsigned long, std::string> monsterHashes;

@@ -138,6 +138,8 @@ S->C UnkPkID: 0xef size: 23 bytes
 
 #define SRV_UNKNOWN_0x111 0x111
 
+#define SRV_UNKNOWN_0x118 0x118 //effectively pkt 0x111 loop2 deserialiser
+
 #define CLI_OPTOUT_TUTORIALS 0x11c //gets 0xff response
 #define SRV_HEARTBEAT 0x132
 #define SRV_ADD_OBJECT 0x135

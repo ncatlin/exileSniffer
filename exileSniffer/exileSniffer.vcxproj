@@ -137,6 +137,7 @@
     </ClCompile>
     <ClCompile Include="exileSniffer.cpp" />
     <ClCompile Include="exileSniffer_packet_actions.cpp" />
+    <ClCompile Include="gameDataStore.cpp" />
     <ClCompile Include="inventory.cpp" />
     <ClCompile Include="key_grabber_thread.cpp" />
     <ClCompile Include="main.cpp" />
@@ -156,6 +157,7 @@
     <ClInclude Include="base_thread.h" />
     <ClInclude Include="clientData.h" />
     <ClInclude Include="cppsemaphore.h" />
+    <ClInclude Include="gameDataStore.h" />
     <ClInclude Include="inventory.h" />
     <ClInclude Include="key_grabber_thread.h" />
     <ClInclude Include="packetIDs.h" />

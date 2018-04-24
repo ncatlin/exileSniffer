@@ -121,6 +121,7 @@ void exileSniffer::init_DecodedPktActioners()
 	decodedPktActioners[CLI_REQUEST_PLAYERID] = &exileSniffer::action_CLI_REQUEST_PLAYERID;
 	decodedPktActioners[SRV_NOTIFY_PLAYERID] = &exileSniffer::action_SRV_NOTIFY_PLAYERID;
 	decodedPktActioners[SRV_UNKNOWN_0x111] = &exileSniffer::action_SRV_UNKNOWN_0x111;
+	decodedPktActioners[SRV_UNKNOWN_0x118] = &exileSniffer::action_SRV_UNKNOWN_0x118;
 	decodedPktActioners[CLI_OPTOUT_TUTORIALS] = &exileSniffer::action_CLI_OPTOUT_TUTORIALS;
 	decodedPktActioners[SRV_HEARTBEAT] = &exileSniffer::action_SRV_HEARTBEAT;
 	decodedPktActioners[SRV_ADD_OBJECT] = &exileSniffer::action_SRV_ADD_OBJECT;
@@ -157,19 +158,40 @@ void exileSniffer::addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPk
 	QTableWidgetItem *pktID = new QTableWidgetItem(entry.hexPktID());
 	ui.decodedList->setItem(rowIndex, HEADER_SECTION_MSGID, pktID);
 
-	QTableWidgetItem *summary = new QTableWidgetItem(entry.summary);
-	ui.decodedList->setItem(rowIndex, HEADER_SECTION_SUMMARY, summary);
+
+
 
 	if (entry.badDecode())
 	{
+		entry.summary = "<!BAD!>" + entry.summary;
+
+		QTableWidgetItem *summary = new QTableWidgetItem(entry.summary);
+		ui.decodedList->setItem(rowIndex, HEADER_SECTION_SUMMARY, summary);
+
 		setRowColor(rowIndex, QColor(255, 150, 150, 255));
 		return;
 	}
+
 	if (obj->wasAbandoned())
 	{
-		setRowColor(rowIndex, QColor(255, 232, 209, 255));
+		entry.summary = "<!ABAND!>" + entry.summary;
+
+		QTableWidgetItem *summary = new QTableWidgetItem(entry.summary);
+		ui.decodedList->setItem(rowIndex, HEADER_SECTION_SUMMARY, summary);
+
+		setRowColor(rowIndex, QColor(255, 175, 175, 255));
+
+		//nice neutral light orangey colour - use it for something else
+		//setRowColor(rowIndex, QColor(255, 232, 209, 255));
 		return;
 	}
+
+	if (obj->spansMultiplePackets())
+		entry.summary = "<!MultiPkt!>" + entry.summary;
+
+	QTableWidgetItem *summary = new QTableWidgetItem(entry.summary);
+	ui.decodedList->setItem(rowIndex, HEADER_SECTION_SUMMARY, summary);
+
 
 	byte flags = entry.pktFlags();
 	if (!(flags & PKTBIT_GAMESERVER))
@@ -482,7 +504,7 @@ void exileSniffer::action_SRV_AREA_INFO(UIDecodedPkt& obj, QString *analysis)
 
 	DWORD areaCode = obj.get_UInt32(L"AreaCode");
 	std::wstring areaname;
-	lookup_areaCode(areaCode, areaname);
+	ggpk.lookup_areaCode(areaCode, areaname);
 
 	auto it = obj.payload.FindMember(L"PreloadHashList");
 	if (it == obj.payload.MemberEnd())
@@ -543,7 +565,7 @@ void exileSniffer::action_SRV_AREA_INFO(UIDecodedPkt& obj, QString *analysis)
 		DWORD hash = it->GetUint();
 		std::string hashResult;
 		std::string hashCategory;
-		lookup_hash(hash, hashResult, hashCategory);
+		ggpk.lookup_hash(hash, hashResult, hashCategory);
 		preloadVec.push_back(make_pair(hashCategory, make_pair(hashResult, hash)));
 	}
 	sort(preloadVec.begin(), preloadVec.end());
@@ -1302,7 +1324,7 @@ void exileSniffer::action_SRV_SLOT_ITEMSLIST(UIDecodedPkt& obj, QString *analysi
 			ushort posY = it->FindMember(L"PosY")->value.GetUint();
 			DWORD hash = it->FindMember(L"ItemHash")->value.GetUint();
 			std::string itemname, category;
-			lookup_hash(hash, itemname, category);
+			ggpk.lookup_hash(hash, itemname, category);
 
 			analysisStream << "   (" << std::dec << (ushort)posX << "," << (ushort)posY << "): " <<
 				converter.from_bytes(itemname) << std::hex << " (0x" << hash << ") ID: 0x" << instanceID << std::endl;
@@ -1994,7 +2016,34 @@ void exileSniffer::action_SRV_UNKNOWN_0x111(UIDecodedPkt& obj, QString *analysis
 
 }
 
+void exileSniffer::action_SRV_UNKNOWN_0x118(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
 
+
+	if (!analysis)
+	{
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = "pkt 0x118 from server, one entry of 0x111 list2";
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+	UINT32 unk1 = obj.get_UInt32(L"Unk1");
+	UINT32 unk2 = obj.get_UInt32(L"Unk2");
+	UINT32 unk3 = obj.get_UInt32(L"Unk3");
+	UINT32 unk4a = obj.get_UInt32(L"Unk4a");
+	UINT32 unk4b = obj.get_UInt32(L"Unk4b");
+
+	wstringstream analysisStream;
+	analysisStream << "This is an item as it would appear on the second list of an 0x111 pkt" << std::endl;
+	analysisStream << std::hex;
+	analysisStream << "Unk1: 0x" << unk1 << std::endl;
+	analysisStream << "Unk2: 0x" << unk2 << std::endl;
+	analysisStream << "Unk3: 0x" << unk3 << std::endl;
+	analysisStream << "Unk4: 0x" << unk4a <<"," << unk4b << std::endl;
+
+	*analysis = QString::fromStdWString(analysisStream.str());
+}
 
 void exileSniffer::action_CLI_OPTOUT_TUTORIALS(UIDecodedPkt& obj, QString *analysis)
 {
@@ -2037,23 +2086,22 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 	std::string hashResult;
 	std::string hashCategory;
-	lookup_hash(objHash, hashResult, hashCategory);
+	ggpk.lookup_hash(objHash, hashResult, hashCategory);
 
-	DWORD coord1 = obj.get_UInt32(L"Coord1");
-	DWORD coord2 = obj.get_UInt32(L"Coord2");
+
 
 	if (!analysis)
 	{
 		wstringstream summary;
 		summary << std::hex << converter.from_bytes(hashCategory) << " added <"<<converter.from_bytes(hashResult)<<
-			"> ID (0x" << ID1 << "," << ID2 << ",0x" << ID3 << ")" <<"@ "<<std::dec<<coord1<<","<<coord2<<
-			"<"<<dataLen<<" bytes>";
+			"> ID (0x" << ID1 << "," << ID2 << ",0x" << ID3 << ") - " <<dataLen<<" bytes>";
 
 		UI_DECODED_LIST_ENTRY listentry(obj);
 		listentry.summary = QString::fromStdWString(summary.str());
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
+
 
 	wstringstream analysisStream;
 
@@ -2062,9 +2110,18 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 		<< converter.from_bytes(hashCategory) << "-" 
 		<< converter.from_bytes(hashResult) << std::endl;
 
-	//possibly need to intepret this differently based on hashcategory. following is for players
-
 	analysisStream << "Datalen: " << std::dec << dataLen << std::endl;
+
+	if (hashCategory != "Character")
+	{
+		analysisStream << "\n !- Not character, can't decode yet -! " << std::endl;
+		*analysis = QString::fromStdWString(analysisStream.str());
+		return;
+	}
+
+
+	DWORD coord1 = obj.get_UInt32(L"Coord1");
+	DWORD coord2 = obj.get_UInt32(L"Coord2");
 
 	auto it = obj.payload.FindMember(L"List1");
 	if (it != obj.payload.MemberEnd())
@@ -2087,7 +2144,7 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 	DWORD unkdword1 = ntohl(obj.get_UInt32(L"UnkDword1"));
 	if (unkdword1 != 0)
 	{
-		lookup_hash(unkdword1, hashResult, hashCategory);
+		ggpk.lookup_hash(unkdword1, hashResult, hashCategory);
 		analysisStream << "Unk DWORD After Coords: 0x" << unkdword1 << " - "
 			<< converter.from_bytes(hashCategory) << "-"
 			<< converter.from_bytes(hashResult) << std::endl;
