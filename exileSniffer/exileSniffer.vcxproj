@@ -129,7 +129,7 @@
   <ItemGroup>
     <ClCompile Include="base_thread.cpp" />
     <ClCompile Include="clientData.cpp" />
-    <ClCompile Include="derivedRawFilterForm.cpp">
+    <ClCompile Include="filterForm.cpp">
       <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\%(Filename).moc</OutputFile>
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
       <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\%(Filename).moc</OutputFile>
@@ -143,7 +143,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MurmurHash2.cpp" />
     <ClCompile Include="packet_processor.cpp" />
-    <QtMoc Include="rawFilterForm.h" />
+    <QtMoc Include="filterForm.h" />
     <ClCompile Include="packet_processor_decode_utils.cpp" />
     <ClCompile Include="packet_processor_game_packet_decoders.cpp" />
     <ClCompile Include="stdafx.cpp">

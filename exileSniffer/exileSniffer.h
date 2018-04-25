@@ -12,14 +12,15 @@
 
 #include "ui_exileSniffer.h"
 
-#include "rawFilterForm.h"
+#include "filterForm.h"
 #include "ui_rawfilterform.h"
 #include <fstream>
 
-#define HEADER_SECTION_TIME 0
-#define HEADER_SECTION_SENDER 1
-#define HEADER_SECTION_MSGID 2
-#define HEADER_SECTION_SUMMARY 3
+#define DECODED_SECTION_TIME 0
+#define DECODED_SECTION_SENDER 1
+#define DECODED_SECTION_MSGID 2
+#define DECODED_SECTION_SUMMARY 3
+
 
 struct RAW_FILTERS {
 	bool filterIncoming = false;
@@ -78,8 +79,10 @@ class exileSniffer : public QMainWindow
 
 	private slots:
 		void read_UI_Q();
+
 		void showRawFiltersDLG() { rawFilterForm.show(); }
-		void updateRawFilters() { std::cout << "y ay"<<std::endl; }
+		void updateFilters();
+
 		void rawBytesRowChanged(QString arg);
 		void toggleRawLineWrap(bool state);
 		void toggleRawAutoScroll(bool state);
@@ -91,6 +94,7 @@ class exileSniffer : public QMainWindow
 		void setup_decoded_messages_tab();
 		void init_DecodedPktActioners();
 		void start_threads();
+		void initFilters();
 
 
 		void action_UI_Msg(UI_MESSAGE *msg);
@@ -238,7 +242,7 @@ class exileSniffer : public QMainWindow
 		std::ofstream outfile;
 		Ui::exileSniffer ui;
 		Ui::rawFilterForm rawFiltersFormUI;
-		derivedRawFilterForm rawFilterForm;
+		filterForm rawFilterForm;
 
 		unsigned short UIhexPacketsPerRow = 16;
 

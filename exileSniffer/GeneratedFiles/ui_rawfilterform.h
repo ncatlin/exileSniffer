@@ -13,17 +13,11 @@
 #include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
-#include <QtWidgets/QCheckBox>
-#include <QtWidgets/QComboBox>
-#include <QtWidgets/QFrame>
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QListView>
 #include <QtWidgets/QPushButton>
-#include <QtWidgets/QSpacerItem>
-#include <QtWidgets/QTextEdit>
+#include <QtWidgets/QTableWidget>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 
@@ -34,29 +28,13 @@ class Ui_rawFilterForm
 public:
     QVBoxLayout *verticalLayout;
     QVBoxLayout *verticalLayout_2;
-    QGroupBox *groupBox;
-    QHBoxLayout *horizontalLayout;
-    QSpacerItem *horizontalSpacer;
-    QCheckBox *checkBox;
-    QCheckBox *checkBox_2;
-    QGroupBox *groupBox_2;
-    QHBoxLayout *horizontalLayout_2;
-    QSpacerItem *horizontalSpacer_2;
-    QCheckBox *checkBox_4;
-    QCheckBox *checkBox_5;
     QGroupBox *groupBox_3;
     QVBoxLayout *verticalLayout_3;
-    QListView *listView;
-    QHBoxLayout *horizontalLayout_3;
-    QFrame *frame;
-    QHBoxLayout *horizontalLayout_4;
-    QLabel *label;
-    QTextEdit *textEdit;
-    QComboBox *comboBox;
-    QPushButton *pushButton;
-    QHBoxLayout *horizontalLayout_5;
-    QPushButton *rawClearBtn;
-    QPushButton *rawOkBtn;
+    QTableWidget *filterTable;
+    QHBoxLayout *horizontalLayout;
+    QPushButton *includeBtn;
+    QPushButton *excludeBtn;
+    QPushButton *applyBtn;
 
     void setupUi(QWidget *rawFilterForm)
     {
@@ -67,143 +45,36 @@ public:
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
         verticalLayout_2 = new QVBoxLayout();
         verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
-        groupBox = new QGroupBox(rawFilterForm);
-        groupBox->setObjectName(QStringLiteral("groupBox"));
-        groupBox->setMaximumSize(QSize(350, 50));
-        QFont font;
-        font.setPointSize(10);
-        groupBox->setFont(font);
-        horizontalLayout = new QHBoxLayout(groupBox);
-        horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
-        horizontalSpacer = new QSpacerItem(50, 20, QSizePolicy::Fixed, QSizePolicy::Minimum);
-
-        horizontalLayout->addItem(horizontalSpacer);
-
-        checkBox = new QCheckBox(groupBox);
-        checkBox->setObjectName(QStringLiteral("checkBox"));
-
-        horizontalLayout->addWidget(checkBox);
-
-        checkBox_2 = new QCheckBox(groupBox);
-        checkBox_2->setObjectName(QStringLiteral("checkBox_2"));
-
-        horizontalLayout->addWidget(checkBox_2);
-
-
-        verticalLayout_2->addWidget(groupBox);
-
-        groupBox_2 = new QGroupBox(rawFilterForm);
-        groupBox_2->setObjectName(QStringLiteral("groupBox_2"));
-        groupBox_2->setMaximumSize(QSize(350, 54));
-        groupBox_2->setFont(font);
-        horizontalLayout_2 = new QHBoxLayout(groupBox_2);
-        horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
-        horizontalLayout_2->setContentsMargins(9, -1, -1, 9);
-        horizontalSpacer_2 = new QSpacerItem(50, 20, QSizePolicy::Fixed, QSizePolicy::Minimum);
-
-        horizontalLayout_2->addItem(horizontalSpacer_2);
-
-        checkBox_4 = new QCheckBox(groupBox_2);
-        checkBox_4->setObjectName(QStringLiteral("checkBox_4"));
-        checkBox_4->setMinimumSize(QSize(0, 0));
-        checkBox_4->setMaximumSize(QSize(16777215, 16777215));
-
-        horizontalLayout_2->addWidget(checkBox_4);
-
-        checkBox_5 = new QCheckBox(groupBox_2);
-        checkBox_5->setObjectName(QStringLiteral("checkBox_5"));
-
-        horizontalLayout_2->addWidget(checkBox_5);
-
-
-        verticalLayout_2->addWidget(groupBox_2);
-
         groupBox_3 = new QGroupBox(rawFilterForm);
         groupBox_3->setObjectName(QStringLiteral("groupBox_3"));
+        QFont font;
+        font.setPointSize(10);
         groupBox_3->setFont(font);
         verticalLayout_3 = new QVBoxLayout(groupBox_3);
         verticalLayout_3->setObjectName(QStringLiteral("verticalLayout_3"));
-        listView = new QListView(groupBox_3);
-        listView->setObjectName(QStringLiteral("listView"));
+        filterTable = new QTableWidget(groupBox_3);
+        if (filterTable->columnCount() < 5)
+            filterTable->setColumnCount(5);
+        QTableWidgetItem *__qtablewidgetitem = new QTableWidgetItem();
+        filterTable->setHorizontalHeaderItem(0, __qtablewidgetitem);
+        QTableWidgetItem *__qtablewidgetitem1 = new QTableWidgetItem();
+        filterTable->setHorizontalHeaderItem(1, __qtablewidgetitem1);
+        QTableWidgetItem *__qtablewidgetitem2 = new QTableWidgetItem();
+        filterTable->setHorizontalHeaderItem(2, __qtablewidgetitem2);
+        QTableWidgetItem *__qtablewidgetitem3 = new QTableWidgetItem();
+        filterTable->setHorizontalHeaderItem(3, __qtablewidgetitem3);
+        QTableWidgetItem *__qtablewidgetitem4 = new QTableWidgetItem();
+        filterTable->setHorizontalHeaderItem(4, __qtablewidgetitem4);
+        filterTable->setObjectName(QStringLiteral("filterTable"));
+        filterTable->setEditTriggers(QAbstractItemView::SelectedClicked);
+        filterTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
+        filterTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+        filterTable->setTextElideMode(Qt::ElideLeft);
+        filterTable->setGridStyle(Qt::DotLine);
+        filterTable->setSortingEnabled(true);
+        filterTable->verticalHeader()->setVisible(false);
 
-        verticalLayout_3->addWidget(listView);
-
-        horizontalLayout_3 = new QHBoxLayout();
-        horizontalLayout_3->setObjectName(QStringLiteral("horizontalLayout_3"));
-        frame = new QFrame(groupBox_3);
-        frame->setObjectName(QStringLiteral("frame"));
-        QSizePolicy sizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
-        sizePolicy.setHorizontalStretch(0);
-        sizePolicy.setVerticalStretch(0);
-        sizePolicy.setHeightForWidth(frame->sizePolicy().hasHeightForWidth());
-        frame->setSizePolicy(sizePolicy);
-        frame->setFrameShape(QFrame::Box);
-        frame->setFrameShadow(QFrame::Raised);
-        frame->setLineWidth(1);
-        frame->setMidLineWidth(1);
-        horizontalLayout_4 = new QHBoxLayout(frame);
-        horizontalLayout_4->setObjectName(QStringLiteral("horizontalLayout_4"));
-        horizontalLayout_4->setContentsMargins(-1, 3, -1, 3);
-        label = new QLabel(frame);
-        label->setObjectName(QStringLiteral("label"));
-        QSizePolicy sizePolicy1(QSizePolicy::Maximum, QSizePolicy::Preferred);
-        sizePolicy1.setHorizontalStretch(0);
-        sizePolicy1.setVerticalStretch(0);
-        sizePolicy1.setHeightForWidth(label->sizePolicy().hasHeightForWidth());
-        label->setSizePolicy(sizePolicy1);
-
-        horizontalLayout_4->addWidget(label);
-
-        textEdit = new QTextEdit(frame);
-        textEdit->setObjectName(QStringLiteral("textEdit"));
-        QSizePolicy sizePolicy2(QSizePolicy::Fixed, QSizePolicy::Expanding);
-        sizePolicy2.setHorizontalStretch(0);
-        sizePolicy2.setVerticalStretch(0);
-        sizePolicy2.setHeightForWidth(textEdit->sizePolicy().hasHeightForWidth());
-        textEdit->setSizePolicy(sizePolicy2);
-        textEdit->setMaximumSize(QSize(50, 26));
-
-        horizontalLayout_4->addWidget(textEdit);
-
-        comboBox = new QComboBox(frame);
-        comboBox->setObjectName(QStringLiteral("comboBox"));
-        comboBox->setMinimumSize(QSize(0, 26));
-        comboBox->setMaximumSize(QSize(100, 16777215));
-        comboBox->setFont(font);
-
-        horizontalLayout_4->addWidget(comboBox);
-
-        pushButton = new QPushButton(frame);
-        pushButton->setObjectName(QStringLiteral("pushButton"));
-        sizePolicy.setHeightForWidth(pushButton->sizePolicy().hasHeightForWidth());
-        pushButton->setSizePolicy(sizePolicy);
-        pushButton->setMinimumSize(QSize(103, 26));
-
-        horizontalLayout_4->addWidget(pushButton);
-
-
-        horizontalLayout_3->addWidget(frame);
-
-
-        verticalLayout_3->addLayout(horizontalLayout_3);
-
-        horizontalLayout_5 = new QHBoxLayout();
-        horizontalLayout_5->setObjectName(QStringLiteral("horizontalLayout_5"));
-        rawClearBtn = new QPushButton(groupBox_3);
-        rawClearBtn->setObjectName(QStringLiteral("rawClearBtn"));
-        rawClearBtn->setMinimumSize(QSize(0, 26));
-        rawClearBtn->setMaximumSize(QSize(87, 16777215));
-
-        horizontalLayout_5->addWidget(rawClearBtn);
-
-        rawOkBtn = new QPushButton(groupBox_3);
-        rawOkBtn->setObjectName(QStringLiteral("rawOkBtn"));
-        rawOkBtn->setMaximumSize(QSize(100, 16777215));
-
-        horizontalLayout_5->addWidget(rawOkBtn);
-
-
-        verticalLayout_3->addLayout(horizontalLayout_5);
+        verticalLayout_3->addWidget(filterTable);
 
 
         verticalLayout_2->addWidget(groupBox_3);
@@ -211,9 +82,34 @@ public:
 
         verticalLayout->addLayout(verticalLayout_2);
 
+        horizontalLayout = new QHBoxLayout();
+        horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
+        includeBtn = new QPushButton(rawFilterForm);
+        includeBtn->setObjectName(QStringLiteral("includeBtn"));
+        includeBtn->setMaximumSize(QSize(120, 16777215));
+
+        horizontalLayout->addWidget(includeBtn);
+
+        excludeBtn = new QPushButton(rawFilterForm);
+        excludeBtn->setObjectName(QStringLiteral("excludeBtn"));
+        excludeBtn->setMaximumSize(QSize(120, 16777215));
+
+        horizontalLayout->addWidget(excludeBtn);
+
+        applyBtn = new QPushButton(rawFilterForm);
+        applyBtn->setObjectName(QStringLiteral("applyBtn"));
+        applyBtn->setMaximumSize(QSize(120, 16777215));
+
+        horizontalLayout->addWidget(applyBtn);
+
+
+        verticalLayout->addLayout(horizontalLayout);
+
 
         retranslateUi(rawFilterForm);
-        QObject::connect(rawOkBtn, SIGNAL(clicked()), rawFilterForm, SLOT(okBtnPress()));
+        QObject::connect(excludeBtn, SIGNAL(clicked()), rawFilterForm, SLOT(excludeSelectedFilters()));
+        QObject::connect(includeBtn, SIGNAL(clicked()), rawFilterForm, SLOT(includeSelectedFilters()));
+        QObject::connect(applyBtn, SIGNAL(clicked()), rawFilterForm, SLOT(applyBtnPress()));
 
         QMetaObject::connectSlotsByName(rawFilterForm);
     } // setupUi
@@ -221,22 +117,20 @@ public:
     void retranslateUi(QWidget *rawFilterForm)
     {
         rawFilterForm->setWindowTitle(QApplication::translate("rawFilterForm", "Form", Q_NULLPTR));
-        groupBox->setTitle(QApplication::translate("rawFilterForm", "Exclude by Direction", Q_NULLPTR));
-        checkBox->setText(QApplication::translate("rawFilterForm", "Client -> Server", Q_NULLPTR));
-        checkBox_2->setText(QApplication::translate("rawFilterForm", "Server -> Client", Q_NULLPTR));
-        groupBox_2->setTitle(QApplication::translate("rawFilterForm", "Exclude by Stream Type", Q_NULLPTR));
-        checkBox_4->setText(QApplication::translate("rawFilterForm", "Login", Q_NULLPTR));
-        checkBox_5->setText(QApplication::translate("rawFilterForm", "Game", Q_NULLPTR));
-        groupBox_3->setTitle(QApplication::translate("rawFilterForm", "Exclude Specific Packet Types (first two bytes)", Q_NULLPTR));
-        label->setText(QApplication::translate("rawFilterForm", "Packet ID 0x", Q_NULLPTR));
-        comboBox->clear();
-        comboBox->insertItems(0, QStringList()
-         << QApplication::translate("rawFilterForm", "Login", Q_NULLPTR)
-         << QApplication::translate("rawFilterForm", "Game", Q_NULLPTR)
-        );
-        pushButton->setText(QApplication::translate("rawFilterForm", "Add Filter", Q_NULLPTR));
-        rawClearBtn->setText(QApplication::translate("rawFilterForm", "Clear Filters", Q_NULLPTR));
-        rawOkBtn->setText(QApplication::translate("rawFilterForm", "Done", Q_NULLPTR));
+        groupBox_3->setTitle(QApplication::translate("rawFilterForm", "Filter Settings (Right click for presets)", Q_NULLPTR));
+        QTableWidgetItem *___qtablewidgetitem = filterTable->horizontalHeaderItem(0);
+        ___qtablewidgetitem->setText(QApplication::translate("rawFilterForm", "ID", Q_NULLPTR));
+        QTableWidgetItem *___qtablewidgetitem1 = filterTable->horizontalHeaderItem(1);
+        ___qtablewidgetitem1->setText(QApplication::translate("rawFilterForm", "Function", Q_NULLPTR));
+        QTableWidgetItem *___qtablewidgetitem2 = filterTable->horizontalHeaderItem(2);
+        ___qtablewidgetitem2->setText(QApplication::translate("rawFilterForm", "Sender", Q_NULLPTR));
+        QTableWidgetItem *___qtablewidgetitem3 = filterTable->horizontalHeaderItem(3);
+        ___qtablewidgetitem3->setText(QApplication::translate("rawFilterForm", "Count", Q_NULLPTR));
+        QTableWidgetItem *___qtablewidgetitem4 = filterTable->horizontalHeaderItem(4);
+        ___qtablewidgetitem4->setText(QApplication::translate("rawFilterForm", "Filter", Q_NULLPTR));
+        includeBtn->setText(QApplication::translate("rawFilterForm", "Include Selected", Q_NULLPTR));
+        excludeBtn->setText(QApplication::translate("rawFilterForm", "Exclude Selected", Q_NULLPTR));
+        applyBtn->setText(QApplication::translate("rawFilterForm", "Apply Filters", Q_NULLPTR));
     } // retranslateUi
 
 };
@@ -248,3 +142,4 @@ namespace Ui {
 QT_END_NAMESPACE
 
 #endif // UI_RAWFILTERFORM_H
+

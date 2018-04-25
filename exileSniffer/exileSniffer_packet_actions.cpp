@@ -173,13 +173,13 @@ void exileSniffer::addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPk
 
 	QTableWidgetItem *time = new QTableWidgetItem(entry.floatSeconds(startMSSinceEpoch));
 	time->setData(Qt::UserRole, QVariant::fromValue<UIDecodedPkt *>(obj));
-	ui.decodedList->setItem(rowIndex, HEADER_SECTION_TIME, time);
+	ui.decodedList->setItem(rowIndex, DECODED_SECTION_TIME, time);
 
 	QTableWidgetItem *sender = new QTableWidgetItem(entry.sender());
-	ui.decodedList->setItem(rowIndex, HEADER_SECTION_SENDER, sender);
+	ui.decodedList->setItem(rowIndex, DECODED_SECTION_SENDER, sender);
 
 	QTableWidgetItem *pktID = new QTableWidgetItem(entry.hexPktID());
-	ui.decodedList->setItem(rowIndex, HEADER_SECTION_MSGID, pktID);
+	ui.decodedList->setItem(rowIndex, DECODED_SECTION_MSGID, pktID);
 
 
 
@@ -189,7 +189,7 @@ void exileSniffer::addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPk
 		entry.summary = "<!BAD!>" + entry.summary;
 
 		QTableWidgetItem *summary = new QTableWidgetItem(entry.summary);
-		ui.decodedList->setItem(rowIndex, HEADER_SECTION_SUMMARY, summary);
+		ui.decodedList->setItem(rowIndex, DECODED_SECTION_SUMMARY, summary);
 
 		setRowColor(rowIndex, QColor(255, 150, 150, 255));
 		return;
@@ -200,7 +200,7 @@ void exileSniffer::addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPk
 		entry.summary = "<!ABAND!>" + entry.summary;
 
 		QTableWidgetItem *summary = new QTableWidgetItem(entry.summary);
-		ui.decodedList->setItem(rowIndex, HEADER_SECTION_SUMMARY, summary);
+		ui.decodedList->setItem(rowIndex, DECODED_SECTION_SUMMARY, summary);
 
 		setRowColor(rowIndex, QColor(255, 175, 175, 255));
 
@@ -213,7 +213,7 @@ void exileSniffer::addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPk
 		entry.summary = "<!MultiPkt!>" + entry.summary;
 
 	QTableWidgetItem *summary = new QTableWidgetItem(entry.summary);
-	ui.decodedList->setItem(rowIndex, HEADER_SECTION_SUMMARY, summary);
+	ui.decodedList->setItem(rowIndex, DECODED_SECTION_SUMMARY, summary);
 
 
 	byte flags = entry.pktFlags();

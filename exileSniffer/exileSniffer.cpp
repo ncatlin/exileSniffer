@@ -20,6 +20,7 @@ exileSniffer::exileSniffer(QWidget *parent)
 
 	setup_raw_stream_tab();
 	setup_decoded_messages_tab();
+	initFilters();
 
 	init_DecodedPktActioners();
 
@@ -72,8 +73,8 @@ exileSniffer::exileSniffer(QWidget *parent)
 void exileSniffer::setup_raw_stream_tab()
 {
 	rawFiltersFormUI.setupUi(&rawFilterForm);
-	connect(&rawFilterForm, SIGNAL(newrawFilters()), this, SLOT(updateRawFilters()));
-	toggleRawLineWrap(ui.rawLinewrapCheck->isChecked());
+	rawFilterForm.setUI(&rawFiltersFormUI);
+
 
 	connect(ui.ptHexPane->verticalScrollBar(), SIGNAL(valueChanged(int)),
 		ui.ptASCIIPane->verticalScrollBar(), SLOT(setValue(int)));
@@ -82,12 +83,70 @@ void exileSniffer::setup_raw_stream_tab()
 	ui.ptHexPane->verticalScrollBar()->hide();
 }
 
+void exileSniffer::initFilters()
+{
+	connect(&rawFilterForm, SIGNAL(applyFilters()), this, SLOT(updateFilters()));
+	toggleRawLineWrap(ui.rawLinewrapCheck->isChecked());
+
+
+	rawFiltersFormUI.filterTable->horizontalHeader()->setSectionResizeMode(FILTER_SECTION_FUNCTION, QHeaderView::Stretch);
+	rawFiltersFormUI.filterTable->horizontalHeader()->resizeSection(FILTER_SECTION_ID, 60);
+	rawFiltersFormUI.filterTable->horizontalHeader()->resizeSection(FILTER_SECTION_SENDER, 75);
+	rawFiltersFormUI.filterTable->horizontalHeader()->resizeSection(FILTER_SECTION_COUNT, 80);
+	rawFiltersFormUI.filterTable->horizontalHeader()->resizeSection(FILTER_SECTION_STATE, 75);
+
+	unsigned int rowIndex = rawFiltersFormUI.filterTable->rowCount();
+	rawFiltersFormUI.filterTable->setRowCount(rowIndex + 1);
+	if (ui.decodedAutoscrollCheck->isChecked())
+		ui.decodedList->scrollToBottom();
+
+	numericSortTableWidgetItem *pktID = new numericSortTableWidgetItem();
+	pktID->setData(Qt::DisplayRole, 0);
+	rawFiltersFormUI.filterTable->setItem(rowIndex, FILTER_SECTION_ID, pktID);
+
+	QTableWidgetItem *function = new QTableWidgetItem();
+	function->setData(Qt::DisplayRole, "Unknown");
+	rawFiltersFormUI.filterTable->setItem(rowIndex, FILTER_SECTION_FUNCTION, function);
+
+	QTableWidgetItem *sender = new QTableWidgetItem();
+	sender->setData(Qt::DisplayRole, "Server");
+	sender->setTextAlignment(Qt::AlignCenter);
+	rawFiltersFormUI.filterTable->setItem(rowIndex, FILTER_SECTION_SENDER, sender);
+
+	numericSortTableWidgetItem *count = new numericSortTableWidgetItem();
+	count->setData(Qt::DisplayRole, 0);
+	rawFiltersFormUI.filterTable->setItem(rowIndex, FILTER_SECTION_COUNT, count);
+
+	QTableWidgetItem *status = new QTableWidgetItem();
+	status->setData(Qt::DisplayRole, "Included");
+	status->setTextAlignment(Qt::AlignCenter);
+	rawFiltersFormUI.filterTable->setItem(rowIndex, FILTER_SECTION_STATE, status);
+
+}
+
+void exileSniffer::updateFilters()
+{ 
+	QList<ushort> includedMessageIDs;
+
+	for (int msgid = 0; msgid < rawFiltersFormUI.filterTable->rowCount(); msgid++)
+	{
+		QTableWidgetItem *item = rawFiltersFormUI.filterTable->item(msgid, FILTER_SECTION_STATE);
+		if (item->text() != "Excluded") 
+			includedMessageIDs << msgid;
+	}
+
+	std::cout << "Todo: include " << includedMessageIDs.size() << " msg types in decoded list" << std::endl;
+}
+
+
+
+
 void exileSniffer::setup_decoded_messages_tab()
 {
 	ui.decodedList->horizontalScrollBar()->setFixedHeight(10);
-	ui.decodedList->horizontalHeader()->resizeSection(HEADER_SECTION_TIME, 70);
-	ui.decodedList->horizontalHeader()->resizeSection(HEADER_SECTION_SENDER, 50);
-	ui.decodedList->horizontalHeader()->resizeSection(HEADER_SECTION_SUMMARY, 450);
+	ui.decodedList->horizontalHeader()->resizeSection(DECODED_SECTION_TIME, 70);
+	ui.decodedList->horizontalHeader()->resizeSection(DECODED_SECTION_SENDER, 50);
+	ui.decodedList->horizontalHeader()->resizeSection(DECODED_SECTION_SUMMARY, 450);
 	ui.decodedList->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
 }
 

@@ -63,9 +63,6 @@
     <ClCompile Include="inventory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="derivedRawFilterForm.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="packet_processor_decode_utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -80,6 +77,9 @@
     </ClCompile>
     <ClCompile Include="MurmurHash2.cpp">
       <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="filterForm.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -130,7 +130,7 @@
     <QtMoc Include="exileSniffer.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="rawFilterForm.h">
+    <QtMoc Include="filterForm.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

@@ -62,7 +62,7 @@
           </column>
           <column>
            <property name="text">
-            <string>Sender</string>
+            <string>Origin</string>
            </property>
           </column>
           <column>
