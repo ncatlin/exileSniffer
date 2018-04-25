@@ -129,6 +129,7 @@ class exileSniffer : public QMainWindow
 		void action_SRV_PLAYER_ITEMS(UIDecodedPkt&, QString*);
 		void action_CLI_CLICKED_GROUND_ITEM(UIDecodedPkt&, QString*);
 		void action_CLI_ACTION_PREDICTIVE(UIDecodedPkt&, QString*);
+		void action_SRV_TRANSFER_INSTANCE(UIDecodedPkt& obj, QString *analysis);
 		void action_SRV_INSTANCE_SERVER_DATA(UIDecodedPkt&, QString*);
 		void action_CLI_PICKUP_ITEM(UIDecodedPkt&, QString*);
 		void action_CLI_PLACE_ITEM(UIDecodedPkt&, QString*);
@@ -171,6 +172,8 @@ class exileSniffer : public QMainWindow
 
 		void action_CLI_SWAPPED_WEAPONS(UIDecodedPkt&, QString*);
 
+		void action_SRV_UNK_0x92(UIDecodedPkt&, QString*);
+
 		void action_CLI_SKILLPANE_ACTION(UIDecodedPkt&, QString*);
 
 		void action_SRV_SKILLPANE_DATA(UIDecodedPkt&, QString*);
@@ -183,7 +186,16 @@ class exileSniffer : public QMainWindow
 
 		void action_CLI_GUILD_CREATE(UIDecodedPkt&, QString*);
 
+
 		void action_CLI_PACKET_EXIT(UIDecodedPkt&, QString*);
+		void action_CLI_PACKET_EXIT_2(UIDecodedPkt&, QString*);
+		void action_CLI_DUEL_CHALLENGE(UIDecodedPkt&, QString*);
+		void action_SRV_DUEL_RESPONSE(UIDecodedPkt&, QString*);
+		void action_SRV_DUEL_CHALLENGE(UIDecodedPkt&, QString*);
+
+		void action_CLI_UNK_0xC7(UIDecodedPkt&, QString*);
+
+		void action_SRV_UNK_0xD5(UIDecodedPkt&, QString*);
 
 		void action_CLI_USED_SKILL(UIDecodedPkt&, QString*);
 
@@ -191,7 +203,7 @@ class exileSniffer : public QMainWindow
 		void action_CLI_MOUSE_HELD(UIDecodedPkt&, QString*);
 		void action_CLI_MOUSE_RELEASE(UIDecodedPkt&, QString*);
 
-		void action_CLI_OPEN_WORLD_SCREEN(UIDecodedPkt *);
+		void action_CLI_OPEN_WORLD_SCREEN(UIDecodedPkt&, QString*);
 
 		void action_SRV_UNK_0xE6(UIDecodedPkt&, QString*);	
 		void action_SRV_ITEM_REMOVED(UIDecodedPkt&, QString*);

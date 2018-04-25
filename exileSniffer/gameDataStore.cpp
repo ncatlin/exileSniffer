@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "gameDataStore.h"
 
+#include "MurmurHash2.h"
+
 gameDataStore::~gameDataStore()
 {
 }
@@ -90,6 +92,12 @@ bool gameDataStore::lookup_hash(unsigned long hash, std::string& result, std::st
 	{
 		result = itemsIt->second;
 		category = "Item";
+		return true;
+	}
+
+	if (searchLevelAdjustedMonsters(hash, result))
+	{
+		category = "Monster";
 		return true;
 	}
 
@@ -184,4 +192,78 @@ void gameDataStore::fill_gamedata_lists()
 
 	rapidjson::Value& itemsDoc = jsondoc.FindMember("ItemHashes")->value;
 	genericHashesLoad(itemsDoc, itemHashes);
+}
+
+unsigned long levelAdjustedHash(std::string baseString, unsigned int level, std::string& hashedString_Out)
+{
+	hashedString_Out = baseString + "@" + std::to_string(level);
+	return MurmurHash2(hashedString_Out.c_str(), hashedString_Out.size(), 0);
+}
+
+/*
+as a space saving measure we only save an index to the monster that a hash refers to
+once found we work out what level was appended to the path string
+*/
+bool gameDataStore::searchLevelAdjustedMonsters(unsigned long hash, std::string& result)
+{
+	auto monstersIt = levelAdjustedMonsterHashes.find(hash);
+	if (monstersIt == levelAdjustedMonsterHashes.end())
+		return false;
+
+	const std::string baseString = monsterVarieties.at(monstersIt->second);
+	unsigned long testhash = levelAdjustedHash(baseString, lastAreaLevel, result);
+
+	if (testhash == hash)
+	{
+		return true;
+	}
+
+	for (auto it = hashedMonsterLevels.begin(); it != hashedMonsterLevels.end(); it++)
+	{
+		unsigned int testLevel = *it;
+		testhash = levelAdjustedHash(baseString, testLevel, result);
+		if (testhash == hash)
+		{
+			return true;
+		}
+	}
+
+	//shouldn't happen
+	result = baseString + "@<UnkLevel>"; 
+	return true;
+}
+
+/*
+SRV_AREA_INFO monster hashes are the hash of the metadata path with '@[arealevel]' appended
+this hashes all possible monster types with a level the first time we encounter it
+
+not code to be proud of but it takes about 64ms per list on my test vm and will be 
+called 0-3ish? times on entering an area with a new monsterlevel so... meh
+*/
+void gameDataStore::generateMonsterLevelHashes(unsigned int level)
+{
+	//search from the back because player prob going to encounter recent levels more often
+	if (level == lastAreaLevel)	return;
+	if (std::find(hashedMonsterLevels.rbegin(), hashedMonsterLevels.rend(), level) != hashedMonsterLevels.rend())
+		return;
+
+	clock_t time_a = clock();
+
+
+
+	for (int index = 0; index < monsterVarieties.size(); index++)
+	{
+		const std::string& targ = monsterVarieties.at(index);
+		std::string hashedString;
+		unsigned long hash = levelAdjustedHash(targ, level, hashedString);
+		levelAdjustedMonsterHashes[hash] = index;
+		//std::cout << "Ad hash of " << hashedString << std::endl;
+	}
+
+	lastAreaLevel = level;
+	hashedMonsterLevels.push_back(level);
+
+	clock_t time_b = clock();
+	clock_t total_time_ticks = (time_b - time_a);
+	std::cout << "list genned in " << total_time_ticks << "," << (total_time_ticks / CLOCKS_PER_SEC) << std::endl;
 }

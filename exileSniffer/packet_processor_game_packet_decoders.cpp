@@ -28,6 +28,7 @@ void packet_processor::init_packetDeserialisers()
 	packetDeserialisers[SRV_PLAYER_ITEMS] = (deserialiser)&packet_processor::deserialise_SRV_PLAYER_ITEMS;
 	packetDeserialisers[CLI_CLICKED_GROUND_ITEM] = (deserialiser)&packet_processor::deserialise_CLI_CLICKED_GROUND_ITEM;
 	packetDeserialisers[CLI_ACTION_PREDICTIVE] = (deserialiser)&packet_processor::deserialise_CLI_ACTION_PREDICTIVE;
+	packetDeserialisers[SRV_TRANSFER_INSTANCE] = (deserialiser)&packet_processor::deserialise_SRV_TRANSFER_INSTANCE;
 
 	packetDeserialisers[SRV_INSTANCE_SERVER_DATA] = (deserialiser)&packet_processor::deserialise_SRV_INSTANCE_SERVER_DATA;
 	packetDeserialisers[CLI_PICKUP_ITEM] = (deserialiser)&packet_processor::deserialise_CLI_PICKUP_ITEM;
@@ -68,16 +69,31 @@ void packet_processor::init_packetDeserialisers()
 	
 	packetDeserialisers[CLI_SWAPPED_WEAPONS] = (deserialiser)&packet_processor::deserialise_CLI_SWAPPED_WEAPONS;
 	packetDeserialisers[CLI_SKILLPANE_ACTION] = (deserialiser)&packet_processor::deserialise_CLI_SKILLPANE_ACTION;
-	//	SRV_SKILLPANE_DATA
+	packetDeserialisers[SRV_UNK_0x92] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x92;
+
+	packetDeserialisers[CLI_SKILLPANE_ACTION] = (deserialiser)&packet_processor::deserialise_CLI_SKILLPANE_ACTION;
+	packetDeserialisers[SRV_SKILLPANE_DATA] = (deserialiser)&packet_processor::deserialise_SRV_SKILLPANE_DATA;
+
 	packetDeserialisers[CLI_MICROTRANSACTION_SHOP_ACTION] = (deserialiser)&packet_processor::deserialise_CLI_MICROTRANSACTION_SHOP_ACTION;
 	packetDeserialisers[SRV_MICROTRANSACTION_SHOP_DETAILS] = (deserialiser)&packet_processor::deserialise_SRV_MICROTRANSACTION_SHOP_DETAILS;
 	packetDeserialisers[SRV_UNK_A3] = (deserialiser)&packet_processor::deserialise_SRV_UNK_A3;
 
 	packetDeserialisers[CLI_PACKET_EXIT] = (deserialiser)&packet_processor::deserialise_CLI_PACKET_EXIT;
+	packetDeserialisers[CLI_PACKET_EXIT_2] = (deserialiser)&packet_processor::deserialise_CLI_PACKET_EXIT_2;
+	packetDeserialisers[CLI_DUEL_CHALLENGE] = (deserialiser)&packet_processor::deserialise_CLI_DUEL_CHALLENGE;
+	packetDeserialisers[SRV_DUEL_RESPONSE] = (deserialiser)&packet_processor::deserialise_SRV_DUEL_RESPONSE;
+	packetDeserialisers[SRV_DUEL_CHALLENGE] = (deserialiser)&packet_processor::deserialise_SRV_DUEL_CHALLENGE;
+
+	packetDeserialisers[CLI_UNK_0xC7] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0xC7;
+
+	packetDeserialisers[SRV_UNK_0xD5] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xD5;
+
 	packetDeserialisers[CLI_USED_SKILL] = (deserialiser)&packet_processor::deserialise_CLI_USED_SKILL;
 	packetDeserialisers[CLI_CLICK_OBJ] = (deserialiser)&packet_processor::deserialise_CLI_CLICK_OBJ;
 	packetDeserialisers[CLI_MOUSE_HELD] = (deserialiser)&packet_processor::deserialise_CLI_MOUSE_HELD;
 	packetDeserialisers[CLI_MOUSE_RELEASE] = (deserialiser)&packet_processor::deserialise_CLI_MOUSE_RELEASE;
+	packetDeserialisers[CLI_OPEN_WORLD_SCREEN] = (deserialiser)&packet_processor::deserialise_CLI_OPEN_WORLD_SCREEN;
+	
 	packetDeserialisers[SRV_CHAT_CHANNEL_ID] = (deserialiser)&packet_processor::deserialise_SRV_CHAT_CHANNEL_ID;
 	packetDeserialisers[CLI_GUILD_CREATE] = (deserialiser)&packet_processor::deserialise_CLI_GUILD_CREATE;
 	packetDeserialisers[SRV_UNK_0xE6] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xE6;
@@ -507,9 +523,16 @@ void packet_processor::deserialise_SRV_PRELOAD_MONSTER_LIST(UIDecodedPkt* uipkt)
 	}
 
 	//level?
+	unsigned int lastLevel = 0xFFFF;
 	for (int i = 0; i < listCount; i++)
 	{
-		preloadList.at(i).second = consume_Byte();
+		byte level = consume_Byte();
+		preloadList.at(i).second = level;
+		if (level != lastLevel)
+		{
+			ggpk->generateMonsterLevelHashes(level);
+			lastLevel = level;
+		}
 		if (errorFlag != eNoErr) return;
 	}
 
@@ -609,6 +632,13 @@ void packet_processor::deserialise_CLI_ACTION_PREDICTIVE(UIDecodedPkt *uipkt)
 	consume_add_word_ntoh(L"PkCount", uipkt);
 	consume_add_byte(L"Modifier", uipkt);
 }
+
+
+void packet_processor::deserialise_SRV_TRANSFER_INSTANCE(UIDecodedPkt *uipkt)
+{
+	consume_add_word_ntoh(L"Arg", uipkt);
+}
+
 
 void packet_processor::deserialise_SRV_INSTANCE_SERVER_DATA(UIDecodedPkt *uipkt)
 {
@@ -958,7 +988,7 @@ void packet_processor::deserialise_SRV_CREATE_ITEM(UIDecodedPkt *uipkt)
 
 	//routine inner
 	consume_add_dword_ntoh(L"DW2", uipkt);
-	DWORD listsize = consume_DWORD();
+	DWORD listsize = ntohl(consume_DWORD());
 	uipkt->add_dword(L"ListSize", listsize);
 
 	for (int i = 0; i < listsize; i++)
@@ -1053,6 +1083,22 @@ void packet_processor::deserialise_CLI_SKILLPANE_ACTION(UIDecodedPkt *uipkt)
 	consume_add_byte(L"State", uipkt);
 }
 
+void packet_processor::deserialise_SRV_SKILLPANE_DATA(UIDecodedPkt *uipkt)
+{
+	abandon_processing(); //todo
+}
+
+void packet_processor::deserialise_SRV_UNK_0x92(UIDecodedPkt *uipkt)
+{
+	//gets a short count
+	ushort count = consumeUShort();
+	uipkt->add_word(L"Count", count);
+	//loop -> 4 strings, other stuff. easier to wait for a sample with >0 count
+	if (count > 0)
+		abandon_processing();
+}
+
+
 void packet_processor::deserialise_CLI_MICROTRANSACTION_SHOP_ACTION(UIDecodedPkt *uipkt)
 {
 	consume_add_byte(L"State", uipkt);
@@ -1077,6 +1123,41 @@ void packet_processor::deserialise_CLI_PACKET_EXIT(UIDecodedPkt *uipkt)
 }
 
 
+void packet_processor::deserialise_CLI_PACKET_EXIT_2(UIDecodedPkt *)
+{
+	abandon_processing();//todo
+}
+void packet_processor::deserialise_CLI_DUEL_CHALLENGE(UIDecodedPkt *)
+{
+	abandon_processing();//todo
+}
+void packet_processor::deserialise_SRV_DUEL_RESPONSE(UIDecodedPkt *)
+{
+
+	abandon_processing();//todo
+}
+void packet_processor::deserialise_SRV_DUEL_CHALLENGE(UIDecodedPkt *)
+{
+
+	abandon_processing();//todo
+}
+
+void packet_processor::deserialise_CLI_UNK_0xC7(UIDecodedPkt *uipkt)
+{
+
+	abandon_processing();//no data
+}
+
+void packet_processor::deserialise_SRV_UNK_0xD5(UIDecodedPkt *uipkt)
+{
+
+	DWORD sizeCount = consume_DWORD();
+	
+	uipkt->add_dword(L"SizeCount", sizeCount);
+	if (sizeCount != 0)
+		abandon_processing();
+}
+
 void packet_processor::deserialise_CLI_USED_SKILL(UIDecodedPkt *uipkt)
 {
 	//todo
@@ -1095,6 +1176,11 @@ void packet_processor::deserialise_CLI_MOUSE_HELD(UIDecodedPkt *uipkt)
 void packet_processor::deserialise_CLI_MOUSE_RELEASE(UIDecodedPkt *uipkt)
 {
 	//no data expected
+}
+
+void packet_processor::deserialise_CLI_OPEN_WORLD_SCREEN(UIDecodedPkt *uipkt)
+{
+	abandon_processing();
 }
 
 void packet_processor::deserialise_SRV_CHAT_CHANNEL_ID(UIDecodedPkt *uipkt)
@@ -1299,8 +1385,8 @@ void packet_processor::deserialise_SRV_STAT_CHANGED(UIDecodedPkt *uipkt)
 		DWORD first = customSizeByteGet();
 		pair.PushBack((UINT32)first, allocator);
 
-		DWORD second = customSizeByteGet_signed();
-		pair.PushBack((UINT32)second, allocator);
+		INT32 second = customSizeByteGet_signed();
+		pair.PushBack((INT32)second, allocator);
 
 		pairlist.PushBack(pair, allocator);
 	}
@@ -1443,11 +1529,11 @@ void packet_processor::deserialise_SRV_UNKNOWN_0x111(UIDecodedPkt *uipkt)
 void packet_processor::deserialise_SRV_UNKNOWN_0x118(UIDecodedPkt *uipkt)
 {
 	consume_add_dword_ntoh(L"Index", uipkt);
-	consume_add_dword_ntoh(L"PossHash", uipkt);
-	consume_add_dword_ntoh(L"Unk3", uipkt);
+	consume_add_dword_ntoh(L"Hash", uipkt);
+	consume_add_dword_ntoh(L"Unk1", uipkt);
 	//todo - 8 byte data type. we have the technology.
-	consume_add_dword_ntoh(L"Unk4a", uipkt);
-	consume_add_dword_ntoh(L"Unk4b", uipkt);
+	consume_add_dword_ntoh(L"Unk2a", uipkt);
+	consume_add_dword_ntoh(L"Unk2b", uipkt);
 }
 
 
@@ -1640,7 +1726,7 @@ void packet_processor::deserialise_SRV_UPDATE_OBJECT(UIDecodedPkt *uipkt)
 	consume_add_dword_ntoh(L"ID2", uipkt);
 	consume_add_word_ntoh(L"ID3", uipkt);
 	
-	unsigned short dataLen = consumeUShort();
+	unsigned short dataLen = ntohs(consumeUShort());
 	//byte arrayIndex = consume_Byte();
 	//ushort controlBits = consumeUShort();
 	consume_blob(dataLen); //todo

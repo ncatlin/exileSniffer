@@ -11,10 +11,11 @@ This is the UI thread - try not to hang it
 #include "packetIDs.h"
 #include <fstream>
 
-
 exileSniffer::exileSniffer(QWidget *parent)
 	: QMainWindow(parent)
 {
+
+
 	ui.setupUi(this);
 
 	setup_raw_stream_tab();

@@ -71,6 +71,7 @@ private:
 	void deserialise_SRV_PLAYER_ITEMS(UIDecodedPkt*);
 	void deserialise_CLI_CLICKED_GROUND_ITEM(UIDecodedPkt *);
 	void deserialise_CLI_ACTION_PREDICTIVE(UIDecodedPkt *);
+	void deserialise_SRV_TRANSFER_INSTANCE(UIDecodedPkt *uipkt);
 	void deserialise_SRV_INSTANCE_SERVER_DATA(UIDecodedPkt *);
 	void deserialise_CLI_PICKUP_ITEM(UIDecodedPkt *);
 	void deserialise_CLI_PLACE_ITEM(UIDecodedPkt *);
@@ -117,6 +118,8 @@ private:
 
 	void deserialise_SRV_SKILLPANE_DATA(UIDecodedPkt *);
 
+	void deserialise_SRV_UNK_0x92(UIDecodedPkt *uipkt);
+
 	void deserialise_CLI_MICROTRANSACTION_SHOP_ACTION(UIDecodedPkt *);
 	void deserialise_SRV_MICROTRANSACTION_SHOP_DETAILS(UIDecodedPkt *);
 	void deserialise_SRV_UNK_A3(UIDecodedPkt *);
@@ -125,6 +128,14 @@ private:
 	void deserialise_CLI_GUILD_CREATE(UIDecodedPkt *);
 
 	void deserialise_CLI_PACKET_EXIT(UIDecodedPkt *);
+	void deserialise_CLI_PACKET_EXIT_2(UIDecodedPkt *);
+	void deserialise_CLI_DUEL_CHALLENGE(UIDecodedPkt *);
+	void deserialise_SRV_DUEL_RESPONSE(UIDecodedPkt *);
+	void deserialise_SRV_DUEL_CHALLENGE(UIDecodedPkt *);
+
+	void deserialise_CLI_UNK_0xC7(UIDecodedPkt *);
+
+	void deserialise_SRV_UNK_0xD5(UIDecodedPkt *);
 
 	void deserialise_CLI_USED_SKILL(UIDecodedPkt *);
 
