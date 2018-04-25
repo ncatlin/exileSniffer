@@ -70,6 +70,9 @@ void exileSniffer::init_DecodedPktActioners()
 	decodedPktActioners[CLI_LEVEL_SKILLGEM] = &exileSniffer::action_CLI_LEVEL_SKILLGEM;
 	decodedPktActioners[CLI_UNK_0x20] = &exileSniffer::action_CLI_UNK_0x20;
 	decodedPktActioners[CLI_SKILLPOINT_CHANGE] = &exileSniffer::action_CLI_SKILLPOINT_CHANGE;
+
+	decodedPktActioners[CLI_CHOSE_ASCENDANCY] = &exileSniffer::action_CLI_CHOSE_ASCENDANCY;
+
 	decodedPktActioners[CLI_CANCEL_BUF] = &exileSniffer::action_CLI_CANCEL_BUF;
 	decodedPktActioners[CLI_UNK_0x2c] = &exileSniffer::action_CLI_UNK_0x2c;
 	decodedPktActioners[CLI_SET_HOTBARSKILL] = &exileSniffer::action_CLI_SET_HOTBARSKILL;
@@ -79,7 +82,7 @@ void exileSniffer::init_DecodedPktActioners()
 	decodedPktActioners[CLI_USE_ITEM] = &exileSniffer::action_CLI_USE_ITEM;
 
 	decodedPktActioners[CLI_UNK_0x41] = &exileSniffer::action_CLI_UNK_0x41;
-	decodedPktActioners[SRV_STASH_INFO] = &exileSniffer::action_SRV_STASH_INFO;
+	decodedPktActioners[SRV_OPEN_UI_PANE] = &exileSniffer::action_SRV_OPEN_UI_PANE;
 	decodedPktActioners[CLI_SEND_PARTY_INVITE] = &exileSniffer::action_CLI_SEND_PARTY_INVITE;
 	decodedPktActioners[CLI_DISBAND_PUBLIC_PARTY] = &exileSniffer::action_CLI_DISBAND_PUBLIC_PARTY;
 	decodedPktActioners[CLI_CREATE_PUBLICPARTY] = &exileSniffer::action_CLI_CREATE_PUBLICPARTY;
@@ -112,6 +115,8 @@ void exileSniffer::init_DecodedPktActioners()
 	decodedPktActioners[SRV_DUEL_RESPONSE] = &exileSniffer::action_SRV_DUEL_RESPONSE;
 	decodedPktActioners[SRV_DUEL_CHALLENGE] = &exileSniffer::action_SRV_DUEL_CHALLENGE;
 
+	decodedPktActioners[SRV_UNK_0xCA] = &exileSniffer::action_SRV_UNK_0xCA;
+
 	decodedPktActioners[CLI_UNK_0xC7] = &exileSniffer::action_CLI_UNK_0xC7;
 	
 	decodedPktActioners[SRV_UNK_0xD5] = &exileSniffer::action_SRV_UNK_0xD5;
@@ -140,6 +145,7 @@ void exileSniffer::init_DecodedPktActioners()
 	decodedPktActioners[SRV_UNKNOWN_0x111] = &exileSniffer::action_SRV_UNKNOWN_0x111;
 	decodedPktActioners[SRV_UNKNOWN_0x118] = &exileSniffer::action_SRV_UNKNOWN_0x118;
 	decodedPktActioners[CLI_OPTOUT_TUTORIALS] = &exileSniffer::action_CLI_OPTOUT_TUTORIALS;
+	decodedPktActioners[SRV_SHOW_ENTERING_MSG] = &exileSniffer::action_SRV_SHOW_ENTERING_MSG;
 	decodedPktActioners[SRV_HEARTBEAT] = &exileSniffer::action_SRV_HEARTBEAT;
 	decodedPktActioners[SRV_ADD_OBJECT] = &exileSniffer::action_SRV_ADD_OBJECT;
 	decodedPktActioners[SRV_UPDATE_OBJECT] = &exileSniffer::action_SRV_UPDATE_OBJECT;
@@ -1007,6 +1013,22 @@ void exileSniffer::action_CLI_SKILLPOINT_CHANGE(UIDecodedPkt& obj, QString *anal
 	}
 }
 
+void exileSniffer::action_CLI_CHOSE_ASCENDANCY(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+
+	ushort choice = obj.get_UInt32(L"Choice");
+
+	if (!analysis)
+	{
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = "Player chose ascendancy "+QString::number(choice);
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
+
 void exileSniffer::action_CLI_CANCEL_BUF(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
@@ -1117,13 +1139,28 @@ void exileSniffer::action_CLI_UNK_0x41(UIDecodedPkt& obj, QString* analysis)
 	}
 }
 
-void exileSniffer::action_SRV_STASH_INFO(UIDecodedPkt& obj, QString* analysis)
+void exileSniffer::action_SRV_OPEN_UI_PANE(UIDecodedPkt& obj, QString* analysis)
 {
 	obj.toggle_payload_operations(true);
+
+	std::string paneName;
+	UINT32 paneID = obj.get_UInt32(L"PaneID");
+
+	auto it = ggpk.UIPaneIDs.find(paneID);
+	if (it != ggpk.UIPaneIDs.end())
+		paneName = ggpk.UIPaneIDs.at(paneID);
+	else
+		paneName = "<Unkown Pane. Where did this happen?>";
+
+	UINT32 arg = obj.get_UInt32(L"Arg");
+
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+
 	if (!analysis)
 	{
+
 		std::wstringstream summary;
-		summary << "Stash(?) info from server";
+		summary << "Server opened Client UI pane "<<converter.from_bytes(paneName)<<std::hex<<", Arg: 0x" << arg;
 
 		UI_DECODED_LIST_ENTRY listentry(obj);
 		listentry.summary = listentry.summary = QString::fromStdWString(summary.str());
@@ -1533,6 +1570,39 @@ void exileSniffer::action_CLI_UNK_0xC7(UIDecodedPkt& obj, QString *analysis)
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
+}
+
+void exileSniffer::action_SRV_UNK_0xCA(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+
+
+	UINT32 unk1 = obj.get_UInt32(L"UnkWord1"); 
+	UINT32 unk2 = obj.get_UInt32(L"UnkByte2");
+	
+	auto it = obj.payload.FindMember(L"ItemArray");
+	if (it == obj.payload.MemberEnd())
+	{
+		add_metalog_update("Warning: No itemlist found in payload of action_SRV_UNK_0xCA", obj.clientProcessID());
+		return;
+	}
+	WValue &itemList = it->value;
+
+	unsigned short listSize = itemList.Size();
+	if (!analysis)
+	{
+		wstringstream summary;
+		summary << "Srv msg 0xCA. Unk1: 0x" << std::hex << unk1 << std::endl;
+		summary << "Unk2: 0x" << unk2 << std::endl;
+		summary << "Listcount: 0x" << listSize << std::endl;
+
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+
+	//todo, list the lists
 }
 
 void exileSniffer::action_SRV_UNK_0xD5(UIDecodedPkt& obj, QString *analysis)
@@ -2019,12 +2089,12 @@ void exileSniffer::action_SRV_UNK_0xf2(UIDecodedPkt& obj, QString *analysis)
 	DWORD ID2 = obj.get_UInt32(L"ID2");
 	UINT32 ID3 = obj.get_UInt32(L"ID3");
 
-	DWORD DW1 = obj.get_UInt32(L"DW1");
+	ushort arg = obj.get_UInt32(L"Arg");
 
 	if (!analysis)
 	{
 		std::wstringstream summary;
-		summary << std::hex << "Pkt 0xf2. ID (0x" << ID1 << ", 0x" << ID2 << ", 0x" << ID3 << ") DWORDS- 0x" << DW1 ;
+		summary << std::hex << "Pkt 0xf2. ID (0x" << ID1 << ", 0x" << ID2 << ", 0x" << ID3 << ") Arg 0x" << arg ;
 
 		UI_DECODED_LIST_ENTRY listentry(obj);
 		listentry.summary = QString::fromStdWString(summary.str());
@@ -2231,6 +2301,24 @@ void exileSniffer::action_CLI_OPTOUT_TUTORIALS(UIDecodedPkt& obj, QString *analy
 	{
 		UI_DECODED_LIST_ENTRY listentry(obj);
 		listentry.summary = "Player(You) opted out of tutorials";
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
+
+void exileSniffer::action_SRV_SHOW_ENTERING_MSG(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+
+	DWORD areaCode = obj.get_UInt32(L"AreaCode");
+	std::wstring areaname;
+	ggpk.lookup_areaCode(areaCode, areaname);
+
+	if (!analysis)
+	{
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = "Starting transtion to area " + QString::fromStdWString(areaname);
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}

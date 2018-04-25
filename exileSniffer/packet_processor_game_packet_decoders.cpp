@@ -39,6 +39,9 @@ void packet_processor::init_packetDeserialisers()
 	packetDeserialisers[CLI_LEVEL_SKILLGEM] = (deserialiser)&packet_processor::deserialise_CLI_LEVEL_SKILLGEM;
 	packetDeserialisers[CLI_UNK_0x20] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0x20;
 	packetDeserialisers[CLI_SKILLPOINT_CHANGE] = (deserialiser)&packet_processor::deserialise_CLI_SKILLPOINT_CHANGE;
+
+	packetDeserialisers[CLI_CHOSE_ASCENDANCY] = (deserialiser)&packet_processor::deserialise_CLI_CHOSE_ASCENDANCY;
+
 	packetDeserialisers[CLI_CANCEL_BUF] = (deserialiser)&packet_processor::deserialise_CLI_CANCEL_BUF;
 	packetDeserialisers[CLI_UNK_0x2c] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0x2c;
 	packetDeserialisers[CLI_SET_HOTBARSKILL] = (deserialiser)&packet_processor::deserialise_CLI_SET_HOTBARSKILL;
@@ -47,7 +50,7 @@ void packet_processor::init_packetDeserialisers()
 	packetDeserialisers[CLI_USE_BELT_SLOT] = (deserialiser)&packet_processor::deserialise_CLI_USE_BELT_SLOT;
 	packetDeserialisers[CLI_USE_ITEM] = (deserialiser)&packet_processor::deserialise_CLI_USE_ITEM;
 	packetDeserialisers[CLI_UNK_0x41] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0x41;
-	packetDeserialisers[SRV_STASH_INFO] = (deserialiser)&packet_processor::deserialise_SRV_STASH_INFO;
+	packetDeserialisers[SRV_OPEN_UI_PANE] = (deserialiser)&packet_processor::deserialise_SRV_OPEN_UI_PANE;
 	packetDeserialisers[CLI_SEND_PARTY_INVITE] = (deserialiser)&packet_processor::deserialise_CLI_SEND_PARTY_INVITE;
 	packetDeserialisers[CLI_TRY_JOIN_PARTY] = (deserialiser)&packet_processor::deserialise_CLI_TRY_JOIN_PARTY;
 	packetDeserialisers[CLI_DISBAND_PUBLIC_PARTY] = (deserialiser)&packet_processor::deserialise_CLI_DISBAND_PUBLIC_PARTY;
@@ -85,7 +88,7 @@ void packet_processor::init_packetDeserialisers()
 	packetDeserialisers[SRV_DUEL_CHALLENGE] = (deserialiser)&packet_processor::deserialise_SRV_DUEL_CHALLENGE;
 
 	packetDeserialisers[CLI_UNK_0xC7] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0xC7;
-
+	packetDeserialisers[SRV_UNK_0xCA] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xCA;
 	packetDeserialisers[SRV_UNK_0xD5] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xD5;
 
 	packetDeserialisers[CLI_USED_SKILL] = (deserialiser)&packet_processor::deserialise_CLI_USED_SKILL;
@@ -114,6 +117,7 @@ void packet_processor::init_packetDeserialisers()
 	packetDeserialisers[SRV_UNKNOWN_0x111] = (deserialiser)&packet_processor::deserialise_SRV_UNKNOWN_0x111;
 	packetDeserialisers[SRV_UNKNOWN_0x118] = (deserialiser)&packet_processor::deserialise_SRV_UNKNOWN_0x118;
 	packetDeserialisers[CLI_OPTOUT_TUTORIALS] = (deserialiser)&packet_processor::deserialise_CLI_OPTOUT_TUTORIALS;
+	packetDeserialisers[SRV_SHOW_ENTERING_MSG] = (deserialiser)&packet_processor::deserialise_SRV_SHOW_ENTERING_MSG;
 	packetDeserialisers[SRV_HEARTBEAT] = (deserialiser)&packet_processor::deserialise_SRV_HEARTBEAT;
 	packetDeserialisers[SRV_ADD_OBJECT] = (deserialiser)&packet_processor::deserialise_SRV_ADD_OBJECT;
 	packetDeserialisers[SRV_UPDATE_OBJECT] = (deserialiser)&packet_processor::deserialise_SRV_UPDATE_OBJECT;
@@ -253,15 +257,11 @@ void packet_processor::deserialise_SRV_CHAT_MESSAGE(UIDecodedPkt *uipkt)
 	uipkt->payload.AddMember(L"ItemList", itemArray, allocator);
 }
 
-void packet_processor::deserialise_SRV_SERVER_MESSAGE(UIDecodedPkt *uipkt)
+//0xb, 0xca, 
+WValue packet_processor::get_pairs_strings_blob(UIDecodedPkt *uipkt)
 {
-	//outer
-	consume_add_word_ntoh(L"BackendErrorsRow", uipkt);
-	consume_add_word_ntoh(L"DevID", uipkt);
-	consume_add_byte(L"TextModifier", uipkt);
-	consume_add_dword_ntoh(L"Unk4", uipkt);
+	WValue blobPair(rapidjson::kObjectType);
 
-	//inner - shared with other packets
 	byte pairCount = consume_Byte();
 	byte stringCount = consume_Byte();
 
@@ -277,7 +277,7 @@ void packet_processor::deserialise_SRV_SERVER_MESSAGE(UIDecodedPkt *uipkt)
 		pair.PushBack((UINT32)p2, allocator);
 		pairArray.PushBack(pair, allocator);
 	}
-	uipkt->payload.AddMember(L"PairList", pairArray, allocator);
+	blobPair.AddMember(L"Pairs", pairArray, allocator);
 
 	WValue stringArray(rapidjson::kArrayType);
 	for (int i = 0; i < stringCount; i++)
@@ -287,8 +287,27 @@ void packet_processor::deserialise_SRV_SERVER_MESSAGE(UIDecodedPkt *uipkt)
 		WValue stringval(msgstr.c_str(), allocator);
 		stringArray.PushBack(stringval, allocator);
 	}
-	uipkt->payload.AddMember(L"StringList", stringArray, allocator);
+	blobPair.AddMember(L"Strings", stringArray, allocator);
+	
+	return blobPair;
+}
 
+void packet_processor::deserialise_SRV_SERVER_MESSAGE(UIDecodedPkt *uipkt)
+{
+	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+
+	//outer
+	consume_add_word_ntoh(L"BackendErrorsRow", uipkt);
+	consume_add_word_ntoh(L"DevID", uipkt);
+	consume_add_byte(L"TextModifier", uipkt);
+	consume_add_dword_ntoh(L"Unk4", uipkt);
+
+	WValue blobs = get_pairs_strings_blob(uipkt);
+	std::cout << "pre1" << std::endl;
+	uipkt->payload.AddMember(L"PairList", blobs.FindMember(L"Pairs")->value, allocator);
+	std::cout << "pre2" << std::endl;
+	uipkt->payload.AddMember(L"StringList", blobs.FindMember(L"Strings")->value, allocator);
+	std::cout << "pre3" << std::endl;
 	/*
 	//welcome to coast
 	00 0B
@@ -742,6 +761,12 @@ void packet_processor::deserialise_CLI_SKILLPOINT_CHANGE(UIDecodedPkt *uipkt)
 	consume_add_dword_ntoh(L"GraphIndex", uipkt);
 }
 
+void packet_processor::deserialise_CLI_CHOSE_ASCENDANCY(UIDecodedPkt *uipkt)
+{
+	consume_add_byte(L"Choice", uipkt);
+}
+
+
 void packet_processor::deserialise_CLI_CANCEL_BUF(UIDecodedPkt *uipkt)
 {
 	consume_add_dword_ntoh(L"BuffID", uipkt);
@@ -803,9 +828,10 @@ void packet_processor::deserialise_CLI_UNK_0x41(UIDecodedPkt *uipkt)
 	consume_add_dword_ntoh(L"Unk2", uipkt);
 }
 
-void packet_processor::deserialise_SRV_STASH_INFO(UIDecodedPkt *uipkt)
+void packet_processor::deserialise_SRV_OPEN_UI_PANE(UIDecodedPkt *uipkt)
 {
-
+	consume_add_byte(L"PaneID", uipkt);
+	consume_add_dword_ntoh(L"Arg", uipkt);
 }
 
 void packet_processor::deserialise_CLI_SEND_PARTY_INVITE(UIDecodedPkt *uipkt)
@@ -962,7 +988,7 @@ void packet_processor::deserialise_SRV_PUBLIC_PARTY_LIST(UIDecodedPkt *uipkt)
 		WValue partyDetails(rapidjson::kObjectType);
 		partyDetails.AddMember(L"ID", (UINT32)consume_DWORD(), allocator);
 
-		ushort stringlen = ntohs(consumeUShort());
+		ushort stringlen = consumeUShort();
 		wstring name = consumeWString(stringlen * 2);
 		WValue nameStringVal(name.c_str(), allocator);
 		partyDetails.AddMember(L"Description", nameStringVal, allocator);
@@ -1146,6 +1172,35 @@ void packet_processor::deserialise_CLI_UNK_0xC7(UIDecodedPkt *uipkt)
 {
 
 	abandon_processing();//no data
+}
+
+void packet_processor::deserialise_SRV_UNK_0xCA(UIDecodedPkt *uipkt)
+{
+	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+
+	WValue itemArray(rapidjson::kArrayType);
+
+	consume_add_word(L"UnkWord1", uipkt);
+	consume_add_byte(L"UnkByte2", uipkt);
+
+
+
+	byte listSize = consume_Byte();
+	for (int i = 0; i < listSize; i++)
+	{
+		WValue item(rapidjson::kObjectType);
+
+		item.AddMember(L"Unk1", consumeUShort(), allocator);
+		item.AddMember(L"Unk2", consumeUShort(), allocator);
+		item.AddMember(L"Unk3", consumeUShort(), allocator);
+
+		WValue blobPair = get_pairs_strings_blob(uipkt);
+		item.AddMember(L"BlobPair", blobPair, allocator);
+
+		itemArray.PushBack(item, allocator);
+	}
+
+	uipkt->payload.AddMember(L"ItemArray", itemArray, allocator);
 }
 
 void packet_processor::deserialise_SRV_UNK_0xD5(UIDecodedPkt *uipkt)
@@ -1400,8 +1455,7 @@ void packet_processor::deserialise_SRV_UNK_0xf2(UIDecodedPkt *uipkt)
 	consume_add_dword_ntoh(L"ID2", uipkt);
 	consume_add_word_ntoh(L"ID3", uipkt);
 
-
-	consume_add_dword_ntoh(L"DW1", uipkt);
+	consume_add_byte(L"Arg", uipkt);
 }
 
 void packet_processor::deserialise_SRV_UNK_0xf3(UIDecodedPkt *uipkt)
@@ -1541,6 +1595,12 @@ void packet_processor::deserialise_SRV_UNKNOWN_0x118(UIDecodedPkt *uipkt)
 void packet_processor::deserialise_CLI_OPTOUT_TUTORIALS(UIDecodedPkt *uipkt)
 {
 	//todo
+}
+
+
+void packet_processor::deserialise_SRV_SHOW_ENTERING_MSG(UIDecodedPkt *uipkt)
+{
+	consume_add_dword_ntoh(L"AreaCode", uipkt);
 }
 
 void packet_processor::deserialise_SRV_HEARTBEAT(UIDecodedPkt *uipkt)

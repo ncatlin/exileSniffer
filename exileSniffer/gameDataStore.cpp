@@ -109,6 +109,41 @@ bool gameDataStore::lookup_hash(unsigned long hash, std::string& result, std::st
 	return false;
 }
 
+void gameDataStore::fill_UI_pane_IDs()
+{
+	UIPaneIDs[0] = "World";
+	UIPaneIDs[1] = "PlayerStash";
+	UIPaneIDs[2] = "GuildStash";
+	UIPaneIDs[3] = "Social";
+	UIPaneIDs[4] = "Atlas";
+
+	UIPaneIDs[6] = "DivineFont";
+	UIPaneIDs[7] = "StoneAltar";
+
+	UIPaneIDs[9] = "Ascendancy";
+	UIPaneIDs[10] = "EventsPVP-EventsTab";
+	UIPaneIDs[11] = "CardTrade";
+	UIPaneIDs[12] = "EventsPVP-PVPTab";
+	UIPaneIDs[13] = "Darkshrine";
+	UIPaneIDs[14] = "LabyrinthMap";
+	UIPaneIDs[15] = "Labyrinth";
+	UIPaneIDs[16] = "Challenges_1";
+	UIPaneIDs[17] = "Inventory";
+	UIPaneIDs[18] = "Atlas";
+	UIPaneIDs[19] = "Pantheon";
+	UIPaneIDs[20] = "Challenges_2"; //supposed to be something other than achievements tab?
+	UIPaneIDs[22] = "BloodAltar";
+	UIPaneIDs[23] = "MapCrafting";
+	UIPaneIDs[24] = "Crafting_AnimGuardianDrop";
+	UIPaneIDs[25] = "Crafting_1";
+	UIPaneIDs[26] = "Crafting_2";
+	UIPaneIDs[27] = "Crafting_3";
+	UIPaneIDs[28] = "Crafting_4";
+	UIPaneIDs[29] = "Crafting_5";
+	UIPaneIDs[30] = "Crafting_6";
+
+}
+
 void gameDataStore::fill_gamedata_lists()
 {
 
@@ -192,6 +227,8 @@ void gameDataStore::fill_gamedata_lists()
 
 	rapidjson::Value& itemsDoc = jsondoc.FindMember("ItemHashes")->value;
 	genericHashesLoad(itemsDoc, itemHashes);
+
+	fill_UI_pane_IDs();
 }
 
 unsigned long levelAdjustedHash(std::string baseString, unsigned int level, std::string& hashedString_Out)

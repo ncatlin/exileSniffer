@@ -140,6 +140,8 @@ class exileSniffer : public QMainWindow
 		void action_CLI_UNK_0x20(UIDecodedPkt&, QString*);
 		void action_CLI_SKILLPOINT_CHANGE(UIDecodedPkt&, QString*);
 
+		void action_CLI_CHOSE_ASCENDANCY(UIDecodedPkt&, QString*);
+
 		void action_CLI_CANCEL_BUF(UIDecodedPkt&, QString*);
 		void action_CLI_UNK_0x2c(UIDecodedPkt&, QString*);
 		void action_CLI_SET_HOTBARSKILL(UIDecodedPkt&, QString*);
@@ -148,7 +150,7 @@ class exileSniffer : public QMainWindow
 		void action_CLI_USE_BELT_SLOT(UIDecodedPkt&, QString*);
 		void action_CLI_USE_ITEM(UIDecodedPkt&, QString*);
 		void action_CLI_UNK_0x41(UIDecodedPkt&, QString*);
-		void action_SRV_STASH_INFO(UIDecodedPkt&, QString*);
+		void action_SRV_OPEN_UI_PANE(UIDecodedPkt&, QString*);
 
 		void action_CLI_SEND_PARTY_INVITE(UIDecodedPkt&, QString*);
 
@@ -195,6 +197,8 @@ class exileSniffer : public QMainWindow
 
 		void action_CLI_UNK_0xC7(UIDecodedPkt&, QString*);
 
+		void action_SRV_UNK_0xCA(UIDecodedPkt&, QString*);
+
 		void action_SRV_UNK_0xD5(UIDecodedPkt&, QString*);
 
 		void action_CLI_USED_SKILL(UIDecodedPkt&, QString*);
@@ -224,6 +228,7 @@ class exileSniffer : public QMainWindow
 		void action_SRV_UNKNOWN_0x118(UIDecodedPkt&, QString*);
 		void action_SRV_NOTIFY_PLAYERID(UIDecodedPkt&, QString *);
 		void action_CLI_OPTOUT_TUTORIALS(UIDecodedPkt&, QString*);
+		void action_SRV_SHOW_ENTERING_MSG(UIDecodedPkt&, QString*);
 		void action_SRV_HEARTBEAT(UIDecodedPkt&, QString*);
 		void action_SRV_ADD_OBJECT(UIDecodedPkt&, QString*);
 		void action_SRV_UPDATE_OBJECT(UIDecodedPkt&, QString*);

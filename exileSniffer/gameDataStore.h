@@ -22,6 +22,8 @@ public:
 	std::map <unsigned long, std::string> itemHashes;
 	std::map <unsigned long, std::string> areaCodes;
 
+	std::map <unsigned short, std::string> UIPaneIDs;
+
 
 	std::vector <std::string> monsterVarieties;
 	std::vector <std::string> statDescriptions;
@@ -34,6 +36,8 @@ public:
 private:
 
 	void fill_gamedata_lists();
+	void fill_UI_pane_IDs();
+
 	void genericHashesLoad(rapidjson::Value& itemsDoc, std::map <unsigned long, std::string>& targMap);
 	bool searchLevelAdjustedMonsters(unsigned long hash, std::string& result);
 };

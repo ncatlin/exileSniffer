@@ -71,7 +71,7 @@ private:
 	void deserialise_SRV_PLAYER_ITEMS(UIDecodedPkt*);
 	void deserialise_CLI_CLICKED_GROUND_ITEM(UIDecodedPkt *);
 	void deserialise_CLI_ACTION_PREDICTIVE(UIDecodedPkt *);
-	void deserialise_SRV_TRANSFER_INSTANCE(UIDecodedPkt *uipkt);
+	void deserialise_SRV_TRANSFER_INSTANCE(UIDecodedPkt *);
 	void deserialise_SRV_INSTANCE_SERVER_DATA(UIDecodedPkt *);
 	void deserialise_CLI_PICKUP_ITEM(UIDecodedPkt *);
 	void deserialise_CLI_PLACE_ITEM(UIDecodedPkt *);
@@ -80,7 +80,8 @@ private:
 
 	void deserialise_CLI_LEVEL_SKILLGEM(UIDecodedPkt *);
 	void deserialise_CLI_UNK_0x20(UIDecodedPkt *);
-	void deserialise_CLI_SKILLPOINT_CHANGE(UIDecodedPkt *);
+	void deserialise_CLI_SKILLPOINT_CHANGE(UIDecodedPkt *); 
+	void deserialise_CLI_CHOSE_ASCENDANCY(UIDecodedPkt *);
 
 	void deserialise_CLI_CANCEL_BUF(UIDecodedPkt *);
 	void deserialise_CLI_UNK_0x2c(UIDecodedPkt *);
@@ -90,7 +91,7 @@ private:
 	void deserialise_CLI_USE_BELT_SLOT(UIDecodedPkt *);
 	void deserialise_CLI_USE_ITEM(UIDecodedPkt *);
 	void deserialise_CLI_UNK_0x41(UIDecodedPkt *);
-	void deserialise_SRV_STASH_INFO(UIDecodedPkt *);
+	void deserialise_SRV_OPEN_UI_PANE(UIDecodedPkt *);
 
 	void deserialise_CLI_SEND_PARTY_INVITE(UIDecodedPkt *);
 
@@ -108,11 +109,11 @@ private:
 
 	void deserialise_SRV_CREATE_ITEM(UIDecodedPkt *);
 	void deserialise_SRV_SLOT_ITEMSLIST(UIDecodedPkt *);
-	void deserialise_UNK_MESSAGE_0x70(UIDecodedPkt *uipkt);
-	void deserialise_UNK_MESSAGE_0x73(UIDecodedPkt *uipkt);
-	void deserialise_CLI_SET_STATUS_MESSAGE(UIDecodedPkt *uipkt);
+	void deserialise_UNK_MESSAGE_0x70(UIDecodedPkt *);
+	void deserialise_UNK_MESSAGE_0x73(UIDecodedPkt *);
+	void deserialise_CLI_SET_STATUS_MESSAGE(UIDecodedPkt *);
 
-	void deserialise_CLI_SWAPPED_WEAPONS(UIDecodedPkt *uipkt);
+	void deserialise_CLI_SWAPPED_WEAPONS(UIDecodedPkt *);
 
 	void deserialise_CLI_SKILLPANE_ACTION(UIDecodedPkt *);
 
@@ -134,6 +135,8 @@ private:
 	void deserialise_SRV_DUEL_CHALLENGE(UIDecodedPkt *);
 
 	void deserialise_CLI_UNK_0xC7(UIDecodedPkt *);
+
+	void deserialise_SRV_UNK_0xCA(UIDecodedPkt *);
 
 	void deserialise_SRV_UNK_0xD5(UIDecodedPkt *);
 
@@ -166,7 +169,8 @@ private:
 	void deserialise_SRV_NOTIFY_PLAYERID(UIDecodedPkt *);
 	void deserialise_SRV_UNKNOWN_0x111(UIDecodedPkt *);
 	void deserialise_SRV_UNKNOWN_0x118(UIDecodedPkt *);
-	void deserialise_CLI_OPTOUT_TUTORIALS(UIDecodedPkt *);
+	void deserialise_CLI_OPTOUT_TUTORIALS(UIDecodedPkt *); 
+	void deserialise_SRV_SHOW_ENTERING_MSG(UIDecodedPkt *uipkt);
 	void deserialise_SRV_HEARTBEAT(UIDecodedPkt *uipkt);
 	void deserialise_SRV_ADD_OBJECT(UIDecodedPkt *uipkt);
 
@@ -187,6 +191,8 @@ private:
 	INT32 customSizeByteGet_signed();
 	void rewind_buffer(size_t countBytes);
 	void restore_buffer();
+
+	WValue get_pairs_strings_blob(UIDecodedPkt *uipkt);
 
 	bool sanityCheckPacketID(unsigned short pktID);
 	void emit_decoding_err_msg(unsigned short msgID, unsigned short lastMsgID);

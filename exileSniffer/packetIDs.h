@@ -32,6 +32,8 @@
 #define CLI_UNK_0x20 (CLI_LEVEL_SKILLGEM+1) //0x20
 #define CLI_SKILLPOINT_CHANGE (CLI_UNK_0x20+1) //0x21
 
+#define CLI_CHOSE_ASCENDANCY 0x24
+
 #define CLI_CANCEL_BUF 0x2b
 #define CLI_UNK_0x2c 0x2c
 
@@ -52,7 +54,7 @@ S->C UnkPkID: 0xef size: 23 bytes
 #define CLI_USE_BELT_SLOT 0x0037
 #define CLI_USE_ITEM 0x0038
 
-#define SRV_STASH_INFO 0x3f
+#define SRV_OPEN_UI_PANE 0x3f
 
 #define CLI_UNK_0x41 0x41
 
@@ -101,12 +103,14 @@ S->C UnkPkID: 0xef size: 23 bytes
 
 
 #define CLI_PACKET_EXIT 0xc0
-#define CLI_PACKET_EXIT_2 0xc1 //unimplemented
-#define CLI_DUEL_CHALLENGE 0xc2 //unimplemented
-#define SRV_DUEL_RESPONSE 0xc3 //unimplemented
+#define CLI_PACKET_EXIT_2 0xc1 
+#define CLI_DUEL_CHALLENGE 0xc2
+#define SRV_DUEL_RESPONSE 0xc3
 #define SRV_DUEL_CHALLENGE 0xc4 //namestring, byte. unimplemented
 
 #define CLI_UNK_0xC7 0xc7
+
+#define SRV_UNK_0xCA 0xca
 
 #define CLI_VISIT_HIDEOUT 0xce //unimplmented. 00 CE [namestring] [dword]
 
@@ -144,6 +148,9 @@ S->C UnkPkID: 0xef size: 23 bytes
 #define SRV_UNKNOWN_0x118 0x118 //effectively pkt 0x111 loop2 deserialiser
 
 #define CLI_OPTOUT_TUTORIALS 0x11c //gets 0xff response
+
+#define SRV_SHOW_ENTERING_MSG 0x12f
+
 #define SRV_HEARTBEAT 0x132
 #define SRV_ADD_OBJECT 0x135
 #define SRV_UPDATE_OBJECT 0x136

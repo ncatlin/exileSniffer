@@ -641,7 +641,7 @@ void packet_processor::handle_packet_to_gameserver(byte* data,
 		UIDecodedPkt *ui_decodedpkt =
 			new UIDecodedPkt(streamObj->workingSendKey->sourceProcess, eGame, PKTBIT_OUTBOUND, timems);
 		deserialisedPkts.push_back(ui_decodedpkt);
-		ui_decodedpkt->setStartOffset(decryptedIndex);
+		ui_decodedpkt->setStartOffset(decryptedIndex - 2);
 		ui_decodedpkt->messageID = pktIDWord;
 		ui_decodedpkt->toggle_payload_operations(true);
 

@@ -242,6 +242,14 @@ std::wstring packet_processor::consumeWString(size_t bytesLength)
 
 	while (remainingDecrypted < bytesLength)
 	{
+		if (bytesLength > 0xff)
+		{
+			std::stringstream err;
+			err << "Warning! Long string " << bytesLength <<" possible bad byte order" << std::endl;
+			std::cout << err.str();
+			UIaddLogMsg(QString::fromStdString(err.str()), activeClientPID, uiMsgQueue);
+		}
+
 		if (errorFlag != eDecodingErr::eNoErr) return 0;
 		continue_gamebuffer_next_packet();
 	}
