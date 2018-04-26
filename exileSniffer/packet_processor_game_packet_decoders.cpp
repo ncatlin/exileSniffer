@@ -828,6 +828,25 @@ void packet_processor::deserialise_CLI_UNK_0x41(UIDecodedPkt *uipkt)
 	consume_add_dword_ntoh(L"Unk2", uipkt);
 }
 
+void packet_processor::deserialise_CLI_SELECT_NPC_DIALOG(UIDecodedPkt *uipkt)
+{
+	consume_add_byte(L"Option", uipkt);
+}
+
+void packet_processor::deserialise_SRV_SHOW_NPC_DIALOG(UIDecodedPkt *uipkt)
+{
+	consume_add_dword_ntoh(L"Unk1", uipkt);
+	consume_add_dword_ntoh(L"Unk2", uipkt);
+	consume_add_word_ntoh(L"Unk3", uipkt);
+	consume_add_byte(L"Unk4", uipkt);
+}
+
+void packet_processor::deserialise_CLI_CLOSE_NPC_DIALOG(UIDecodedPkt *uipkt)
+{
+	//no data
+}
+
+
 void packet_processor::deserialise_SRV_OPEN_UI_PANE(UIDecodedPkt *uipkt)
 {
 	consume_add_byte(L"PaneID", uipkt);
@@ -1006,6 +1025,14 @@ void packet_processor::deserialise_SRV_PUBLIC_PARTY_LIST(UIDecodedPkt *uipkt)
 	uipkt->payload.AddMember(L"PartyList", partyArray, allocator);
 }
 
+void packet_processor::deserialise_CLI_MOVE_ITEM_PANE(UIDecodedPkt *uipkt)
+{
+	consume_add_dword_ntoh(L"PaneID", uipkt);
+	consume_add_dword_ntoh(L"ItemID", uipkt);
+	consume_add_byte(L"Column", uipkt);
+	consume_add_byte(L"Row", uipkt);
+}
+
 void packet_processor::deserialise_SRV_CREATE_ITEM(UIDecodedPkt *uipkt)
 {
 	//routine outer
@@ -1170,8 +1197,7 @@ void packet_processor::deserialise_SRV_DUEL_CHALLENGE(UIDecodedPkt *)
 
 void packet_processor::deserialise_CLI_UNK_0xC7(UIDecodedPkt *uipkt)
 {
-
-	abandon_processing();//no data
+ //no data
 }
 
 void packet_processor::deserialise_SRV_UNK_0xCA(UIDecodedPkt *uipkt)

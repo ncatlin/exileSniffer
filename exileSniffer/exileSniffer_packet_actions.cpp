@@ -82,6 +82,11 @@ void exileSniffer::init_DecodedPktActioners()
 	decodedPktActioners[CLI_USE_ITEM] = &exileSniffer::action_CLI_USE_ITEM;
 
 	decodedPktActioners[CLI_UNK_0x41] = &exileSniffer::action_CLI_UNK_0x41;
+
+	decodedPktActioners[CLI_SELECT_NPC_DIALOG] = &exileSniffer::action_CLI_SELECT_NPC_DIALOG;
+	decodedPktActioners[SRV_SHOW_NPC_DIALOG] = &exileSniffer::action_SRV_SHOW_NPC_DIALOG;
+	decodedPktActioners[CLI_CLOSE_NPC_DIALOG] = &exileSniffer::action_CLI_CLOSE_NPC_DIALOG;
+
 	decodedPktActioners[SRV_OPEN_UI_PANE] = &exileSniffer::action_SRV_OPEN_UI_PANE;
 	decodedPktActioners[CLI_SEND_PARTY_INVITE] = &exileSniffer::action_CLI_SEND_PARTY_INVITE;
 	decodedPktActioners[CLI_DISBAND_PUBLIC_PARTY] = &exileSniffer::action_CLI_DISBAND_PUBLIC_PARTY;
@@ -92,6 +97,9 @@ void exileSniffer::init_DecodedPktActioners()
 	
 	decodedPktActioners[CLI_REQUEST_PUBLICPARTIES] = &exileSniffer::action_CLI_REQUEST_PUBLICPARTIES;
 	decodedPktActioners[SRV_PUBLIC_PARTY_LIST] = &exileSniffer::action_SRV_PUBLIC_PARTY_LIST;
+
+	decodedPktActioners[CLI_MOVE_ITEM_PANE] = &exileSniffer::action_CLI_MOVE_ITEM_PANE;
+
 	decodedPktActioners[SRV_CREATE_ITEM] = &exileSniffer::action_SRV_CREATE_ITEM;
 	decodedPktActioners[SRV_SLOT_ITEMSLIST] = &exileSniffer::action_SRV_SLOT_ITEMSLIST;
 
@@ -1139,6 +1147,62 @@ void exileSniffer::action_CLI_UNK_0x41(UIDecodedPkt& obj, QString* analysis)
 	}
 }
 
+void exileSniffer::action_CLI_SELECT_NPC_DIALOG(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+
+	UINT32 option = obj.get_UInt32(L"Option");
+
+	if (!analysis)
+	{
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = "Client selected dialog option "+QString::number(option);
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+void exileSniffer::action_SRV_SHOW_NPC_DIALOG(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+	//seen 1 while going from town to riverways, maybe declares area as fightable/droppable items?
+
+	UINT32 arg1 = obj.get_UInt32(L"Unk1");
+	UINT32 arg2 = obj.get_UInt32(L"Unk2");
+	UINT32 arg3 = obj.get_UInt32(L"Unk3");
+	UINT32 arg4 = obj.get_UInt32(L"Unk4");
+
+
+
+	if (!analysis)
+	{
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = "Dialog shown";
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+
+
+	std::wstringstream analysisStream;
+
+	analysisStream << "Dialog arguments:" << std::endl;
+	analysisStream << "Arg1: 0x"<<std::hex<<arg1 << std::endl;
+	analysisStream << "Arg2: 0x" << std::hex << arg2 << std::endl;
+	analysisStream << "Arg3: 0x" << std::hex << arg3 << std::endl;
+	analysisStream << "Arg4: 0x" << std::hex << arg4 << std::endl;
+	*analysis = QString::fromStdWString(analysisStream.str());
+}
+void exileSniffer::action_CLI_CLOSE_NPC_DIALOG(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+	if (!analysis)
+	{
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = "Player closed dialog";
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
 void exileSniffer::action_SRV_OPEN_UI_PANE(UIDecodedPkt& obj, QString* analysis)
 {
 	obj.toggle_payload_operations(true);
@@ -1322,6 +1386,28 @@ void exileSniffer::action_SRV_PUBLIC_PARTY_LIST(UIDecodedPkt& obj, QString *anal
 	}
 
 
+}
+
+void exileSniffer::action_CLI_MOVE_ITEM_PANE(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+
+	DWORD paneID = obj.get_UInt32(L"PaneID");
+	DWORD itemID = obj.get_UInt32(L"ItemID");
+	DWORD column = obj.get_UInt32(L"Column");
+	DWORD row = obj.get_UInt32(L"Row");
+
+	if (!analysis)
+	{
+		wstringstream summary;
+		summary << "Client placed item 0x" << itemID << " in pane 0x" << paneID 
+			<< " at " << std::dec << column << "," << row;
+
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
 }
 
 void exileSniffer::action_SRV_CREATE_ITEM(UIDecodedPkt& obj, QString *analysis)

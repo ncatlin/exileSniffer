@@ -58,6 +58,10 @@ S->C UnkPkID: 0xef size: 23 bytes
 
 #define CLI_UNK_0x41 0x41
 
+#define CLI_SELECT_NPC_DIALOG 0x46 
+#define SRV_SHOW_NPC_DIALOG 0x47 
+#define CLI_CLOSE_NPC_DIALOG 0x48 
+
 #define CLI_SEND_PARTY_INVITE 0x50
 
 #define CLI_TRY_JOIN_PARTY 0x52
@@ -74,6 +78,7 @@ S->C UnkPkID: 0xef size: 23 bytes
 #define CLI_REQUEST_PUBLICPARTIES 0x5d
 #define SRV_PUBLIC_PARTY_LIST (CLI_REQUEST_PUBLICPARTIES+1)
 
+#define CLI_MOVE_ITEM_PANE 0x63
 
 #define SRV_CREATE_ITEM 0x6d
 #define SRV_SLOT_ITEMSLIST (SRV_CREATE_ITEM+1)
@@ -142,7 +147,7 @@ S->C UnkPkID: 0xef size: 23 bytes
 
 #define CLI_REQUEST_PLAYERID 0x10e
 #define SRV_NOTIFY_PLAYERID 0x10f
-
+//0x110 - player pressed add new stash tab +?
 #define SRV_UNKNOWN_0x111 0x111
 
 #define SRV_UNKNOWN_0x118 0x118 //effectively pkt 0x111 loop2 deserialiser

@@ -154,6 +154,11 @@ class exileSniffer : public QMainWindow
 		void action_CLI_USE_BELT_SLOT(UIDecodedPkt&, QString*);
 		void action_CLI_USE_ITEM(UIDecodedPkt&, QString*);
 		void action_CLI_UNK_0x41(UIDecodedPkt&, QString*);
+
+		void action_CLI_SELECT_NPC_DIALOG(UIDecodedPkt&, QString*);
+		void action_SRV_SHOW_NPC_DIALOG(UIDecodedPkt&, QString*);
+		void action_CLI_CLOSE_NPC_DIALOG(UIDecodedPkt&, QString*);
+
 		void action_SRV_OPEN_UI_PANE(UIDecodedPkt&, QString*);
 
 		void action_CLI_SEND_PARTY_INVITE(UIDecodedPkt&, QString*);
@@ -169,6 +174,8 @@ class exileSniffer : public QMainWindow
 
 		void action_CLI_REQUEST_PUBLICPARTIES(UIDecodedPkt&, QString*);
 		void action_SRV_PUBLIC_PARTY_LIST(UIDecodedPkt&, QString*);
+
+		void action_CLI_MOVE_ITEM_PANE(UIDecodedPkt&, QString*);
 
 		void action_SRV_CREATE_ITEM(UIDecodedPkt&, QString*);
 		void action_SRV_SLOT_ITEMSLIST(UIDecodedPkt&, QString*);

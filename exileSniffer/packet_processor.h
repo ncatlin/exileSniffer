@@ -91,6 +91,11 @@ private:
 	void deserialise_CLI_USE_BELT_SLOT(UIDecodedPkt *);
 	void deserialise_CLI_USE_ITEM(UIDecodedPkt *);
 	void deserialise_CLI_UNK_0x41(UIDecodedPkt *);
+
+	void deserialise_CLI_SELECT_NPC_DIALOG(UIDecodedPkt *uipkt);
+	void deserialise_SRV_SHOW_NPC_DIALOG(UIDecodedPkt *uipkt);
+	void deserialise_CLI_CLOSE_NPC_DIALOG(UIDecodedPkt *uipkt);
+
 	void deserialise_SRV_OPEN_UI_PANE(UIDecodedPkt *);
 
 	void deserialise_CLI_SEND_PARTY_INVITE(UIDecodedPkt *);
@@ -106,6 +111,8 @@ private:
 
 	void deserialise_CLI_REQUEST_PUBLICPARTIES(UIDecodedPkt *);
 	void deserialise_SRV_PUBLIC_PARTY_LIST(UIDecodedPkt *);
+
+	void deserialise_CLI_MOVE_ITEM_PANE(UIDecodedPkt *);
 
 	void deserialise_SRV_CREATE_ITEM(UIDecodedPkt *);
 	void deserialise_SRV_SLOT_ITEMSLIST(UIDecodedPkt *);
