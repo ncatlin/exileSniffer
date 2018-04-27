@@ -40,7 +40,7 @@ public:
     {
         if (rawFilterForm->objectName().isEmpty())
             rawFilterForm->setObjectName(QStringLiteral("rawFilterForm"));
-        rawFilterForm->resize(591, 434);
+        rawFilterForm->resize(575, 434);
         verticalLayout = new QVBoxLayout(rawFilterForm);
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
         verticalLayout_2 = new QVBoxLayout();
@@ -123,9 +123,9 @@ public:
         QTableWidgetItem *___qtablewidgetitem1 = filterTable->horizontalHeaderItem(1);
         ___qtablewidgetitem1->setText(QApplication::translate("rawFilterForm", "Function", Q_NULLPTR));
         QTableWidgetItem *___qtablewidgetitem2 = filterTable->horizontalHeaderItem(2);
-        ___qtablewidgetitem2->setText(QApplication::translate("rawFilterForm", "Sender", Q_NULLPTR));
+        ___qtablewidgetitem2->setText(QApplication::translate("rawFilterForm", "Origin", Q_NULLPTR));
         QTableWidgetItem *___qtablewidgetitem3 = filterTable->horizontalHeaderItem(3);
-        ___qtablewidgetitem3->setText(QApplication::translate("rawFilterForm", "Count", Q_NULLPTR));
+        ___qtablewidgetitem3->setText(QApplication::translate("rawFilterForm", "Session Count", Q_NULLPTR));
         QTableWidgetItem *___qtablewidgetitem4 = filterTable->horizontalHeaderItem(4);
         ___qtablewidgetitem4->setText(QApplication::translate("rawFilterForm", "Filter", Q_NULLPTR));
         includeBtn->setText(QApplication::translate("rawFilterForm", "Include Selected", Q_NULLPTR));
@@ -142,4 +142,3 @@ namespace Ui {
 QT_END_NAMESPACE
 
 #endif // UI_RAWFILTERFORM_H
-

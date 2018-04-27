@@ -6,8 +6,6 @@
 #define PATCHSERVER_PORT 12995
 #define LOGINSERVER_PORT 20481
 #define GAMESERVER_PORT 6112
-#define PACKET_OUTGOING 0
-#define PACKET_INCOMING 1
 
 struct GAMEPACKET {
 	char serverType;

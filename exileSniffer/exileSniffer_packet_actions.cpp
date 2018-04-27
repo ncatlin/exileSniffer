@@ -43,121 +43,313 @@ std::wstring explainModifier(byte lastByte)
 
 void exileSniffer::init_DecodedPktActioners()
 {
+	//encapsulated ignored
 	decodedPktActioners[CLI_CHAT_MSG_ITEMS] = &exileSniffer::action_CLI_CHAT_MSG_ITEMS;
-	decodedPktActioners[CLI_CHAT_MESSAGE] = &exileSniffer::action_CLI_CHAT_MSG;
-	decodedPktActioners[CLI_PING_CHALLENGE] = &exileSniffer::action_CLI_PING_CHALLENGE;
-	decodedPktActioners[SRV_PING_RESPONSE] = &exileSniffer::action_SRV_PING_RESPONSE;
-	decodedPktActioners[SRV_AREA_INFO] = &exileSniffer::action_SRV_AREA_INFO;
+	//7
+	decodedPktActioners[CLI_CHAT_MESSAGE] = &exileSniffer::action_CLI_CHAT_MSG;	
 	decodedPktActioners[CLI_CHAT_COMMAND] = &exileSniffer::action_CLI_CHAT_COMMAND;
 	decodedPktActioners[SRV_CHAT_MESSAGE] = &exileSniffer::action_SRV_CHAT_MESSAGE;
 	decodedPktActioners[SRV_SERVER_MESSAGE] = &exileSniffer::action_SRV_SERVER_MESSAGE;
 	decodedPktActioners[CLI_LOGGED_OUT] = &exileSniffer::action_CLI_LOGGED_OUT;
-
+	decodedPktActioners[CLI_PING_CHALLENGE] = &exileSniffer::action_CLI_PING_CHALLENGE;
+	decodedPktActioners[SRV_PING_RESPONSE] = &exileSniffer::action_SRV_PING_RESPONSE;
+	decodedPktActioners[SRV_AREA_INFO] = &exileSniffer::action_SRV_AREA_INFO;
+	//10?
+	//11?
 	decodedPktActioners[SRV_PRELOAD_MONSTER_LIST] = &exileSniffer::action_SRV_PRELOAD_MONSTER_LIST;
 	decodedPktActioners[SRV_UNK_0x13] = &exileSniffer::action_SRV_UNK_0x13;
-
 	decodedPktActioners[SRV_PLAYER_ITEMS] = &exileSniffer::action_SRV_PLAYER_ITEMS;
 	decodedPktActioners[CLI_CLICKED_GROUND_ITEM] = &exileSniffer::action_CLI_CLICKED_GROUND_ITEM;
 	decodedPktActioners[CLI_ACTION_PREDICTIVE] = &exileSniffer::action_CLI_ACTION_PREDICTIVE;
 	decodedPktActioners[SRV_TRANSFER_INSTANCE] = &exileSniffer::action_SRV_TRANSFER_INSTANCE;
 	decodedPktActioners[SRV_INSTANCE_SERVER_DATA] = &exileSniffer::action_SRV_INSTANCE_SERVER_DATA;
 	decodedPktActioners[CLI_PICKUP_ITEM] = &exileSniffer::action_CLI_PICKUP_ITEM;
-
+	//1a
 	decodedPktActioners[CLI_PLACE_ITEM] = &exileSniffer::action_CLI_PLACE_ITEM;
+	//1c
 	decodedPktActioners[CLI_REMOVE_SOCKET] = &exileSniffer::action_CLI_REMOVE_SOCKET;
 	decodedPktActioners[CLI_INSERT_SOCKET] = &exileSniffer::action_CLI_INSERT_SOCKET;
-
 	decodedPktActioners[CLI_LEVEL_SKILLGEM] = &exileSniffer::action_CLI_LEVEL_SKILLGEM;
 	decodedPktActioners[CLI_UNK_0x20] = &exileSniffer::action_CLI_UNK_0x20;
 	decodedPktActioners[CLI_SKILLPOINT_CHANGE] = &exileSniffer::action_CLI_SKILLPOINT_CHANGE;
-
+	//22
+	//23
 	decodedPktActioners[CLI_CHOSE_ASCENDANCY] = &exileSniffer::action_CLI_CHOSE_ASCENDANCY;
-
+	//25
+	//26
+	//27
+	//28
+	//29
+	//2a
 	decodedPktActioners[CLI_CANCEL_BUF] = &exileSniffer::action_CLI_CANCEL_BUF;
 	decodedPktActioners[CLI_UNK_0x2c] = &exileSniffer::action_CLI_UNK_0x2c;
+	//2d
 	decodedPktActioners[CLI_SET_HOTBARSKILL] = &exileSniffer::action_CLI_SET_HOTBARSKILL;
 	decodedPktActioners[SRV_SKILL_SLOTS_LIST] = &exileSniffer::action_SRV_SKILL_SLOTS_LIST;
-
+	//30
+	//31
+	//32
+	//33
+	//34
+	//35
+	//36
 	decodedPktActioners[CLI_USE_BELT_SLOT] = &exileSniffer::action_CLI_USE_BELT_SLOT;
 	decodedPktActioners[CLI_USE_ITEM] = &exileSniffer::action_CLI_USE_ITEM;
-
+	//39
+	//3a
+	//3b
+	//3c
+	//3d
+	//3e
+	decodedPktActioners[SRV_OPEN_UI_PANE] = &exileSniffer::action_SRV_OPEN_UI_PANE;
+	//40
 	decodedPktActioners[CLI_UNK_0x41] = &exileSniffer::action_CLI_UNK_0x41;
-
+	//42
+	//43
+	//44
+	//45
 	decodedPktActioners[CLI_SELECT_NPC_DIALOG] = &exileSniffer::action_CLI_SELECT_NPC_DIALOG;
 	decodedPktActioners[SRV_SHOW_NPC_DIALOG] = &exileSniffer::action_SRV_SHOW_NPC_DIALOG;
 	decodedPktActioners[CLI_CLOSE_NPC_DIALOG] = &exileSniffer::action_CLI_CLOSE_NPC_DIALOG;
-
-	decodedPktActioners[SRV_OPEN_UI_PANE] = &exileSniffer::action_SRV_OPEN_UI_PANE;
+	//49
+	//4a
+	//4b
+	//4c
+	//4d
+	//4e
+	//4f
 	decodedPktActioners[CLI_SEND_PARTY_INVITE] = &exileSniffer::action_CLI_SEND_PARTY_INVITE;
+	//51
+	decodedPktActioners[CLI_TRY_JOIN_PARTY] = &exileSniffer::action_CLI_TRY_JOIN_PARTY;
 	decodedPktActioners[CLI_DISBAND_PUBLIC_PARTY] = &exileSniffer::action_CLI_DISBAND_PUBLIC_PARTY;
+	//54
 	decodedPktActioners[CLI_CREATE_PUBLICPARTY] = &exileSniffer::action_CLI_CREATE_PUBLICPARTY;
 	decodedPktActioners[CLI_UNK_x56] = &exileSniffer::action_CLI_UNK_x56;
 	decodedPktActioners[CLI_GET_PARTY_DETAILS] = &exileSniffer::action_CLI_GET_PARTY_DETAILS;
 	decodedPktActioners[SRV_FRIENDSLIST] = &exileSniffer::action_SRV_FRIENDSLIST;
-	
+	//59
+	decodedPktActioners[SRV_PARTY_DETAILS] = &exileSniffer::action_SRV_PARTY_DETAILS;
+	decodedPktActioners[SRV_PARTY_ENDED] = &exileSniffer::action_SRV_PARTY_ENDED;
+	//5c
 	decodedPktActioners[CLI_REQUEST_PUBLICPARTIES] = &exileSniffer::action_CLI_REQUEST_PUBLICPARTIES;
 	decodedPktActioners[SRV_PUBLIC_PARTY_LIST] = &exileSniffer::action_SRV_PUBLIC_PARTY_LIST;
-
+	//5f
+	//60
+	//61
+	//62
 	decodedPktActioners[CLI_MOVE_ITEM_PANE] = &exileSniffer::action_CLI_MOVE_ITEM_PANE;
-
+	//64
+	//65
+	//66
+	//67
+	//68
+	//69
+	//6a
+	//6b
+	//6c
 	decodedPktActioners[SRV_CREATE_ITEM] = &exileSniffer::action_SRV_CREATE_ITEM;
 	decodedPktActioners[SRV_SLOT_ITEMSLIST] = &exileSniffer::action_SRV_SLOT_ITEMSLIST;
-
+	//6f
 	decodedPktActioners[UNK_MESSAGE_0x70] = &exileSniffer::action_UNK_MESSAGE_0x70;
+	//71
+	//72
 	decodedPktActioners[UNK_MESSAGE_0x73] = &exileSniffer::action_UNK_MESSAGE_0x73;
 	decodedPktActioners[CLI_SET_STATUS_MESSAGE] = &exileSniffer::action_CLI_SET_STATUS_MESSAGE;
-
+	//75
+	//76
+	//77
+	//78
+	//79
+	//7a
+	//7b
+	//7c
+	//7d
+	//7e
 	decodedPktActioners[CLI_SWAPPED_WEAPONS] = &exileSniffer::action_CLI_SWAPPED_WEAPONS;
+	//80
+	//81
+	//82
+	//83
+	//84
+	//85
+	//86
+	//87
+	//88
+	//89
+	//8a
+	//8b
+	//8c
+	//8d
+	//8e
+	//define 0x8f seen when leaving duel queue
+	//define 0x90 seen when leaving duel queue
+	//91
 	decodedPktActioners[SRV_UNK_0x92] = &exileSniffer::action_SRV_UNK_0x92;
-	
+	//93
+	//94
+	//95
+	//96
+	//97
 	decodedPktActioners[CLI_SKILLPANE_ACTION] = &exileSniffer::action_CLI_SKILLPANE_ACTION;
+	//99
+	//9a
 	decodedPktActioners[SRV_SKILLPANE_DATA] = &exileSniffer::action_SRV_SKILLPANE_DATA;
-
+	//9c
+	//9d
+	//9e
 	decodedPktActioners[CLI_MICROTRANSACTION_SHOP_ACTION] = &exileSniffer::action_CLI_MICROTRANSACTION_SHOP_ACTION;
+	//a0
 	decodedPktActioners[SRV_MICROTRANSACTION_SHOP_DETAILS] = &exileSniffer::action_SRV_MICROTRANSACTION_SHOP_DETAILS;
+	//a2
 	decodedPktActioners[SRV_UNK_A3] = &exileSniffer::action_SRV_UNK_A3;
-
+	decodedPktActioners[SRV_CHAT_CHANNEL_ID] = &exileSniffer::action_SRV_CHAT_CHANNEL_ID;
+	//a5
+	//a6
+	//a7
+	//a8
+	//a9
+	//aa
+	//ab
+	//ac
+	decodedPktActioners[CLI_GUILD_CREATE] = &exileSniffer::action_CLI_GUILD_CREATE;
+	//ae
+	//af
+	//b0
+	//b1
+	//b2
+	//b3
+	//b4
+	//b5
+	//b6
+	//b7
+	//b8
+	//b9
+	//ba
+	//bc
+	//bd
+	//be
+	//bf
 	decodedPktActioners[CLI_PACKET_EXIT] = &exileSniffer::action_CLI_PACKET_EXIT;
 	decodedPktActioners[CLI_PACKET_EXIT_2] = &exileSniffer::action_CLI_PACKET_EXIT_2;
 	decodedPktActioners[CLI_DUEL_CHALLENGE] = &exileSniffer::action_CLI_DUEL_CHALLENGE;
 	decodedPktActioners[SRV_DUEL_RESPONSE] = &exileSniffer::action_SRV_DUEL_RESPONSE;
 	decodedPktActioners[SRV_DUEL_CHALLENGE] = &exileSniffer::action_SRV_DUEL_CHALLENGE;
-
-	decodedPktActioners[SRV_UNK_0xCA] = &exileSniffer::action_SRV_UNK_0xCA;
-
+	//c5
+	//c6
 	decodedPktActioners[CLI_UNK_0xC7] = &exileSniffer::action_CLI_UNK_0xC7;
-	
+	//c8
+	//c9
+	decodedPktActioners[SRV_UNK_0xCA] = &exileSniffer::action_SRV_UNK_0xCA;
+	//cb
+	//cd
+	//CLI_VISIT_HIDEOUT
+	//cf
+	//d0
+	//d1
+	//d2
+	//d3
+	//d4
 	decodedPktActioners[SRV_UNK_0xD5] = &exileSniffer::action_SRV_UNK_0xD5;
-
+	//d6
+	//d7
 	decodedPktActioners[CLI_USED_SKILL] = &exileSniffer::action_CLI_USED_SKILL;
 	decodedPktActioners[CLI_CLICK_OBJ] = &exileSniffer::action_CLI_CLICK_OBJ;
 	decodedPktActioners[CLI_MOUSE_HELD] = &exileSniffer::action_CLI_MOUSE_HELD;
+	//db
 	decodedPktActioners[CLI_MOUSE_RELEASE] = &exileSniffer::action_CLI_MOUSE_RELEASE;
+	//dd
+	//de
+	//df
 	decodedPktActioners[CLI_OPEN_WORLD_SCREEN] = &exileSniffer::action_CLI_OPEN_WORLD_SCREEN;
-	decodedPktActioners[SRV_CHAT_CHANNEL_ID] = &exileSniffer::action_SRV_CHAT_CHANNEL_ID;
-	decodedPktActioners[CLI_GUILD_CREATE] = &exileSniffer::action_CLI_GUILD_CREATE;
+	//e1
+	//e2
+	//e3
+	//e4
+	//e5
 	decodedPktActioners[SRV_UNK_0xE6] = &exileSniffer::action_SRV_UNK_0xE6;
-	decodedPktActioners[SRV_ITEM_REMOVED] = &exileSniffer::action_SRV_ITEM_REMOVED;
+	//e7
+	//e8
+	decodedPktActioners[SRV_OBJ_REMOVED] = &exileSniffer::action_SRV_OBJ_REMOVED;
 	decodedPktActioners[SRV_MOBILE_START_SKILL] = &exileSniffer::action_SRV_MOBILE_START_SKILL;
 	decodedPktActioners[SRV_MOBILE_FINISH_SKILL] = &exileSniffer::action_SRV_MOBILE_FINISH_SKILL;
+	//ec
+	//ed
 	decodedPktActioners[SRV_MOBILE_UNK_0xee] = &exileSniffer::action_SRV_MOBILE_UNK_0xee;
 	decodedPktActioners[SRV_MOBILE_UNK_0xef] = &exileSniffer::action_SRV_MOBILE_UNK_0xef;
 	decodedPktActioners[SRV_MOBILE_UPDATE_HMS] = &exileSniffer::action_SRV_MOBILE_UPDATE_HMS;
 	decodedPktActioners[SRV_STAT_CHANGED] = &exileSniffer::action_SRV_STAT_CHANGED;
 	decodedPktActioners[SRV_UNK_0xf2] = &exileSniffer::action_SRV_UNK_0xf2;
 	decodedPktActioners[SRV_UNK_0xf3] = &exileSniffer::action_SRV_UNK_0xf3;
+	//f4
+	//f5
+	//f6
+	//f7
+	//f8
+	//f9
 	decodedPktActioners[SRV_START_EFFECT] = &exileSniffer::action_SRV_START_BUFF;
 	decodedPktActioners[SRV_END_EFFECT] = &exileSniffer::action_SRV_END_EFFECT;
+	//fc
+	//fd
+	//fe
+	//ff
+	//100
+	//101
+	//102
+	//103
+	//104
+	//105
+	//106
+	//107
+	//108
+	//109
+	//10a
+	//10b
+	//10c
+	//10d
 	decodedPktActioners[CLI_REQUEST_PLAYERID] = &exileSniffer::action_CLI_REQUEST_PLAYERID;
 	decodedPktActioners[SRV_NOTIFY_PLAYERID] = &exileSniffer::action_SRV_NOTIFY_PLAYERID;
+	//0x110 - player pressed add new stash tab +?
 	decodedPktActioners[SRV_UNKNOWN_0x111] = &exileSniffer::action_SRV_UNKNOWN_0x111;
+	//112
+	//113
+	//114
+	//115
+	//116
+	//117
 	decodedPktActioners[SRV_UNKNOWN_0x118] = &exileSniffer::action_SRV_UNKNOWN_0x118;
+	//119
+	//11a
+	//11b
 	decodedPktActioners[CLI_OPTOUT_TUTORIALS] = &exileSniffer::action_CLI_OPTOUT_TUTORIALS;
+	//11d
+	//11e
+	//11f
+	//120
+	//121
+	//122
+	//123
+	//124
+	//125
+	//126
+	//127
+	//128
+	//129
+	//12a
+	//12b
+	//12c
+	//12d
+	//12e
 	decodedPktActioners[SRV_SHOW_ENTERING_MSG] = &exileSniffer::action_SRV_SHOW_ENTERING_MSG;
+	//130
+	//131
 	decodedPktActioners[SRV_HEARTBEAT] = &exileSniffer::action_SRV_HEARTBEAT;
+	//133
+	//134
 	decodedPktActioners[SRV_ADD_OBJECT] = &exileSniffer::action_SRV_ADD_OBJECT;
 	decodedPktActioners[SRV_UPDATE_OBJECT] = &exileSniffer::action_SRV_UPDATE_OBJECT;
 	decodedPktActioners[SRV_IDNOTIFY_0x137] = &exileSniffer::action_SRV_IDNOTIFY_0x137;
+	//138
+	//139
 
 }
 
@@ -1361,6 +1553,17 @@ void exileSniffer::action_SRV_PARTY_DETAILS(UIDecodedPkt& obj, QString *analysis
 	}
 }
 
+void exileSniffer::action_SRV_PARTY_ENDED(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+	if (!analysis)
+	{
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = "Party ended";
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
 
 void exileSniffer::action_CLI_REQUEST_PUBLICPARTIES(UIDecodedPkt& obj, QString *analysis)
 {
@@ -1898,13 +2101,21 @@ void exileSniffer::action_SRV_DUEL_CHALLENGE(UIDecodedPkt& obj, QString *analysi
 }
 
 
-void exileSniffer::action_SRV_ITEM_REMOVED(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_OBJ_REMOVED(UIDecodedPkt& obj, QString *analysis)
 {
+	UINT32 ID = obj.get_UInt32(L"ItemID");
+	UINT32 receiver = obj.get_UInt32(L"Receiver");
+	UINT32 unk2 = obj.get_UInt32(L"Unk2");
+
 	if (!analysis)
 	{
 
 		wstringstream summary;
-		summary << std::hex << "Item removed";
+		summary << std::hex << "Item removed: 0x " << ID;
+		if (receiver)
+			summary << " by 0x" << receiver;
+		if (unk2)
+			summary << " unk2: 0x" << unk2;
 
 		UI_DECODED_LIST_ENTRY listentry(obj);
 		listentry.summary = QString::fromStdWString(summary.str());
@@ -1946,8 +2157,8 @@ void exileSniffer::action_SRV_MOBILE_START_SKILL(UIDecodedPkt& obj, QString *ana
 	*/
 	obj.toggle_payload_operations(true);
 
-	DWORD ID1 = obj.get_UInt32(L"ID1");
-	DWORD ID2 = obj.get_UInt32(L"ID2");
+	UINT32 ID1 = obj.get_UInt32(L"ID1");
+	UINT32 ID2 = obj.get_UInt32(L"ID2");
 	UINT32 ID3 = obj.get_UInt32(L"ID3");
 	UINT32 modifier = obj.get_UInt32(L"Modifier"); 
 
@@ -1988,8 +2199,8 @@ void exileSniffer::action_SRV_MOBILE_START_SKILL(UIDecodedPkt& obj, QString *ana
 
 void exileSniffer::action_SRV_MOBILE_FINISH_SKILL(UIDecodedPkt& obj, QString *analysis)
 {
-	DWORD ID1 = obj.get_UInt32(L"ID1");
-	DWORD ID2 = obj.get_UInt32(L"ID2");
+	UINT32 ID1 = obj.get_UInt32(L"ID1");
+	UINT32 ID2 = obj.get_UInt32(L"ID2");
 	UINT32 ID3 = obj.get_UInt32(L"ID3");
 	if (!analysis)
 	{
@@ -2007,14 +2218,14 @@ void exileSniffer::action_SRV_MOBILE_FINISH_SKILL(UIDecodedPkt& obj, QString *an
 
 void exileSniffer::action_SRV_MOBILE_UNK_0xee(UIDecodedPkt& obj, QString *analysis)
 {
-	DWORD ID1 = obj.get_UInt32(L"ID1");
-	DWORD ID2 = obj.get_UInt32(L"ID2");
+	UINT32 ID1 = obj.get_UInt32(L"ID1");
+	UINT32 ID2 = obj.get_UInt32(L"ID2");
 	UINT32 ID3 = obj.get_UInt32(L"ID3");
 
 	UINT32 s1 = obj.get_UInt32(L"S1");
 	UINT32 b1 = obj.get_UInt32(L"B1");
 	UINT32 b2 = obj.get_UInt32(L"B2");
-	DWORD64 d1 = obj.get_UInt32(L"D1");
+	UINT32 d1 = obj.get_UInt32(L"D1");
 
 	UINT32 skillid = obj.get_UInt32(L"SkillID");
 
@@ -2049,14 +2260,14 @@ void exileSniffer::action_SRV_MOBILE_UNK_0xee(UIDecodedPkt& obj, QString *analys
 
 void exileSniffer::action_SRV_MOBILE_UNK_0xef(UIDecodedPkt& obj, QString *analysis)
 {
-	DWORD ID1 = obj.get_UInt32(L"ID1");
-	DWORD ID2 = obj.get_UInt32(L"ID2");
+	UINT32 ID1 = obj.get_UInt32(L"ID1");
+	UINT32 ID2 = obj.get_UInt32(L"ID2");
 	UINT32 ID3 = obj.get_UInt32(L"ID3");
 
 	UINT32 s1 = obj.get_UInt32(L"S1");
 	UINT32 b1 = obj.get_UInt32(L"B1");
 	UINT32 b2 = obj.get_UInt32(L"B2");
-	DWORD64 d1 = obj.get_UInt32(L"D1");
+	UINT32 d1 = obj.get_UInt32(L"D1");
 
 	UINT32 UnkEndB = obj.get_UInt32(L"UnkEndB");
 	if (!analysis)
@@ -2078,8 +2289,8 @@ void exileSniffer::action_SRV_MOBILE_UPDATE_HMS(UIDecodedPkt& obj, QString *anal
 {
 	obj.toggle_payload_operations(true);
 
-	DWORD ID1 = obj.get_UInt32(L"ID1");
-	DWORD ID2 = obj.get_UInt32(L"ID2");
+	UINT32 ID1 = obj.get_UInt32(L"ID1");
+	UINT32 ID2 = obj.get_UInt32(L"ID2");
 	UINT32 ID3 = obj.get_UInt32(L"ID3");
 
 	UINT32 val = obj.get_UInt32(L"NewValue");
@@ -2119,8 +2330,8 @@ void exileSniffer::action_SRV_MOBILE_UPDATE_HMS(UIDecodedPkt& obj, QString *anal
 void exileSniffer::action_SRV_STAT_CHANGED(UIDecodedPkt& obj, QString *analysis)//0xf1
 {
 	obj.toggle_payload_operations(true);
-	DWORD ID1 = obj.get_UInt32(L"ID1");
-	DWORD ID2 = obj.get_UInt32(L"ID2");
+	UINT32 ID1 = obj.get_UInt32(L"ID1");
+	UINT32 ID2 = obj.get_UInt32(L"ID2");
 	UINT32 ID3 = obj.get_UInt32(L"ID3");
 
 	size_t listSize = 0;
@@ -2157,7 +2368,7 @@ void exileSniffer::action_SRV_STAT_CHANGED(UIDecodedPkt& obj, QString *analysis)
 
 			WValue &pair = *pairlistit;
 
-			DWORD statIndex = pair[0].GetUint() - 1;
+			UINT32 statIndex = pair[0].GetUint() - 1;
 			analysisStream << "\t" <<
 				converter.from_bytes(ggpk.statDescriptions.at(statIndex))
 				<< ": " << pair[1].GetInt() << std::endl;
@@ -2171,8 +2382,8 @@ void exileSniffer::action_SRV_STAT_CHANGED(UIDecodedPkt& obj, QString *analysis)
 void exileSniffer::action_SRV_UNK_0xf2(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
-	DWORD ID1 = obj.get_UInt32(L"ID1");
-	DWORD ID2 = obj.get_UInt32(L"ID2");
+	UINT32 ID1 = obj.get_UInt32(L"ID1");
+	UINT32 ID2 = obj.get_UInt32(L"ID2");
 	UINT32 ID3 = obj.get_UInt32(L"ID3");
 
 	ushort arg = obj.get_UInt32(L"Arg");
@@ -2194,8 +2405,8 @@ void exileSniffer::action_SRV_UNK_0xf2(UIDecodedPkt& obj, QString *analysis)
 void exileSniffer::action_SRV_UNK_0xf3(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
-	DWORD ID1 = obj.get_UInt32(L"ID1");
-	DWORD ID2 = obj.get_UInt32(L"ID2");
+	UINT32 ID1 = obj.get_UInt32(L"ID1");
+	UINT32 ID2 = obj.get_UInt32(L"ID2");
 	UINT32 ID3 = obj.get_UInt32(L"ID3");
 
 	DWORD DW1 = obj.get_UInt32(L"DW1");
@@ -2218,16 +2429,16 @@ void exileSniffer::action_SRV_UNK_0xf3(UIDecodedPkt& obj, QString *analysis)
 void exileSniffer::action_SRV_START_BUFF(UIDecodedPkt& obj, QString *analysis) //0xfa
 {
 	obj.toggle_payload_operations(true);
-	DWORD ID1 = obj.get_UInt32(L"ID1");
-	DWORD ID2 = obj.get_UInt32(L"ID2");
+	UINT32 ID1 = obj.get_UInt32(L"ID1");
+	UINT32 ID2 = obj.get_UInt32(L"ID2");
 	UINT32 ID3 = obj.get_UInt32(L"ID3");
 
 
-	ushort buffID = obj.get_UInt32(L"BuffID");
-	ushort buffDefinitionsRow = obj.get_UInt32(L"BuffDefinitionsRow");
-	DWORD UnkDWord3 = obj.get_UInt32(L"ID2");
-	ushort PotionSlot = obj.get_UInt32(L"PotionSlot");
-	ushort controlByte = obj.get_UInt32(L"ID2");
+	UINT32 buffID = obj.get_UInt32(L"BuffID");
+	UINT32 buffDefinitionsRow = obj.get_UInt32(L"BuffDefinitionsRow");
+	UINT32 UnkDWord3 = obj.get_UInt32(L"ID2");
+	UINT32 PotionSlot = obj.get_UInt32(L"PotionSlot");
+	UINT32 controlByte = obj.get_UInt32(L"ID2");
 
 	if (!analysis)
 	{
@@ -2255,11 +2466,11 @@ void exileSniffer::action_SRV_START_BUFF(UIDecodedPkt& obj, QString *analysis) /
 void exileSniffer::action_SRV_END_EFFECT(UIDecodedPkt& obj, QString *analysis) //0xfb
 {
 	obj.toggle_payload_operations(true);
-	DWORD ID1 = obj.get_UInt32(L"ID1");
-	DWORD ID2 = obj.get_UInt32(L"ID2");
+	UINT32 ID1 = obj.get_UInt32(L"ID1");
+	UINT32 ID2 = obj.get_UInt32(L"ID2");
 	UINT32 ID3 = obj.get_UInt32(L"ID3");
 
-	ushort BuffID = obj.get_UInt32(L"BuffID");
+	UINT32 BuffID = obj.get_UInt32(L"BuffID");
 	if (!analysis)
 	{
 		std::wstringstream summary;
@@ -2289,8 +2500,8 @@ void exileSniffer::action_CLI_REQUEST_PLAYERID(UIDecodedPkt& obj, QString *analy
 void exileSniffer::action_SRV_NOTIFY_PLAYERID(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
-	DWORD ID1 = obj.get_UInt32(L"ID1");
-	DWORD ID2 = obj.get_UInt32(L"ID2");
+	UINT32 ID1 = obj.get_UInt32(L"ID1");
+	UINT32 ID2 = obj.get_UInt32(L"ID2");
 	UINT32 ID3 = obj.get_UInt32(L"ID3");
 
 	if (!analysis)
@@ -2427,8 +2638,8 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
-	DWORD ID1 = obj.get_UInt32(L"ID1");
-	DWORD ID2 = obj.get_UInt32(L"ID2");
+	UINT32 ID1 = obj.get_UInt32(L"ID1");
+	UINT32 ID2 = obj.get_UInt32(L"ID2");
 	UINT32 ID3 = obj.get_UInt32(L"ID3");
 
 	DWORD objHash = obj.get_UInt32(L"objHash");
@@ -2446,8 +2657,16 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 	if (!analysis)
 	{
 		wstringstream summary;
-		summary << std::hex << converter.from_bytes(hashCategory) << " added <"<<converter.from_bytes(hashResult)<<
-			"> ID (0x" << ID1 << "," << ID2 << ",0x" << ID3 << ") - " <<dataLen<<" bytes>";
+		summary << std::hex << converter.from_bytes(hashCategory) << " added ";
+		if (hashCategory == "Character")
+		{
+			summary << " - " << obj.get_wstring(L"Name");
+		}
+		else
+		{
+			summary << "<" << converter.from_bytes(hashResult) <<
+				"> ID (0x" << ID1 << "," << ID2 << ",0x" << ID3 << ") - " << dataLen << " bytes>";
+		}
 
 		UI_DECODED_LIST_ENTRY listentry(obj);
 		listentry.summary = QString::fromStdWString(summary.str());
@@ -2618,8 +2837,8 @@ void exileSniffer::action_SRV_UPDATE_OBJECT(UIDecodedPkt& obj, QString *analysis
 {
 	obj.toggle_payload_operations(true);
 
-	DWORD ID1 = obj.get_UInt32(L"ID1");
-	DWORD ID2 = obj.get_UInt32(L"ID2");
+	UINT32 ID1 = obj.get_UInt32(L"ID1");
+	UINT32 ID2 = obj.get_UInt32(L"ID2");
 	UINT32 ID3 = obj.get_UInt32(L"ID3");
 
 	DWORD dataLen = obj.get_UInt32(L"DataLen");
@@ -2640,8 +2859,8 @@ void exileSniffer::action_SRV_IDNOTIFY_0x137(UIDecodedPkt& obj, QString *analysi
 {
 	obj.toggle_payload_operations(true);
 
-	DWORD ID1 = obj.get_UInt32(L"ID1");
-	DWORD ID2 = obj.get_UInt32(L"ID2");
+	UINT32 ID1 = obj.get_UInt32(L"ID1");
+	UINT32 ID2 = obj.get_UInt32(L"ID2");
 	UINT32 ID3 = obj.get_UInt32(L"ID3");
 
 	if (!analysis)

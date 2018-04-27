@@ -32,8 +32,18 @@ private:
 class numericSortTableWidgetItem : public QTableWidgetItem {
 public:
 	numericSortTableWidgetItem() { this->setTextAlignment(Qt::AlignCenter); }
+	void setHex(int num) {
+		customHex = true;
+		this->setData(Qt::ItemDataRole::UserRole, num);
+		this->setText("0x" + QString::number(num, 16));
+	}
 	bool operator <(const QTableWidgetItem &other) const
 	{
-		return text().toInt() < other.text().toInt();
+		if (customHex)
+			return data(Qt::ItemDataRole::UserRole).toInt() < other.data(Qt::ItemDataRole::UserRole).toInt();
+		else
+			return text().toInt() < other.text().toInt();
 	}
+private:
+	bool customHex = false;
 };

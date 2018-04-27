@@ -116,10 +116,10 @@ void gameDataStore::fill_UI_pane_IDs()
 	UIPaneIDs[2] = "GuildStash";
 	UIPaneIDs[3] = "Social";
 	UIPaneIDs[4] = "Atlas";
-
+	//?
 	UIPaneIDs[6] = "DivineFont";
 	UIPaneIDs[7] = "StoneAltar";
-
+	//?
 	UIPaneIDs[9] = "Ascendancy";
 	UIPaneIDs[10] = "EventsPVP-EventsTab";
 	UIPaneIDs[11] = "CardTrade";
@@ -131,7 +131,7 @@ void gameDataStore::fill_UI_pane_IDs()
 	UIPaneIDs[17] = "Inventory";
 	UIPaneIDs[18] = "Atlas";
 	UIPaneIDs[19] = "Pantheon";
-	UIPaneIDs[20] = "Challenges_2"; //supposed to be something other than achievements tab?
+	UIPaneIDs[20] = "Challenges_2"; //something other than achievements tab?
 	UIPaneIDs[22] = "BloodAltar";
 	UIPaneIDs[23] = "MapCrafting";
 	UIPaneIDs[24] = "Crafting_AnimGuardianDrop";

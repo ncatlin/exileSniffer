@@ -108,7 +108,7 @@ private:
 	void deserialise_SRV_FRIENDSLIST(UIDecodedPkt *);
 
 	void deserialise_SRV_PARTY_DETAILS(UIDecodedPkt *);
-
+	void deserialise_SRV_PARTY_ENDED(UIDecodedPkt *uipkt);
 	void deserialise_CLI_REQUEST_PUBLICPARTIES(UIDecodedPkt *);
 	void deserialise_SRV_PUBLIC_PARTY_LIST(UIDecodedPkt *);
 
@@ -157,7 +157,7 @@ private:
 
 	void deserialise_SRV_UNK_0xE6(UIDecodedPkt *);
 
-	void deserialise_SRV_ITEM_REMOVED(UIDecodedPkt *);
+	void deserialise_SRV_OBJ_REMOVED(UIDecodedPkt *);
 	void deserialise_SRV_MOBILE_START_SKILL(UIDecodedPkt *);
 	void deserialise_SRV_MOBILE_FINISH_SKILL(UIDecodedPkt *);
 

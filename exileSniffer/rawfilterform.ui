@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>591</width>
+    <width>585</width>
     <height>434</height>
    </rect>
   </property>
@@ -62,12 +62,12 @@
           </column>
           <column>
            <property name="text">
-            <string>Sender</string>
+            <string>Origin</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Count</string>
+            <string>Session Count</string>
            </property>
           </column>
           <column>

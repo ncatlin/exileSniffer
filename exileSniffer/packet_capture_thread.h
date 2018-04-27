@@ -11,6 +11,9 @@ using Tins::TCPIP::StreamFollower;
 
 #include "uiMsg.h"
 
+#define PACKET_OUTGOING 0
+#define PACKET_INCOMING 1
+
 class packet_capture_thread :
 	public base_thread
 {

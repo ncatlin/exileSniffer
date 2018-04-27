@@ -115,6 +115,8 @@ class exileSniffer : public QMainWindow
 		void addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPkt *obj);
 		void setRowColor(int row, QColor colour);
 
+		void add_filter_category(unsigned short pktid, QString description, int fromServer);
+
 	private:
 
 		void action_SRV_PKT_ENCAPSULATED(UIDecodedPkt&, QString*);
@@ -171,7 +173,7 @@ class exileSniffer : public QMainWindow
 		void action_SRV_FRIENDSLIST(UIDecodedPkt&, QString*);
 
 		void action_SRV_PARTY_DETAILS(UIDecodedPkt&, QString*);
-
+		void action_SRV_PARTY_ENDED(UIDecodedPkt&, QString *);
 		void action_CLI_REQUEST_PUBLICPARTIES(UIDecodedPkt&, QString*);
 		void action_SRV_PUBLIC_PARTY_LIST(UIDecodedPkt&, QString*);
 
@@ -221,7 +223,7 @@ class exileSniffer : public QMainWindow
 		void action_CLI_OPEN_WORLD_SCREEN(UIDecodedPkt&, QString*);
 
 		void action_SRV_UNK_0xE6(UIDecodedPkt&, QString*);	
-		void action_SRV_ITEM_REMOVED(UIDecodedPkt&, QString*);
+		void action_SRV_OBJ_REMOVED(UIDecodedPkt&, QString*);
 		void action_SRV_MOBILE_START_SKILL(UIDecodedPkt&, QString*);
 		void action_SRV_MOBILE_FINISH_SKILL(UIDecodedPkt&, QString*);
 
