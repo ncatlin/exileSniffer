@@ -10,120 +10,180 @@
     <height>434</height>
    </rect>
   </property>
+  <property name="contextMenuPolicy">
+   <enum>Qt::CustomContextMenu</enum>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout_2">
-     <item>
-      <widget class="QGroupBox" name="groupBox_3">
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="title">
-        <string>Filter Settings (Right click for presets)</string>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout_3">
-        <item>
-         <widget class="QTableWidget" name="filterTable">
-          <property name="editTriggers">
-           <set>QAbstractItemView::SelectedClicked</set>
-          </property>
-          <property name="selectionMode">
-           <enum>QAbstractItemView::ExtendedSelection</enum>
-          </property>
-          <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectRows</enum>
-          </property>
-          <property name="textElideMode">
-           <enum>Qt::ElideLeft</enum>
-          </property>
-          <property name="gridStyle">
-           <enum>Qt::DotLine</enum>
-          </property>
-          <property name="sortingEnabled">
-           <bool>true</bool>
-          </property>
-          <attribute name="verticalHeaderVisible">
-           <bool>false</bool>
-          </attribute>
-          <column>
-           <property name="text">
-            <string>ID</string>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>1</number>
+     </property>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string>Filters</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QTableWidget" name="filterTable">
+           <property name="contextMenuPolicy">
+            <enum>Qt::CustomContextMenu</enum>
            </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Function</string>
+           <property name="editTriggers">
+            <set>QAbstractItemView::SelectedClicked</set>
            </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Origin</string>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::ExtendedSelection</enum>
            </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Session Count</string>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
            </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Filter</string>
+           <property name="textElideMode">
+            <enum>Qt::ElideLeft</enum>
            </property>
-          </column>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QPushButton" name="includeBtn">
-       <property name="maximumSize">
-        <size>
-         <width>120</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Include Selected</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="excludeBtn">
-       <property name="maximumSize">
-        <size>
-         <width>120</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Exclude Selected</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="applyBtn">
-       <property name="maximumSize">
-        <size>
-         <width>120</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Apply Filters</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+           <property name="gridStyle">
+            <enum>Qt::DotLine</enum>
+           </property>
+           <property name="sortingEnabled">
+            <bool>true</bool>
+           </property>
+           <attribute name="verticalHeaderVisible">
+            <bool>false</bool>
+           </attribute>
+           <column>
+            <property name="text">
+             <string>ID</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Function</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Origin</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Session Count</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Filter</string>
+            </property>
+           </column>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QPushButton" name="includeBtn">
+           <property name="maximumSize">
+            <size>
+             <width>120</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Include Selected</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="excludeBtn">
+           <property name="maximumSize">
+            <size>
+             <width>120</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Exclude Selected</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="applyBtn">
+           <property name="maximumSize">
+            <size>
+             <width>120</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Apply Filters</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_2">
+      <attribute name="title">
+       <string>Presets</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QTreeWidget" name="presetsTree">
+         <property name="contextMenuPolicy">
+          <enum>Qt::CustomContextMenu</enum>
+         </property>
+         <column>
+          <property name="text">
+           <string>Category</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Summary</string>
+          </property>
+         </column>
+         <item>
+          <property name="text">
+           <string>Builtin</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Save custom preset:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="saveName">
+           <property name="text">
+            <string>presetName</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="saveBtn">
+           <property name="text">
+            <string>Save</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </widget>
    </item>
   </layout>
  </widget>
@@ -177,11 +237,95 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>presetsTree</sender>
+   <signal>customContextMenuRequested(QPoint)</signal>
+   <receiver>rawFilterForm</receiver>
+   <slot>showPresetContextMenu(QPoint)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>291</x>
+     <y>210</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>292</x>
+     <y>216</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>saveBtn</sender>
+   <signal>clicked()</signal>
+   <receiver>rawFilterForm</receiver>
+   <slot>saveCustom()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>524</x>
+     <y>399</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>292</x>
+     <y>216</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>saveName</sender>
+   <signal>returnPressed()</signal>
+   <receiver>rawFilterForm</receiver>
+   <slot>saveCustom()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>303</x>
+     <y>398</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>292</x>
+     <y>216</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>presetsTree</sender>
+   <signal>itemDoubleClicked(QTreeWidgetItem*,int)</signal>
+   <receiver>rawFilterForm</receiver>
+   <slot>loadPreset()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>291</x>
+     <y>210</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>292</x>
+     <y>216</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>presetsTree</sender>
+   <signal>itemActivated(QTreeWidgetItem*,int)</signal>
+   <receiver>rawFilterForm</receiver>
+   <slot>loadPreset()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>291</x>
+     <y>210</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>292</x>
+     <y>216</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <signal>applyFilters()</signal>
   <slot>includeSelectedFilters()</slot>
   <slot>excludeSelectedFilters()</slot>
   <slot>applyBtnPress()</slot>
+  <slot>showPresetContextMenu(QPoint)</slot>
+  <slot>saveCustom()</slot>
+  <slot>loadPreset()</slot>
+  <slot>deletePreset()</slot>
  </slots>
 </ui>

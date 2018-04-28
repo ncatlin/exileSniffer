@@ -321,3 +321,4 @@ S->C UnkPkID: 0xef size: 23 bytes
 //138
 //139
 #define SRV_UNK_13A 0x13a
+#define MSG_IDS_END (SRV_UNK_13A+1)
