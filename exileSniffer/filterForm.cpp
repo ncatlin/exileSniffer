@@ -9,6 +9,7 @@ enum ePresetCategory { builtin, user };
 filterForm::filterForm(QWidget *parent)
 	: QWidget(parent)
 {
+	savedPresetLists = new QSettings("ExileSniffer", "Filters");
 }
 
 void filterForm::add_filter_category(unsigned short pktid, QString description, 
@@ -465,6 +466,25 @@ void filterForm::buildBuiltinPresets()
 	builtinPresets.push_back(drops);
 }
 
+PRESET_LIST filterForm::load_saved_preset(QString groupName)
+{
+	PRESET_LIST plist;
+	plist.name = savedPresetLists->value(groupName + "//name").toString();
+	plist.description = savedPresetLists->value(groupName + "//info").toString();
+
+	QString listString = savedPresetLists->value(groupName + "//list").toString();
+
+	std::vector<std::string> tokens;
+	std::istringstream iss(listString.toStdString());
+	std::copy(std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>(),
+		back_inserter(tokens));
+
+	for (auto it = tokens.begin(); it != tokens.end(); it++)
+		plist.IDs.push_back(std::stoi(*it, 0, 16));
+
+	return plist;
+}
+
 void filterForm::populatePresetsList()
 {
 
@@ -484,25 +504,24 @@ void filterForm::populatePresetsList()
 		builtinsItem->addChild(preset);
 	}
 
-	if (!customPresets.empty())
+	QTreeWidgetItem * customPresetsItem = new QTreeWidgetItem();
+	ui->presetsTree->addTopLevelItem(customPresetsItem);
+
+	QStringList groups = savedPresetLists->childGroups();
+	for (auto groupit = groups.begin(); groupit != groups.end(); groupit++)
 	{
-		QTreeWidgetItem * customPresetsItem = new QTreeWidgetItem();
+		PRESET_LIST plist = load_saved_preset(*groupit);
 
-		ui->presetsTree->addTopLevelItem(customPresetsItem);
+		customPresets.push_back(plist);
 
-		for (int i = 0; i < customPresets.size(); i++)
-		{
-			PRESET_LIST& pl = customPresets.at(i);
-			QTreeWidgetItem * preset = new QTreeWidgetItem();
-			preset->setText(0, pl.name);
-			preset->setText(1, pl.description);
-			preset->setData(2, Qt::UserRole, ePresetCategory::user);
-			preset->setData(3, Qt::UserRole, i);
-			customPresetsItem->addChild(preset);
-		}
+		QTreeWidgetItem * preset = new QTreeWidgetItem();
+		preset->setText(0, plist.name);
+		preset->setText(1, plist.description);
+		preset->setData(2, Qt::UserRole, ePresetCategory::user);
+		preset->setData(3, Qt::UserRole, customPresets.size() - 1);
+		customPresetsItem->addChild(preset);
 	}
-
-
+	
 	ui->presetsTree->expandAll();
 }
 
@@ -576,11 +595,31 @@ void filterForm::toggleSelectedFilter()
 	}
 }
 
-
-void filterForm::saveCustom()
+void filterForm::savePresetLists()
 {
-	QString saveNameTxt = ui->saveName->text();
+	savedPresetLists->clear();
 
+	int idx = 0;
+	for (auto it = customPresets.begin(); it != customPresets.end(); it++)
+	{
+		PRESET_LIST& plist = *it;
+
+		QString spaceSepList;
+		for (auto strit = plist.IDs.begin(); strit != plist.IDs.end(); strit++)
+			spaceSepList += (QString::number(*strit, 16) + " ");
+
+		savedPresetLists->beginGroup(QString::number(idx++)+ " "+plist.name);
+		savedPresetLists->setValue("name", plist.name);
+		savedPresetLists->setValue("info", plist.description);
+		savedPresetLists->setValue("list", spaceSepList);
+		savedPresetLists->endGroup();
+	}
+
+	savedPresetLists->sync();
+}
+
+void filterForm::addPresetListToTree(PRESET_LIST& newList)
+{
 	QTreeWidgetItem *customPresetsItem;
 	if (ui->presetsTree->topLevelItemCount() == 2)
 		customPresetsItem = ui->presetsTree->topLevelItem(1);
@@ -592,22 +631,29 @@ void filterForm::saveCustom()
 		ui->presetsTree->expandAll();
 	}
 
-	PRESET_LIST newList;
-	newList.name = saveNameTxt;
-
-	for (auto it = filterStates.begin(); it != filterStates.end(); it++)
-		if (it->second != 0)
-			newList.IDs.push_back(it->first);
-
-	newList.description = QString::number(newList.IDs.size()) + " filters";
-	customPresets.push_back(newList);
-
 	QTreeWidgetItem *item = new QTreeWidgetItem();
 	item->setText(0, newList.name);
 	item->setText(1, newList.description);
 	item->setData(2, Qt::UserRole, ePresetCategory::user);
 	item->setData(3, Qt::UserRole, customPresets.size() - 1);
 	customPresetsItem->addChild(item);
+}
+
+void filterForm::saveCustom()
+{
+	PRESET_LIST newList;
+	newList.name = ui->saveName->text();
+
+	for (auto it = filterStates.begin(); it != filterStates.end(); it++)
+		if (it->second != 0)
+			newList.IDs.push_back(it->first);
+
+	newList.description = QString::number(newList.IDs.size()) + " filters";
+
+	customPresets.push_back(newList);
+
+	addPresetListToTree(newList);
+	savePresetLists();
 }
 
 void filterForm::deletePreset()
@@ -618,13 +664,14 @@ void filterForm::deletePreset()
 
 	if (category == ePresetCategory::user)
 	{
-		customPresets.at(index).IDs.clear();
-		customPresets.at(index).description = "Deleted";
 		delete item;
+		customPresets.erase(customPresets.begin() + index);
 	}
+
+	savePresetLists();
 }
 
-void filterForm::loadPreset()
+void filterForm::activatePresetList()
 {
 	QTreeWidgetItem *item = ui->presetsTree->selectedItems().front();
 	ePresetCategory category = (ePresetCategory)item->data(2, Qt::UserRole).toInt();
@@ -647,6 +694,8 @@ void filterForm::loadPreset()
 		ushort pktID = *it;
 		setPktIDFilterState(pktID, eDisplayState::displayed);
 	}
+
+	ui->tabWidget->setCurrentIndex(0); //show the filters
 }
 
 void filterForm::showPresetContextMenu(const QPoint& pos)
@@ -654,12 +703,22 @@ void filterForm::showPresetContextMenu(const QPoint& pos)
 	QMenu contextMenu(tr("Context menu"), this);
 
 	QAction action1("Load", this);
-	connect(&action1, SIGNAL(triggered()), this, SLOT(loadPreset()));
+	connect(&action1, SIGNAL(triggered()), this, SLOT(activatePresetList()));
 	contextMenu.addAction(&action1);
 
+	//doesnt appear if nested in the if statements?
 	QAction action2("Delete", this);
 	connect(&action2, SIGNAL(triggered()), this, SLOT(deletePreset()));
-	contextMenu.addAction(&action2);
+
+	QTreeWidgetItem *selectedItem = ui->presetsTree->selectedItems().front();
+	if (selectedItem)
+	{
+		ePresetCategory category = (ePresetCategory)selectedItem->data(2, Qt::UserRole).toInt();
+		if (category == ePresetCategory::user)
+		{
+			contextMenu.addAction(&action2);
+		}
+	}
 
 	contextMenu.exec(mapToGlobal(pos));
 }

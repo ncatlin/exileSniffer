@@ -31,7 +31,7 @@ class Ui_rawFilterForm
 public:
     QVBoxLayout *verticalLayout;
     QTabWidget *tabWidget;
-    QWidget *tab;
+    QWidget *filtersTab;
     QVBoxLayout *verticalLayout_4;
     QVBoxLayout *verticalLayout_2;
     QTableWidget *filterTable;
@@ -39,7 +39,7 @@ public:
     QPushButton *includeBtn;
     QPushButton *excludeBtn;
     QPushButton *applyBtn;
-    QWidget *tab_2;
+    QWidget *presetsTab;
     QVBoxLayout *verticalLayout_3;
     QTreeWidget *presetsTree;
     QHBoxLayout *horizontalLayout_2;
@@ -58,13 +58,13 @@ public:
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
         tabWidget = new QTabWidget(rawFilterForm);
         tabWidget->setObjectName(QStringLiteral("tabWidget"));
-        tab = new QWidget();
-        tab->setObjectName(QStringLiteral("tab"));
-        verticalLayout_4 = new QVBoxLayout(tab);
+        filtersTab = new QWidget();
+        filtersTab->setObjectName(QStringLiteral("filtersTab"));
+        verticalLayout_4 = new QVBoxLayout(filtersTab);
         verticalLayout_4->setObjectName(QStringLiteral("verticalLayout_4"));
         verticalLayout_2 = new QVBoxLayout();
         verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
-        filterTable = new QTableWidget(tab);
+        filterTable = new QTableWidget(filtersTab);
         if (filterTable->columnCount() < 5)
             filterTable->setColumnCount(5);
         QTableWidgetItem *__qtablewidgetitem = new QTableWidgetItem();
@@ -95,19 +95,19 @@ public:
 
         horizontalLayout = new QHBoxLayout();
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
-        includeBtn = new QPushButton(tab);
+        includeBtn = new QPushButton(filtersTab);
         includeBtn->setObjectName(QStringLiteral("includeBtn"));
         includeBtn->setMaximumSize(QSize(120, 16777215));
 
         horizontalLayout->addWidget(includeBtn);
 
-        excludeBtn = new QPushButton(tab);
+        excludeBtn = new QPushButton(filtersTab);
         excludeBtn->setObjectName(QStringLiteral("excludeBtn"));
         excludeBtn->setMaximumSize(QSize(120, 16777215));
 
         horizontalLayout->addWidget(excludeBtn);
 
-        applyBtn = new QPushButton(tab);
+        applyBtn = new QPushButton(filtersTab);
         applyBtn->setObjectName(QStringLiteral("applyBtn"));
         applyBtn->setMaximumSize(QSize(120, 16777215));
 
@@ -116,12 +116,12 @@ public:
 
         verticalLayout_4->addLayout(horizontalLayout);
 
-        tabWidget->addTab(tab, QString());
-        tab_2 = new QWidget();
-        tab_2->setObjectName(QStringLiteral("tab_2"));
-        verticalLayout_3 = new QVBoxLayout(tab_2);
+        tabWidget->addTab(filtersTab, QString());
+        presetsTab = new QWidget();
+        presetsTab->setObjectName(QStringLiteral("presetsTab"));
+        verticalLayout_3 = new QVBoxLayout(presetsTab);
         verticalLayout_3->setObjectName(QStringLiteral("verticalLayout_3"));
-        presetsTree = new QTreeWidget(tab_2);
+        presetsTree = new QTreeWidget(presetsTab);
         new QTreeWidgetItem(presetsTree);
         presetsTree->setObjectName(QStringLiteral("presetsTree"));
         presetsTree->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -130,17 +130,17 @@ public:
 
         horizontalLayout_2 = new QHBoxLayout();
         horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
-        label = new QLabel(tab_2);
+        label = new QLabel(presetsTab);
         label->setObjectName(QStringLiteral("label"));
 
         horizontalLayout_2->addWidget(label);
 
-        saveName = new QLineEdit(tab_2);
+        saveName = new QLineEdit(presetsTab);
         saveName->setObjectName(QStringLiteral("saveName"));
 
         horizontalLayout_2->addWidget(saveName);
 
-        saveBtn = new QPushButton(tab_2);
+        saveBtn = new QPushButton(presetsTab);
         saveBtn->setObjectName(QStringLiteral("saveBtn"));
 
         horizontalLayout_2->addWidget(saveBtn);
@@ -148,7 +148,7 @@ public:
 
         verticalLayout_3->addLayout(horizontalLayout_2);
 
-        tabWidget->addTab(tab_2, QString());
+        tabWidget->addTab(presetsTab, QString());
 
         verticalLayout->addWidget(tabWidget);
 
@@ -160,11 +160,11 @@ public:
         QObject::connect(presetsTree, SIGNAL(customContextMenuRequested(QPoint)), rawFilterForm, SLOT(showPresetContextMenu(QPoint)));
         QObject::connect(saveBtn, SIGNAL(clicked()), rawFilterForm, SLOT(saveCustom()));
         QObject::connect(saveName, SIGNAL(returnPressed()), rawFilterForm, SLOT(saveCustom()));
-        QObject::connect(presetsTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)), rawFilterForm, SLOT(loadPreset()));
-        QObject::connect(presetsTree, SIGNAL(itemActivated(QTreeWidgetItem*,int)), rawFilterForm, SLOT(loadPreset()));
+        QObject::connect(presetsTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)), rawFilterForm, SLOT(activatePresetList()));
+        QObject::connect(presetsTree, SIGNAL(itemActivated(QTreeWidgetItem*,int)), rawFilterForm, SLOT(activatePresetList()));
         QObject::connect(filterTable, SIGNAL(cellActivated(int,int)), rawFilterForm, SLOT(toggleSelectedFilter()));
 
-        tabWidget->setCurrentIndex(0);
+        tabWidget->setCurrentIndex(1);
 
 
         QMetaObject::connectSlotsByName(rawFilterForm);
@@ -183,10 +183,22 @@ public:
         ___qtablewidgetitem3->setText(QApplication::translate("rawFilterForm", "Session Count", Q_NULLPTR));
         QTableWidgetItem *___qtablewidgetitem4 = filterTable->horizontalHeaderItem(4);
         ___qtablewidgetitem4->setText(QApplication::translate("rawFilterForm", "Filter", Q_NULLPTR));
+#ifndef QT_NO_TOOLTIP
+        filterTable->setToolTip(QApplication::translate("rawFilterForm", "These apply to newly received packets. Press 'Refresh Decoded List' to apply them to past packets", Q_NULLPTR));
+#endif // QT_NO_TOOLTIP
+#ifndef QT_NO_STATUSTIP
+        filterTable->setStatusTip(QApplication::translate("rawFilterForm", "These apply to newly received packets. Press 'Refresh Decoded List' to apply them to past packets", Q_NULLPTR));
+#endif // QT_NO_STATUSTIP
         includeBtn->setText(QApplication::translate("rawFilterForm", "Include Selected", Q_NULLPTR));
         excludeBtn->setText(QApplication::translate("rawFilterForm", "Exclude Selected", Q_NULLPTR));
-        applyBtn->setText(QApplication::translate("rawFilterForm", "Apply Filters", Q_NULLPTR));
-        tabWidget->setTabText(tabWidget->indexOf(tab), QApplication::translate("rawFilterForm", "Filters", Q_NULLPTR));
+#ifndef QT_NO_TOOLTIP
+        applyBtn->setToolTip(QApplication::translate("rawFilterForm", "Filter past entries in the decoded packet list based on the current filters", Q_NULLPTR));
+#endif // QT_NO_TOOLTIP
+#ifndef QT_NO_STATUSTIP
+        applyBtn->setStatusTip(QApplication::translate("rawFilterForm", "Filters past entries in the decoded packet list based on the current filters", Q_NULLPTR));
+#endif // QT_NO_STATUSTIP
+        applyBtn->setText(QApplication::translate("rawFilterForm", "Refresh Decoded List", Q_NULLPTR));
+        tabWidget->setTabText(tabWidget->indexOf(filtersTab), QApplication::translate("rawFilterForm", "Filters", Q_NULLPTR));
         QTreeWidgetItem *___qtreewidgetitem = presetsTree->headerItem();
         ___qtreewidgetitem->setText(1, QApplication::translate("rawFilterForm", "Summary", Q_NULLPTR));
         ___qtreewidgetitem->setText(0, QApplication::translate("rawFilterForm", "Category", Q_NULLPTR));
@@ -200,7 +212,7 @@ public:
         label->setText(QApplication::translate("rawFilterForm", "Save custom preset:", Q_NULLPTR));
         saveName->setText(QApplication::translate("rawFilterForm", "presetName", Q_NULLPTR));
         saveBtn->setText(QApplication::translate("rawFilterForm", "Save", Q_NULLPTR));
-        tabWidget->setTabText(tabWidget->indexOf(tab_2), QApplication::translate("rawFilterForm", "Presets", Q_NULLPTR));
+        tabWidget->setTabText(tabWidget->indexOf(presetsTab), QApplication::translate("rawFilterForm", "Presets", Q_NULLPTR));
     } // retranslateUi
 
 };

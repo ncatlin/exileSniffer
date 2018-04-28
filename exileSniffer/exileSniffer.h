@@ -37,8 +37,6 @@ class UI_DECODED_LIST_ENTRY
 			msTime = pktobj.time_processed_ms();
 			pktID = pktobj.messageID;
 			flags = pktobj.streamFlags;
-			if ((flags & PKTBIT_INBOUND) && (flags & PKTBIT_OUTBOUND))
-				std::cout << "errrrrrrr" << std::endl;
 			failedDecode = pktobj.decodeError();
 			originalbuf = pktobj.originalbuf;
 			bufferOffsets = pktobj.bufferOffsets;
@@ -81,7 +79,7 @@ class exileSniffer : public QMainWindow
 	private slots:
 		void read_UI_Q();
 
-		void showRawFiltersDLG() { filterFormObj.show(); }
+		void showRawFiltersDLG() { filterFormObj.isVisible() ? filterFormObj.hide() : filterFormObj.show(); }
 		void refreshFilters();
 
 		void rawBytesRowChanged(QString arg);
@@ -258,9 +256,7 @@ class exileSniffer : public QMainWindow
 		std::pair <unsigned long, unsigned long> rawCount_Recorded_Filtered;
 		std::pair <int, int> decodedCount_Displayed_Filtered;	 //table row index is int
 		int decodedErrorPacketCount = 0;
-
-		//RAW_FILTERS rawPacketFilters;
-
+		
 		SafeQueue<UI_MESSAGE> uiMsgQueue; //read by ui thread, written by all others
 		map<DWORD, clientData *> clients;
 
@@ -274,7 +270,7 @@ private:
 	gameDataStore ggpk;
 	
 private:
-	packet_capture_thread * packetSniffer;
-	key_grabber_thread *keyGrabber;
-	packet_processor *packetProcessor;
+	packet_capture_thread* packetSniffer;
+	key_grabber_thread* keyGrabber;
+	packet_processor* packetProcessor;
 };

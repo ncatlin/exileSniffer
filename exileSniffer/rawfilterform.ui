@@ -25,11 +25,23 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="filtersTab">
       <attribute name="title">
        <string>Filters</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="font">
+          <font>
+           <italic>true</italic>
+          </font>
+         </property>
+         <property name="text">
+          <string>Hint: You can save a custom filter list on the preset tab</string>
+         </property>
+        </widget>
+       </item>
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
@@ -147,7 +159,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_2">
+     <widget class="QWidget" name="presetsTab">
       <attribute name="title">
        <string>Presets</string>
       </attribute>
@@ -307,7 +319,7 @@
    <sender>presetsTree</sender>
    <signal>itemDoubleClicked(QTreeWidgetItem*,int)</signal>
    <receiver>rawFilterForm</receiver>
-   <slot>loadPreset()</slot>
+   <slot>activatePresetList()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>291</x>
@@ -323,7 +335,7 @@
    <sender>presetsTree</sender>
    <signal>itemActivated(QTreeWidgetItem*,int)</signal>
    <receiver>rawFilterForm</receiver>
-   <slot>loadPreset()</slot>
+   <slot>activatePresetList()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>291</x>
@@ -359,7 +371,7 @@
   <slot>applyBtnPress()</slot>
   <slot>showPresetContextMenu(QPoint)</slot>
   <slot>saveCustom()</slot>
-  <slot>loadPreset()</slot>
+  <slot>activatePresetList()</slot>
   <slot>deletePreset()</slot>
   <slot>toggleSelectedFilter()</slot>
  </slots>

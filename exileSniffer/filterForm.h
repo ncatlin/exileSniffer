@@ -40,10 +40,12 @@ public Q_SLOTS:
 	void excludeSelectedFilters();
 	void saveCustom();
 	void showPresetContextMenu(const QPoint& pos);
-	void loadPreset();
+	void activatePresetList();
 	void deletePreset();
 	void buildBuiltinPresets();
-	void toggleSelectedFilter();
+	void toggleSelectedFilter(); 
+	void addPresetListToTree(PRESET_LIST& newList);
+	void savePresetLists();
 
 private:
 
@@ -52,6 +54,7 @@ private:
 	void setRowColor(int tablerow, QColor colour); 
 	void setFilterRowState(int row, eDisplayState newState);
 	void setPktIDFilterState(ushort pktID, eDisplayState newState);
+	PRESET_LIST load_saved_preset(QString groupname);
 
 	Ui::rawFilterForm *ui = NULL;
 
@@ -60,6 +63,8 @@ private:
 
 	std::vector<PRESET_LIST> builtinPresets;
 	std::vector<PRESET_LIST> customPresets;
+
+	QSettings *savedPresetLists = NULL;
 };
 
 class numericSortTableWidgetItem : public QTableWidgetItem {
