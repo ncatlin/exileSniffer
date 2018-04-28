@@ -230,7 +230,7 @@
              <property name="handleWidth">
               <number>2</number>
              </property>
-             <widget class="QTableWidget" name="decodedList">
+             <widget class="QTableWidget" name="decodedListTable">
               <property name="layoutDirection">
                <enum>Qt::LeftToRight</enum>
               </property>
@@ -646,7 +646,7 @@ p, li { white-space: pre-wrap; }
    </hints>
   </connection>
   <connection>
-   <sender>decodedList</sender>
+   <sender>decodedListTable</sender>
    <signal>clicked(QModelIndex)</signal>
    <receiver>exileSniffer</receiver>
    <slot>decodedListClicked()</slot>
@@ -662,7 +662,7 @@ p, li { white-space: pre-wrap; }
    </hints>
   </connection>
   <connection>
-   <sender>decodedList</sender>
+   <sender>decodedListTable</sender>
    <signal>cellPressed(int,int)</signal>
    <receiver>exileSniffer</receiver>
    <slot>decodedCellActivated(int,int)</slot>

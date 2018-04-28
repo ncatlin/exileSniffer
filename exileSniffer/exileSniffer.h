@@ -77,11 +77,12 @@ class exileSniffer : public QMainWindow
 	public:
 		exileSniffer(QWidget *parent = Q_NULLPTR);
 
+	
 	private slots:
 		void read_UI_Q();
 
-		void showRawFiltersDLG() { rawFilterForm.show(); }
-		void updateFilters();
+		void showRawFiltersDLG() { filterFormObj.show(); }
+		void refreshFilters();
 
 		void rawBytesRowChanged(QString arg);
 		void toggleRawLineWrap(bool state);
@@ -108,15 +109,14 @@ class exileSniffer : public QMainWindow
 		void reprintRawHex();
 		void insertRawText(std::string hexdump, std::string asciidump);
 		void print_raw_packet(UI_RAWHEX_PKT *pkt);
-		bool packet_passes_raw_filter(UI_RAWHEX_PKT *pkt, clientData *client);
-		bool packet_passes_decoded_filter(UIDecodedPkt& decoded, clientData *client);
-		void updateRawFilterLabel();
-		void updateDecodedFilterLabel();
-		void addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPkt *obj);
+		void addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPkt *obj, bool isNewEntry = true);
 		void setRowColor(int row, QColor colour);
 
-		void add_filter_category(unsigned short pktid, QString description, int fromServer);
-
+		bool packet_passes_raw_filter(UI_RAWHEX_PKT *pkt);
+		bool packet_passes_decoded_filter(ushort msgID);
+		void updateRawFilterLabel();
+		void updateDecodedFilterLabel();
+		
 	private:
 
 		void action_SRV_PKT_ENCAPSULATED(UIDecodedPkt&, QString*);
@@ -251,7 +251,7 @@ class exileSniffer : public QMainWindow
 		std::ofstream outfile;
 		Ui::exileSniffer ui;
 		Ui::rawFilterForm rawFiltersFormUI;
-		filterForm rawFilterForm;
+		filterForm filterFormObj;
 
 		unsigned short UIhexPacketsPerRow = 16;
 
@@ -266,6 +266,7 @@ class exileSniffer : public QMainWindow
 
 		typedef void (exileSniffer::*actionFunc)(UIDecodedPkt&, QString*);
 		map<unsigned short, actionFunc> decodedPktActioners;
+		std::vector<std::pair<UI_DECODED_LIST_ENTRY, UIDecodedPkt *>> decodedListEntries;
 
 		const long long startMSSinceEpoch = ms_since_epoch();
 

@@ -356,40 +356,40 @@ void exileSniffer::init_DecodedPktActioners()
 void exileSniffer::setRowColor(int tablerow, QColor colour)
 {
 
-	for (int tablecolumn = 0; tablecolumn < ui.decodedList->columnCount(); tablecolumn++)
+	for (int tablecolumn = 0; tablecolumn < ui.decodedListTable->columnCount(); tablecolumn++)
 	{
-		QTableWidgetItem *item = ui.decodedList->item(tablerow, tablecolumn);
+		QTableWidgetItem *item = ui.decodedListTable->item(tablerow, tablecolumn);
 		if(item)
 			item->setBackgroundColor(colour);
 	}
 }
 
-void exileSniffer::addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPkt *obj)
+void exileSniffer::addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPkt *obj, bool isNewEntry)
 {
-	unsigned int rowIndex = ui.decodedList->rowCount();
-	ui.decodedList->setRowCount(rowIndex + 1);
+	if (isNewEntry)
+		decodedListEntries.push_back(make_pair(entry, obj));
+
+	unsigned int rowIndex = ui.decodedListTable->rowCount();
+	ui.decodedListTable->setRowCount(rowIndex + 1);
 	if(ui.decodedAutoscrollCheck->isChecked())
-		ui.decodedList->scrollToBottom();
+		ui.decodedListTable->scrollToBottom();
 
 	QTableWidgetItem *time = new QTableWidgetItem(entry.floatSeconds(startMSSinceEpoch));
 	time->setData(Qt::UserRole, QVariant::fromValue<UIDecodedPkt *>(obj));
-	ui.decodedList->setItem(rowIndex, DECODED_SECTION_TIME, time);
+	ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_TIME, time);
 
 	QTableWidgetItem *sender = new QTableWidgetItem(entry.sender());
-	ui.decodedList->setItem(rowIndex, DECODED_SECTION_SENDER, sender);
+	ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_SENDER, sender);
 
 	QTableWidgetItem *pktID = new QTableWidgetItem(entry.hexPktID());
-	ui.decodedList->setItem(rowIndex, DECODED_SECTION_MSGID, pktID);
-
-
-
+	ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_MSGID, pktID);
 
 	if (entry.badDecode())
 	{
 		entry.summary = "<!BAD!>" + entry.summary;
 
 		QTableWidgetItem *summary = new QTableWidgetItem(entry.summary);
-		ui.decodedList->setItem(rowIndex, DECODED_SECTION_SUMMARY, summary);
+		ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_SUMMARY, summary);
 
 		setRowColor(rowIndex, QColor(255, 150, 150, 255));
 		return;
@@ -400,7 +400,7 @@ void exileSniffer::addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPk
 		entry.summary = "<!ABAND!>" + entry.summary;
 
 		QTableWidgetItem *summary = new QTableWidgetItem(entry.summary);
-		ui.decodedList->setItem(rowIndex, DECODED_SECTION_SUMMARY, summary);
+		ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_SUMMARY, summary);
 
 		setRowColor(rowIndex, QColor(255, 175, 175, 255));
 
@@ -413,8 +413,7 @@ void exileSniffer::addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPk
 		entry.summary = "<!MultiPkt!>" + entry.summary;
 
 	QTableWidgetItem *summary = new QTableWidgetItem(entry.summary);
-	ui.decodedList->setItem(rowIndex, DECODED_SECTION_SUMMARY, summary);
-
+	ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_SUMMARY, summary);
 
 	byte flags = entry.pktFlags();
 	if (!(flags & PKTBIT_GAMESERVER))
@@ -426,6 +425,8 @@ void exileSniffer::addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPk
 		else
 			setRowColor(rowIndex, QColor(255, 0, 0, 0));
 	}
+
+
 }
 
 void exileSniffer::action_undecoded_packet(UIDecodedPkt& obj)
@@ -454,7 +455,7 @@ void exileSniffer::action_decoded_packet(UIDecodedPkt& decoded)
 		return;
 	}
 
-	if (!packet_passes_decoded_filter(decoded, client))
+	if (!packet_passes_decoded_filter(decoded.messageID))
 	{
 		++decodedCount_Displayed_Filtered.second;
 		updateDecodedFilterLabel();
@@ -1382,6 +1383,7 @@ void exileSniffer::action_SRV_SHOW_NPC_DIALOG(UIDecodedPkt& obj, QString *analys
 
 	analysisStream << "Object ID: (0x" << std::hex << ID1 << ", " << ID2 << ", " << ID3 << ")" << std::endl;
 	analysisStream << "Dialog option: " << std::dec << dialogIdx << std::endl;
+
 	*analysis = QString::fromStdWString(analysisStream.str());
 }
 void exileSniffer::action_CLI_CLOSE_NPC_DIALOG(UIDecodedPkt& obj, QString *analysis)

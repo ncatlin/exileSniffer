@@ -37,6 +37,12 @@
            <property name="contextMenuPolicy">
             <enum>Qt::CustomContextMenu</enum>
            </property>
+           <property name="toolTip">
+            <string>These apply to newly received packets. Press 'Refresh Decoded List' to apply them to past packets</string>
+           </property>
+           <property name="statusTip">
+            <string>These apply to newly received packets. Press 'Refresh Decoded List' to apply them to past packets</string>
+           </property>
            <property name="editTriggers">
             <set>QAbstractItemView::NoEditTriggers</set>
            </property>
@@ -126,8 +132,14 @@
              <height>16777215</height>
             </size>
            </property>
+           <property name="toolTip">
+            <string>Filter past entries in the decoded packet list based on the current filters</string>
+           </property>
+           <property name="statusTip">
+            <string>Filters past entries in the decoded packet list based on the current filters</string>
+           </property>
            <property name="text">
-            <string>Apply Filters</string>
+            <string>Refresh Decoded List</string>
            </property>
           </widget>
          </item>

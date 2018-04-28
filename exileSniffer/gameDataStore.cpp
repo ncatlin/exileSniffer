@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "gameDataStore.h"
-
 #include "MurmurHash2.h"
 
 gameDataStore::~gameDataStore()
@@ -154,7 +153,7 @@ void gameDataStore::fill_gamedata_lists()
 	fopen_s(&pFile, filename.c_str(), "rb");
 	if (!pFile)
 	{
-		std::cerr << "Warning: Could not open " << filename << " for reading. Abandoning Load." << std::endl;
+		std::cerr << "Warning: Could not open " << filename << " for reading as ggpk data. Abandoning Load." << std::endl;
 		return;
 	}
 
@@ -167,7 +166,7 @@ void gameDataStore::fill_gamedata_lists()
 
 	if (!jsondoc.IsObject())
 	{
-		std::cerr << "Warning: Corrupt ggpk_exports file. Abandoning Load." << std::endl;
+		std::cerr << "Warning: Corrupt ggpk_exports file "<< filename<<". Abandoning Load." << std::endl;
 		if (jsondoc.HasParseError())
 		{
 			std::cerr << "\t rapidjson parse error " << jsondoc.GetParseError()
@@ -272,10 +271,10 @@ bool gameDataStore::searchLevelAdjustedMonsters(unsigned long hash, std::string&
 
 /*
 SRV_AREA_INFO monster hashes are the hash of the metadata path with '@[arealevel]' appended
-this hashes all possible monster types with a level the first time we encounter it
+this hashes all possible monster types with a level the first time we load an area of that level
 
 not code to be proud of but it takes about 64ms per list on my test vm and will be 
-called 0-3ish? times on entering an area with a new monsterlevel so... meh
+called 0-3ish times on entering an area with a new monsterlevel so... meh
 */
 void gameDataStore::generateMonsterLevelHashes(unsigned int level)
 {
@@ -283,10 +282,6 @@ void gameDataStore::generateMonsterLevelHashes(unsigned int level)
 	if (level == lastAreaLevel)	return;
 	if (std::find(hashedMonsterLevels.rbegin(), hashedMonsterLevels.rend(), level) != hashedMonsterLevels.rend())
 		return;
-
-	clock_t time_a = clock();
-
-
 
 	for (int index = 0; index < monsterVarieties.size(); index++)
 	{
@@ -299,8 +294,4 @@ void gameDataStore::generateMonsterLevelHashes(unsigned int level)
 
 	lastAreaLevel = level;
 	hashedMonsterLevels.push_back(level);
-
-	clock_t time_b = clock();
-	clock_t total_time_ticks = (time_b - time_a);
-	std::cout << "list genned in " << total_time_ticks << "," << (total_time_ticks / CLOCKS_PER_SEC) << std::endl;
 }

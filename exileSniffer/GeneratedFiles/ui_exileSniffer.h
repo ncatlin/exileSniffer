@@ -64,7 +64,7 @@ public:
     QLabel *decodedDisplayedLabel;
     QPushButton *decodedFiltersBtn;
     QSplitter *splitter;
-    QTableWidget *decodedList;
+    QTableWidget *decodedListTable;
     QPlainTextEdit *decodedText;
     QWidget *rawDecryptTab;
     QVBoxLayout *verticalLayout_2;
@@ -226,31 +226,31 @@ public:
         splitter->setObjectName(QStringLiteral("splitter"));
         splitter->setOrientation(Qt::Vertical);
         splitter->setHandleWidth(2);
-        decodedList = new QTableWidget(splitter);
-        if (decodedList->columnCount() < 4)
-            decodedList->setColumnCount(4);
+        decodedListTable = new QTableWidget(splitter);
+        if (decodedListTable->columnCount() < 4)
+            decodedListTable->setColumnCount(4);
         QTableWidgetItem *__qtablewidgetitem = new QTableWidgetItem();
-        decodedList->setHorizontalHeaderItem(0, __qtablewidgetitem);
+        decodedListTable->setHorizontalHeaderItem(0, __qtablewidgetitem);
         QTableWidgetItem *__qtablewidgetitem1 = new QTableWidgetItem();
-        decodedList->setHorizontalHeaderItem(1, __qtablewidgetitem1);
+        decodedListTable->setHorizontalHeaderItem(1, __qtablewidgetitem1);
         QTableWidgetItem *__qtablewidgetitem2 = new QTableWidgetItem();
-        decodedList->setHorizontalHeaderItem(2, __qtablewidgetitem2);
+        decodedListTable->setHorizontalHeaderItem(2, __qtablewidgetitem2);
         QTableWidgetItem *__qtablewidgetitem3 = new QTableWidgetItem();
-        decodedList->setHorizontalHeaderItem(3, __qtablewidgetitem3);
-        decodedList->setObjectName(QStringLiteral("decodedList"));
-        decodedList->setLayoutDirection(Qt::LeftToRight);
-        decodedList->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-        decodedList->setEditTriggers(QAbstractItemView::NoEditTriggers);
-        decodedList->setProperty("showDropIndicator", QVariant(false));
-        decodedList->setDragEnabled(false);
-        decodedList->setSelectionMode(QAbstractItemView::NoSelection);
-        decodedList->setSelectionBehavior(QAbstractItemView::SelectRows);
-        decodedList->setSortingEnabled(false);
-        splitter->addWidget(decodedList);
-        decodedList->horizontalHeader()->setDefaultSectionSize(60);
-        decodedList->horizontalHeader()->setMinimumSectionSize(43);
-        decodedList->verticalHeader()->setVisible(false);
-        decodedList->verticalHeader()->setHighlightSections(false);
+        decodedListTable->setHorizontalHeaderItem(3, __qtablewidgetitem3);
+        decodedListTable->setObjectName(QStringLiteral("decodedListTable"));
+        decodedListTable->setLayoutDirection(Qt::LeftToRight);
+        decodedListTable->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+        decodedListTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+        decodedListTable->setProperty("showDropIndicator", QVariant(false));
+        decodedListTable->setDragEnabled(false);
+        decodedListTable->setSelectionMode(QAbstractItemView::NoSelection);
+        decodedListTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+        decodedListTable->setSortingEnabled(false);
+        splitter->addWidget(decodedListTable);
+        decodedListTable->horizontalHeader()->setDefaultSectionSize(60);
+        decodedListTable->horizontalHeader()->setMinimumSectionSize(43);
+        decodedListTable->verticalHeader()->setVisible(false);
+        decodedListTable->verticalHeader()->setHighlightSections(false);
         decodedText = new QPlainTextEdit(splitter);
         decodedText->setObjectName(QStringLiteral("decodedText"));
         QFont font2;
@@ -412,8 +412,8 @@ public:
         QObject::connect(bytesRowCombo, SIGNAL(activated(QString)), exileSniffer, SLOT(rawBytesRowChanged(QString)));
         QObject::connect(rawLinewrapCheck, SIGNAL(toggled(bool)), exileSniffer, SLOT(toggleRawLineWrap(bool)));
         QObject::connect(rawAutoScrollCheck, SIGNAL(toggled(bool)), exileSniffer, SLOT(toggleRawAutoScroll(bool)));
-        QObject::connect(decodedList, SIGNAL(clicked(QModelIndex)), exileSniffer, SLOT(decodedListClicked()));
-        QObject::connect(decodedList, SIGNAL(cellPressed(int,int)), exileSniffer, SLOT(decodedCellActivated(int,int)));
+        QObject::connect(decodedListTable, SIGNAL(clicked(QModelIndex)), exileSniffer, SLOT(decodedListClicked()));
+        QObject::connect(decodedListTable, SIGNAL(cellPressed(int,int)), exileSniffer, SLOT(decodedCellActivated(int,int)));
 
         processTabs->setCurrentIndex(1);
 
@@ -432,13 +432,13 @@ public:
         decodedAutoscrollCheck->setText(QApplication::translate("exileSniffer", "Auto Scroll", Q_NULLPTR));
         decodedDisplayedLabel->setText(QApplication::translate("exileSniffer", "Packets ( Displayed: Filtered: )", Q_NULLPTR));
         decodedFiltersBtn->setText(QApplication::translate("exileSniffer", "Filters", Q_NULLPTR));
-        QTableWidgetItem *___qtablewidgetitem = decodedList->horizontalHeaderItem(0);
+        QTableWidgetItem *___qtablewidgetitem = decodedListTable->horizontalHeaderItem(0);
         ___qtablewidgetitem->setText(QApplication::translate("exileSniffer", "Time", Q_NULLPTR));
-        QTableWidgetItem *___qtablewidgetitem1 = decodedList->horizontalHeaderItem(1);
+        QTableWidgetItem *___qtablewidgetitem1 = decodedListTable->horizontalHeaderItem(1);
         ___qtablewidgetitem1->setText(QApplication::translate("exileSniffer", "Sender", Q_NULLPTR));
-        QTableWidgetItem *___qtablewidgetitem2 = decodedList->horizontalHeaderItem(2);
+        QTableWidgetItem *___qtablewidgetitem2 = decodedListTable->horizontalHeaderItem(2);
         ___qtablewidgetitem2->setText(QApplication::translate("exileSniffer", "Msg ID", Q_NULLPTR));
-        QTableWidgetItem *___qtablewidgetitem3 = decodedList->horizontalHeaderItem(3);
+        QTableWidgetItem *___qtablewidgetitem3 = decodedListTable->horizontalHeaderItem(3);
         ___qtablewidgetitem3->setText(QApplication::translate("exileSniffer", "Summary", Q_NULLPTR));
         processTabs->setTabText(processTabs->indexOf(decodeTab), QApplication::translate("exileSniffer", "Decoder", Q_NULLPTR));
         ptHexPane->setHtml(QApplication::translate("exileSniffer", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"

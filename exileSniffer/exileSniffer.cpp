@@ -72,8 +72,8 @@ exileSniffer::exileSniffer(QWidget *parent)
 
 void exileSniffer::setup_raw_stream_tab()
 {
-	rawFiltersFormUI.setupUi(&rawFilterForm);
-	rawFilterForm.setUI(&rawFiltersFormUI);
+	rawFiltersFormUI.setupUi(&filterFormObj);
+	filterFormObj.setUI(&rawFiltersFormUI);
 
 	toggleRawLineWrap(ui.rawLinewrapCheck->isChecked());
 
@@ -84,40 +84,37 @@ void exileSniffer::setup_raw_stream_tab()
 	ui.ptHexPane->verticalScrollBar()->hide();
 }
 
+//full clear and reload of displayed packets
+void exileSniffer::refreshFilters()
+{
+	if (decodedListEntries.empty()) return;
 
+	ui.decodedListTable->clear();
+
+	for (auto it = decodedListEntries.begin(); it != decodedListEntries.end(); it++)
+	{
+		if (packet_passes_decoded_filter(it->second->messageID))
+		{
+			addDecodedListEntry(it->first, it->second, false);
+		}
+	}
+}
 
 void exileSniffer::initFilters()
 {
-	rawFilterForm.populateFiltersList();
-	rawFilterForm.populatePresetsList();
+	filterFormObj.populateFiltersList();
+	filterFormObj.populatePresetsList();
 
-	connect(&rawFilterForm, SIGNAL(applyFilters()), this, SLOT(updateFilters()));
+	connect(&filterFormObj, SIGNAL(applyFilters()), this, SLOT(refreshFilters()));
 }
-
-void exileSniffer::updateFilters()
-{ 
-	QList<ushort> includedMessageIDs;
-
-	for (int msgid = 0; msgid < rawFiltersFormUI.filterTable->rowCount(); msgid++)
-	{
-		QTableWidgetItem *item = rawFiltersFormUI.filterTable->item(msgid, FILTER_SECTION_STATE);
-		if (item->text() != "Excluded") 
-			includedMessageIDs << msgid;
-	}
-
-	std::cout << "Todo: include " << includedMessageIDs.size() << " msg types in decoded list" << std::endl;
-}
-
-
-
 
 void exileSniffer::setup_decoded_messages_tab()
 {
-	ui.decodedList->horizontalScrollBar()->setFixedHeight(10);
-	ui.decodedList->horizontalHeader()->resizeSection(DECODED_SECTION_TIME, 70);
-	ui.decodedList->horizontalHeader()->resizeSection(DECODED_SECTION_SENDER, 50);
-	ui.decodedList->horizontalHeader()->resizeSection(DECODED_SECTION_SUMMARY, 450);
-	ui.decodedList->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
+	ui.decodedListTable->horizontalScrollBar()->setFixedHeight(10);
+	ui.decodedListTable->horizontalHeader()->resizeSection(DECODED_SECTION_TIME, 70);
+	ui.decodedListTable->horizontalHeader()->resizeSection(DECODED_SECTION_SENDER, 50);
+	ui.decodedListTable->horizontalHeader()->resizeSection(DECODED_SECTION_SUMMARY, 450);
+	ui.decodedListTable->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
 }
 
 void exileSniffer::start_threads()
@@ -363,7 +360,7 @@ void exileSniffer::print_raw_packet(UI_RAWHEX_PKT *pkt)
 
 }
 
-bool exileSniffer::packet_passes_raw_filter(UI_RAWHEX_PKT *pkt, clientData *client)
+bool exileSniffer::packet_passes_raw_filter(UI_RAWHEX_PKT *pkt)
 {
 	//todo user specified
 	if (pkt->startBytes == CLI_PING_CHALLENGE || 
@@ -375,9 +372,9 @@ bool exileSniffer::packet_passes_raw_filter(UI_RAWHEX_PKT *pkt, clientData *clie
 	return true;
 }
 
-bool exileSniffer::packet_passes_decoded_filter(UIDecodedPkt& decoded, clientData *client)
+bool exileSniffer::packet_passes_decoded_filter(ushort msgID)
 {
-	return (rawFilterForm.isDisplayed(decoded.messageID));
+	return (filterFormObj.isDisplayed(msgID));
 }
 
 clientData * exileSniffer::get_client(DWORD pid)
@@ -420,7 +417,7 @@ void exileSniffer::handle_raw_packet_data(UI_RAWHEX_PKT *pkt)
 		return;
 	}
 
-	if (packet_passes_raw_filter(pkt, client))
+	if (packet_passes_raw_filter(pkt))
 		print_raw_packet(pkt);
 	else
 		++rawCount_Recorded_Filtered.second;
@@ -460,7 +457,7 @@ void exileSniffer::reprintRawHex()
 	{
 		UI_RAWHEX_PKT *pkt = *pktIt;
 
-		if (packet_passes_raw_filter(pkt, exampleclient))
+		if (packet_passes_raw_filter(pkt))
 			print_raw_packet(pkt);
 		else
 			++rawCount_Recorded_Filtered.second;
@@ -525,7 +522,7 @@ void exileSniffer::decodedCellActivated(int row, int col)
 {
 	ui.decodedText->clear();
 
-	QTableWidgetItem *item = ui.decodedList->item(row, 0);
+	QTableWidgetItem *item = ui.decodedListTable->item(row, 0);
 	UIDecodedPkt* obj = (UIDecodedPkt*)item->data(Qt::UserRole).value<UIDecodedPkt*>();
 
 	if (!obj->decodeError())
