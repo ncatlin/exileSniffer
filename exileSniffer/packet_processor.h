@@ -52,8 +52,10 @@ private:
 	inline void consume_add_byte(std::wstring name, UIDecodedPkt *uipkt) {	uipkt->add_byte(name, consume_Byte());}
 	inline void consume_add_word(std::wstring name, UIDecodedPkt *uipkt) { uipkt->add_word(name, consumeUShort()); }
 	inline void consume_add_dword(std::wstring name, UIDecodedPkt *uipkt) { uipkt->add_dword(name, consume_DWORD()); }
+	inline void consume_add_qword(std::wstring name, UIDecodedPkt *uipkt) { uipkt->add_dword(name, consume_QWORD()); }
 	inline void consume_add_word_ntoh(std::wstring name, UIDecodedPkt *uipkt) { uipkt->add_word(name, ntohs(consumeUShort())); }
 	inline void consume_add_dword_ntoh(std::wstring name, UIDecodedPkt *uipkt) { uipkt->add_dword(name, ntohl(consume_DWORD())); }
+	void consume_add_lenprefix_string(std::wstring name, WValue& container, rapidjson::Document::AllocatorType& allocator);
 
 	void deserialise_SRV_PKT_ENCAPSULATED(UIDecodedPkt *);
 	void deserialise_CLI_CHAT_MSG_ITEMS(UIDecodedPkt *);
@@ -117,6 +119,8 @@ private:
 	void deserialise_SRV_CREATE_ITEM(UIDecodedPkt *);
 	void deserialise_SRV_SLOT_ITEMSLIST(UIDecodedPkt *);
 	void deserialise_UNK_MESSAGE_0x70(UIDecodedPkt *);
+	void deserialise_CLI_UNK_0x71(UIDecodedPkt *);
+	void deserialise_SRV_UNK_0x72(UIDecodedPkt *);
 	void deserialise_UNK_MESSAGE_0x73(UIDecodedPkt *);
 	void deserialise_CLI_SET_STATUS_MESSAGE(UIDecodedPkt *);
 
@@ -125,8 +129,9 @@ private:
 	void deserialise_CLI_SKILLPANE_ACTION(UIDecodedPkt *);
 
 	void deserialise_SRV_SKILLPANE_DATA(UIDecodedPkt *);
-
-	void deserialise_SRV_UNK_0x92(UIDecodedPkt *uipkt);
+	
+	void deserialise_SRV_PVP_MATCHLIST(UIDecodedPkt *uipkt);
+	void deserialise_SRV_EVENTSLIST(UIDecodedPkt *uipkt);
 
 	void deserialise_CLI_MICROTRANSACTION_SHOP_ACTION(UIDecodedPkt *);
 	void deserialise_SRV_MICROTRANSACTION_SHOP_DETAILS(UIDecodedPkt *);
@@ -141,6 +146,7 @@ private:
 	void deserialise_SRV_DUEL_RESPONSE(UIDecodedPkt *);
 	void deserialise_SRV_DUEL_CHALLENGE(UIDecodedPkt *);
 
+	void deserialise_CLI_UNK_0xC6(UIDecodedPkt *);
 	void deserialise_CLI_UNK_0xC7(UIDecodedPkt *);
 
 	void deserialise_SRV_UNK_0xCA(UIDecodedPkt *);
@@ -189,7 +195,9 @@ private:
 
 	UINT8 consume_Byte();
 	UINT16 consumeUShort();
-	UINT32 consume_DWORD();
+	UINT32 consume_DWORD(); 
+	UINT64 consume_QWORD();
+
 	std::wstring consumeWString(size_t bytesLength);
 	void consume_blob(ushort byteCount);
 	void consume_blob(ushort byteCount, vector <byte>& blobBuf);

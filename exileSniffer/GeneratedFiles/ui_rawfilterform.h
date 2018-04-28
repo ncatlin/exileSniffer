@@ -33,6 +33,7 @@ public:
     QTabWidget *tabWidget;
     QWidget *filtersTab;
     QVBoxLayout *verticalLayout_4;
+    QLabel *label_2;
     QVBoxLayout *verticalLayout_2;
     QTableWidget *filterTable;
     QHBoxLayout *horizontalLayout;
@@ -62,6 +63,14 @@ public:
         filtersTab->setObjectName(QStringLiteral("filtersTab"));
         verticalLayout_4 = new QVBoxLayout(filtersTab);
         verticalLayout_4->setObjectName(QStringLiteral("verticalLayout_4"));
+        label_2 = new QLabel(filtersTab);
+        label_2->setObjectName(QStringLiteral("label_2"));
+        QFont font;
+        font.setItalic(true);
+        label_2->setFont(font);
+
+        verticalLayout_4->addWidget(label_2);
+
         verticalLayout_2 = new QVBoxLayout();
         verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
         filterTable = new QTableWidget(filtersTab);
@@ -164,7 +173,7 @@ public:
         QObject::connect(presetsTree, SIGNAL(itemActivated(QTreeWidgetItem*,int)), rawFilterForm, SLOT(activatePresetList()));
         QObject::connect(filterTable, SIGNAL(cellActivated(int,int)), rawFilterForm, SLOT(toggleSelectedFilter()));
 
-        tabWidget->setCurrentIndex(1);
+        tabWidget->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(rawFilterForm);
@@ -173,6 +182,7 @@ public:
     void retranslateUi(QWidget *rawFilterForm)
     {
         rawFilterForm->setWindowTitle(QApplication::translate("rawFilterForm", "Manage Message Filters", Q_NULLPTR));
+        label_2->setText(QApplication::translate("rawFilterForm", "Hint: You can save a custom filter list on the preset tab", Q_NULLPTR));
         QTableWidgetItem *___qtablewidgetitem = filterTable->horizontalHeaderItem(0);
         ___qtablewidgetitem->setText(QApplication::translate("rawFilterForm", "ID", Q_NULLPTR));
         QTableWidgetItem *___qtablewidgetitem1 = filterTable->horizontalHeaderItem(1);

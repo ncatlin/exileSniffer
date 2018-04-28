@@ -151,8 +151,8 @@ void exileSniffer::init_DecodedPktActioners()
 	decodedPktActioners[SRV_SLOT_ITEMSLIST] = &exileSniffer::action_SRV_SLOT_ITEMSLIST;
 	//6f
 	decodedPktActioners[UNK_MESSAGE_0x70] = &exileSniffer::action_UNK_MESSAGE_0x70;
-	//71
-	//72
+	decodedPktActioners[CLI_UNK_0x71] = &exileSniffer::action_CLI_UNK_0x71;
+	decodedPktActioners[SRV_UNK_0x72] = &exileSniffer::action_SRV_UNK_0x72;
 	decodedPktActioners[UNK_MESSAGE_0x73] = &exileSniffer::action_UNK_MESSAGE_0x73;
 	decodedPktActioners[CLI_SET_STATUS_MESSAGE] = &exileSniffer::action_CLI_SET_STATUS_MESSAGE;
 	//75
@@ -183,8 +183,8 @@ void exileSniffer::init_DecodedPktActioners()
 	//8e
 	//define 0x8f seen when leaving duel queue
 	//define 0x90 seen when leaving duel queue
-	//91
-	decodedPktActioners[SRV_UNK_0x92] = &exileSniffer::action_SRV_UNK_0x92;
+	decodedPktActioners[SRV_PVP_MATCHLIST] = &exileSniffer::action_SRV_PVP_MATCHLIST;
+	decodedPktActioners[SRV_EVENTSLIST] = &exileSniffer::action_SRV_EVENTSLIST;
 	//93
 	//94
 	//95
@@ -235,7 +235,7 @@ void exileSniffer::init_DecodedPktActioners()
 	decodedPktActioners[SRV_DUEL_RESPONSE] = &exileSniffer::action_SRV_DUEL_RESPONSE;
 	decodedPktActioners[SRV_DUEL_CHALLENGE] = &exileSniffer::action_SRV_DUEL_CHALLENGE;
 	//c5
-	//c6
+	decodedPktActioners[CLI_UNK_0xC6] = &exileSniffer::action_CLI_UNK_0xC6; 
 	decodedPktActioners[CLI_UNK_0xC7] = &exileSniffer::action_CLI_UNK_0xC7;
 	//c8
 	//c9
@@ -1719,11 +1719,49 @@ void exileSniffer::action_UNK_MESSAGE_0x70(UIDecodedPkt& obj, QString *analysis)
 	}
 }
 
+void exileSniffer::action_CLI_UNK_0x71(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+
+	UINT32 unk1 = obj.get_UInt32(L"Unk1");
+	UINT32 unk2 = obj.get_UInt32(L"Unk2");
+	UINT32 unk3 = obj.get_UInt32(L"Unk3");
+
+	if (!analysis)
+	{
+		wstringstream summary;
+		summary << "Unk client msg 0x71. Data: 0x" << std::hex << unk1 << ", 0x"<<unk2<<", 0x"<<unk3;
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
+void exileSniffer::action_SRV_UNK_0x72(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+
+	UINT32 unk1 = obj.get_UInt32(L"Unk1");
+	UINT32 unk2 = obj.get_UInt32(L"Unk2");
+	UINT32 unk3 = obj.get_UInt32(L"Unk3");
+
+	if (!analysis)
+	{
+		wstringstream summary;
+		summary << "Unk server msg 0x72. Data: 0x" << std::hex << unk1 << ", 0x" << unk2 << ", 0x" << unk3;
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
 void exileSniffer::action_UNK_MESSAGE_0x73(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
-	DWORD data1 = obj.get_UInt32(L"Data1");
+	UINT32 data1 = obj.get_UInt32(L"Data1");
 	std::wstring string1 = obj.get_wstring(L"String1");
 	std::wstring string2 = obj.get_wstring(L"String2");
 
@@ -1770,23 +1808,77 @@ void exileSniffer::action_CLI_SWAPPED_WEAPONS(UIDecodedPkt& obj, QString *analys
 	}
 }
 
-void exileSniffer::action_SRV_UNK_0x92(UIDecodedPkt& obj, QString *analysis)
+QString exileSniffer::stringify_eventslist(WValue &eventlist)
+{
+	wstringstream analysisStream;
+
+	for (auto evIt = eventlist.Begin(); evIt != eventlist.End(); evIt++)
+	{
+		analysisStream << "Name: " << evIt->FindMember(L"StringRef")->value.GetString() << std::endl;
+		analysisStream << "\tDescription: " << evIt->FindMember(L"Description")->value.GetString() << std::endl;
+		analysisStream << "\tMode1: " << evIt->FindMember(L"Mode1")->value.GetString() << std::endl;
+		analysisStream << "\tMode2: " << evIt->FindMember(L"Mode2")->value.GetString() << std::endl;
+		analysisStream << "\tUnk1: 0x" << std::hex << evIt->FindMember(L"Unk1")->value.GetUint() << std::endl;
+
+		unsigned short minlevel = evIt->FindMember(L"MinLevel")->value.GetUint();
+		if(minlevel)
+			analysisStream << "\tMinLevel: " << std::dec << minlevel << std::endl;
+		else
+			analysisStream << "\tMinLevel: " << "-" << std::endl;
+
+		unsigned short maxlevel = evIt->FindMember(L"MaxLevel")->value.GetUint();
+		if (maxlevel)
+			analysisStream << "\tMaxLevel: " << std::dec << maxlevel << std::endl;
+		else
+			analysisStream << "\tMaxLevel: " << "-" << std::endl;
+
+		analysisStream << "\tUnk2: 0x" << std::hex << evIt->FindMember(L"Unk2")->value.GetUint() << std::endl;
+		analysisStream << "\tUnk3_64 (Time?): 0x" << evIt->FindMember(L"Unk3_64")->value.GetUint64() << std::endl;
+		analysisStream << "\tUnk4_64 (Time?): 0x" << evIt->FindMember(L"Unk4_64")->value.GetUint64() << std::endl;
+		analysisStream << "\tUnk5_64 (Time?): 0x" << evIt->FindMember(L"Unk5_64")->value.GetUint64() << std::endl;
+		analysisStream << "\tUnk6: 0x" << evIt->FindMember(L"Unk6")->value.GetUint() << std::endl;
+		analysisStream << "\tUnk7: 0x" << evIt->FindMember(L"Unk7")->value.GetUint() << std::endl;
+		analysisStream << std::endl;
+	}
+	analysisStream << std::endl;
+
+	return QString::fromStdWString(analysisStream.str());
+}
+
+void exileSniffer::action_SRV_PVP_MATCHLIST(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
-	ushort count = obj.get_UInt32(L"Count");
+	WValue &eventlist = obj.payload.FindMember(L"EventList")->value;
+	size_t listSize = eventlist.Size();
+
 	if (!analysis)
 	{
 		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Srv pkt 0x92.  ";
-		if (count > 0)
-			listentry.summary += "[HAS COUNT! USE ME]";
-		else
-			listentry.summary += " Empty.";
-
+		listentry.summary = "List of "+ QString::number(listSize)+" available PVP match types";
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
+
+	*analysis = stringify_eventslist(eventlist);
+}
+
+void exileSniffer::action_SRV_EVENTSLIST(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+
+	WValue &eventlist = obj.payload.FindMember(L"EventList")->value;
+	size_t listSize = eventlist.Size();
+
+	if (!analysis)
+	{
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = "List of " + QString::number(listSize) + " available events to join";
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+
+	*analysis = stringify_eventslist(eventlist);
 }
 
 
@@ -1852,6 +1944,20 @@ void exileSniffer::action_SRV_UNK_A3(UIDecodedPkt& obj, QString *analysis)
 	}
 }
 
+//sent when clicking join pvp
+void exileSniffer::action_CLI_UNK_0xC6(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+	if (!analysis)
+	{
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = "Client sent dataless message ID 0xC6";
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
+//sent when clicking join pvp
 void exileSniffer::action_CLI_UNK_0xC7(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);

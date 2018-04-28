@@ -117,8 +117,8 @@ void packet_processor::init_packetDeserialisers()
 	packetDeserialisers[SRV_SLOT_ITEMSLIST] = (deserialiser)&packet_processor::deserialise_SRV_SLOT_ITEMSLIST;
 	//6f
 	packetDeserialisers[UNK_MESSAGE_0x70] = (deserialiser)&packet_processor::deserialise_UNK_MESSAGE_0x70;
-	//71
-	//72
+	packetDeserialisers[CLI_UNK_0x71] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0x71;
+	packetDeserialisers[SRV_UNK_0x72] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x72;
 	packetDeserialisers[UNK_MESSAGE_0x73] = (deserialiser)&packet_processor::deserialise_UNK_MESSAGE_0x73;
 	packetDeserialisers[CLI_SET_STATUS_MESSAGE] = (deserialiser)&packet_processor::deserialise_CLI_SET_STATUS_MESSAGE;
 	//75
@@ -149,8 +149,8 @@ void packet_processor::init_packetDeserialisers()
 	//8e
 	//define 0x8f seen when leaving duel queue
 	//define 0x90 seen when leaving duel queue
-	//91
-	packetDeserialisers[SRV_UNK_0x92] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x92;
+	packetDeserialisers[SRV_PVP_MATCHLIST] = (deserialiser)&packet_processor::deserialise_SRV_PVP_MATCHLIST;
+	packetDeserialisers[SRV_EVENTSLIST] = (deserialiser)&packet_processor::deserialise_SRV_EVENTSLIST;
 	//93
 	//94
 	//95
@@ -201,7 +201,7 @@ void packet_processor::init_packetDeserialisers()
 	packetDeserialisers[SRV_DUEL_RESPONSE] = (deserialiser)&packet_processor::deserialise_SRV_DUEL_RESPONSE;
 	packetDeserialisers[SRV_DUEL_CHALLENGE] = (deserialiser)&packet_processor::deserialise_SRV_DUEL_CHALLENGE;
 	//c5
-	//c6
+	packetDeserialisers[CLI_UNK_0xC6] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0xC6;
 	packetDeserialisers[CLI_UNK_0xC7] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0xC7;
 	//c8
 	//c9
@@ -1202,13 +1202,13 @@ void packet_processor::deserialise_SRV_PUBLIC_PARTY_LIST(UIDecodedPkt *uipkt)
 
 	WValue partyArray(rapidjson::kArrayType);
 
-	ushort listingCount = consumeUShort();
+	ushort listingCount = ntohs(consumeUShort());
 	for (int i = 0; i < listingCount; i++)
 	{
 		WValue partyDetails(rapidjson::kObjectType);
 		partyDetails.AddMember(L"ID", (UINT32)consume_DWORD(), allocator);
 
-		ushort stringlen = consumeUShort();
+		ushort stringlen = ntohs(consumeUShort());
 		wstring name = consumeWString(stringlen * 2);
 		WValue nameStringVal(name.c_str(), allocator);
 		partyDetails.AddMember(L"Description", nameStringVal, allocator);
@@ -1309,6 +1309,21 @@ void packet_processor::deserialise_UNK_MESSAGE_0x70(UIDecodedPkt *uipkt)
 	consume_add_dword_ntoh(L"Arg", uipkt);
 }
 
+void packet_processor::deserialise_CLI_UNK_0x71(UIDecodedPkt *uipkt)
+{
+	consume_add_byte(L"Unk1", uipkt);
+	consume_add_byte(L"Unk2", uipkt);
+	consume_add_byte(L"Unk3", uipkt);
+}
+
+
+void packet_processor::deserialise_SRV_UNK_0x72(UIDecodedPkt *uipkt)
+{
+	consume_add_word_ntoh(L"Unk1", uipkt);
+	consume_add_dword_ntoh(L"Unk2", uipkt);
+	consume_add_byte(L"Unk3", uipkt);
+}
+
 void packet_processor::deserialise_UNK_MESSAGE_0x73(UIDecodedPkt *uipkt)
 {
 	consume_add_dword_ntoh(L"Data1", uipkt); //todo - this is not fixed at 4, its just what ive seen it as
@@ -1342,14 +1357,46 @@ void packet_processor::deserialise_SRV_SKILLPANE_DATA(UIDecodedPkt *uipkt)
 	abandon_processing(); //todo
 }
 
-void packet_processor::deserialise_SRV_UNK_0x92(UIDecodedPkt *uipkt)
+
+void packet_processor::deserialise_SRV_PVP_MATCHLIST(UIDecodedPkt *uipkt)
 {
-	//gets a short count
-	ushort count = consumeUShort();
+	deserialise_SRV_EVENTSLIST(uipkt);
+}
+
+
+void packet_processor::deserialise_SRV_EVENTSLIST(UIDecodedPkt *uipkt)
+{
+	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+
+	ushort count = ntohs(consumeUShort());
 	uipkt->add_word(L"Count", count);
-	//loop -> 4 strings, other stuff. easier to wait for a sample with >0 count
-	if (count > 0)
-		abandon_processing();
+
+	WValue eventArray(rapidjson::kArrayType);
+	for (int i = 0; i < count; i++)
+	{
+		WValue eventObj(rapidjson::kObjectType);
+
+		
+		consume_add_lenprefix_string(L"StringRef", eventObj, allocator);
+		consume_add_lenprefix_string(L"Description", eventObj, allocator);
+		consume_add_lenprefix_string(L"Mode1", eventObj, allocator);
+		consume_add_lenprefix_string(L"Mode2", eventObj, allocator);
+
+		eventObj.AddMember(L"Unk1", consume_DWORD(), allocator);
+		eventObj.AddMember(L"MinLevel", ntohs(consumeUShort()), allocator);
+		eventObj.AddMember(L"MaxLevel", ntohs(consumeUShort()), allocator);
+		eventObj.AddMember(L"Unk2", consume_Byte(), allocator);
+
+		eventObj.AddMember(L"Unk3_64", consume_QWORD(), allocator);
+		eventObj.AddMember(L"Unk4_64", consume_QWORD(), allocator);
+		eventObj.AddMember(L"Unk5_64", consume_QWORD(), allocator);
+		eventObj.AddMember(L"Unk6", consumeUShort(), allocator);
+		eventObj.AddMember(L"Unk7", consumeUShort(), allocator);
+
+		eventArray.PushBack(eventObj, allocator);
+	}
+
+	uipkt->payload.AddMember(L"EventList", eventArray, allocator);
 }
 
 
@@ -1394,6 +1441,11 @@ void packet_processor::deserialise_SRV_DUEL_CHALLENGE(UIDecodedPkt *)
 {
 
 	abandon_processing();//todo
+}
+
+void packet_processor::deserialise_CLI_UNK_0xC6(UIDecodedPkt *uipkt)
+{
+	//no data
 }
 
 void packet_processor::deserialise_CLI_UNK_0xC7(UIDecodedPkt *uipkt)

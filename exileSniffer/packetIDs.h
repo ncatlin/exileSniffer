@@ -121,8 +121,8 @@ S->C UnkPkID: 0xef size: 23 bytes
 #define SRV_SLOT_ITEMSLIST (SRV_CREATE_ITEM+1)
 //6f
 #define UNK_MESSAGE_0x70 0x70
-//71
-//72
+#define CLI_UNK_0x71 0x71
+#define SRV_UNK_0x72 0x72
 #define UNK_MESSAGE_0x73 0x73
 #define CLI_SET_STATUS_MESSAGE 0x74
 //75
@@ -153,8 +153,8 @@ S->C UnkPkID: 0xef size: 23 bytes
 //8e
 //define 0x8f seen when leaving duel queue
 //define 0x90 seen when leaving duel queue
-//91
-#define SRV_UNK_0x92 0x92
+#define SRV_PVP_MATCHLIST 0x91
+#define SRV_EVENTSLIST 0x92
 //93
 //94
 //95
@@ -205,7 +205,7 @@ S->C UnkPkID: 0xef size: 23 bytes
 #define SRV_DUEL_RESPONSE 0xc3
 #define SRV_DUEL_CHALLENGE 0xc4 //namestring, byte. unimplemented
 //c5
-//c6
+#define CLI_UNK_0xC6 0xc6 //both sent after clickign join pvp
 #define CLI_UNK_0xC7 0xc7
 //c8
 //c9
@@ -280,7 +280,7 @@ S->C UnkPkID: 0xef size: 23 bytes
 #define SRV_NOTIFY_PLAYERID 0x10f
 //0x110 - player pressed add new stash tab +?
 #define SRV_UNKNOWN_0x111 0x111
-//112
+#define CLI_NEW_STASHTAB 0x112
 //113
 //114
 //115

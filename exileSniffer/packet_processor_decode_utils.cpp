@@ -158,6 +158,22 @@ UINT32 packet_processor::consume_DWORD()
 	return result;
 }
 
+UINT64 packet_processor::consume_QWORD()
+{
+	if (errorFlag != eDecodingErr::eNoErr) return 0;
+
+	while (remainingDecrypted < 8)
+	{
+		if (errorFlag != eDecodingErr::eNoErr) return 0;
+		continue_gamebuffer_next_packet();
+	}
+
+	UINT64 result = getUlonglong(&decryptedBuffer->at(decryptedIndex));
+	decryptedIndex += 8;
+	remainingDecrypted -= 8;
+	return result;
+}
+
 void packet_processor::consume_blob(ushort byteCount)
 {
 	if (errorFlag != eDecodingErr::eNoErr) return;
@@ -198,6 +214,19 @@ void packet_processor::consume_blob(ushort byteCount, vector <byte>& blobBuf)
 	decryptedIndex += byteCount;
 	remainingDecrypted -= byteCount;
 }
+
+
+void packet_processor::consume_add_lenprefix_string(std::wstring name, WValue& container, rapidjson::Document::AllocatorType& allocator)
+{
+	WValue nameItem(name.c_str(), allocator);
+
+	ushort stringlen = ntohs(consumeUShort());
+	std::wstring stringval = consumeWString(stringlen * 2);
+	WValue stringItem(stringval.c_str(), allocator);
+
+	container.AddMember(nameItem, stringItem, allocator);
+}
+
 
 void packet_processor::rewind_buffer(size_t countBytes)
 {

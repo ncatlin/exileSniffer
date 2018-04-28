@@ -14,14 +14,19 @@ std::string timestamp()
 	return std::string(tstamp);
 }
 
-unsigned int getUlong(void *ptr)
+UINT64 getUlonglong(void *ptr)
 {
-	return *(DWORD*)(ptr);
+	return *(UINT64*)(ptr);
 }
 
-unsigned int getUshort(void *ptr)
+UINT32 getUlong(void *ptr)
 {
-	return *(unsigned short*)(ptr);
+	return *(UINT32*)(ptr);
+}
+
+UINT16 getUshort(void *ptr)
+{
+	return *(UINT16*)(ptr);
 }
 
 std::wstring mb_to_utf8(std::string utf16_string)

@@ -79,7 +79,7 @@ class exileSniffer : public QMainWindow
 	private slots:
 		void read_UI_Q();
 
-		void showRawFiltersDLG() { filterFormObj.isVisible() ? filterFormObj.hide() : filterFormObj.show(); }
+		void showRawFiltersDLG() { filterFormObj.isHidden() ? filterFormObj.show() : filterFormObj.hide(); }
 		void refreshFilters();
 
 		void rawBytesRowChanged(QString arg);
@@ -114,6 +114,8 @@ class exileSniffer : public QMainWindow
 		bool packet_passes_decoded_filter(ushort msgID);
 		void updateRawFilterLabel();
 		void updateDecodedFilterLabel();
+
+		QString stringify_eventslist(WValue &eventlist);
 		
 	private:
 
@@ -180,12 +182,15 @@ class exileSniffer : public QMainWindow
 		void action_SRV_CREATE_ITEM(UIDecodedPkt&, QString*);
 		void action_SRV_SLOT_ITEMSLIST(UIDecodedPkt&, QString*);
 		void action_UNK_MESSAGE_0x70(UIDecodedPkt&, QString*);
+		void action_CLI_UNK_0x71(UIDecodedPkt&, QString*);
+		void action_SRV_UNK_0x72(UIDecodedPkt&, QString*);
 		void action_UNK_MESSAGE_0x73(UIDecodedPkt&, QString*);
 		void action_CLI_SET_STATUS_MESSAGE(UIDecodedPkt&, QString*);
 
 		void action_CLI_SWAPPED_WEAPONS(UIDecodedPkt&, QString*);
 
-		void action_SRV_UNK_0x92(UIDecodedPkt&, QString*);
+		void action_SRV_PVP_MATCHLIST(UIDecodedPkt&, QString*);
+		void action_SRV_EVENTSLIST(UIDecodedPkt&, QString*);
 
 		void action_CLI_SKILLPANE_ACTION(UIDecodedPkt&, QString*);
 
@@ -205,7 +210,7 @@ class exileSniffer : public QMainWindow
 		void action_CLI_DUEL_CHALLENGE(UIDecodedPkt&, QString*);
 		void action_SRV_DUEL_RESPONSE(UIDecodedPkt&, QString*);
 		void action_SRV_DUEL_CHALLENGE(UIDecodedPkt&, QString*);
-
+		void action_CLI_UNK_0xC6(UIDecodedPkt&, QString*);
 		void action_CLI_UNK_0xC7(UIDecodedPkt&, QString*);
 
 		void action_SRV_UNK_0xCA(UIDecodedPkt&, QString*);

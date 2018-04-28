@@ -207,8 +207,8 @@ void filterForm::populateFiltersList()
 	//8e
 	//define 0x8f seen when leaving duel queue
 	//define 0x90 seen when leaving duel queue
-	//91
-	add_filter_category(SRV_UNK_0x92, "Unknown", ePktDirection::incoming);
+	add_filter_category(SRV_PVP_MATCHLIST, "PVP Match list", ePktDirection::incoming);
+	add_filter_category(SRV_EVENTSLIST, "Events List", ePktDirection::incoming);
 	//93
 	//94
 	//95
