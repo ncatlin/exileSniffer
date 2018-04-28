@@ -10,6 +10,9 @@
 #define FILTER_SECTION_COUNT 3
 #define FILTER_SECTION_STATE 4
 
+
+enum eDisplayState { hidden, displayed };
+
 struct PRESET_LIST {
 	std::vector<ushort> IDs;
 	QString name;
@@ -40,15 +43,20 @@ public Q_SLOTS:
 	void loadPreset();
 	void deletePreset();
 	void buildBuiltinPresets();
+	void toggleSelectedFilter();
 
 private:
 
-	void add_filter_category(unsigned short pktid, QString description, int fromServer);
-	void setRowColor(int tablerow, QColor colour);
+	void add_filter_category(unsigned short pktid, QString description, 
+		int fromServer, eDisplayState initialState = eDisplayState::displayed);
+	void setRowColor(int tablerow, QColor colour); 
+	void setFilterRowState(int row, eDisplayState newState);
+	void setPktIDFilterState(ushort pktID, eDisplayState newState);
+
 	Ui::rawFilterForm *ui = NULL;
 
-	std::map<unsigned short, short> filterStates;
-	std::map<unsigned short, QTableWidgetItem *> filterItems;
+	std::map<unsigned short, eDisplayState> filterStates;
+	std::map<unsigned short, QTableWidgetItem *> filterTableItems;
 
 	std::vector<PRESET_LIST> builtinPresets;
 	std::vector<PRESET_LIST> customPresets;

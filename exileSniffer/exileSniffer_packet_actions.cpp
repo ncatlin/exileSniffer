@@ -1358,17 +1358,21 @@ void exileSniffer::action_SRV_SHOW_NPC_DIALOG(UIDecodedPkt& obj, QString *analys
 	obj.toggle_payload_operations(true);
 	//seen 1 while going from town to riverways, maybe declares area as fightable/droppable items?
 
-	UINT32 arg1 = obj.get_UInt32(L"Unk1");
-	UINT32 arg2 = obj.get_UInt32(L"Unk2");
-	UINT32 arg3 = obj.get_UInt32(L"Unk3");
-	UINT32 arg4 = obj.get_UInt32(L"Unk4");
+	UINT32 ID1 = obj.get_UInt32(L"ID1");
+	UINT32 ID2 = obj.get_UInt32(L"ID2");
+	UINT32 ID3 = obj.get_UInt32(L"ID3");
+	UINT32 dialogIdx = obj.get_UInt32(L"Option");
 
 
 
 	if (!analysis)
 	{
+		std::wstringstream summary;
+		summary << "Dialog item " << std::dec << dialogIdx << " shown for object (0x" << 
+			std::hex << ID1 << "," << ID2 << "," << ID3 << ")";
+
 		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Dialog shown";
+		listentry.summary = QString::fromStdWString(summary.str());
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
@@ -1376,11 +1380,8 @@ void exileSniffer::action_SRV_SHOW_NPC_DIALOG(UIDecodedPkt& obj, QString *analys
 
 	std::wstringstream analysisStream;
 
-	analysisStream << "Dialog arguments:" << std::endl;
-	analysisStream << "Arg1: 0x"<<std::hex<<arg1 << std::endl;
-	analysisStream << "Arg2: 0x" << std::hex << arg2 << std::endl;
-	analysisStream << "Arg3: 0x" << std::hex << arg3 << std::endl;
-	analysisStream << "Arg4: 0x" << std::hex << arg4 << std::endl;
+	analysisStream << "Object ID: (0x" << std::hex << ID1 << ", " << ID2 << ", " << ID3 << ")" << std::endl;
+	analysisStream << "Dialog option: " << std::dec << dialogIdx << std::endl;
 	*analysis = QString::fromStdWString(analysisStream.str());
 }
 void exileSniffer::action_CLI_CLOSE_NPC_DIALOG(UIDecodedPkt& obj, QString *analysis)
@@ -1419,7 +1420,7 @@ void exileSniffer::action_SRV_OPEN_UI_PANE(UIDecodedPkt& obj, QString* analysis)
 		summary << "Server opened Client UI pane "<<converter.from_bytes(paneName)<<std::hex<<", Arg: 0x" << arg;
 
 		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = listentry.summary = QString::fromStdWString(summary.str());
+		listentry.summary = QString::fromStdWString(summary.str());
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}

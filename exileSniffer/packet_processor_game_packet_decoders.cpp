@@ -1029,10 +1029,12 @@ void packet_processor::deserialise_CLI_SELECT_NPC_DIALOG(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_SRV_SHOW_NPC_DIALOG(UIDecodedPkt *uipkt)
 {
-	consume_add_dword_ntoh(L"Unk1", uipkt);
-	consume_add_dword_ntoh(L"Unk2", uipkt);
-	consume_add_word_ntoh(L"Unk3", uipkt);
-	consume_add_byte(L"Unk4", uipkt);
+	//10 b objid
+	consume_add_dword_ntoh(L"ID1", uipkt);
+	consume_add_dword_ntoh(L"ID2", uipkt);
+	consume_add_word_ntoh(L"ID3", uipkt);
+
+	consume_add_byte(L"Option", uipkt);
 }
 
 void packet_processor::deserialise_CLI_CLOSE_NPC_DIALOG(UIDecodedPkt *uipkt)

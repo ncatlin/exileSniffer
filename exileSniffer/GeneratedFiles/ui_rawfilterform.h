@@ -53,6 +53,7 @@ public:
             rawFilterForm->setObjectName(QStringLiteral("rawFilterForm"));
         rawFilterForm->resize(585, 434);
         rawFilterForm->setContextMenuPolicy(Qt::CustomContextMenu);
+        rawFilterForm->setToolTipDuration(0);
         verticalLayout = new QVBoxLayout(rawFilterForm);
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
         tabWidget = new QTabWidget(rawFilterForm);
@@ -78,7 +79,8 @@ public:
         filterTable->setHorizontalHeaderItem(4, __qtablewidgetitem4);
         filterTable->setObjectName(QStringLiteral("filterTable"));
         filterTable->setContextMenuPolicy(Qt::CustomContextMenu);
-        filterTable->setEditTriggers(QAbstractItemView::SelectedClicked);
+        filterTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+        filterTable->setDragDropOverwriteMode(false);
         filterTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
         filterTable->setSelectionBehavior(QAbstractItemView::SelectRows);
         filterTable->setTextElideMode(Qt::ElideLeft);
@@ -160,8 +162,9 @@ public:
         QObject::connect(saveName, SIGNAL(returnPressed()), rawFilterForm, SLOT(saveCustom()));
         QObject::connect(presetsTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)), rawFilterForm, SLOT(loadPreset()));
         QObject::connect(presetsTree, SIGNAL(itemActivated(QTreeWidgetItem*,int)), rawFilterForm, SLOT(loadPreset()));
+        QObject::connect(filterTable, SIGNAL(cellActivated(int,int)), rawFilterForm, SLOT(toggleSelectedFilter()));
 
-        tabWidget->setCurrentIndex(1);
+        tabWidget->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(rawFilterForm);
@@ -169,7 +172,7 @@ public:
 
     void retranslateUi(QWidget *rawFilterForm)
     {
-        rawFilterForm->setWindowTitle(QApplication::translate("rawFilterForm", "Form", Q_NULLPTR));
+        rawFilterForm->setWindowTitle(QApplication::translate("rawFilterForm", "Manage Message Filters", Q_NULLPTR));
         QTableWidgetItem *___qtablewidgetitem = filterTable->horizontalHeaderItem(0);
         ___qtablewidgetitem->setText(QApplication::translate("rawFilterForm", "ID", Q_NULLPTR));
         QTableWidgetItem *___qtablewidgetitem1 = filterTable->horizontalHeaderItem(1);

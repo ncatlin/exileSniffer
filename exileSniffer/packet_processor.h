@@ -242,16 +242,5 @@ private:
 		size_t savedIndex;
 		size_t savedRemaining;
 	} restorePoint;
-
-	std::map <unsigned long, std::string> gameObjHashes;
-	std::map <unsigned long, std::string> monsterHashes;
-	std::map <unsigned long, std::string> chestHashes;
-	std::map <unsigned long, std::string> characterHashes;
-	std::map <unsigned long, std::string> NPCHashes;
-	std::map <unsigned long, std::string> petHashes;
-	std::map <unsigned long, std::string> itemHashes;
-
-	std::map <unsigned long, std::string> areaCodes;
-	std::vector <std::string> monsterVarieties;
 };
 

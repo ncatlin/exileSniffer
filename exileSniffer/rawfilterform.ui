@@ -14,13 +14,16 @@
    <enum>Qt::CustomContextMenu</enum>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Manage Message Filters</string>
+  </property>
+  <property name="toolTipDuration">
+   <number>0</number>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -35,7 +38,10 @@
             <enum>Qt::CustomContextMenu</enum>
            </property>
            <property name="editTriggers">
-            <set>QAbstractItemView::SelectedClicked</set>
+            <set>QAbstractItemView::NoEditTriggers</set>
+           </property>
+           <property name="dragDropOverwriteMode">
+            <bool>false</bool>
            </property>
            <property name="selectionMode">
             <enum>QAbstractItemView::ExtendedSelection</enum>
@@ -317,6 +323,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>filterTable</sender>
+   <signal>cellActivated(int,int)</signal>
+   <receiver>rawFilterForm</receiver>
+   <slot>toggleSelectedFilter()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>291</x>
+     <y>210</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>292</x>
+     <y>216</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <signal>applyFilters()</signal>
@@ -327,5 +349,6 @@
   <slot>saveCustom()</slot>
   <slot>loadPreset()</slot>
   <slot>deletePreset()</slot>
+  <slot>toggleSelectedFilter()</slot>
  </slots>
 </ui>
