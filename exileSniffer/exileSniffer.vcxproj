@@ -179,6 +179,7 @@
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="exileSniffer.qrc" />
+    <QtRcc Include="Resources.qrc" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="exileSniffer.rc" />

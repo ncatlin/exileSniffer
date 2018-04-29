@@ -18,15 +18,18 @@
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QFrame>
 #include <QtWidgets/QGridLayout>
+#include <QtWidgets/QGroupBox>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPlainTextEdit>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSplitter>
+#include <QtWidgets/QStackedWidget>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QTableWidget>
@@ -44,13 +47,46 @@ public:
     QGridLayout *gridLayout;
     QTabWidget *processTabs;
     QWidget *interceptionTab;
+    QVBoxLayout *verticalLayout_4;
+    QHBoxLayout *ex_sniff_layout;
+    QGroupBox *groupBox;
+    QVBoxLayout *verticalLayout_6;
+    QHBoxLayout *horizontalLayout_7;
+    QLabel *keyex_lab_bad;
+    QLabel *keyex_lab_pending;
+    QLabel *keyex_lab_good;
+    QVBoxLayout *verticalLayout_5;
+    QLabel *keyex_text;
+    QGroupBox *groupBox_2;
+    QVBoxLayout *verticalLayout_7;
+    QHBoxLayout *horizontalLayout_8;
+    QLabel *sniff_lab_bad;
+    QLabel *sniff_lab_pending;
+    QLabel *sniff_lab_good;
+    QVBoxLayout *verticalLayout_8;
+    QLabel *sniff_text;
+    QWidget *decrypt_status_widget;
+    QHBoxLayout *horizontalLayout_10;
     QVBoxLayout *verticalLayout;
-    QFrame *statusFrame;
-    QFormLayout *formLayout;
-    QLabel *statusInfoText;
-    QLabel *statusInfoLabel;
-    QLabel *statusLabel;
-    QLabel *statusText;
+    QLabel *no_decrypt_label;
+    QLabel *yes_decrypt_label;
+    QFrame *horizontalFrame_3;
+    QHBoxLayout *horizontalLayout_9;
+    QStackedWidget *stackedWidget_3;
+    QWidget *noDecryptStack;
+    QVBoxLayout *verticalLayout_9;
+    QLabel *decryptionStatusText;
+    QWidget *yesDecryptStack;
+    QVBoxLayout *verticalLayout_10;
+    QLabel *label;
+    QGroupBox *groupBox_3;
+    QFormLayout *formLayout_2;
+    QLabel *label_2;
+    QLabel *label_3;
+    QLabel *label_4;
+    QPlainTextEdit *plainTextEdit;
+    QLineEdit *lineEdit;
+    QLineEdit *lineEdit_2;
     QWidget *decodeTab;
     QGridLayout *gridLayout_3;
     QFrame *decodeDisplayFrame;
@@ -107,55 +143,246 @@ public:
         processTabs->setTabPosition(QTabWidget::North);
         interceptionTab = new QWidget();
         interceptionTab->setObjectName(QStringLiteral("interceptionTab"));
-        verticalLayout = new QVBoxLayout(interceptionTab);
-        verticalLayout->setSpacing(6);
-        verticalLayout->setContentsMargins(11, 11, 11, 11);
-        verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
-        statusFrame = new QFrame(interceptionTab);
-        statusFrame->setObjectName(QStringLiteral("statusFrame"));
-        statusFrame->setMaximumSize(QSize(16777215, 100));
-        statusFrame->setFrameShape(QFrame::StyledPanel);
-        statusFrame->setFrameShadow(QFrame::Raised);
-        formLayout = new QFormLayout(statusFrame);
-        formLayout->setSpacing(6);
-        formLayout->setContentsMargins(11, 11, 11, 11);
-        formLayout->setObjectName(QStringLiteral("formLayout"));
-        statusInfoText = new QLabel(statusFrame);
-        statusInfoText->setObjectName(QStringLiteral("statusInfoText"));
-        statusInfoText->setMaximumSize(QSize(16777215, 16777215));
+        verticalLayout_4 = new QVBoxLayout(interceptionTab);
+        verticalLayout_4->setSpacing(6);
+        verticalLayout_4->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_4->setObjectName(QStringLiteral("verticalLayout_4"));
+        ex_sniff_layout = new QHBoxLayout();
+        ex_sniff_layout->setSpacing(6);
+        ex_sniff_layout->setObjectName(QStringLiteral("ex_sniff_layout"));
+        groupBox = new QGroupBox(interceptionTab);
+        groupBox->setObjectName(QStringLiteral("groupBox"));
+        groupBox->setMinimumSize(QSize(300, 0));
+        groupBox->setMaximumSize(QSize(16777215, 200));
         QFont font;
         font.setPointSize(12);
-        statusInfoText->setFont(font);
-        statusInfoText->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
-        statusInfoText->setIndent(12);
+        groupBox->setFont(font);
+        verticalLayout_6 = new QVBoxLayout(groupBox);
+        verticalLayout_6->setSpacing(6);
+        verticalLayout_6->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_6->setObjectName(QStringLiteral("verticalLayout_6"));
+        verticalLayout_6->setContentsMargins(-1, 4, -1, 4);
+        horizontalLayout_7 = new QHBoxLayout();
+        horizontalLayout_7->setSpacing(6);
+        horizontalLayout_7->setObjectName(QStringLiteral("horizontalLayout_7"));
+        keyex_lab_bad = new QLabel(groupBox);
+        keyex_lab_bad->setObjectName(QStringLiteral("keyex_lab_bad"));
+        keyex_lab_bad->setMaximumSize(QSize(100, 100));
+        keyex_lab_bad->setStyleSheet(QStringLiteral(""));
 
-        formLayout->setWidget(3, QFormLayout::FieldRole, statusInfoText);
+        horizontalLayout_7->addWidget(keyex_lab_bad);
 
-        statusInfoLabel = new QLabel(statusFrame);
-        statusInfoLabel->setObjectName(QStringLiteral("statusInfoLabel"));
+        keyex_lab_pending = new QLabel(groupBox);
+        keyex_lab_pending->setObjectName(QStringLiteral("keyex_lab_pending"));
+        keyex_lab_pending->setMaximumSize(QSize(100, 100));
+        keyex_lab_pending->setStyleSheet(QStringLiteral(""));
+
+        horizontalLayout_7->addWidget(keyex_lab_pending);
+
+        keyex_lab_good = new QLabel(groupBox);
+        keyex_lab_good->setObjectName(QStringLiteral("keyex_lab_good"));
+        keyex_lab_good->setMaximumSize(QSize(100, 100));
+        keyex_lab_good->setStyleSheet(QStringLiteral(""));
+
+        horizontalLayout_7->addWidget(keyex_lab_good);
+
+
+        verticalLayout_6->addLayout(horizontalLayout_7);
+
+        verticalLayout_5 = new QVBoxLayout();
+        verticalLayout_5->setSpacing(6);
+        verticalLayout_5->setObjectName(QStringLiteral("verticalLayout_5"));
+        keyex_text = new QLabel(groupBox);
+        keyex_text->setObjectName(QStringLiteral("keyex_text"));
         QFont font1;
-        font1.setPointSize(13);
-        statusInfoLabel->setFont(font1);
+        font1.setPointSize(10);
+        keyex_text->setFont(font1);
+        keyex_text->setAlignment(Qt::AlignCenter);
 
-        formLayout->setWidget(3, QFormLayout::LabelRole, statusInfoLabel);
-
-        statusLabel = new QLabel(statusFrame);
-        statusLabel->setObjectName(QStringLiteral("statusLabel"));
-        statusLabel->setFont(font1);
-
-        formLayout->setWidget(2, QFormLayout::LabelRole, statusLabel);
-
-        statusText = new QLabel(statusFrame);
-        statusText->setObjectName(QStringLiteral("statusText"));
-        statusText->setMaximumSize(QSize(16777215, 16777215));
-        statusText->setFont(font1);
-        statusText->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
-        statusText->setIndent(12);
-
-        formLayout->setWidget(2, QFormLayout::FieldRole, statusText);
+        verticalLayout_5->addWidget(keyex_text);
 
 
-        verticalLayout->addWidget(statusFrame);
+        verticalLayout_6->addLayout(verticalLayout_5);
+
+
+        ex_sniff_layout->addWidget(groupBox);
+
+        groupBox_2 = new QGroupBox(interceptionTab);
+        groupBox_2->setObjectName(QStringLiteral("groupBox_2"));
+        groupBox_2->setMinimumSize(QSize(300, 0));
+        groupBox_2->setMaximumSize(QSize(16777215, 200));
+        groupBox_2->setFont(font);
+        verticalLayout_7 = new QVBoxLayout(groupBox_2);
+        verticalLayout_7->setSpacing(6);
+        verticalLayout_7->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_7->setObjectName(QStringLiteral("verticalLayout_7"));
+        verticalLayout_7->setContentsMargins(-1, 4, -1, 4);
+        horizontalLayout_8 = new QHBoxLayout();
+        horizontalLayout_8->setSpacing(6);
+        horizontalLayout_8->setObjectName(QStringLiteral("horizontalLayout_8"));
+        sniff_lab_bad = new QLabel(groupBox_2);
+        sniff_lab_bad->setObjectName(QStringLiteral("sniff_lab_bad"));
+        sniff_lab_bad->setMaximumSize(QSize(100, 100));
+        sniff_lab_bad->setStyleSheet(QStringLiteral(""));
+
+        horizontalLayout_8->addWidget(sniff_lab_bad);
+
+        sniff_lab_pending = new QLabel(groupBox_2);
+        sniff_lab_pending->setObjectName(QStringLiteral("sniff_lab_pending"));
+        sniff_lab_pending->setMaximumSize(QSize(100, 100));
+        sniff_lab_pending->setStyleSheet(QStringLiteral(""));
+
+        horizontalLayout_8->addWidget(sniff_lab_pending);
+
+        sniff_lab_good = new QLabel(groupBox_2);
+        sniff_lab_good->setObjectName(QStringLiteral("sniff_lab_good"));
+        sniff_lab_good->setMaximumSize(QSize(100, 100));
+        sniff_lab_good->setStyleSheet(QStringLiteral(""));
+
+        horizontalLayout_8->addWidget(sniff_lab_good);
+
+
+        verticalLayout_7->addLayout(horizontalLayout_8);
+
+        verticalLayout_8 = new QVBoxLayout();
+        verticalLayout_8->setSpacing(6);
+        verticalLayout_8->setObjectName(QStringLiteral("verticalLayout_8"));
+        sniff_text = new QLabel(groupBox_2);
+        sniff_text->setObjectName(QStringLiteral("sniff_text"));
+        sniff_text->setFont(font1);
+        sniff_text->setAlignment(Qt::AlignCenter);
+
+        verticalLayout_8->addWidget(sniff_text);
+
+
+        verticalLayout_7->addLayout(verticalLayout_8);
+
+
+        ex_sniff_layout->addWidget(groupBox_2);
+
+
+        verticalLayout_4->addLayout(ex_sniff_layout);
+
+        decrypt_status_widget = new QWidget(interceptionTab);
+        decrypt_status_widget->setObjectName(QStringLiteral("decrypt_status_widget"));
+        decrypt_status_widget->setMinimumSize(QSize(600, 280));
+        decrypt_status_widget->setMaximumSize(QSize(999999, 250));
+        horizontalLayout_10 = new QHBoxLayout(decrypt_status_widget);
+        horizontalLayout_10->setSpacing(6);
+        horizontalLayout_10->setContentsMargins(11, 11, 11, 11);
+        horizontalLayout_10->setObjectName(QStringLiteral("horizontalLayout_10"));
+        verticalLayout = new QVBoxLayout();
+        verticalLayout->setSpacing(6);
+        verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
+        no_decrypt_label = new QLabel(decrypt_status_widget);
+        no_decrypt_label->setObjectName(QStringLiteral("no_decrypt_label"));
+        no_decrypt_label->setMinimumSize(QSize(130, 130));
+        no_decrypt_label->setMaximumSize(QSize(130, 130));
+        no_decrypt_label->setBaseSize(QSize(130, 130));
+        no_decrypt_label->setStyleSheet(QStringLiteral(""));
+
+        verticalLayout->addWidget(no_decrypt_label);
+
+        yes_decrypt_label = new QLabel(decrypt_status_widget);
+        yes_decrypt_label->setObjectName(QStringLiteral("yes_decrypt_label"));
+        yes_decrypt_label->setMinimumSize(QSize(130, 130));
+        yes_decrypt_label->setMaximumSize(QSize(130, 130));
+        yes_decrypt_label->setBaseSize(QSize(130, 130));
+        yes_decrypt_label->setStyleSheet(QStringLiteral(""));
+
+        verticalLayout->addWidget(yes_decrypt_label);
+
+
+        horizontalLayout_10->addLayout(verticalLayout);
+
+        horizontalFrame_3 = new QFrame(decrypt_status_widget);
+        horizontalFrame_3->setObjectName(QStringLiteral("horizontalFrame_3"));
+        horizontalLayout_9 = new QHBoxLayout(horizontalFrame_3);
+        horizontalLayout_9->setSpacing(6);
+        horizontalLayout_9->setContentsMargins(11, 11, 11, 11);
+        horizontalLayout_9->setObjectName(QStringLiteral("horizontalLayout_9"));
+        stackedWidget_3 = new QStackedWidget(horizontalFrame_3);
+        stackedWidget_3->setObjectName(QStringLiteral("stackedWidget_3"));
+        noDecryptStack = new QWidget();
+        noDecryptStack->setObjectName(QStringLiteral("noDecryptStack"));
+        verticalLayout_9 = new QVBoxLayout(noDecryptStack);
+        verticalLayout_9->setSpacing(6);
+        verticalLayout_9->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_9->setObjectName(QStringLiteral("verticalLayout_9"));
+        decryptionStatusText = new QLabel(noDecryptStack);
+        decryptionStatusText->setObjectName(QStringLiteral("decryptionStatusText"));
+        QFont font2;
+        font2.setPointSize(16);
+        decryptionStatusText->setFont(font2);
+        decryptionStatusText->setAlignment(Qt::AlignCenter);
+
+        verticalLayout_9->addWidget(decryptionStatusText);
+
+        stackedWidget_3->addWidget(noDecryptStack);
+        yesDecryptStack = new QWidget();
+        yesDecryptStack->setObjectName(QStringLiteral("yesDecryptStack"));
+        verticalLayout_10 = new QVBoxLayout(yesDecryptStack);
+        verticalLayout_10->setSpacing(6);
+        verticalLayout_10->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_10->setObjectName(QStringLiteral("verticalLayout_10"));
+        label = new QLabel(yesDecryptStack);
+        label->setObjectName(QStringLiteral("label"));
+        label->setFont(font2);
+        label->setAlignment(Qt::AlignCenter);
+
+        verticalLayout_10->addWidget(label);
+
+        groupBox_3 = new QGroupBox(yesDecryptStack);
+        groupBox_3->setObjectName(QStringLiteral("groupBox_3"));
+        groupBox_3->setFont(font);
+        formLayout_2 = new QFormLayout(groupBox_3);
+        formLayout_2->setSpacing(6);
+        formLayout_2->setContentsMargins(11, 11, 11, 11);
+        formLayout_2->setObjectName(QStringLiteral("formLayout_2"));
+        formLayout_2->setHorizontalSpacing(32);
+        formLayout_2->setContentsMargins(20, -1, 20, -1);
+        label_2 = new QLabel(groupBox_3);
+        label_2->setObjectName(QStringLiteral("label_2"));
+
+        formLayout_2->setWidget(0, QFormLayout::LabelRole, label_2);
+
+        label_3 = new QLabel(groupBox_3);
+        label_3->setObjectName(QStringLiteral("label_3"));
+
+        formLayout_2->setWidget(1, QFormLayout::LabelRole, label_3);
+
+        label_4 = new QLabel(groupBox_3);
+        label_4->setObjectName(QStringLiteral("label_4"));
+
+        formLayout_2->setWidget(2, QFormLayout::LabelRole, label_4);
+
+        plainTextEdit = new QPlainTextEdit(groupBox_3);
+        plainTextEdit->setObjectName(QStringLiteral("plainTextEdit"));
+
+        formLayout_2->setWidget(0, QFormLayout::FieldRole, plainTextEdit);
+
+        lineEdit = new QLineEdit(groupBox_3);
+        lineEdit->setObjectName(QStringLiteral("lineEdit"));
+
+        formLayout_2->setWidget(1, QFormLayout::FieldRole, lineEdit);
+
+        lineEdit_2 = new QLineEdit(groupBox_3);
+        lineEdit_2->setObjectName(QStringLiteral("lineEdit_2"));
+
+        formLayout_2->setWidget(2, QFormLayout::FieldRole, lineEdit_2);
+
+
+        verticalLayout_10->addWidget(groupBox_3);
+
+        stackedWidget_3->addWidget(yesDecryptStack);
+
+        horizontalLayout_9->addWidget(stackedWidget_3);
+
+
+        horizontalLayout_10->addWidget(horizontalFrame_3);
+
+
+        verticalLayout_4->addWidget(decrypt_status_widget);
 
         processTabs->addTab(interceptionTab, QString());
         decodeTab = new QWidget();
@@ -254,10 +481,10 @@ public:
         decodedListTable->verticalHeader()->setHighlightSections(false);
         decodedText = new QPlainTextEdit(splitter);
         decodedText->setObjectName(QStringLiteral("decodedText"));
-        QFont font2;
-        font2.setFamily(QStringLiteral("Courier New"));
-        font2.setPointSize(11);
-        decodedText->setFont(font2);
+        QFont font3;
+        font3.setFamily(QStringLiteral("Courier New"));
+        font3.setPointSize(11);
+        decodedText->setFont(font3);
         splitter->addWidget(decodedText);
 
         verticalLayout_3->addWidget(splitter);
@@ -277,10 +504,10 @@ public:
         textPaneFrame->setObjectName(QStringLiteral("textPaneFrame"));
         ptHexPane = new QTextEdit(rawDecryptTab);
         ptHexPane->setObjectName(QStringLiteral("ptHexPane"));
-        QFont font3;
-        font3.setFamily(QStringLiteral("Courier New"));
-        font3.setPointSize(8);
-        ptHexPane->setFont(font3);
+        QFont font4;
+        font4.setFamily(QStringLiteral("Courier New"));
+        font4.setPointSize(8);
+        ptHexPane->setFont(font4);
         ptHexPane->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
         ptHexPane->setLineWrapMode(QTextEdit::NoWrap);
         ptHexPane->setReadOnly(true);
@@ -290,9 +517,9 @@ public:
 
         ptASCIIPane = new QTextEdit(rawDecryptTab);
         ptASCIIPane->setObjectName(QStringLiteral("ptASCIIPane"));
-        QFont font4;
-        font4.setFamily(QStringLiteral("Courier New"));
-        ptASCIIPane->setFont(font4);
+        QFont font5;
+        font5.setFamily(QStringLiteral("Courier New"));
+        ptASCIIPane->setFont(font5);
         ptASCIIPane->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
         ptASCIIPane->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
@@ -417,7 +644,7 @@ public:
         QObject::connect(decodedListTable, SIGNAL(cellPressed(int,int)), exileSniffer, SLOT(decodedCellActivated(int,int)));
         QObject::connect(decodedListTable, SIGNAL(customContextMenuRequested(QPoint)), exileSniffer, SLOT(decodedTableMenuRequest(QPoint)));
 
-        processTabs->setCurrentIndex(1);
+        processTabs->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(exileSniffer);
@@ -426,11 +653,25 @@ public:
     void retranslateUi(QMainWindow *exileSniffer)
     {
         exileSniffer->setWindowTitle(QApplication::translate("exileSniffer", "exileSniffer", Q_NULLPTR));
-        statusInfoText->setText(QApplication::translate("exileSniffer", "Waiting for processes named \"PathOfExile.exe\" or \"PathOfExile_x64.exe\"", Q_NULLPTR));
-        statusInfoLabel->setText(QApplication::translate("exileSniffer", "Action:", Q_NULLPTR));
-        statusLabel->setText(QApplication::translate("exileSniffer", "Status:", Q_NULLPTR));
-        statusText->setText(QApplication::translate("exileSniffer", "No running Path of Exile clients found", Q_NULLPTR));
-        processTabs->setTabText(processTabs->indexOf(interceptionTab), QApplication::translate("exileSniffer", "Interception", Q_NULLPTR));
+        groupBox->setTitle(QApplication::translate("exileSniffer", "Key Extraction", Q_NULLPTR));
+        keyex_lab_bad->setText(QString());
+        keyex_lab_pending->setText(QString());
+        keyex_lab_good->setText(QString());
+        keyex_text->setText(QApplication::translate("exileSniffer", "Status: Doing Stuff", Q_NULLPTR));
+        groupBox_2->setTitle(QApplication::translate("exileSniffer", "Network Sniffing", Q_NULLPTR));
+        sniff_lab_bad->setText(QString());
+        sniff_lab_pending->setText(QString());
+        sniff_lab_good->setText(QString());
+        sniff_text->setText(QApplication::translate("exileSniffer", "Status: Doing Stuff", Q_NULLPTR));
+        no_decrypt_label->setText(QString());
+        yes_decrypt_label->setText(QString());
+        decryptionStatusText->setText(QApplication::translate("exileSniffer", "Not decrypting", Q_NULLPTR));
+        label->setText(QApplication::translate("exileSniffer", "Decryption in progress", Q_NULLPTR));
+        groupBox_3->setTitle(QApplication::translate("exileSniffer", "Salsa Key Material", Q_NULLPTR));
+        label_2->setText(QApplication::translate("exileSniffer", "Key", Q_NULLPTR));
+        label_3->setText(QApplication::translate("exileSniffer", "Send IV", Q_NULLPTR));
+        label_4->setText(QApplication::translate("exileSniffer", "Receive IV", Q_NULLPTR));
+        processTabs->setTabText(processTabs->indexOf(interceptionTab), QApplication::translate("exileSniffer", "Decryption", Q_NULLPTR));
         decodedAutoscrollCheck->setText(QApplication::translate("exileSniffer", "Auto Scroll", Q_NULLPTR));
         decodedDisplayedLabel->setText(QApplication::translate("exileSniffer", "No packets decoded", Q_NULLPTR));
         decodedFiltersBtn->setText(QApplication::translate("exileSniffer", "Filters", Q_NULLPTR));
@@ -442,7 +683,7 @@ public:
         ___qtablewidgetitem2->setText(QApplication::translate("exileSniffer", "PktID", Q_NULLPTR));
         QTableWidgetItem *___qtablewidgetitem3 = decodedListTable->horizontalHeaderItem(3);
         ___qtablewidgetitem3->setText(QApplication::translate("exileSniffer", "Summary", Q_NULLPTR));
-        processTabs->setTabText(processTabs->indexOf(decodeTab), QApplication::translate("exileSniffer", "Decoder", Q_NULLPTR));
+        processTabs->setTabText(processTabs->indexOf(decodeTab), QApplication::translate("exileSniffer", "Decoding", Q_NULLPTR));
         ptHexPane->setHtml(QApplication::translate("exileSniffer", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"

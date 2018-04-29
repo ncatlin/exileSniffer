@@ -152,6 +152,9 @@
     <QtRcc Include="exileSniffer.qrc">
       <Filter>Resource Files</Filter>
     </QtRcc>
+    <QtRcc Include="Resources.qrc">
+      <Filter>Resource Files</Filter>
+    </QtRcc>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="exileSniffer.rc" />
