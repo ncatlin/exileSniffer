@@ -238,12 +238,13 @@ public:
         QTableWidgetItem *__qtablewidgetitem3 = new QTableWidgetItem();
         decodedListTable->setHorizontalHeaderItem(3, __qtablewidgetitem3);
         decodedListTable->setObjectName(QStringLiteral("decodedListTable"));
+        decodedListTable->setContextMenuPolicy(Qt::CustomContextMenu);
         decodedListTable->setLayoutDirection(Qt::LeftToRight);
         decodedListTable->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
         decodedListTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
         decodedListTable->setProperty("showDropIndicator", QVariant(false));
         decodedListTable->setDragEnabled(false);
-        decodedListTable->setSelectionMode(QAbstractItemView::NoSelection);
+        decodedListTable->setSelectionMode(QAbstractItemView::SingleSelection);
         decodedListTable->setSelectionBehavior(QAbstractItemView::SelectRows);
         decodedListTable->setSortingEnabled(false);
         splitter->addWidget(decodedListTable);
@@ -414,6 +415,7 @@ public:
         QObject::connect(rawAutoScrollCheck, SIGNAL(toggled(bool)), exileSniffer, SLOT(toggleRawAutoScroll(bool)));
         QObject::connect(decodedListTable, SIGNAL(clicked(QModelIndex)), exileSniffer, SLOT(decodedListClicked()));
         QObject::connect(decodedListTable, SIGNAL(cellPressed(int,int)), exileSniffer, SLOT(decodedCellActivated(int,int)));
+        QObject::connect(decodedListTable, SIGNAL(customContextMenuRequested(QPoint)), exileSniffer, SLOT(decodedTableMenuRequest(QPoint)));
 
         processTabs->setCurrentIndex(1);
 
@@ -430,14 +432,14 @@ public:
         statusText->setText(QApplication::translate("exileSniffer", "No running Path of Exile clients found", Q_NULLPTR));
         processTabs->setTabText(processTabs->indexOf(interceptionTab), QApplication::translate("exileSniffer", "Interception", Q_NULLPTR));
         decodedAutoscrollCheck->setText(QApplication::translate("exileSniffer", "Auto Scroll", Q_NULLPTR));
-        decodedDisplayedLabel->setText(QApplication::translate("exileSniffer", "Packets ( Displayed: Filtered: )", Q_NULLPTR));
+        decodedDisplayedLabel->setText(QApplication::translate("exileSniffer", "No packets decoded", Q_NULLPTR));
         decodedFiltersBtn->setText(QApplication::translate("exileSniffer", "Filters", Q_NULLPTR));
         QTableWidgetItem *___qtablewidgetitem = decodedListTable->horizontalHeaderItem(0);
         ___qtablewidgetitem->setText(QApplication::translate("exileSniffer", "Time", Q_NULLPTR));
         QTableWidgetItem *___qtablewidgetitem1 = decodedListTable->horizontalHeaderItem(1);
         ___qtablewidgetitem1->setText(QApplication::translate("exileSniffer", "Sender", Q_NULLPTR));
         QTableWidgetItem *___qtablewidgetitem2 = decodedListTable->horizontalHeaderItem(2);
-        ___qtablewidgetitem2->setText(QApplication::translate("exileSniffer", "Msg ID", Q_NULLPTR));
+        ___qtablewidgetitem2->setText(QApplication::translate("exileSniffer", "PktID", Q_NULLPTR));
         QTableWidgetItem *___qtablewidgetitem3 = decodedListTable->horizontalHeaderItem(3);
         ___qtablewidgetitem3->setText(QApplication::translate("exileSniffer", "Summary", Q_NULLPTR));
         processTabs->setTabText(processTabs->indexOf(decodeTab), QApplication::translate("exileSniffer", "Decoder", Q_NULLPTR));

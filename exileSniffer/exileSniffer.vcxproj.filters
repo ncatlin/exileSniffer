@@ -66,12 +66,6 @@
     <ClCompile Include="packet_processor_decode_utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="exileSniffer_packet_actions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="packet_processor_game_packet_decoders.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="gameDataStore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -79,6 +73,18 @@
       <Filter>Header Files</Filter>
     </ClCompile>
     <ClCompile Include="filterForm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="loginserver_packet_actions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gameserver_packet_actions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gameserver_packet_deserialisers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="loginserver_packet_deserialisers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

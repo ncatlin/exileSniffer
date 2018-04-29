@@ -16,76 +16,51 @@ UI update operations
 #include "packetIDs.h"
 #include "inventory.h"
 
-std::wstring explainModifier(byte lastByte)
-{
-	/*
-	00001000 click       0x8
-	00001001 +shift		 0x9
-	00001010 +windowOpen 0xa
-	00001100 +ctrl		 0xc
-
-	8 = inventory/etc open
-	9 = shift held
-	c = control held
-	*/
-
-	std::wstring result = L"";
-
-	if (lastByte & 0x1)
-		result += L"+shift ";
-	if (lastByte & 0x2)
-		result += L"+openPane ";
-	if (lastByte & 0x4)
-		result += L"+ctrl ";
-	return result;
-}
-
-
-void exileSniffer::init_DecodedPktActioners()
+void exileSniffer::init_gamePkt_Actioners()
 {
 	//encapsulated ignored
-	decodedPktActioners[CLI_CHAT_MSG_ITEMS] = &exileSniffer::action_CLI_CHAT_MSG_ITEMS;
+	gamePktActioners[CLI_CHAT_MSG_ITEMS] = &exileSniffer::action_CLI_CHAT_MSG_ITEMS;
 	//7
-	decodedPktActioners[CLI_CHAT_MESSAGE] = &exileSniffer::action_CLI_CHAT_MSG;	
-	decodedPktActioners[CLI_CHAT_COMMAND] = &exileSniffer::action_CLI_CHAT_COMMAND;
-	decodedPktActioners[SRV_CHAT_MESSAGE] = &exileSniffer::action_SRV_CHAT_MESSAGE;
-	decodedPktActioners[SRV_SERVER_MESSAGE] = &exileSniffer::action_SRV_SERVER_MESSAGE;
-	decodedPktActioners[CLI_LOGGED_OUT] = &exileSniffer::action_CLI_LOGGED_OUT;
-	decodedPktActioners[CLI_PING_CHALLENGE] = &exileSniffer::action_CLI_PING_CHALLENGE;
-	decodedPktActioners[SRV_PING_RESPONSE] = &exileSniffer::action_SRV_PING_RESPONSE;
-	decodedPktActioners[SRV_AREA_INFO] = &exileSniffer::action_SRV_AREA_INFO;
+	gamePktActioners[CLI_CHAT_MESSAGE] = &exileSniffer::action_CLI_CHAT_MSG;	
+	gamePktActioners[CLI_CHAT_COMMAND] = &exileSniffer::action_CLI_CHAT_COMMAND;
+	gamePktActioners[SRV_CHAT_MESSAGE] = &exileSniffer::action_SRV_CHAT_MESSAGE;
+	gamePktActioners[SRV_SERVER_MESSAGE] = &exileSniffer::action_SRV_SERVER_MESSAGE;
+	gamePktActioners[CLI_LOGGED_OUT] = &exileSniffer::action_CLI_LOGGED_OUT;
+	gamePktActioners[CLI_PING_CHALLENGE] = &exileSniffer::action_CLI_PING_CHALLENGE;
+	gamePktActioners[SRV_PING_RESPONSE] = &exileSniffer::action_SRV_PING_RESPONSE;
+	gamePktActioners[SRV_AREA_INFO] = &exileSniffer::action_SRV_AREA_INFO;
 	//10?
 	//11?
-	decodedPktActioners[SRV_PRELOAD_MONSTER_LIST] = &exileSniffer::action_SRV_PRELOAD_MONSTER_LIST;
-	decodedPktActioners[SRV_UNK_0x13] = &exileSniffer::action_SRV_UNK_0x13;
-	decodedPktActioners[SRV_PLAYER_ITEMS] = &exileSniffer::action_SRV_PLAYER_ITEMS;
-	decodedPktActioners[CLI_CLICKED_GROUND_ITEM] = &exileSniffer::action_CLI_CLICKED_GROUND_ITEM;
-	decodedPktActioners[CLI_ACTION_PREDICTIVE] = &exileSniffer::action_CLI_ACTION_PREDICTIVE;
-	decodedPktActioners[SRV_TRANSFER_INSTANCE] = &exileSniffer::action_SRV_TRANSFER_INSTANCE;
-	decodedPktActioners[SRV_INSTANCE_SERVER_DATA] = &exileSniffer::action_SRV_INSTANCE_SERVER_DATA;
-	decodedPktActioners[CLI_PICKUP_ITEM] = &exileSniffer::action_CLI_PICKUP_ITEM;
+	gamePktActioners[SRV_PRELOAD_MONSTER_LIST] = &exileSniffer::action_SRV_PRELOAD_MONSTER_LIST;
+	gamePktActioners[SRV_UNK_0x13] = &exileSniffer::action_SRV_UNK_0x13;
+	gamePktActioners[SRV_PLAYER_ITEMS] = &exileSniffer::action_SRV_PLAYER_ITEMS;
+	gamePktActioners[CLI_CLICKED_GROUND_ITEM] = &exileSniffer::action_CLI_CLICKED_GROUND_ITEM;
+	gamePktActioners[CLI_ACTION_PREDICTIVE] = &exileSniffer::action_CLI_ACTION_PREDICTIVE;
+	gamePktActioners[SRV_TRANSFER_INSTANCE] = &exileSniffer::action_SRV_TRANSFER_INSTANCE;
+	gamePktActioners[SRV_INSTANCE_SERVER_DATA] = &exileSniffer::action_SRV_INSTANCE_SERVER_DATA;
+	gamePktActioners[CLI_PICKUP_ITEM] = &exileSniffer::action_CLI_PICKUP_ITEM;
 	//1a
-	decodedPktActioners[CLI_PLACE_ITEM] = &exileSniffer::action_CLI_PLACE_ITEM;
+	gamePktActioners[CLI_PLACE_ITEM] = &exileSniffer::action_CLI_PLACE_ITEM;
 	//1c
-	decodedPktActioners[CLI_REMOVE_SOCKET] = &exileSniffer::action_CLI_REMOVE_SOCKET;
-	decodedPktActioners[CLI_INSERT_SOCKET] = &exileSniffer::action_CLI_INSERT_SOCKET;
-	decodedPktActioners[CLI_LEVEL_SKILLGEM] = &exileSniffer::action_CLI_LEVEL_SKILLGEM;
-	decodedPktActioners[CLI_UNK_0x20] = &exileSniffer::action_CLI_UNK_0x20;
-	decodedPktActioners[CLI_SKILLPOINT_CHANGE] = &exileSniffer::action_CLI_SKILLPOINT_CHANGE;
+	gamePktActioners[CLI_REMOVE_SOCKET] = &exileSniffer::action_CLI_REMOVE_SOCKET;
+	gamePktActioners[CLI_INSERT_SOCKET] = &exileSniffer::action_CLI_INSERT_SOCKET;
+	gamePktActioners[CLI_LEVEL_SKILLGEM] = &exileSniffer::action_CLI_LEVEL_SKILLGEM;
+	gamePktActioners[CLI_UNK_0x20] = &exileSniffer::action_CLI_UNK_0x20;
+	gamePktActioners[CLI_SKILLPOINT_CHANGE] = &exileSniffer::action_CLI_SKILLPOINT_CHANGE;
 	//22
 	//23
-	decodedPktActioners[CLI_CHOSE_ASCENDANCY] = &exileSniffer::action_CLI_CHOSE_ASCENDANCY;
+	gamePktActioners[CLI_CHOSE_ASCENDANCY] = &exileSniffer::action_CLI_CHOSE_ASCENDANCY;
 	//25
 	//26
 	//27
 	//28
 	//29
 	//2a
-	decodedPktActioners[CLI_CANCEL_BUF] = &exileSniffer::action_CLI_CANCEL_BUF;
-	decodedPktActioners[CLI_UNK_0x2c] = &exileSniffer::action_CLI_UNK_0x2c;
+	gamePktActioners[CLI_CANCEL_BUF] = &exileSniffer::action_CLI_CANCEL_BUF;
+	gamePktActioners[CLI_UNK_0x2c] = &exileSniffer::action_CLI_UNK_0x2c;
 	//2d
-	decodedPktActioners[CLI_SET_HOTBARSKILL] = &exileSniffer::action_CLI_SET_HOTBARSKILL;
-	decodedPktActioners[SRV_SKILL_SLOTS_LIST] = &exileSniffer::action_SRV_SKILL_SLOTS_LIST;
+	gamePktActioners[CLI_SET_HOTBARSKILL] = &exileSniffer::action_CLI_SET_HOTBARSKILL;
+	gamePktActioners[SRV_SKILL_SLOTS_LIST] = &exileSniffer::action_SRV_SKILL_SLOTS_LIST;
 	//30
 	//31
 	//32
@@ -93,24 +68,24 @@ void exileSniffer::init_DecodedPktActioners()
 	//34
 	//35
 	//36
-	decodedPktActioners[CLI_USE_BELT_SLOT] = &exileSniffer::action_CLI_USE_BELT_SLOT;
-	decodedPktActioners[CLI_USE_ITEM] = &exileSniffer::action_CLI_USE_ITEM;
+	gamePktActioners[CLI_USE_BELT_SLOT] = &exileSniffer::action_CLI_USE_BELT_SLOT;
+	gamePktActioners[CLI_USE_ITEM] = &exileSniffer::action_CLI_USE_ITEM;
 	//39
 	//3a
 	//3b
 	//3c
 	//3d
 	//3e
-	decodedPktActioners[SRV_OPEN_UI_PANE] = &exileSniffer::action_SRV_OPEN_UI_PANE;
+	gamePktActioners[SRV_OPEN_UI_PANE] = &exileSniffer::action_SRV_OPEN_UI_PANE;
 	//40
-	decodedPktActioners[CLI_UNK_0x41] = &exileSniffer::action_CLI_UNK_0x41;
+	gamePktActioners[CLI_UNK_0x41] = &exileSniffer::action_CLI_UNK_0x41;
 	//42
 	//43
 	//44
 	//45
-	decodedPktActioners[CLI_SELECT_NPC_DIALOG] = &exileSniffer::action_CLI_SELECT_NPC_DIALOG;
-	decodedPktActioners[SRV_SHOW_NPC_DIALOG] = &exileSniffer::action_SRV_SHOW_NPC_DIALOG;
-	decodedPktActioners[CLI_CLOSE_NPC_DIALOG] = &exileSniffer::action_CLI_CLOSE_NPC_DIALOG;
+	gamePktActioners[CLI_SELECT_NPC_DIALOG] = &exileSniffer::action_CLI_SELECT_NPC_DIALOG;
+	gamePktActioners[SRV_SHOW_NPC_DIALOG] = &exileSniffer::action_SRV_SHOW_NPC_DIALOG;
+	gamePktActioners[CLI_CLOSE_NPC_DIALOG] = &exileSniffer::action_CLI_CLOSE_NPC_DIALOG;
 	//49
 	//4a
 	//4b
@@ -118,26 +93,26 @@ void exileSniffer::init_DecodedPktActioners()
 	//4d
 	//4e
 	//4f
-	decodedPktActioners[CLI_SEND_PARTY_INVITE] = &exileSniffer::action_CLI_SEND_PARTY_INVITE;
+	gamePktActioners[CLI_SEND_PARTY_INVITE] = &exileSniffer::action_CLI_SEND_PARTY_INVITE;
 	//51
-	decodedPktActioners[CLI_TRY_JOIN_PARTY] = &exileSniffer::action_CLI_TRY_JOIN_PARTY;
-	decodedPktActioners[CLI_DISBAND_PUBLIC_PARTY] = &exileSniffer::action_CLI_DISBAND_PUBLIC_PARTY;
+	gamePktActioners[CLI_TRY_JOIN_PARTY] = &exileSniffer::action_CLI_TRY_JOIN_PARTY;
+	gamePktActioners[CLI_DISBAND_PUBLIC_PARTY] = &exileSniffer::action_CLI_DISBAND_PUBLIC_PARTY;
 	//54
-	decodedPktActioners[CLI_CREATE_PUBLICPARTY] = &exileSniffer::action_CLI_CREATE_PUBLICPARTY;
-	decodedPktActioners[CLI_UNK_x56] = &exileSniffer::action_CLI_UNK_x56;
-	decodedPktActioners[CLI_GET_PARTY_DETAILS] = &exileSniffer::action_CLI_GET_PARTY_DETAILS;
-	decodedPktActioners[SRV_FRIENDSLIST] = &exileSniffer::action_SRV_FRIENDSLIST;
+	gamePktActioners[CLI_CREATE_PUBLICPARTY] = &exileSniffer::action_CLI_CREATE_PUBLICPARTY;
+	gamePktActioners[CLI_UNK_x56] = &exileSniffer::action_CLI_UNK_x56;
+	gamePktActioners[CLI_GET_PARTY_DETAILS] = &exileSniffer::action_CLI_GET_PARTY_DETAILS;
+	gamePktActioners[SRV_FRIENDSLIST] = &exileSniffer::action_SRV_FRIENDSLIST;
 	//59
-	decodedPktActioners[SRV_PARTY_DETAILS] = &exileSniffer::action_SRV_PARTY_DETAILS;
-	decodedPktActioners[SRV_PARTY_ENDED] = &exileSniffer::action_SRV_PARTY_ENDED;
+	gamePktActioners[SRV_PARTY_DETAILS] = &exileSniffer::action_SRV_PARTY_DETAILS;
+	gamePktActioners[SRV_PARTY_ENDED] = &exileSniffer::action_SRV_PARTY_ENDED;
 	//5c
-	decodedPktActioners[CLI_REQUEST_PUBLICPARTIES] = &exileSniffer::action_CLI_REQUEST_PUBLICPARTIES;
-	decodedPktActioners[SRV_PUBLIC_PARTY_LIST] = &exileSniffer::action_SRV_PUBLIC_PARTY_LIST;
+	gamePktActioners[CLI_REQUEST_PUBLICPARTIES] = &exileSniffer::action_CLI_REQUEST_PUBLICPARTIES;
+	gamePktActioners[SRV_PUBLIC_PARTY_LIST] = &exileSniffer::action_SRV_PUBLIC_PARTY_LIST;
 	//5f
 	//60
 	//61
 	//62
-	decodedPktActioners[CLI_MOVE_ITEM_PANE] = &exileSniffer::action_CLI_MOVE_ITEM_PANE;
+	gamePktActioners[CLI_MOVE_ITEM_PANE] = &exileSniffer::action_CLI_MOVE_ITEM_PANE;
 	//64
 	//65
 	//66
@@ -147,14 +122,14 @@ void exileSniffer::init_DecodedPktActioners()
 	//6a
 	//6b
 	//6c
-	decodedPktActioners[SRV_CREATE_ITEM] = &exileSniffer::action_SRV_CREATE_ITEM;
-	decodedPktActioners[SRV_SLOT_ITEMSLIST] = &exileSniffer::action_SRV_SLOT_ITEMSLIST;
+	gamePktActioners[SRV_CREATE_ITEM] = &exileSniffer::action_SRV_CREATE_ITEM;
+	gamePktActioners[SRV_SLOT_ITEMSLIST] = &exileSniffer::action_SRV_SLOT_ITEMSLIST;
 	//6f
-	decodedPktActioners[UNK_MESSAGE_0x70] = &exileSniffer::action_UNK_MESSAGE_0x70;
-	decodedPktActioners[CLI_UNK_0x71] = &exileSniffer::action_CLI_UNK_0x71;
-	decodedPktActioners[SRV_UNK_0x72] = &exileSniffer::action_SRV_UNK_0x72;
-	decodedPktActioners[UNK_MESSAGE_0x73] = &exileSniffer::action_UNK_MESSAGE_0x73;
-	decodedPktActioners[CLI_SET_STATUS_MESSAGE] = &exileSniffer::action_CLI_SET_STATUS_MESSAGE;
+	gamePktActioners[UNK_MESSAGE_0x70] = &exileSniffer::action_UNK_MESSAGE_0x70;
+	gamePktActioners[CLI_UNK_0x71] = &exileSniffer::action_CLI_UNK_0x71;
+	gamePktActioners[SRV_UNK_0x72] = &exileSniffer::action_SRV_UNK_0x72;
+	gamePktActioners[UNK_MESSAGE_0x73] = &exileSniffer::action_UNK_MESSAGE_0x73;
+	gamePktActioners[CLI_SET_STATUS_MESSAGE] = &exileSniffer::action_CLI_SET_STATUS_MESSAGE;
 	//75
 	//76
 	//77
@@ -165,7 +140,7 @@ void exileSniffer::init_DecodedPktActioners()
 	//7c
 	//7d
 	//7e
-	decodedPktActioners[CLI_SWAPPED_WEAPONS] = &exileSniffer::action_CLI_SWAPPED_WEAPONS;
+	gamePktActioners[CLI_SWAPPED_WEAPONS] = &exileSniffer::action_CLI_SWAPPED_WEAPONS;
 	//80
 	//81
 	//82
@@ -183,26 +158,26 @@ void exileSniffer::init_DecodedPktActioners()
 	//8e
 	//define 0x8f seen when leaving duel queue
 	//define 0x90 seen when leaving duel queue
-	decodedPktActioners[SRV_PVP_MATCHLIST] = &exileSniffer::action_SRV_PVP_MATCHLIST;
-	decodedPktActioners[SRV_EVENTSLIST] = &exileSniffer::action_SRV_EVENTSLIST;
+	gamePktActioners[SRV_PVP_MATCHLIST] = &exileSniffer::action_SRV_PVP_MATCHLIST;
+	gamePktActioners[SRV_EVENTSLIST] = &exileSniffer::action_SRV_EVENTSLIST;
 	//93
 	//94
 	//95
 	//96
 	//97
-	decodedPktActioners[CLI_SKILLPANE_ACTION] = &exileSniffer::action_CLI_SKILLPANE_ACTION;
+	gamePktActioners[CLI_SKILLPANE_ACTION] = &exileSniffer::action_CLI_SKILLPANE_ACTION;
 	//99
 	//9a
-	decodedPktActioners[SRV_SKILLPANE_DATA] = &exileSniffer::action_SRV_SKILLPANE_DATA;
+	gamePktActioners[SRV_SKILLPANE_DATA] = &exileSniffer::action_SRV_SKILLPANE_DATA;
 	//9c
 	//9d
 	//9e
-	decodedPktActioners[CLI_MICROTRANSACTION_SHOP_ACTION] = &exileSniffer::action_CLI_MICROTRANSACTION_SHOP_ACTION;
+	gamePktActioners[CLI_MICROTRANSACTION_SHOP_ACTION] = &exileSniffer::action_CLI_MICROTRANSACTION_SHOP_ACTION;
 	//a0
-	decodedPktActioners[SRV_MICROTRANSACTION_SHOP_DETAILS] = &exileSniffer::action_SRV_MICROTRANSACTION_SHOP_DETAILS;
+	gamePktActioners[SRV_MICROTRANSACTION_SHOP_DETAILS] = &exileSniffer::action_SRV_MICROTRANSACTION_SHOP_DETAILS;
 	//a2
-	decodedPktActioners[SRV_UNK_A3] = &exileSniffer::action_SRV_UNK_A3;
-	decodedPktActioners[SRV_CHAT_CHANNEL_ID] = &exileSniffer::action_SRV_CHAT_CHANNEL_ID;
+	gamePktActioners[SRV_UNK_A3] = &exileSniffer::action_SRV_UNK_A3;
+	gamePktActioners[SRV_CHAT_CHANNEL_ID] = &exileSniffer::action_SRV_CHAT_CHANNEL_ID;
 	//a5
 	//a6
 	//a7
@@ -211,7 +186,7 @@ void exileSniffer::init_DecodedPktActioners()
 	//aa
 	//ab
 	//ac
-	decodedPktActioners[CLI_GUILD_CREATE] = &exileSniffer::action_CLI_GUILD_CREATE;
+	gamePktActioners[CLI_GUILD_CREATE] = &exileSniffer::action_CLI_GUILD_CREATE;
 	//ae
 	//af
 	//b0
@@ -229,17 +204,17 @@ void exileSniffer::init_DecodedPktActioners()
 	//bd
 	//be
 	//bf
-	decodedPktActioners[CLI_PACKET_EXIT] = &exileSniffer::action_CLI_PACKET_EXIT;
-	decodedPktActioners[CLI_PACKET_EXIT_2] = &exileSniffer::action_CLI_PACKET_EXIT_2;
-	decodedPktActioners[CLI_DUEL_CHALLENGE] = &exileSniffer::action_CLI_DUEL_CHALLENGE;
-	decodedPktActioners[SRV_DUEL_RESPONSE] = &exileSniffer::action_SRV_DUEL_RESPONSE;
-	decodedPktActioners[SRV_DUEL_CHALLENGE] = &exileSniffer::action_SRV_DUEL_CHALLENGE;
+	gamePktActioners[CLI_PACKET_EXIT] = &exileSniffer::action_CLI_PACKET_EXIT;
+	gamePktActioners[CLI_PACKET_EXIT_2] = &exileSniffer::action_CLI_PACKET_EXIT_2;
+	gamePktActioners[CLI_DUEL_CHALLENGE] = &exileSniffer::action_CLI_DUEL_CHALLENGE;
+	gamePktActioners[SRV_DUEL_RESPONSE] = &exileSniffer::action_SRV_DUEL_RESPONSE;
+	gamePktActioners[SRV_DUEL_CHALLENGE] = &exileSniffer::action_SRV_DUEL_CHALLENGE;
 	//c5
-	decodedPktActioners[CLI_UNK_0xC6] = &exileSniffer::action_CLI_UNK_0xC6; 
-	decodedPktActioners[CLI_UNK_0xC7] = &exileSniffer::action_CLI_UNK_0xC7;
+	gamePktActioners[CLI_UNK_0xC6] = &exileSniffer::action_CLI_UNK_0xC6; 
+	gamePktActioners[CLI_UNK_0xC7] = &exileSniffer::action_CLI_UNK_0xC7;
 	//c8
 	//c9
-	decodedPktActioners[SRV_UNK_0xCA] = &exileSniffer::action_SRV_UNK_0xCA;
+	gamePktActioners[SRV_UNK_0xCA] = &exileSniffer::action_SRV_UNK_0xCA;
 	//cb
 	//cd
 	//CLI_VISIT_HIDEOUT
@@ -249,45 +224,45 @@ void exileSniffer::init_DecodedPktActioners()
 	//d2
 	//d3
 	//d4
-	decodedPktActioners[SRV_UNK_0xD5] = &exileSniffer::action_SRV_UNK_0xD5;
+	gamePktActioners[SRV_UNK_0xD5] = &exileSniffer::action_SRV_UNK_0xD5;
 	//d6
 	//d7
-	decodedPktActioners[CLI_USED_SKILL] = &exileSniffer::action_CLI_USED_SKILL;
-	decodedPktActioners[CLI_CLICK_OBJ] = &exileSniffer::action_CLI_CLICK_OBJ;
-	decodedPktActioners[CLI_MOUSE_HELD] = &exileSniffer::action_CLI_MOUSE_HELD;
+	gamePktActioners[CLI_USED_SKILL] = &exileSniffer::action_CLI_USED_SKILL;
+	gamePktActioners[CLI_CLICK_OBJ] = &exileSniffer::action_CLI_CLICK_OBJ;
+	gamePktActioners[CLI_MOUSE_HELD] = &exileSniffer::action_CLI_MOUSE_HELD;
 	//db
-	decodedPktActioners[CLI_MOUSE_RELEASE] = &exileSniffer::action_CLI_MOUSE_RELEASE;
+	gamePktActioners[CLI_MOUSE_RELEASE] = &exileSniffer::action_CLI_MOUSE_RELEASE;
 	//dd
 	//de
 	//df
-	decodedPktActioners[CLI_OPEN_WORLD_SCREEN] = &exileSniffer::action_CLI_OPEN_WORLD_SCREEN;
+	gamePktActioners[CLI_OPEN_WORLD_SCREEN] = &exileSniffer::action_CLI_OPEN_WORLD_SCREEN;
 	//e1
 	//e2
 	//e3
 	//e4
 	//e5
-	decodedPktActioners[SRV_UNK_0xE6] = &exileSniffer::action_SRV_UNK_0xE6;
+	gamePktActioners[SRV_UNK_0xE6] = &exileSniffer::action_SRV_UNK_0xE6;
 	//e7
 	//e8
-	decodedPktActioners[SRV_OBJ_REMOVED] = &exileSniffer::action_SRV_OBJ_REMOVED;
-	decodedPktActioners[SRV_MOBILE_START_SKILL] = &exileSniffer::action_SRV_MOBILE_START_SKILL;
-	decodedPktActioners[SRV_MOBILE_FINISH_SKILL] = &exileSniffer::action_SRV_MOBILE_FINISH_SKILL;
+	gamePktActioners[SRV_OBJ_REMOVED] = &exileSniffer::action_SRV_OBJ_REMOVED;
+	gamePktActioners[SRV_MOBILE_START_SKILL] = &exileSniffer::action_SRV_MOBILE_START_SKILL;
+	gamePktActioners[SRV_MOBILE_FINISH_SKILL] = &exileSniffer::action_SRV_MOBILE_FINISH_SKILL;
 	//ec
 	//ed
-	decodedPktActioners[SRV_MOBILE_UNK_0xee] = &exileSniffer::action_SRV_MOBILE_UNK_0xee;
-	decodedPktActioners[SRV_MOBILE_UNK_0xef] = &exileSniffer::action_SRV_MOBILE_UNK_0xef;
-	decodedPktActioners[SRV_MOBILE_UPDATE_HMS] = &exileSniffer::action_SRV_MOBILE_UPDATE_HMS;
-	decodedPktActioners[SRV_STAT_CHANGED] = &exileSniffer::action_SRV_STAT_CHANGED;
-	decodedPktActioners[SRV_UNK_0xf2] = &exileSniffer::action_SRV_UNK_0xf2;
-	decodedPktActioners[SRV_UNK_0xf3] = &exileSniffer::action_SRV_UNK_0xf3;
+	gamePktActioners[SRV_MOBILE_UNK_0xee] = &exileSniffer::action_SRV_MOBILE_UNK_0xee;
+	gamePktActioners[SRV_MOBILE_UNK_0xef] = &exileSniffer::action_SRV_MOBILE_UNK_0xef;
+	gamePktActioners[SRV_MOBILE_UPDATE_HMS] = &exileSniffer::action_SRV_MOBILE_UPDATE_HMS;
+	gamePktActioners[SRV_STAT_CHANGED] = &exileSniffer::action_SRV_STAT_CHANGED;
+	gamePktActioners[SRV_UNK_0xf2] = &exileSniffer::action_SRV_UNK_0xf2;
+	gamePktActioners[SRV_UNK_0xf3] = &exileSniffer::action_SRV_UNK_0xf3;
 	//f4
 	//f5
 	//f6
 	//f7
 	//f8
 	//f9
-	decodedPktActioners[SRV_START_EFFECT] = &exileSniffer::action_SRV_START_BUFF;
-	decodedPktActioners[SRV_END_EFFECT] = &exileSniffer::action_SRV_END_EFFECT;
+	gamePktActioners[SRV_START_EFFECT] = &exileSniffer::action_SRV_START_BUFF;
+	gamePktActioners[SRV_END_EFFECT] = &exileSniffer::action_SRV_END_EFFECT;
 	//fc
 	//fd
 	//fe
@@ -306,21 +281,21 @@ void exileSniffer::init_DecodedPktActioners()
 	//10b
 	//10c
 	//10d
-	decodedPktActioners[CLI_REQUEST_PLAYERID] = &exileSniffer::action_CLI_REQUEST_PLAYERID;
-	decodedPktActioners[SRV_NOTIFY_PLAYERID] = &exileSniffer::action_SRV_NOTIFY_PLAYERID;
+	gamePktActioners[CLI_REQUEST_PLAYERID] = &exileSniffer::action_CLI_REQUEST_PLAYERID;
+	gamePktActioners[SRV_NOTIFY_PLAYERID] = &exileSniffer::action_SRV_NOTIFY_PLAYERID;
 	//0x110 - player pressed add new stash tab +?
-	decodedPktActioners[SRV_UNKNOWN_0x111] = &exileSniffer::action_SRV_UNKNOWN_0x111;
+	gamePktActioners[SRV_UNKNOWN_0x111] = &exileSniffer::action_SRV_UNKNOWN_0x111;
 	//112
 	//113
 	//114
 	//115
 	//116
 	//117
-	decodedPktActioners[SRV_UNKNOWN_0x118] = &exileSniffer::action_SRV_UNKNOWN_0x118;
+	gamePktActioners[SRV_UNKNOWN_0x118] = &exileSniffer::action_SRV_UNKNOWN_0x118;
 	//119
 	//11a
 	//11b
-	decodedPktActioners[CLI_OPTOUT_TUTORIALS] = &exileSniffer::action_CLI_OPTOUT_TUTORIALS;
+	gamePktActioners[CLI_OPTOUT_TUTORIALS] = &exileSniffer::action_CLI_OPTOUT_TUTORIALS;
 	//11d
 	//11e
 	//11f
@@ -339,15 +314,15 @@ void exileSniffer::init_DecodedPktActioners()
 	//12c
 	//12d
 	//12e
-	decodedPktActioners[SRV_SHOW_ENTERING_MSG] = &exileSniffer::action_SRV_SHOW_ENTERING_MSG;
+	gamePktActioners[SRV_SHOW_ENTERING_MSG] = &exileSniffer::action_SRV_SHOW_ENTERING_MSG;
 	//130
 	//131
-	decodedPktActioners[SRV_HEARTBEAT] = &exileSniffer::action_SRV_HEARTBEAT;
+	gamePktActioners[SRV_HEARTBEAT] = &exileSniffer::action_SRV_HEARTBEAT;
 	//133
 	//134
-	decodedPktActioners[SRV_ADD_OBJECT] = &exileSniffer::action_SRV_ADD_OBJECT;
-	decodedPktActioners[SRV_UPDATE_OBJECT] = &exileSniffer::action_SRV_UPDATE_OBJECT;
-	decodedPktActioners[SRV_IDNOTIFY_0x137] = &exileSniffer::action_SRV_IDNOTIFY_0x137;
+	gamePktActioners[SRV_ADD_OBJECT] = &exileSniffer::action_SRV_ADD_OBJECT;
+	gamePktActioners[SRV_UPDATE_OBJECT] = &exileSniffer::action_SRV_UPDATE_OBJECT;
+	gamePktActioners[SRV_IDNOTIFY_0x137] = &exileSniffer::action_SRV_IDNOTIFY_0x137;
 	//138
 	//139
 
@@ -433,6 +408,14 @@ void exileSniffer::action_undecoded_packet(UIDecodedPkt& obj)
 {
 	obj.toggle_payload_operations(true);
 
+	if (!obj.originalbuf) 
+	{
+		stringstream err;
+		err << "ERROR! Undecoded packet has no buffer set";
+		add_metalog_update(QString::fromStdString(err.str()), 0);
+		return;
+	}
+
 	size_t sizeAfterID = obj.originalbuf->size() - obj.bufferOffsets.first;
 	wstringstream summary;
 	summary << "Undecoded packet or multipacket blob (~ "
@@ -449,9 +432,17 @@ void exileSniffer::action_undecoded_packet(UIDecodedPkt& obj)
 
 void exileSniffer::action_decoded_packet(UIDecodedPkt& decoded)
 {
+	if (decoded.streamFlags & PKTBIT_GAMESERVER)
+		action_decoded_game_packet(decoded);
+	else if (decoded.streamFlags & PKTBIT_LOGINSERVER)
+		action_decoded_login_packet(decoded);
+}
+
+void exileSniffer::action_decoded_game_packet(UIDecodedPkt& decoded)
+{
 	clientData *client = get_client(decoded.clientProcessID());
 	if (!client) {
-		std::cerr << "Error: Client had PID 0 when decoding pkt id 0x" << std::hex << decoded.messageID << std::endl;
+		std::cerr << "Error: Client had PID 0 when decoding game pkt id 0x" << std::hex << decoded.messageID << std::endl;
 		return;
 	}
 
@@ -462,8 +453,8 @@ void exileSniffer::action_decoded_packet(UIDecodedPkt& decoded)
 		return;
 	}
 
-	auto it = decodedPktActioners.find(decoded.messageID);
-	if (it != decodedPktActioners.end())
+	auto it = gamePktActioners.find(decoded.messageID);
+	if (it != gamePktActioners.end())
 	{
 		exileSniffer::actionFunc f = it->second;
 		(this->*f)(decoded, NULL);
@@ -474,10 +465,35 @@ void exileSniffer::action_decoded_packet(UIDecodedPkt& decoded)
 	else
 	{
 		stringstream err;
-		err << "ERROR! no action setup for known pkt id 0x" << std::hex << decoded.messageID;
+		err << "ERROR! no action setup for known game msg id 0x" << std::hex << decoded.messageID;
 		add_metalog_update(QString::fromStdString(err.str()), decoded.clientProcessID());
 	}
 
+}
+
+
+std::wstring explainModifier(byte lastByte)
+{
+	/*
+	00001000 click       0x8
+	00001001 +shift		 0x9
+	00001010 +windowOpen 0xa
+	00001100 +ctrl		 0xc
+
+	8 = inventory/etc open
+	9 = shift held
+	c = control held
+	*/
+
+	std::wstring result = L"";
+
+	if (lastByte & 0x1)
+		result += L"+shift ";
+	if (lastByte & 0x2)
+		result += L"+openPane ";
+	if (lastByte & 0x4)
+		result += L"+ctrl ";
+	return result;
 }
 
 

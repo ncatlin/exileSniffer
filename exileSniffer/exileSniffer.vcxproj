@@ -136,16 +136,18 @@
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
     </ClCompile>
     <ClCompile Include="exileSniffer.cpp" />
-    <ClCompile Include="exileSniffer_packet_actions.cpp" />
+    <ClCompile Include="gameserver_packet_actions.cpp" />
     <ClCompile Include="gameDataStore.cpp" />
     <ClCompile Include="inventory.cpp" />
     <ClCompile Include="key_grabber_thread.cpp" />
+    <ClCompile Include="loginserver_packet_actions.cpp" />
+    <ClCompile Include="loginserver_packet_deserialisers.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MurmurHash2.cpp" />
     <ClCompile Include="packet_processor.cpp" />
     <QtMoc Include="filterForm.h" />
     <ClCompile Include="packet_processor_decode_utils.cpp" />
-    <ClCompile Include="packet_processor_game_packet_decoders.cpp" />
+    <ClCompile Include="gameserver_packet_deserialisers.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>

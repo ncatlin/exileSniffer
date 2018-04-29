@@ -149,7 +149,7 @@ std::wstring epochms_to_timestring(long long epochms)
 	timeinfo = localtime(&rawtime);
 
 	wchar_t buf[100];
-	wcsftime(buf, 100, L"%b%d %H:%M:%S:", timeinfo);
+	wcsftime(buf, 100, L"%b-%d %H:%M:%S:", timeinfo);
 	std::wstring result = std::wstring(buf) + std::to_wstring((epochms % 1000));
 	return result;
 }
@@ -161,3 +161,17 @@ long long ms_since_epoch()
 	auto sinceEpoch = now_ms.time_since_epoch();
 	return sinceEpoch.count();
 }
+
+std::wstring IPToString(DWORD ip)
+{
+	unsigned char a, b, c, d;
+	d = ip & 0xFF;
+	c = (ip >> 8) & 0xFF;
+	b = (ip >> 16) & 0xFF;
+	a = (ip >> 24) & 0xFF;
+
+	std::wstringstream res;
+	res << std::dec << a << "." << b << "." << c << "." << d;
+	return res.str();
+}
+

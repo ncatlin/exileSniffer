@@ -22,8 +22,8 @@ exileSniffer::exileSniffer(QWidget *parent)
 	setup_decoded_messages_tab();
 	initFilters();
 
-	init_DecodedPktActioners();
-
+	init_loginPkt_Actioners();
+	init_gamePkt_Actioners();
 
 	start_threads();
 
@@ -112,7 +112,8 @@ void exileSniffer::setup_decoded_messages_tab()
 {
 	ui.decodedListTable->horizontalScrollBar()->setFixedHeight(10);
 	ui.decodedListTable->horizontalHeader()->resizeSection(DECODED_SECTION_TIME, 70);
-	ui.decodedListTable->horizontalHeader()->resizeSection(DECODED_SECTION_SENDER, 50);
+	ui.decodedListTable->horizontalHeader()->resizeSection(DECODED_SECTION_SENDER, 75);
+	ui.decodedListTable->horizontalHeader()->resizeSection(DECODED_SECTION_MSGID, 45);
 	ui.decodedListTable->horizontalHeader()->resizeSection(DECODED_SECTION_SUMMARY, 450);
 	ui.decodedListTable->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
 }
@@ -516,7 +517,13 @@ void exileSniffer::decodedListClicked()
 		ui.decodedAutoscrollCheck->setChecked(false);
 }
 
-
+QString UI_DECODED_LIST_ENTRY::sender()
+{
+	if (flags & PKTBIT_OUTBOUND) return "Client";
+	if (flags & PKTBIT_GAMESERVER) return "GameServer";
+	if (flags & PKTBIT_LOGINSERVER) return "LoginServer";
+	return "ErrorB";
+}
 
 void exileSniffer::decodedCellActivated(int row, int col)
 {
@@ -527,8 +534,14 @@ void exileSniffer::decodedCellActivated(int row, int col)
 
 	if (!obj->decodeError())
 	{
-		auto it = decodedPktActioners.find(obj->messageID);
-		if (it != decodedPktActioners.end())
+		map<unsigned short, actionFunc>* actionerList;
+		if (obj->streamFlags & PKTBIT_GAMESERVER)
+			actionerList = &gamePktActioners;
+		else
+			actionerList = &loginPktActioners;
+
+		auto it = actionerList->find(obj->messageID);
+		if (it != actionerList->end())
 		{
 			exileSniffer::actionFunc f = it->second;
 			QString detailedAnalysis;
@@ -549,24 +562,35 @@ void exileSniffer::decodedCellActivated(int row, int col)
 		}
 	}
 
-
 	std::wstringstream hexdump;
-
+	hexdump << "----Hex Dump----" << std::endl;
 	char timestamp[20];
-
 	hexdump << epochms_to_timestring(obj->time_processed_ms()) << " ";
+
+	if (!obj->originalbuf)
+	{
+		wstringstream err;
+		err << "ERROR! Decodedcell item has no buffer set. pkt time: " << epochms_to_timestring(obj->time_processed_ms());
+		add_metalog_update(QString::fromStdWString(err.str()), 0);
+		return;
+	}
+
+
 
 	size_t bytessize;
 	if (obj->decodeError())
 		bytessize = obj->originalbuf->size() - obj->bufferOffsets.first;
 	else
 		bytessize = obj->bufferOffsets.second - obj->bufferOffsets.first;
+	
+	std::wstring serverName  = (obj->streamFlags & PKTBIT_GAMESERVER) ? L"GameServer" : L"LoginServer";
 
 	if (obj->streamFlags & PKTBIT_INBOUND)
-		hexdump << "server" << " to PlayerClient";
+		hexdump << serverName << " to PlayerClient";
 	else
-		hexdump << "PlayerClient to " << "server"; //serverString(pkt->stream, "f");
-	hexdump << "(" << std::dec << bytessize << " bytes)" << std::endl;
+		hexdump << "PlayerClient to " << serverName;
+
+	hexdump << " (" << std::dec << bytessize << " bytes)" << std::endl;
 
 	size_t bufStart = obj->bufferOffsets.first;
 	
@@ -595,4 +619,53 @@ void exileSniffer::decodedCellActivated(int row, int col)
 	
 	std::wstring hexdumpstring = hexdump.str();
 	ui.decodedText->insertPlainText(QString::fromStdWString(hexdumpstring));
+}
+
+
+void exileSniffer::copySelected()
+{
+	QModelIndexList rowsSelected = ui.decodedListTable->selectionModel()->selectedRows();
+	if (rowsSelected.empty()) return;
+	QTableWidgetItem *rowitem = ui.decodedListTable->item(rowsSelected.front().row(), 0);
+
+	//todo - mush stuff on this row together on keyboard
+}
+
+void exileSniffer::filterSelected()
+{
+	QModelIndexList rowsSelected = ui.decodedListTable->selectionModel()->selectedRows();
+	if (rowsSelected.empty()) return;
+	QTableWidgetItem *rowitem = ui.decodedListTable->item(rowsSelected.front().row(), 0);
+	UIDecodedPkt* obj = (UIDecodedPkt*)rowitem->data(Qt::UserRole).value<UIDecodedPkt*>();
+
+	//todo filter
+}
+
+void exileSniffer::decodedTableMenuRequest(QPoint pos)
+{
+	QMenu contextMenu(tr("Context menu"), this);
+
+	QAction action1("Copy Contents", this);
+	//connect(&action1, SIGNAL(triggered()), this, SLOT(copySelected()));
+	contextMenu.addAction(&action1);
+
+	//doesnt appear if nested in the if statements?
+	QAction action2("", this);
+	//connect(&action2, SIGNAL(triggered()), this, SLOT(filterSelected()));
+
+	QModelIndexList rowsSelected = ui.decodedListTable->selectionModel()->selectedRows();
+	if (rowsSelected.empty())
+	{
+		contextMenu.exec(mapToGlobal(pos));
+		return;
+	}
+
+	QTableWidgetItem *rowitem = ui.decodedListTable->item(rowsSelected.front().row(), 0);
+	UIDecodedPkt* obj = (UIDecodedPkt*)rowitem->data(Qt::UserRole).value<UIDecodedPkt*>();
+
+	QString labeltext = "Filter PktID 0x" + QString::number(obj->messageID, 16);
+	action2.setText(labeltext);
+	contextMenu.addAction(&action2);
+	contextMenu.exec(mapToGlobal(pos));
+	return;
 }

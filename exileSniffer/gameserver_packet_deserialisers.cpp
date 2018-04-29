@@ -7,51 +7,51 @@ into meaningful data as the game client/server would interpret it
 #include "packetIDs.h"
 
 
-void packet_processor::init_packetDeserialisers()
+void packet_processor::init_gamePkt_deserialisers()
 {
-	packetDeserialisers[SRV_PKT_ENCAPSULATED] = (deserialiser)&packet_processor::deserialise_SRV_PKT_ENCAPSULATED;
-	packetDeserialisers[CLI_CHAT_MSG_ITEMS] = (deserialiser)&packet_processor::deserialise_CLI_CHAT_MSG_ITEMS;
+	gamePktDeserialisers[SRV_PKT_ENCAPSULATED] = (deserialiser)&packet_processor::deserialise_SRV_PKT_ENCAPSULATED;
+	gamePktDeserialisers[CLI_CHAT_MSG_ITEMS] = (deserialiser)&packet_processor::deserialise_CLI_CHAT_MSG_ITEMS;
 	//7
-	packetDeserialisers[CLI_CHAT_MESSAGE] = (deserialiser)&packet_processor::deserialise_CLI_CHAT_MSG;
-	packetDeserialisers[CLI_CHAT_COMMAND] = (deserialiser)&packet_processor::deserialise_CLI_CHAT_COMMAND;
-	packetDeserialisers[SRV_CHAT_MESSAGE] = (deserialiser)&packet_processor::deserialise_SRV_CHAT_MESSAGE;
-	packetDeserialisers[SRV_SERVER_MESSAGE] = (deserialiser)&packet_processor::deserialise_SRV_SERVER_MESSAGE;
-	packetDeserialisers[CLI_LOGGED_OUT] = (deserialiser)&packet_processor::deserialise_CLI_LOGGED_OUT;
-	packetDeserialisers[CLI_PING_CHALLENGE] = (deserialiser)&packet_processor::deserialise_CLI_PING_CHALLENGE;
-	packetDeserialisers[SRV_PING_RESPONSE] = (deserialiser)&packet_processor::deserialise_SRV_PING_RESPONSE;
-	packetDeserialisers[SRV_AREA_INFO] = (deserialiser)&packet_processor::deserialise_SRV_AREA_INFO;
+	gamePktDeserialisers[CLI_CHAT_MESSAGE] = (deserialiser)&packet_processor::deserialise_CLI_CHAT_MSG;
+	gamePktDeserialisers[CLI_CHAT_COMMAND] = (deserialiser)&packet_processor::deserialise_CLI_CHAT_COMMAND;
+	gamePktDeserialisers[SRV_CHAT_MESSAGE] = (deserialiser)&packet_processor::deserialise_SRV_CHAT_MESSAGE;
+	gamePktDeserialisers[SRV_SERVER_MESSAGE] = (deserialiser)&packet_processor::deserialise_SRV_SERVER_MESSAGE;
+	gamePktDeserialisers[CLI_LOGGED_OUT] = (deserialiser)&packet_processor::deserialise_CLI_LOGGED_OUT;
+	gamePktDeserialisers[CLI_PING_CHALLENGE] = (deserialiser)&packet_processor::deserialise_CLI_PING_CHALLENGE;
+	gamePktDeserialisers[SRV_PING_RESPONSE] = (deserialiser)&packet_processor::deserialise_SRV_PING_RESPONSE;
+	gamePktDeserialisers[SRV_AREA_INFO] = (deserialiser)&packet_processor::deserialise_SRV_AREA_INFO;
 	//10?
 	//11?
-	packetDeserialisers[SRV_PRELOAD_MONSTER_LIST] = (deserialiser)&packet_processor::deserialise_SRV_PRELOAD_MONSTER_LIST;
-	packetDeserialisers[SRV_UNK_0x13] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x13;
-	packetDeserialisers[SRV_PLAYER_ITEMS] = (deserialiser)&packet_processor::deserialise_SRV_PLAYER_ITEMS;
-	packetDeserialisers[CLI_CLICKED_GROUND_ITEM] = (deserialiser)&packet_processor::deserialise_CLI_CLICKED_GROUND_ITEM;
-	packetDeserialisers[CLI_ACTION_PREDICTIVE] = (deserialiser)&packet_processor::deserialise_CLI_ACTION_PREDICTIVE;
-	packetDeserialisers[SRV_TRANSFER_INSTANCE] = (deserialiser)&packet_processor::deserialise_SRV_TRANSFER_INSTANCE;
-	packetDeserialisers[SRV_INSTANCE_SERVER_DATA] = (deserialiser)&packet_processor::deserialise_SRV_INSTANCE_SERVER_DATA;
-	packetDeserialisers[CLI_PICKUP_ITEM] = (deserialiser)&packet_processor::deserialise_CLI_PICKUP_ITEM;
+	gamePktDeserialisers[SRV_PRELOAD_MONSTER_LIST] = (deserialiser)&packet_processor::deserialise_SRV_PRELOAD_MONSTER_LIST;
+	gamePktDeserialisers[SRV_UNK_0x13] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x13;
+	gamePktDeserialisers[SRV_PLAYER_ITEMS] = (deserialiser)&packet_processor::deserialise_SRV_PLAYER_ITEMS;
+	gamePktDeserialisers[CLI_CLICKED_GROUND_ITEM] = (deserialiser)&packet_processor::deserialise_CLI_CLICKED_GROUND_ITEM;
+	gamePktDeserialisers[CLI_ACTION_PREDICTIVE] = (deserialiser)&packet_processor::deserialise_CLI_ACTION_PREDICTIVE;
+	gamePktDeserialisers[SRV_TRANSFER_INSTANCE] = (deserialiser)&packet_processor::deserialise_SRV_TRANSFER_INSTANCE;
+	gamePktDeserialisers[SRV_INSTANCE_SERVER_DATA] = (deserialiser)&packet_processor::deserialise_SRV_INSTANCE_SERVER_DATA;
+	gamePktDeserialisers[CLI_PICKUP_ITEM] = (deserialiser)&packet_processor::deserialise_CLI_PICKUP_ITEM;
 	//1a
-	packetDeserialisers[CLI_PLACE_ITEM] = (deserialiser)&packet_processor::deserialise_CLI_PLACE_ITEM;
+	gamePktDeserialisers[CLI_PLACE_ITEM] = (deserialiser)&packet_processor::deserialise_CLI_PLACE_ITEM;
 	//1c
-	packetDeserialisers[CLI_REMOVE_SOCKET] = (deserialiser)&packet_processor::deserialise_CLI_REMOVE_SOCKET;
-	packetDeserialisers[CLI_INSERT_SOCKET] = (deserialiser)&packet_processor::deserialise_CLI_INSERT_SOCKET;
-	packetDeserialisers[CLI_LEVEL_SKILLGEM] = (deserialiser)&packet_processor::deserialise_CLI_LEVEL_SKILLGEM;
-	packetDeserialisers[CLI_UNK_0x20] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0x20;
-	packetDeserialisers[CLI_SKILLPOINT_CHANGE] = (deserialiser)&packet_processor::deserialise_CLI_SKILLPOINT_CHANGE;
+	gamePktDeserialisers[CLI_REMOVE_SOCKET] = (deserialiser)&packet_processor::deserialise_CLI_REMOVE_SOCKET;
+	gamePktDeserialisers[CLI_INSERT_SOCKET] = (deserialiser)&packet_processor::deserialise_CLI_INSERT_SOCKET;
+	gamePktDeserialisers[CLI_LEVEL_SKILLGEM] = (deserialiser)&packet_processor::deserialise_CLI_LEVEL_SKILLGEM;
+	gamePktDeserialisers[CLI_UNK_0x20] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0x20;
+	gamePktDeserialisers[CLI_SKILLPOINT_CHANGE] = (deserialiser)&packet_processor::deserialise_CLI_SKILLPOINT_CHANGE;
 	//22
 	//23
-	packetDeserialisers[CLI_CHOSE_ASCENDANCY] = (deserialiser)&packet_processor::deserialise_CLI_CHOSE_ASCENDANCY;
+	gamePktDeserialisers[CLI_CHOSE_ASCENDANCY] = (deserialiser)&packet_processor::deserialise_CLI_CHOSE_ASCENDANCY;
 	//25
 	//26
 	//27
 	//28
 	//29
 	//2a
-	packetDeserialisers[CLI_CANCEL_BUF] = (deserialiser)&packet_processor::deserialise_CLI_CANCEL_BUF;
-	packetDeserialisers[CLI_UNK_0x2c] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0x2c;
+	gamePktDeserialisers[CLI_CANCEL_BUF] = (deserialiser)&packet_processor::deserialise_CLI_CANCEL_BUF;
+	gamePktDeserialisers[CLI_UNK_0x2c] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0x2c;
 	//2d
-	packetDeserialisers[CLI_SET_HOTBARSKILL] = (deserialiser)&packet_processor::deserialise_CLI_SET_HOTBARSKILL;
-	packetDeserialisers[SRV_SKILL_SLOTS_LIST] = (deserialiser)&packet_processor::deserialise_SRV_SKILL_SLOTS_LIST;
+	gamePktDeserialisers[CLI_SET_HOTBARSKILL] = (deserialiser)&packet_processor::deserialise_CLI_SET_HOTBARSKILL;
+	gamePktDeserialisers[SRV_SKILL_SLOTS_LIST] = (deserialiser)&packet_processor::deserialise_SRV_SKILL_SLOTS_LIST;
 	//30
 	//31
 	//32
@@ -59,24 +59,24 @@ void packet_processor::init_packetDeserialisers()
 	//34
 	//35
 	//36
-	packetDeserialisers[CLI_USE_BELT_SLOT] = (deserialiser)&packet_processor::deserialise_CLI_USE_BELT_SLOT;
-	packetDeserialisers[CLI_USE_ITEM] = (deserialiser)&packet_processor::deserialise_CLI_USE_ITEM;
+	gamePktDeserialisers[CLI_USE_BELT_SLOT] = (deserialiser)&packet_processor::deserialise_CLI_USE_BELT_SLOT;
+	gamePktDeserialisers[CLI_USE_ITEM] = (deserialiser)&packet_processor::deserialise_CLI_USE_ITEM;
 	//39
 	//3a
 	//3b
 	//3c
 	//3d
 	//3e
-	packetDeserialisers[SRV_OPEN_UI_PANE] = (deserialiser)&packet_processor::deserialise_SRV_OPEN_UI_PANE;
+	gamePktDeserialisers[SRV_OPEN_UI_PANE] = (deserialiser)&packet_processor::deserialise_SRV_OPEN_UI_PANE;
 	//40
-	packetDeserialisers[CLI_UNK_0x41] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0x41;
+	gamePktDeserialisers[CLI_UNK_0x41] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0x41;
 	//42
 	//43
 	//44
 	//45
-	packetDeserialisers[CLI_SELECT_NPC_DIALOG] = (deserialiser)&packet_processor::deserialise_CLI_SELECT_NPC_DIALOG;
-	packetDeserialisers[SRV_SHOW_NPC_DIALOG] = (deserialiser)&packet_processor::deserialise_SRV_SHOW_NPC_DIALOG;
-	packetDeserialisers[CLI_CLOSE_NPC_DIALOG] = (deserialiser)&packet_processor::deserialise_CLI_CLOSE_NPC_DIALOG;
+	gamePktDeserialisers[CLI_SELECT_NPC_DIALOG] = (deserialiser)&packet_processor::deserialise_CLI_SELECT_NPC_DIALOG;
+	gamePktDeserialisers[SRV_SHOW_NPC_DIALOG] = (deserialiser)&packet_processor::deserialise_SRV_SHOW_NPC_DIALOG;
+	gamePktDeserialisers[CLI_CLOSE_NPC_DIALOG] = (deserialiser)&packet_processor::deserialise_CLI_CLOSE_NPC_DIALOG;
 	//49
 	//4a
 	//4b
@@ -84,26 +84,26 @@ void packet_processor::init_packetDeserialisers()
 	//4d
 	//4e
 	//4f
-	packetDeserialisers[CLI_SEND_PARTY_INVITE] = (deserialiser)&packet_processor::deserialise_CLI_SEND_PARTY_INVITE;
+	gamePktDeserialisers[CLI_SEND_PARTY_INVITE] = (deserialiser)&packet_processor::deserialise_CLI_SEND_PARTY_INVITE;
 	//51
-	packetDeserialisers[CLI_TRY_JOIN_PARTY] = (deserialiser)&packet_processor::deserialise_CLI_TRY_JOIN_PARTY;
-	packetDeserialisers[CLI_DISBAND_PUBLIC_PARTY] = (deserialiser)&packet_processor::deserialise_CLI_DISBAND_PUBLIC_PARTY;
+	gamePktDeserialisers[CLI_TRY_JOIN_PARTY] = (deserialiser)&packet_processor::deserialise_CLI_TRY_JOIN_PARTY;
+	gamePktDeserialisers[CLI_DISBAND_PUBLIC_PARTY] = (deserialiser)&packet_processor::deserialise_CLI_DISBAND_PUBLIC_PARTY;
 	//54
-	packetDeserialisers[CLI_CREATE_PUBLICPARTY] = (deserialiser)&packet_processor::deserialise_CLI_CREATE_PUBLICPARTY;
-	packetDeserialisers[CLI_UNK_x56] = (deserialiser)&packet_processor::deserialise_CLI_UNK_x56;
-	packetDeserialisers[CLI_GET_PARTY_DETAILS] = (deserialiser)&packet_processor::deserialise_CLI_GET_PARTY_DETAILS;
-	packetDeserialisers[SRV_FRIENDSLIST] = (deserialiser)&packet_processor::deserialise_SRV_FRIENDSLIST;
+	gamePktDeserialisers[CLI_CREATE_PUBLICPARTY] = (deserialiser)&packet_processor::deserialise_CLI_CREATE_PUBLICPARTY;
+	gamePktDeserialisers[CLI_UNK_x56] = (deserialiser)&packet_processor::deserialise_CLI_UNK_x56;
+	gamePktDeserialisers[CLI_GET_PARTY_DETAILS] = (deserialiser)&packet_processor::deserialise_CLI_GET_PARTY_DETAILS;
+	gamePktDeserialisers[SRV_FRIENDSLIST] = (deserialiser)&packet_processor::deserialise_SRV_FRIENDSLIST;
 	//59
-	packetDeserialisers[SRV_PARTY_DETAILS] = (deserialiser)&packet_processor::deserialise_SRV_PARTY_DETAILS;
-	packetDeserialisers[SRV_PARTY_ENDED] = (deserialiser)&packet_processor::deserialise_SRV_PARTY_ENDED;
+	gamePktDeserialisers[SRV_PARTY_DETAILS] = (deserialiser)&packet_processor::deserialise_SRV_PARTY_DETAILS;
+	gamePktDeserialisers[SRV_PARTY_ENDED] = (deserialiser)&packet_processor::deserialise_SRV_PARTY_ENDED;
 	//5c
-	packetDeserialisers[CLI_REQUEST_PUBLICPARTIES] = (deserialiser)&packet_processor::deserialise_CLI_REQUEST_PUBLICPARTIES;
-	packetDeserialisers[SRV_PUBLIC_PARTY_LIST] = (deserialiser)&packet_processor::deserialise_SRV_PUBLIC_PARTY_LIST;
+	gamePktDeserialisers[CLI_REQUEST_PUBLICPARTIES] = (deserialiser)&packet_processor::deserialise_CLI_REQUEST_PUBLICPARTIES;
+	gamePktDeserialisers[SRV_PUBLIC_PARTY_LIST] = (deserialiser)&packet_processor::deserialise_SRV_PUBLIC_PARTY_LIST;
 	//5f
 	//60
 	//61
 	//62
-	packetDeserialisers[CLI_MOVE_ITEM_PANE] = (deserialiser)&packet_processor::deserialise_CLI_MOVE_ITEM_PANE;
+	gamePktDeserialisers[CLI_MOVE_ITEM_PANE] = (deserialiser)&packet_processor::deserialise_CLI_MOVE_ITEM_PANE;
 	//64
 	//65
 	//66
@@ -113,14 +113,14 @@ void packet_processor::init_packetDeserialisers()
 	//6a
 	//6b
 	//6c
-	packetDeserialisers[SRV_CREATE_ITEM] = (deserialiser)&packet_processor::deserialise_SRV_CREATE_ITEM;
-	packetDeserialisers[SRV_SLOT_ITEMSLIST] = (deserialiser)&packet_processor::deserialise_SRV_SLOT_ITEMSLIST;
+	gamePktDeserialisers[SRV_CREATE_ITEM] = (deserialiser)&packet_processor::deserialise_SRV_CREATE_ITEM;
+	gamePktDeserialisers[SRV_SLOT_ITEMSLIST] = (deserialiser)&packet_processor::deserialise_SRV_SLOT_ITEMSLIST;
 	//6f
-	packetDeserialisers[UNK_MESSAGE_0x70] = (deserialiser)&packet_processor::deserialise_UNK_MESSAGE_0x70;
-	packetDeserialisers[CLI_UNK_0x71] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0x71;
-	packetDeserialisers[SRV_UNK_0x72] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x72;
-	packetDeserialisers[UNK_MESSAGE_0x73] = (deserialiser)&packet_processor::deserialise_UNK_MESSAGE_0x73;
-	packetDeserialisers[CLI_SET_STATUS_MESSAGE] = (deserialiser)&packet_processor::deserialise_CLI_SET_STATUS_MESSAGE;
+	gamePktDeserialisers[UNK_MESSAGE_0x70] = (deserialiser)&packet_processor::deserialise_UNK_MESSAGE_0x70;
+	gamePktDeserialisers[CLI_UNK_0x71] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0x71;
+	gamePktDeserialisers[SRV_UNK_0x72] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x72;
+	gamePktDeserialisers[UNK_MESSAGE_0x73] = (deserialiser)&packet_processor::deserialise_UNK_MESSAGE_0x73;
+	gamePktDeserialisers[CLI_SET_STATUS_MESSAGE] = (deserialiser)&packet_processor::deserialise_CLI_SET_STATUS_MESSAGE;
 	//75
 	//76
 	//77
@@ -131,7 +131,7 @@ void packet_processor::init_packetDeserialisers()
 	//7c
 	//7d
 	//7e
-	packetDeserialisers[CLI_SWAPPED_WEAPONS] = (deserialiser)&packet_processor::deserialise_CLI_SWAPPED_WEAPONS;
+	gamePktDeserialisers[CLI_SWAPPED_WEAPONS] = (deserialiser)&packet_processor::deserialise_CLI_SWAPPED_WEAPONS;
 	//80
 	//81
 	//82
@@ -149,26 +149,26 @@ void packet_processor::init_packetDeserialisers()
 	//8e
 	//define 0x8f seen when leaving duel queue
 	//define 0x90 seen when leaving duel queue
-	packetDeserialisers[SRV_PVP_MATCHLIST] = (deserialiser)&packet_processor::deserialise_SRV_PVP_MATCHLIST;
-	packetDeserialisers[SRV_EVENTSLIST] = (deserialiser)&packet_processor::deserialise_SRV_EVENTSLIST;
+	gamePktDeserialisers[SRV_PVP_MATCHLIST] = (deserialiser)&packet_processor::deserialise_SRV_PVP_MATCHLIST;
+	gamePktDeserialisers[SRV_EVENTSLIST] = (deserialiser)&packet_processor::deserialise_SRV_EVENTSLIST;
 	//93
 	//94
 	//95
 	//96
 	//97
-	packetDeserialisers[CLI_SKILLPANE_ACTION] = (deserialiser)&packet_processor::deserialise_CLI_SKILLPANE_ACTION;
+	gamePktDeserialisers[CLI_SKILLPANE_ACTION] = (deserialiser)&packet_processor::deserialise_CLI_SKILLPANE_ACTION;
 	//99
 	//9a
-	packetDeserialisers[SRV_SKILLPANE_DATA] = (deserialiser)&packet_processor::deserialise_SRV_SKILLPANE_DATA;
+	gamePktDeserialisers[SRV_SKILLPANE_DATA] = (deserialiser)&packet_processor::deserialise_SRV_SKILLPANE_DATA;
 	//9c
 	//9d
 	//9e
-	packetDeserialisers[CLI_MICROTRANSACTION_SHOP_ACTION] = (deserialiser)&packet_processor::deserialise_CLI_MICROTRANSACTION_SHOP_ACTION;
+	gamePktDeserialisers[CLI_MICROTRANSACTION_SHOP_ACTION] = (deserialiser)&packet_processor::deserialise_CLI_MICROTRANSACTION_SHOP_ACTION;
 	//a0
-	packetDeserialisers[SRV_MICROTRANSACTION_SHOP_DETAILS] = (deserialiser)&packet_processor::deserialise_SRV_MICROTRANSACTION_SHOP_DETAILS;
+	gamePktDeserialisers[SRV_MICROTRANSACTION_SHOP_DETAILS] = (deserialiser)&packet_processor::deserialise_SRV_MICROTRANSACTION_SHOP_DETAILS;
 	//a2
-	packetDeserialisers[SRV_UNK_A3] = (deserialiser)&packet_processor::deserialise_SRV_UNK_A3;
-	packetDeserialisers[SRV_CHAT_CHANNEL_ID] = (deserialiser)&packet_processor::deserialise_SRV_CHAT_CHANNEL_ID;
+	gamePktDeserialisers[SRV_UNK_A3] = (deserialiser)&packet_processor::deserialise_SRV_UNK_A3;
+	gamePktDeserialisers[SRV_CHAT_CHANNEL_ID] = (deserialiser)&packet_processor::deserialise_SRV_CHAT_CHANNEL_ID;
 	//a5
 	//a6
 	//a7
@@ -177,7 +177,7 @@ void packet_processor::init_packetDeserialisers()
 	//aa
 	//ab
 	//ac
-	packetDeserialisers[CLI_GUILD_CREATE] = (deserialiser)&packet_processor::deserialise_CLI_GUILD_CREATE;
+	gamePktDeserialisers[CLI_GUILD_CREATE] = (deserialiser)&packet_processor::deserialise_CLI_GUILD_CREATE;
 	//ae
 	//af
 	//b0
@@ -195,17 +195,17 @@ void packet_processor::init_packetDeserialisers()
 	//bd
 	//be
 	//bf
-	packetDeserialisers[CLI_PACKET_EXIT] = (deserialiser)&packet_processor::deserialise_CLI_PACKET_EXIT;
-	packetDeserialisers[CLI_PACKET_EXIT_2] = (deserialiser)&packet_processor::deserialise_CLI_PACKET_EXIT_2;
-	packetDeserialisers[CLI_DUEL_CHALLENGE] = (deserialiser)&packet_processor::deserialise_CLI_DUEL_CHALLENGE;
-	packetDeserialisers[SRV_DUEL_RESPONSE] = (deserialiser)&packet_processor::deserialise_SRV_DUEL_RESPONSE;
-	packetDeserialisers[SRV_DUEL_CHALLENGE] = (deserialiser)&packet_processor::deserialise_SRV_DUEL_CHALLENGE;
+	gamePktDeserialisers[CLI_PACKET_EXIT] = (deserialiser)&packet_processor::deserialise_CLI_PACKET_EXIT;
+	gamePktDeserialisers[CLI_PACKET_EXIT_2] = (deserialiser)&packet_processor::deserialise_CLI_PACKET_EXIT_2;
+	gamePktDeserialisers[CLI_DUEL_CHALLENGE] = (deserialiser)&packet_processor::deserialise_CLI_DUEL_CHALLENGE;
+	gamePktDeserialisers[SRV_DUEL_RESPONSE] = (deserialiser)&packet_processor::deserialise_SRV_DUEL_RESPONSE;
+	gamePktDeserialisers[SRV_DUEL_CHALLENGE] = (deserialiser)&packet_processor::deserialise_SRV_DUEL_CHALLENGE;
 	//c5
-	packetDeserialisers[CLI_UNK_0xC6] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0xC6;
-	packetDeserialisers[CLI_UNK_0xC7] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0xC7;
+	gamePktDeserialisers[CLI_UNK_0xC6] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0xC6;
+	gamePktDeserialisers[CLI_UNK_0xC7] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0xC7;
 	//c8
 	//c9
-	packetDeserialisers[SRV_UNK_0xCA] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xCA;
+	gamePktDeserialisers[SRV_UNK_0xCA] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xCA;
 	//cb
 	//cd
 	//CLI_VISIT_HIDEOUT
@@ -215,45 +215,45 @@ void packet_processor::init_packetDeserialisers()
 	//d2
 	//d3
 	//d4
-	packetDeserialisers[SRV_UNK_0xD5] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xD5;
+	gamePktDeserialisers[SRV_UNK_0xD5] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xD5;
 	//d6
 	//d7
-	packetDeserialisers[CLI_USED_SKILL] = (deserialiser)&packet_processor::deserialise_CLI_USED_SKILL;
-	packetDeserialisers[CLI_CLICK_OBJ] = (deserialiser)&packet_processor::deserialise_CLI_CLICK_OBJ;
-	packetDeserialisers[CLI_MOUSE_HELD] = (deserialiser)&packet_processor::deserialise_CLI_MOUSE_HELD;
+	gamePktDeserialisers[CLI_USED_SKILL] = (deserialiser)&packet_processor::deserialise_CLI_USED_SKILL;
+	gamePktDeserialisers[CLI_CLICK_OBJ] = (deserialiser)&packet_processor::deserialise_CLI_CLICK_OBJ;
+	gamePktDeserialisers[CLI_MOUSE_HELD] = (deserialiser)&packet_processor::deserialise_CLI_MOUSE_HELD;
 	//db
-	packetDeserialisers[CLI_MOUSE_RELEASE] = (deserialiser)&packet_processor::deserialise_CLI_MOUSE_RELEASE;
+	gamePktDeserialisers[CLI_MOUSE_RELEASE] = (deserialiser)&packet_processor::deserialise_CLI_MOUSE_RELEASE;
 	//dd
 	//de
 	//df
-	packetDeserialisers[CLI_OPEN_WORLD_SCREEN] = (deserialiser)&packet_processor::deserialise_CLI_OPEN_WORLD_SCREEN;
+	gamePktDeserialisers[CLI_OPEN_WORLD_SCREEN] = (deserialiser)&packet_processor::deserialise_CLI_OPEN_WORLD_SCREEN;
 	//e1
 	//e2
 	//e3
 	//e4
 	//e5
-	packetDeserialisers[SRV_UNK_0xE6] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xE6;
+	gamePktDeserialisers[SRV_UNK_0xE6] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xE6;
 	//e7
 	//e8
-	packetDeserialisers[SRV_OBJ_REMOVED] = (deserialiser)&packet_processor::deserialise_SRV_OBJ_REMOVED;
-	packetDeserialisers[SRV_MOBILE_START_SKILL] = (deserialiser)&packet_processor::deserialise_SRV_MOBILE_START_SKILL;
-	packetDeserialisers[SRV_MOBILE_FINISH_SKILL] = (deserialiser)&packet_processor::deserialise_SRV_MOBILE_FINISH_SKILL;
+	gamePktDeserialisers[SRV_OBJ_REMOVED] = (deserialiser)&packet_processor::deserialise_SRV_OBJ_REMOVED;
+	gamePktDeserialisers[SRV_MOBILE_START_SKILL] = (deserialiser)&packet_processor::deserialise_SRV_MOBILE_START_SKILL;
+	gamePktDeserialisers[SRV_MOBILE_FINISH_SKILL] = (deserialiser)&packet_processor::deserialise_SRV_MOBILE_FINISH_SKILL;
 	//ec
 	//ed
-	packetDeserialisers[SRV_MOBILE_UNK_0xee] = (deserialiser)&packet_processor::deserialise_SRV_MOBILE_UNK_0xee;
-	packetDeserialisers[SRV_MOBILE_UNK_0xef] = (deserialiser)&packet_processor::deserialise_SRV_MOBILE_UNK_0xef;
-	packetDeserialisers[SRV_MOBILE_UPDATE_HMS] = (deserialiser)&packet_processor::deserialise_SRV_MOBILE_UPDATE_HMS;
-	packetDeserialisers[SRV_STAT_CHANGED] = (deserialiser)&packet_processor::deserialise_SRV_STAT_CHANGED;
-	packetDeserialisers[SRV_UNK_0xf2] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xf2;
-	packetDeserialisers[SRV_UNK_0xf3] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xf3;
+	gamePktDeserialisers[SRV_MOBILE_UNK_0xee] = (deserialiser)&packet_processor::deserialise_SRV_MOBILE_UNK_0xee;
+	gamePktDeserialisers[SRV_MOBILE_UNK_0xef] = (deserialiser)&packet_processor::deserialise_SRV_MOBILE_UNK_0xef;
+	gamePktDeserialisers[SRV_MOBILE_UPDATE_HMS] = (deserialiser)&packet_processor::deserialise_SRV_MOBILE_UPDATE_HMS;
+	gamePktDeserialisers[SRV_STAT_CHANGED] = (deserialiser)&packet_processor::deserialise_SRV_STAT_CHANGED;
+	gamePktDeserialisers[SRV_UNK_0xf2] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xf2;
+	gamePktDeserialisers[SRV_UNK_0xf3] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xf3;
 	//f4
 	//f5
 	//f6
 	//f7
 	//f8
 	//f9
-	packetDeserialisers[SRV_START_EFFECT] = (deserialiser)&packet_processor::deserialise_SRV_START_EFFECT;
-	packetDeserialisers[SRV_END_EFFECT] = (deserialiser)&packet_processor::deserialise_SRV_END_EFFECT;
+	gamePktDeserialisers[SRV_START_EFFECT] = (deserialiser)&packet_processor::deserialise_SRV_START_EFFECT;
+	gamePktDeserialisers[SRV_END_EFFECT] = (deserialiser)&packet_processor::deserialise_SRV_END_EFFECT;
 	//fc
 	//fd
 	//fe
@@ -272,21 +272,21 @@ void packet_processor::init_packetDeserialisers()
 	//10b
 	//10c
 	//10d
-	packetDeserialisers[CLI_REQUEST_PLAYERID] = (deserialiser)&packet_processor::deserialise_CLI_REQUEST_PLAYERID;
-	packetDeserialisers[SRV_NOTIFY_PLAYERID] = (deserialiser)&packet_processor::deserialise_SRV_NOTIFY_PLAYERID;
+	gamePktDeserialisers[CLI_REQUEST_PLAYERID] = (deserialiser)&packet_processor::deserialise_CLI_REQUEST_PLAYERID;
+	gamePktDeserialisers[SRV_NOTIFY_PLAYERID] = (deserialiser)&packet_processor::deserialise_SRV_NOTIFY_PLAYERID;
 	//0x110 - player pressed add new stash tab +?
-	packetDeserialisers[SRV_UNKNOWN_0x111] = (deserialiser)&packet_processor::deserialise_SRV_UNKNOWN_0x111;
+	gamePktDeserialisers[SRV_UNKNOWN_0x111] = (deserialiser)&packet_processor::deserialise_SRV_UNKNOWN_0x111;
 	//112
 	//113
 	//114
 	//115
 	//116
 	//117
-	packetDeserialisers[SRV_UNKNOWN_0x118] = (deserialiser)&packet_processor::deserialise_SRV_UNKNOWN_0x118;
+	gamePktDeserialisers[SRV_UNKNOWN_0x118] = (deserialiser)&packet_processor::deserialise_SRV_UNKNOWN_0x118;
 	//119
 	//11a
 	//11b
-	packetDeserialisers[CLI_OPTOUT_TUTORIALS] = (deserialiser)&packet_processor::deserialise_CLI_OPTOUT_TUTORIALS;
+	gamePktDeserialisers[CLI_OPTOUT_TUTORIALS] = (deserialiser)&packet_processor::deserialise_CLI_OPTOUT_TUTORIALS;
 	//11d
 	//11e
 	//11f
@@ -305,15 +305,15 @@ void packet_processor::init_packetDeserialisers()
 	//12c
 	//12d
 	//12e
-	packetDeserialisers[SRV_SHOW_ENTERING_MSG] = (deserialiser)&packet_processor::deserialise_SRV_SHOW_ENTERING_MSG;
+	gamePktDeserialisers[SRV_SHOW_ENTERING_MSG] = (deserialiser)&packet_processor::deserialise_SRV_SHOW_ENTERING_MSG;
 	//130
 	//131
-	packetDeserialisers[SRV_HEARTBEAT] = (deserialiser)&packet_processor::deserialise_SRV_HEARTBEAT;
+	gamePktDeserialisers[SRV_HEARTBEAT] = (deserialiser)&packet_processor::deserialise_SRV_HEARTBEAT;
 	//133
 	//134
-	packetDeserialisers[SRV_ADD_OBJECT] = (deserialiser)&packet_processor::deserialise_SRV_ADD_OBJECT;
-	packetDeserialisers[SRV_UPDATE_OBJECT] = (deserialiser)&packet_processor::deserialise_SRV_UPDATE_OBJECT;
-	packetDeserialisers[SRV_IDNOTIFY_0x137] = (deserialiser)&packet_processor::deserialise_SRV_IDNOTIFY_0x137;
+	gamePktDeserialisers[SRV_ADD_OBJECT] = (deserialiser)&packet_processor::deserialise_SRV_ADD_OBJECT;
+	gamePktDeserialisers[SRV_UPDATE_OBJECT] = (deserialiser)&packet_processor::deserialise_SRV_UPDATE_OBJECT;
+	gamePktDeserialisers[SRV_IDNOTIFY_0x137] = (deserialiser)&packet_processor::deserialise_SRV_IDNOTIFY_0x137;
 	//138
 	//139
 }
@@ -868,7 +868,7 @@ void packet_processor::deserialise_SRV_INSTANCE_SERVER_DATA(UIDecodedPkt *uipkt)
 	//std::cout << std::hex << "[" << pktId << "] New game server data. AREA TRANSITION" << std::endl;
 	//std::cout << "\tGameserver: " << serverIP.str() << ":" << std::dec << port << std::hex << std::endl;
 
-	consume_blob(20);//0?
+	consume_blob(20);
 
 
 	KEYDATA *key1A = new KEYDATA;

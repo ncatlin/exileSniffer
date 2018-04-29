@@ -16,6 +16,7 @@ public:
 	KEYDATA *workingRecvKey = NULL;
 	KEYDATA *workingSendKey = NULL;
 	unsigned short lastPktID = 0;
+	int ephKeys = 0;
 };
 
 class packet_processor :
@@ -34,15 +35,16 @@ private:
 
 	void main_loop();
 
-	void init_packetDeserialisers();
+	void init_gamePkt_deserialisers();
+	void init_loginPkt_deserialisers();
 
 	bool process_packet_loop();
 	void handle_patch_data(byte* data);
 	void handle_login_data(byte* data);
 	bool handle_game_data(byte* data);
 
-	void handle_packet_from_loginserver(byte* data, unsigned int dataLen);
-	void handle_packet_to_loginserver(byte* data, unsigned int dataLen);
+	void handle_packet_from_loginserver(byte* data, unsigned int dataLen, long long timems);
+	void handle_packet_to_loginserver(byte* data, unsigned int dataLen, long long timems);
 	void handle_packet_from_patchserver(byte* data, unsigned int dataLen);
 	void handle_packet_to_patchserver(byte* data, unsigned int dataLen);
 	void handle_packet_from_gameserver(byte* data, unsigned int dataLen, long long timems);
@@ -56,6 +58,24 @@ private:
 	inline void consume_add_word_ntoh(std::wstring name, UIDecodedPkt *uipkt) { uipkt->add_word(name, ntohs(consumeUShort())); }
 	inline void consume_add_dword_ntoh(std::wstring name, UIDecodedPkt *uipkt) { uipkt->add_dword(name, ntohl(consume_DWORD())); }
 	void consume_add_lenprefix_string(std::wstring name, WValue& container, rapidjson::Document::AllocatorType& allocator);
+	std::wstring consume_hexblob(unsigned int size);
+
+	void deserialise_LOGIN_CLI_KEEP_ALIVE(UIDecodedPkt *);
+	void deserialise_LOGIN_EPHERMERAL_PUBKEY(UIDecodedPkt *);
+	void deserialise_LOGIN_CLI_AUTH_DATA(UIDecodedPkt *);
+	void deserialise_LOGIN_SRV_UNK0x4(UIDecodedPkt *);
+	void deserialise_LOGIN_CLI_CHANGE_PASSWORD(UIDecodedPkt *);
+	void deserialise_LOGIN_CLI_DELETE_CHARACTER(UIDecodedPkt *);
+	void deserialise_LOGIN_CLI_CHARACTER_SELECTED(UIDecodedPkt *);
+	void deserialise_LOGIN_SRV_NOTIFY_GAMESERVER(UIDecodedPkt *);
+	void deserialise_LOGIN_CLI_CREATED_CHARACTER(UIDecodedPkt *);
+	void deserialise_LOGIN_SRV_FINAL_PKT(UIDecodedPkt *);
+	void deserialise_LOGIN_SRV_CHAR_LIST(UIDecodedPkt *);
+	void deserialise_LOGIN_CLI_REQUEST_RACE_DATA(UIDecodedPkt *);
+	void deserialise_LOGIN_SRV_LEAGUE_LIST(UIDecodedPkt *);
+	void deserialise_LOGIN_CLI_REQUEST_LEAGUES(UIDecodedPkt *);
+
+
 
 	void deserialise_SRV_PKT_ENCAPSULATED(UIDecodedPkt *);
 	void deserialise_CLI_CHAT_MSG_ITEMS(UIDecodedPkt *);
@@ -192,6 +212,7 @@ private:
 	void deserialise_SRV_UPDATE_OBJECT(UIDecodedPkt *uipkt);
 	void deserialise_SRV_IDNOTIFY_0x137(UIDecodedPkt *uipkt);
 	
+	void deserialise_packets_from_decrypted(streamType, byte isIncoming, long long timeSeen);
 
 	UINT8 consume_Byte();
 	UINT16 consumeUShort();
@@ -227,11 +248,14 @@ private:
 	SafeQueue<UI_MESSAGE>* uiMsgQueue;
 
 	typedef void (packet_processor::*deserialiser)(UIDecodedPkt *);
-	map<unsigned short, deserialiser> packetDeserialisers;
+	map<unsigned short, deserialiser> gamePktDeserialisers;
+	map<unsigned short, deserialiser> loginPktDeserialisers;
+	
 
 	//used for continuing multi-packet messages
 	networkStreamID currentMsgStreamID;
 	bool currentMsgIncoming;
+	STREAMDATA *currentStreamObj = NULL;
 
 	HANDLE patchpipe = NULL;
 	HANDLE loginpipe = NULL;
@@ -244,7 +268,9 @@ private:
 	eDecodingErr errorFlag = eDecodingErr::eNoErr;
 	unsigned long errorCount = 0;
 
+	//this is where a single logical message spans multiple tcp packets
 	bool currentMsgMultiPacket = false;
+
 	struct {
 		bool active = false;
 		size_t savedIndex;
