@@ -25,9 +25,10 @@ exileSniffer::exileSniffer(QWidget *parent)
 	init_loginPkt_Actioners();
 	init_gamePkt_Actioners();
 
+	setup_decryption_tab();
+
 	start_threads();
 
-	printf("Starting packet processing!\n");
 	std::cout << "writing to log " << "N:\\code\\POEcode\\poeSRE\\clientX\\Debug\\latestconndump.txt" << std::endl;
 	outfile = std::ofstream("N:\\code\\POEcode\\poeSRE\\clientX\\Debug\\latestconndump.txt",
 		std::ofstream::out | std::ofstream::app | std::ofstream::binary);
@@ -68,6 +69,86 @@ exileSniffer::exileSniffer(QWidget *parent)
 		}
 	}
 
+}
+
+
+void exileSniffer::setLabelActive(QLabel *lab, bool state)
+{
+	if (state)
+	{
+		lab->setGraphicsEffect(Q_NULLPTR);
+	}
+	else
+	{
+		QGraphicsColorizeEffect *effect;
+		effect = new QGraphicsColorizeEffect;
+		effect->setColor(QColor(225, 225, 225, 255));
+
+		lab->setGraphicsEffect(effect);
+	}
+}
+
+void exileSniffer::fadeTimerLabel(timerFadeInfo& fadeinfo, QLabel *lab)
+{
+	if (fadeinfo.rising)
+	{
+		fadeinfo.alpha += 5;
+		if (fadeinfo.alpha > 235)
+		{
+			fadeinfo.alpha = 235;
+			fadeinfo.rising = false;
+		}
+	}
+	else
+	{
+		fadeinfo.alpha -= 5;
+		if (fadeinfo.alpha < 80)
+		{
+			fadeinfo.alpha = 80;
+			fadeinfo.rising = true;
+		}
+	}
+
+	QGraphicsColorizeEffect *effect = new QGraphicsColorizeEffect;
+	effect->setColor(QColor(255, 255, 255, 255 - fadeinfo.alpha));
+
+	lab->setGraphicsEffect(effect);
+}
+
+void exileSniffer::fadeTimerLabels()
+{
+	if (fadeInfoKeyex.active) fadeTimerLabel(fadeInfoKeyex, ui.keyex_lab_pending);
+	if (fadeInfoSniff.active) fadeTimerLabel(fadeInfoSniff, ui.sniff_lab_pending);
+}
+
+void exileSniffer::setup_decryption_tab()
+{
+	ui.keyex_lab_bad->setPixmap(QPixmap(":/icons/cross-red.png"));
+	ui.keyex_lab_pending->setPixmap(QPixmap(":/icons/timer.png"));
+	ui.keyex_lab_good->setPixmap(QPixmap(":/icons/check-green.png"));
+	ui.sniff_lab_bad->setPixmap(QPixmap(":/icons/cross-red.png"));
+	ui.sniff_lab_pending->setPixmap(QPixmap(":/icons/timer.png"));
+	ui.sniff_lab_good->setPixmap(QPixmap(":/icons/check-green.png"));
+	ui.no_decrypt_label->setPixmap(QPixmap(":/icons/padlock-red-locked.png"));
+	ui.yes_decrypt_label->setPixmap(QPixmap(":/icons/padlock-green.png"));
+
+	setLabelActive(ui.keyex_lab_bad, true);
+	setLabelActive(ui.keyex_lab_pending, true);
+	setLabelActive(ui.keyex_lab_good, false);
+	setLabelActive(ui.sniff_lab_bad, true);
+	setLabelActive(ui.sniff_lab_pending, false);
+	setLabelActive(ui.sniff_lab_good, false);
+	setLabelActive(ui.yes_decrypt_label, false);
+	setLabelActive(ui.no_decrypt_label, true);
+
+	fadeInfoKeyex.active = fadeInfoSniff.active = true;
+	fadeInfoKeyex.alpha = fadeInfoSniff.alpha = 167;
+	fadeInfoKeyex.rising = true;
+	fadeInfoSniff.rising = true;
+
+	QTimer *timer = new QTimer(this);
+	connect(timer, SIGNAL(timeout()), this, SLOT(fadeTimerLabels()));
+	timer->start(80);
 }
 
 void exileSniffer::setup_raw_stream_tab()

@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/exileSniffer/prefix1">
+        <file>black-spinner.png</file>
+        <file>check-green.png</file>
+        <file>cross-red.png</file>
+        <file>padlock-green.png</file>
+        <file>padlock-red-locked.png</file>
+    </qresource>
+</RCC>

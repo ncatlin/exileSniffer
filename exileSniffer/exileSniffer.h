@@ -68,6 +68,12 @@ class UI_DECODED_LIST_ENTRY
 		std::pair <ushort, ushort> bufferOffsets;
 };
 
+struct timerFadeInfo {
+	bool active = false;
+	int alpha = 167;
+	bool rising = false;
+};
+
 class exileSniffer : public QMainWindow
 {
 	Q_OBJECT
@@ -90,17 +96,21 @@ class exileSniffer : public QMainWindow
 		void decodedTableMenuRequest(QPoint);
 		void copySelected();
 		void filterSelected();
+		void fadeTimerLabels();
 
 	private:
 		void setup_raw_stream_tab();
 		void setup_decoded_messages_tab();
+		void setup_decryption_tab();
+		void setLabelActive(QLabel *lab, bool state);
+
+		void fadeTimerLabel(timerFadeInfo& fadeinfo, QLabel *lab);
 
 		void init_gamePkt_Actioners();
 		void init_loginPkt_Actioners();
 
 		void start_threads();
-		void initFilters();
-
+		void initFilters(); 
 
 		void action_UI_Msg(UI_MESSAGE *msg);
 		void add_metalog_update(QString msg, DWORD pid);
@@ -296,6 +306,8 @@ class exileSniffer : public QMainWindow
 		std::vector<std::pair<UI_DECODED_LIST_ENTRY, UIDecodedPkt *>> decodedListEntries;
 
 		const long long startMSSinceEpoch = ms_since_epoch();
+
+		timerFadeInfo fadeInfoKeyex, fadeInfoSniff;
 
 private:
 	gameDataStore ggpk;

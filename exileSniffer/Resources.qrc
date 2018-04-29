@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>check-green.png</file>
+        <file>cross-red.png</file>
+        <file>padlock-green.png</file>
+        <file>padlock-red-locked.png</file>
+        <file>timer.png</file>
+    </qresource>
+</RCC>
