@@ -200,7 +200,7 @@
                 <item>
                  <widget class="QLabel" name="decodedDisplayedLabel">
                   <property name="text">
-                   <string>Packets ( Displayed: Filtered: )</string>
+                   <string>No packets decoded</string>
                   </property>
                  </widget>
                 </item>
@@ -231,6 +231,9 @@
               <number>2</number>
              </property>
              <widget class="QTableWidget" name="decodedListTable">
+              <property name="contextMenuPolicy">
+               <enum>Qt::CustomContextMenu</enum>
+              </property>
               <property name="layoutDirection">
                <enum>Qt::LeftToRight</enum>
               </property>
@@ -247,7 +250,7 @@
                <bool>false</bool>
               </property>
               <property name="selectionMode">
-               <enum>QAbstractItemView::NoSelection</enum>
+               <enum>QAbstractItemView::SingleSelection</enum>
               </property>
               <property name="selectionBehavior">
                <enum>QAbstractItemView::SelectRows</enum>
@@ -279,7 +282,7 @@
               </column>
               <column>
                <property name="text">
-                <string>Msg ID</string>
+                <string>PktID</string>
                </property>
               </column>
               <column>
@@ -677,6 +680,22 @@ p, li { white-space: pre-wrap; }
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>decodedListTable</sender>
+   <signal>customContextMenuRequested(QPoint)</signal>
+   <receiver>exileSniffer</receiver>
+   <slot>decodedTableMenuRequest(QPoint)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>412</x>
+     <y>247</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>413</x>
+     <y>336</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>showRawFiltersDLG()</slot>
@@ -685,5 +704,6 @@ p, li { white-space: pre-wrap; }
   <slot>toggleRawAutoScroll(bool)</slot>
   <slot>decodedListClicked()</slot>
   <slot>decodedCellActivated(int,int)</slot>
+  <slot>decodedTableMenuRequest(QPoint)</slot>
  </slots>
 </ui>

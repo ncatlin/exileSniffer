@@ -46,7 +46,7 @@ class UI_DECODED_LIST_ENTRY
 		QString floatSeconds(long long start) { return QString::number((msTime - start) / 1000.0, 'd', 4); }
 		QString hexPktID() { return "0x" + QString::number(pktID, 16); }
 		QString decPktID() { return QString::number(pktID); }
-		QString sender() { return ((flags & PKTBIT_INBOUND) ? "Server" : "Client"); }
+		QString sender();
 		byte pktFlags() { return flags; }
 		bool badDecode() { return failedDecode; }
 		std::pair<vector<byte> *, ushort> bytesBuf() {
@@ -87,11 +87,17 @@ class exileSniffer : public QMainWindow
 		void toggleRawAutoScroll(bool state);
 		void decodedListClicked();
 		void decodedCellActivated(int, int);
+		void decodedTableMenuRequest(QPoint);
+		void copySelected();
+		void filterSelected();
 
 	private:
 		void setup_raw_stream_tab();
 		void setup_decoded_messages_tab();
-		void init_DecodedPktActioners();
+
+		void init_gamePkt_Actioners();
+		void init_loginPkt_Actioners();
+
 		void start_threads();
 		void initFilters();
 
@@ -102,6 +108,9 @@ class exileSniffer : public QMainWindow
 		void handle_raw_packet_data(UI_RAWHEX_PKT *pkt);
 		void action_undecoded_packet(UIDecodedPkt& decoded);
 		void action_decoded_packet(UIDecodedPkt& decoded);
+		void action_decoded_game_packet(UIDecodedPkt& decoded);
+		void action_decoded_login_packet(UIDecodedPkt& decoded);
+		
 
 		clientData * get_client(DWORD pid);
 		void reprintRawHex();
@@ -118,6 +127,21 @@ class exileSniffer : public QMainWindow
 		QString stringify_eventslist(WValue &eventlist);
 		
 	private:
+
+		void action_LOGIN_CLI_KEEP_ALIVE(UIDecodedPkt&, QString*);
+		void action_LOGIN_EPHERMERAL_PUBKEY(UIDecodedPkt&, QString *);
+		void action_LOGIN_CLI_AUTH_DATA(UIDecodedPkt&, QString*);
+		void action_LOGIN_SRV_UNK0x4(UIDecodedPkt&, QString*);
+		void action_LOGIN_CLI_CHANGE_PASSWORD(UIDecodedPkt&, QString*);
+		void action_LOGIN_CLI_DELETE_CHARACTER(UIDecodedPkt&, QString*);
+		void action_LOGIN_CLI_CHARACTER_SELECTED(UIDecodedPkt&, QString*);
+		void action_LOGIN_SRV_NOTIFY_GAMESERVER(UIDecodedPkt&, QString*);
+		void action_LOGIN_CLI_CREATED_CHARACTER(UIDecodedPkt&, QString*);
+		void action_LOGIN_SRV_CHAR_LIST(UIDecodedPkt&, QString*);
+		void action_LOGIN_SRV_FINAL_PKT(UIDecodedPkt&, QString*);
+		void action_LOGIN_CLI_REQUEST_RACE_DATA(UIDecodedPkt&, QString*);
+		void action_LOGIN_SRV_LEAGUE_LIST(UIDecodedPkt&, QString*);
+		void action_LOGIN_CLI_REQUEST_LEAGUES(UIDecodedPkt&, QString*);
 
 		void action_SRV_PKT_ENCAPSULATED(UIDecodedPkt&, QString*);
 		void action_CLI_CHAT_MSG_ITEMS(UIDecodedPkt&, QString*);
@@ -266,7 +290,9 @@ class exileSniffer : public QMainWindow
 		map<DWORD, clientData *> clients;
 
 		typedef void (exileSniffer::*actionFunc)(UIDecodedPkt&, QString*);
-		map<unsigned short, actionFunc> decodedPktActioners;
+		map<unsigned short, actionFunc> gamePktActioners;
+		map<unsigned short, actionFunc> loginPktActioners;
+		
 		std::vector<std::pair<UI_DECODED_LIST_ENTRY, UIDecodedPkt *>> decodedListEntries;
 
 		const long long startMSSinceEpoch = ms_since_epoch();

@@ -120,6 +120,11 @@ UINT8 packet_processor::consume_Byte()
 		continue_gamebuffer_next_packet();
 	}
 
+	if (decryptedIndex >= decryptedBuffer->size()) {
+		errorFlag = eDecodingErr::eErrUnderflow;
+		return 0;
+	}
+
 	unsigned char result = decryptedBuffer->at(decryptedIndex);
 	decryptedIndex += 1;
 	remainingDecrypted -= 1;
@@ -134,6 +139,11 @@ UINT16 packet_processor::consumeUShort()
 	{
 		if (errorFlag != eDecodingErr::eNoErr) return 0;
 		continue_gamebuffer_next_packet();
+	}
+
+	if (decryptedIndex >= decryptedBuffer->size()-1) {
+		errorFlag = eDecodingErr::eErrUnderflow;
+		return 0;
 	}
 
 	unsigned short result = getUshort(&decryptedBuffer->at(decryptedIndex));
@@ -152,6 +162,11 @@ UINT32 packet_processor::consume_DWORD()
 		continue_gamebuffer_next_packet();
 	}
 
+	if (decryptedIndex >= decryptedBuffer->size()-3) {
+		errorFlag = eDecodingErr::eErrUnderflow;
+		return 0;
+	}
+
 	DWORD result = getUlong(&decryptedBuffer->at(decryptedIndex));
 	decryptedIndex += 4;
 	remainingDecrypted -= 4;
@@ -167,7 +182,10 @@ UINT64 packet_processor::consume_QWORD()
 		if (errorFlag != eDecodingErr::eNoErr) return 0;
 		continue_gamebuffer_next_packet();
 	}
-
+	if (decryptedIndex >= decryptedBuffer->size()-8) {
+		errorFlag = eDecodingErr::eErrUnderflow;
+		return 0;
+	}
 	UINT64 result = getUlonglong(&decryptedBuffer->at(decryptedIndex));
 	decryptedIndex += 8;
 	remainingDecrypted -= 8;
@@ -408,4 +426,24 @@ INT32 packet_processor::customSizeByteGet_signed()
 	}
 
 	return result;
+}
+
+std::wstring packet_processor::consume_hexblob(unsigned int size)
+{
+	vector <byte> ephKey;
+	consume_blob(size, ephKey);
+
+	std::wstringstream keyhexss;
+	keyhexss << std::setfill(L'0') << std::uppercase << " ";
+	for (int i = 0; i < ephKey.size(); ++i)
+	{
+		byte item = ephKey.at(i);
+		if (item)
+			keyhexss << " " << std::hex << std::setw(2) << (int)item;
+		else
+			keyhexss << " 00";
+	}
+
+	std::wstring keyhex(keyhexss.str());
+	return keyhex;
 }
