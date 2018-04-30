@@ -87,6 +87,9 @@
     <ClCompile Include="loginserver_packet_deserialisers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="statusWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -137,6 +140,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="filterForm.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="statusWidget.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

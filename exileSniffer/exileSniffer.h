@@ -68,11 +68,7 @@ class UI_DECODED_LIST_ENTRY
 		std::pair <ushort, ushort> bufferOffsets;
 };
 
-struct timerFadeInfo {
-	bool active = false;
-	int alpha = 167;
-	bool rising = false;
-};
+
 
 class exileSniffer : public QMainWindow
 {
@@ -103,8 +99,6 @@ class exileSniffer : public QMainWindow
 		void setup_decoded_messages_tab();
 		void setup_decryption_tab();
 		void setLabelActive(QLabel *lab, bool state);
-
-		void fadeTimerLabel(timerFadeInfo& fadeinfo, QLabel *lab);
 
 		void init_gamePkt_Actioners();
 		void init_loginPkt_Actioners();
@@ -307,7 +301,6 @@ class exileSniffer : public QMainWindow
 
 		const long long startMSSinceEpoch = ms_since_epoch();
 
-		timerFadeInfo fadeInfoKeyex, fadeInfoSniff;
 
 private:
 	gameDataStore ggpk;
