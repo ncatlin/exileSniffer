@@ -624,7 +624,7 @@ void packet_processor::deserialise_packets_from_decrypted(streamType streamServe
 				errorFlag = eDecodingErr::ePktIDUnimplemented;
 			}
 		}
-
+		
 		//warning - can be resized during deserialisation - only store pointers afterwards
 		ui_decodedpkt->setBuffer(decryptedBuffer);
 
