@@ -1,5 +1,5 @@
 #include "stdafx.h"
-
+#include "utilities.h"
 #include "filterForm.h"
 #include "packetIDs.h"
 
@@ -374,7 +374,7 @@ void filterForm::populateFiltersList()
 	add_filter_category(SRV_IDNOTIFY_0x137, "Unknown ObjID", ePktDirection::incoming);
 }
 
-#define ERASE_FROM_VEC(v, x) v.erase(std::remove(v.begin(), v.end(), x), v.end())
+
 
 void filterForm::buildBuiltinPresets()
 {
@@ -393,10 +393,10 @@ void filterForm::buildBuiltinPresets()
 	PRESET_LIST mostPkts(allPkts);
 
 	//for remaining lists we remove the noisiest messages
-	ERASE_FROM_VEC(mostPkts.IDs, CLI_PING_CHALLENGE);
-	ERASE_FROM_VEC(mostPkts.IDs, CLI_PING_CHALLENGE);
-	ERASE_FROM_VEC(mostPkts.IDs, SRV_PING_RESPONSE);
-	ERASE_FROM_VEC(mostPkts.IDs, SRV_HEARTBEAT);
+	ERASE_FROM_VECTOR(mostPkts.IDs, CLI_PING_CHALLENGE);
+	ERASE_FROM_VECTOR(mostPkts.IDs, CLI_PING_CHALLENGE);
+	ERASE_FROM_VECTOR(mostPkts.IDs, SRV_PING_RESPONSE);
+	ERASE_FROM_VECTOR(mostPkts.IDs, SRV_HEARTBEAT);
 
 	mostPkts.name = "Most";
 	mostPkts.description = "Excludes keep-alives (noisy)";
@@ -431,12 +431,12 @@ void filterForm::buildBuiltinPresets()
 
 	PRESET_LIST ex_VeryCommon(mostPkts);
 	//usually don't care about chat - can see it in client
-	ERASE_FROM_VEC(ex_VeryCommon.IDs, SRV_CHAT_MESSAGE);
-	ERASE_FROM_VEC(ex_VeryCommon.IDs, CLI_CHAT_MESSAGE);
-	ERASE_FROM_VEC(ex_VeryCommon.IDs, CLI_CHAT_MSG_ITEMS);
+	ERASE_FROM_VECTOR(ex_VeryCommon.IDs, SRV_CHAT_MESSAGE);
+	ERASE_FROM_VECTOR(ex_VeryCommon.IDs, CLI_CHAT_MESSAGE);
+	ERASE_FROM_VECTOR(ex_VeryCommon.IDs, CLI_CHAT_MSG_ITEMS);
 	//don't care about things moving - quite spammy
-	ERASE_FROM_VEC(ex_VeryCommon.IDs, SRV_MOBILE_START_SKILL);
-	ERASE_FROM_VEC(ex_VeryCommon.IDs, CLI_ACTION_PREDICTIVE);
+	ERASE_FROM_VECTOR(ex_VeryCommon.IDs, SRV_MOBILE_START_SKILL);
+	ERASE_FROM_VECTOR(ex_VeryCommon.IDs, CLI_ACTION_PREDICTIVE);
 	
 
 	ex_VeryCommon.name = "Exclude chat/skills";
@@ -445,11 +445,11 @@ void filterForm::buildBuiltinPresets()
 
 	PRESET_LIST exclude_Common(ex_VeryCommon);
 
-	ERASE_FROM_VEC(exclude_Common.IDs, SRV_MOBILE_FINISH_SKILL);
-	ERASE_FROM_VEC(exclude_Common.IDs, SRV_MOBILE_UPDATE_HMS);
-	ERASE_FROM_VEC(exclude_Common.IDs, SRV_STAT_CHANGED);
-	ERASE_FROM_VEC(exclude_Common.IDs, SRV_START_EFFECT);
-	ERASE_FROM_VEC(exclude_Common.IDs, SRV_END_EFFECT);
+	ERASE_FROM_VECTOR(exclude_Common.IDs, SRV_MOBILE_FINISH_SKILL);
+	ERASE_FROM_VECTOR(exclude_Common.IDs, SRV_MOBILE_UPDATE_HMS);
+	ERASE_FROM_VECTOR(exclude_Common.IDs, SRV_STAT_CHANGED);
+	ERASE_FROM_VECTOR(exclude_Common.IDs, SRV_START_EFFECT);
+	ERASE_FROM_VECTOR(exclude_Common.IDs, SRV_END_EFFECT);
 
 	exclude_Common.name = "Exclude chat/skills/combat";
 	exclude_Common.description = "Filters out chat, actions and status updates";

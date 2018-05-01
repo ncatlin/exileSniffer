@@ -545,6 +545,41 @@ void key_grabber_thread::stopProcessScan(DWORD processID)
 	}
 }
 
+void key_grabber_thread::purge_ended_processes(std::vector <DWORD>& latestClientPIDs)
+{
+	processListMutex.lock();
+	for (auto knownProcessIt = activeClients.begin(); knownProcessIt != activeClients.end(); knownProcessIt++)
+	{
+		DWORD knownProcessPID = (*knownProcessIt)->pid;
+		if (!IS_IN_VECTOR(latestClientPIDs, knownProcessPID))
+		{
+			knownProcessIt = activeClients.erase(knownProcessIt);
+			UInotifyClientRunning(knownProcessPID, false, latestClientPIDs.size(), activeClients.size(), uiMsgQueue);
+
+			if (knownProcessIt == activeClients.end())
+				break;
+		}
+	}
+
+
+	if (latestClientPIDs.empty() && !activeClients.empty())
+	{
+		for (auto knownProcessIt = activeClients.begin();
+			knownProcessIt != activeClients.end(); knownProcessIt++)
+		{
+			DWORD knownProcessPID = (*knownProcessIt)->pid;
+
+			knownProcessIt = activeClients.erase(knownProcessIt);
+
+			UInotifyClientRunning(knownProcessPID, false, 0, 0, uiMsgQueue);
+
+			if (knownProcessIt == activeClients.end())
+				break;
+		}
+	}
+	processListMutex.unlock();
+}
+
 /*
 This loop maintains a list of pathofexile processes
 When a new one is detected a set of memory scanning threads are launched for it
@@ -557,7 +592,7 @@ void key_grabber_thread::main_loop()
 		//get running clients
 		std::vector <DWORD> latestClientPIDs;
 
-		if (getClientPIDs(latestClientPIDs) == 0) {
+		if (getClientPIDs(latestClientPIDs) == 0 && activeClients.empty()) {
 			//client will take a while to start and login
 			//so doesn't need to be a short sleep
 			Sleep(1000);  
@@ -585,26 +620,8 @@ void key_grabber_thread::main_loop()
 			}
 		}
 
-		//check if the old clients are still running
-		processListMutex.lock();
-		for (auto knownProcessIt = activeClients.begin(); 
-			knownProcessIt != activeClients.end(); knownProcessIt++)
-		{
-			DWORD seenBeforePID = (*knownProcessIt)->pid;
-
-			bool stillRunning = std::find(latestClientPIDs.begin(),
-										latestClientPIDs.end(),
-											seenBeforePID) != latestClientPIDs.end();
-			if (!stillRunning){
-				knownProcessIt = activeClients.erase(knownProcessIt);
-
-				UInotifyClientRunning(seenBeforePID, false, latestClientPIDs.size(), activeClients.size(), uiMsgQueue);
-
-				if (knownProcessIt == activeClients.end())
-					break;
-			}
-		}
-		processListMutex.unlock();
+		//remove clients absent from the list of running clients
+		purge_ended_processes(latestClientPIDs);
 
 		Sleep(500);
 	}

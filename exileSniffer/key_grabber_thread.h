@@ -72,12 +72,14 @@ private:
 	int getClientPIDs(std::vector <DWORD>& resultsList);
 	GAMECLIENTINFO* get_process_obj(DWORD pid);
 	void memoryScanWorker(GAMECLIENTINFO *);
+	void purge_ended_processes(std::vector <DWORD>& latestClientPIDs);
 
 	static DWORD WINAPI scanControllerStart(void* Param) {
 		memWorkerParams *paramsPtr = (memWorkerParams*)Param;
+		paramsPtr->started = true;
 		key_grabber_thread* This = (key_grabber_thread*)paramsPtr->thisptr;
 		This->keyGrabController(paramsPtr->clientInfo);
-		paramsPtr->started = true;
+		
 		return 0;
 	}
 	static DWORD WINAPI scanWorkerStart(void* Param) {
