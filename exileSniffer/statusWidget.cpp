@@ -73,7 +73,7 @@ statusWidget::statusWidget(QWidget *parent)
 	lab_good->setPixmap(QPixmap(":/icons/check-green.png"));
 
 	setLabelActive(lab_bad, true);
-	setLabelActive(lab_pending, true);
+	setLabelActive(lab_pending, false);
 	setLabelActive(lab_good, false);
 
 
@@ -81,15 +81,52 @@ statusWidget::statusWidget(QWidget *parent)
 	timerFadeInfo.alpha = 167;
 	timerFadeInfo.rising = true;
 
-	QTimer *timer = new QTimer(this);
-	connect(timer, SIGNAL(timeout()), this, SLOT(fadeTimerLabel()));
-	timer->start(80);
+	fadeTimer = new QTimer(this);
+	connect(fadeTimer, SIGNAL(timeout()), this, SLOT(fadeTimerLabel()));
 }
 
 statusWidget::~statusWidget()
 {
 }
 
+void statusWidget::setState(statusWidgetState newState)
+{
+	if (newState == currentState) return;
+
+	switch (currentState)
+	{
+	case eBad:
+		setLabelActive(lab_bad, false);
+		break;
+
+	case ePending:
+		fadeTimer->stop();
+		setLabelActive(lab_pending, false);
+		break;
+
+	case eGood:
+		setLabelActive(lab_good, false);
+		break;
+	}
+
+	switch (newState)
+	{
+	case eBad:
+		setLabelActive(lab_bad, true);
+		break;
+
+	case ePending:
+		fadeTimer->start(80);
+		setLabelActive(lab_pending, true);
+		break;
+
+	case eGood:
+		setLabelActive(lab_good, true);
+		break;
+	}
+
+	currentState = newState;
+}
 
 void statusWidget::setLabelActive(QLabel *lab, bool state)
 {

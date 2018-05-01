@@ -14,12 +14,18 @@ using Tins::TCPIP::StreamFollower;
 #define PACKET_OUTGOING 0
 #define PACKET_INCOMING 1
 
+struct STREAM_NETWORK_DATA {
+	std::string serverIP;
+	int serverPort;
+};
+
 class packet_capture_thread :
 	public base_thread
 {
 public:
 	packet_capture_thread(SafeQueue<UI_MESSAGE>* uiq);
 	~packet_capture_thread();
+	STREAM_NETWORK_DATA *get_stream_data(int streamID);
 
 private:
 
@@ -39,6 +45,8 @@ private:
 	void on_gameclient_data(Tins::TCPIP::Stream& stream);
 	void on_gameserver_data(Tins::TCPIP::Stream& stream);
 
+	CRITICAL_SECTION streamDataCritsec;
+	map<int, STREAM_NETWORK_DATA> streamRecords;
 
 	SafeQueue<UI_MESSAGE> *uiMsgQueue;
 

@@ -11,7 +11,8 @@
 enum streamType { eLogin = 'L', eGame = 'G', ePatch = 'P', eNone = 0 };
 
 typedef rapidjson::GenericValue<rapidjson::UTF16<> > WValue;
-enum uiMsgType {eMetaLog, eClientEvent, eLoginNote, ePacketHex, eDecodedPacket};
+enum uiMsgType {eMetaLog, eClientEvent, eStreamEvent, eSniffNote, 
+	eLoginNote, ePacketHex, eDecodedPacket, eKeyUpdate, eIVUpdate, eCryptIterUpdate};
 
 class UI_MESSAGE
 {
@@ -31,6 +32,16 @@ class UI_CLIENTEVENT_MSG : public UI_MESSAGE
 public:
 	bool running = true;
 	DWORD pid;
+	int totalClients = 0;
+	int totalScanning = 0;
+};
+
+enum eStreamState{ eStreamStarted, eStreamEnded, eStreamFailed, eStreamDecrypting};
+class UI_STREAMEVENT_MSG : public UI_MESSAGE
+{
+public:
+	int streamID = -1;
+	eStreamState state;
 };
 
 class UI_LOGIN_NOTE: public UI_MESSAGE
@@ -39,6 +50,34 @@ public:
 	DWORD pid;
 	streamType server;
 };
+
+class UI_SNIFF_NOTE : public UI_MESSAGE
+{
+public:
+	QString iface;
+	bool state;
+};
+
+class UI_KEY : public UI_MESSAGE
+{
+public:
+	std::vector<byte> key;
+};
+
+class UI_IV : public UI_MESSAGE
+{
+public:
+	std::vector<byte> sendIV;
+	std::vector<byte> recvIV;
+};
+
+class UI_CRYPTITER : public UI_MESSAGE
+{
+public:
+	std::vector<byte> sendIter;
+	std::vector<byte> recvIter;
+};
+
 
 class UI_RAWHEX_PKT : public UI_MESSAGE
 {
@@ -117,5 +156,13 @@ Q_DECLARE_METATYPE(UIDecodedPkt *);
 void UIaddLogMsg(QString msg, DWORD clientPID, SafeQueue<UI_MESSAGE> *uiMsgQueue);
 void UIaddLogMsg(std::string msg, DWORD clientPID, SafeQueue<UI_MESSAGE> *uiMsgQueue);
 void UIaddLogMsg(const char* msg, DWORD clientPID, SafeQueue<UI_MESSAGE> *uiMsgQueue);
-void UInotifyClientRunning(DWORD pid, bool running, SafeQueue<UI_MESSAGE> *uiMsgQueue);
+void UIsniffingStarted(QString iface, SafeQueue<UI_MESSAGE> *uiMsgQueue);
+void UInotifyClientRunning(DWORD clientPID, bool running, int activeClients, 
+	int scanningClients, SafeQueue<UI_MESSAGE> *uiMsgQueue);
 void UIrecordLogin(DWORD clientPID, SafeQueue<UI_MESSAGE> *uiMsgQueue);
+void UInotifyStreamState(int streamID, eStreamState state, SafeQueue<UI_MESSAGE> *uiMsgQueue);
+void UIdisplaySalsaKey(std::vector<byte> key, SafeQueue<UI_MESSAGE> *uiMsgQueue); 
+void UIUpdateSendIV(std::vector<byte> sendIV, SafeQueue<UI_MESSAGE> *uiMsgQueue);
+void UIUpdateRecvIV(std::vector<byte> recvIV, SafeQueue<UI_MESSAGE> *uiMsgQueue);
+void UIUpdateSendIter(std::vector<byte> sendIter, SafeQueue<UI_MESSAGE> *uiMsgQueue);
+void UIUpdateRecvIter(std::vector<byte> recvIter, SafeQueue<UI_MESSAGE> *uiMsgQueue);

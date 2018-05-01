@@ -327,32 +327,44 @@ void key_grabber_thread::memoryScanWorker(GAMECLIENTINFO *gameClient)
 	gameClient->handlesOpen.wait();
 }
 
-/*
-This starts the memory scanning worker threads, then searches through 
-address space for promising memory regions to pass to the workers
-
-Argument: gameclient object to scan for salsa keys
-*/
-void key_grabber_thread::grabKeys(GAMECLIENTINFO *gameClient)
+bool key_grabber_thread::openClientHandle(GAMECLIENTINFO *gameClient)
 {
 	MEMORY_BASIC_INFORMATION info;
-	char* p = 0, *nextp = 0;
-
+	char* p = 0;
 	DWORD processID = gameClient->pid;
 
 	gameClient->processhandle =
 		OpenProcess(PROCESS_VM_READ | PROCESS_QUERY_INFORMATION, FALSE, processID);
 	if (!gameClient->processhandle)
-		return;
+	{
+		UIaddLogMsg("OpenProcess<VM_READ+QUERY_INFORMATION> of target game client failed", gameClient->pid, uiMsgQueue);
+		return false;
+	}
 
 	//an initial test for queryability
 	if (!VirtualQueryEx(gameClient->processhandle, p, &info, sizeof(info)) == sizeof(info))
-		return;
+	{
+		UIaddLogMsg("VirtualQueryEx of target process failed", gameClient->pid, uiMsgQueue);
+		return false;
+	}
+}
 
-	UIaddLogMsg("Starting key scan for game process", processID, uiMsgQueue);
+void key_grabber_thread::keyGrabController(GAMECLIENTINFO *gameClient)
+{
+	MEMORY_BASIC_INFORMATION info;
+	char* p = 0, *nextp = 0;
+
+	if (!VirtualQueryEx(gameClient->processhandle, p, &info, sizeof(info)) == sizeof(info))
+	{
+		//shouldn't happen as we already tested it when opening the handle
+		UIaddLogMsg("VirtualQueryEx of target process failed", gameClient->pid, uiMsgQueue);
+		return;
+	}
+
+	UIaddLogMsg("Starting key scan for game process", gameClient->pid, uiMsgQueue);
 
 	WaitForSingleObject(gameClient->addressQueueMutex, INFINITE);
-	while(!gameClient->addressQueue.empty())
+	while (!gameClient->addressQueue.empty())
 		gameClient->addressQueue.pop();
 	ReleaseMutex(gameClient->addressQueueMutex);
 
@@ -421,7 +433,7 @@ void key_grabber_thread::grabKeys(GAMECLIENTINFO *gameClient)
 		gameClient->addressQueue.emplace((void *)PLEASE_TERMINATE, PLEASE_TERMINATE);
 	ReleaseMutex(gameClient->addressQueueMutex);
 
-	UIaddLogMsg("Ending key scan for game process", processID, uiMsgQueue);
+	UIaddLogMsg("Ending key scan for game process", gameClient->pid, uiMsgQueue);
 
 	//wait for workers to terminate then cleanup
 	while (!gameClient->handlesOpen.empty())
@@ -432,6 +444,24 @@ void key_grabber_thread::grabKeys(GAMECLIENTINFO *gameClient)
 		CloseHandle(gameClient->processhandle);
 		gameClient->processhandle = NULL;
 	}
+}
+/*
+This thread starts the memory scanning worker threads, then searches through 
+address space for promising memory regions to pass to the workers
+
+Argument: gameclient object to scan for salsa keys
+*/
+void key_grabber_thread::grabKeys(GAMECLIENTINFO *gameClient)
+{
+	//start threads to scan memory from candidate addresses found by this thread
+	memWorkerParams paramStruct;
+	paramStruct.thisptr = (void*)this;
+	paramStruct.clientInfo = gameClient;
+	paramStruct.started = false;
+	
+	CreateThread(NULL, 0, scanControllerStart, (void*)&paramStruct, 0, 0);
+	while (!paramStruct.started)
+		Sleep(400);
 }
 
 /*
@@ -522,13 +552,12 @@ When a current one terminates the ui is notified
 */
 void key_grabber_thread::main_loop()
 {
-	
 	while (!terminateScanning)
 	{
 		//get running clients
 		std::vector <DWORD> latestClientPIDs;
-		int clientsFound = getClientPIDs(latestClientPIDs);
-		if (!clientsFound) {
+
+		if (getClientPIDs(latestClientPIDs) == 0) {
 			//client will take a while to start and login
 			//so doesn't need to be a short sleep
 			Sleep(1000);  
@@ -539,18 +568,20 @@ void key_grabber_thread::main_loop()
 		for (auto it = latestClientPIDs.begin(); it != latestClientPIDs.end(); it++)
 		{
 			DWORD freshProcessID = *it;
-			GAMECLIENTINFO *client = get_process_obj(freshProcessID);
 
-			if (!client)
+			if (!get_process_obj(freshProcessID))
 			{
-				client = new GAMECLIENTINFO(freshProcessID);
+				GAMECLIENTINFO *client = new GAMECLIENTINFO(freshProcessID);
 
-				processListMutex.lock();
-				activeClients.push_back(client);
-				processListMutex.unlock();
+				if (openClientHandle(client))
+				{
+					processListMutex.lock();
+					activeClients.push_back(client);
+					processListMutex.unlock();
 
-				UInotifyClientRunning(freshProcessID, true, uiMsgQueue);
-				grabKeys(client);
+					UInotifyClientRunning(freshProcessID, true, latestClientPIDs.size(), activeClients.size(), uiMsgQueue);
+					grabKeys(client);
+				}
 			}
 		}
 
@@ -565,8 +596,10 @@ void key_grabber_thread::main_loop()
 										latestClientPIDs.end(),
 											seenBeforePID) != latestClientPIDs.end();
 			if (!stillRunning){
-				UInotifyClientRunning(seenBeforePID, false, uiMsgQueue);
 				knownProcessIt = activeClients.erase(knownProcessIt);
+
+				UInotifyClientRunning(seenBeforePID, false, latestClientPIDs.size(), activeClients.size(), uiMsgQueue);
+
 				if (knownProcessIt == activeClients.end())
 					break;
 			}

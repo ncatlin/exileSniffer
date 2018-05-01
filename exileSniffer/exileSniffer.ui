@@ -129,7 +129,10 @@
             <widget class="QFrame" name="decryptionInfoFrame">
              <layout class="QHBoxLayout" name="horizontalLayout_9">
               <item>
-               <widget class="QStackedWidget" name="stackedWidget_3">
+               <widget class="QStackedWidget" name="decrypt_details_stack">
+                <property name="currentIndex">
+                 <number>1</number>
+                </property>
                 <widget class="QWidget" name="noDecryptStack" native="true">
                  <layout class="QVBoxLayout" name="verticalLayout_9">
                   <item>
@@ -168,6 +171,12 @@
                   </item>
                   <item>
                    <widget class="QGroupBox" name="groupBox_3">
+                    <property name="maximumSize">
+                     <size>
+                      <width>16777215</width>
+                      <height>16777206</height>
+                     </size>
+                    </property>
                     <property name="font">
                      <font>
                       <pointsize>12</pointsize>
@@ -178,7 +187,7 @@
                     </property>
                     <layout class="QFormLayout" name="formLayout_2">
                      <property name="horizontalSpacing">
-                      <number>32</number>
+                      <number>22</number>
                      </property>
                      <property name="leftMargin">
                       <number>20</number>
@@ -193,14 +202,14 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="1" column="0">
+                     <item row="2" column="0">
                       <widget class="QLabel" name="label_3">
                        <property name="text">
                         <string>Send IV</string>
                        </property>
                       </widget>
                      </item>
-                     <item row="2" column="0">
+                     <item row="5" column="0">
                       <widget class="QLabel" name="label_4">
                        <property name="text">
                         <string>Receive IV</string>
@@ -208,13 +217,130 @@
                       </widget>
                      </item>
                      <item row="0" column="1">
-                      <widget class="QPlainTextEdit" name="plainTextEdit"/>
-                     </item>
-                     <item row="1" column="1">
-                      <widget class="QLineEdit" name="lineEdit"/>
+                      <widget class="QPlainTextEdit" name="keyHexText">
+                       <property name="maximumSize">
+                        <size>
+                         <width>16777215</width>
+                         <height>99</height>
+                        </size>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <family>Courier</family>
+                         <pointsize>10</pointsize>
+                        </font>
+                       </property>
+                       <property name="lineWrapMode">
+                        <enum>QPlainTextEdit::WidgetWidth</enum>
+                       </property>
+                       <property name="readOnly">
+                        <bool>true</bool>
+                       </property>
+                       <property name="plainText">
+                        <string>33 56 29 3D B7 82 89 24 1D BA E8 CD 9A 00 01 F4 
+FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD</string>
+                       </property>
+                       <property name="tabStopWidth">
+                        <number>80</number>
+                       </property>
+                       <property name="maximumBlockCount">
+                        <number>0</number>
+                       </property>
+                      </widget>
                      </item>
                      <item row="2" column="1">
-                      <widget class="QLineEdit" name="lineEdit_2"/>
+                      <widget class="QLineEdit" name="sendIVText">
+                       <property name="font">
+                        <font>
+                         <family>Courier</family>
+                        </font>
+                       </property>
+                       <property name="readOnly">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="5" column="1">
+                      <widget class="QLineEdit" name="recvIVText">
+                       <property name="font">
+                        <font>
+                         <family>Courier</family>
+                        </font>
+                       </property>
+                       <property name="readOnly">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="3" column="0">
+                      <widget class="QLabel" name="label_5">
+                       <property name="text">
+                        <string>Iteration</string>
+                       </property>
+                       <property name="indent">
+                        <number>0</number>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="3" column="1">
+                      <widget class="QLineEdit" name="sendIterText">
+                       <property name="font">
+                        <font>
+                         <family>Courier</family>
+                        </font>
+                       </property>
+                       <property name="readOnly">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="6" column="0">
+                      <widget class="QLabel" name="label_6">
+                       <property name="text">
+                        <string>Iteration</string>
+                       </property>
+                       <property name="indent">
+                        <number>0</number>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="6" column="1">
+                      <widget class="QLineEdit" name="recvIterText">
+                       <property name="font">
+                        <font>
+                         <family>Courier</family>
+                        </font>
+                       </property>
+                       <property name="readOnly">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="1" column="1">
+                      <spacer name="verticalSpacer">
+                       <property name="orientation">
+                        <enum>Qt::Vertical</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>20</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item row="4" column="1">
+                      <spacer name="verticalSpacer_2">
+                       <property name="orientation">
+                        <enum>Qt::Vertical</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>20</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
                      </item>
                     </layout>
                    </widget>

@@ -2,6 +2,7 @@
 
 #include <QWidget>
 
+enum statusWidgetState {eBad, ePending, eGood};
 
 class statusWidget : public QWidget
 {
@@ -12,6 +13,8 @@ public:
 	~statusWidget();
 
 	void setTitle(QString title) { widgetMainGroupBox->setTitle(title); }
+	void setState(statusWidgetState newState);
+	void setText(QString text) { statusText->setText(text); }
 
 private slots:
 	void fadeTimerLabel();
@@ -26,12 +29,15 @@ private:
 	QLabel *lab_good;
 	QVBoxLayout *text_vertLayout;
 	QLabel *statusText;
+	QTimer *fadeTimer;
 
 	struct  {
 		bool active = false;
 		int alpha = 167;
 		bool rising = false;
 	} timerFadeInfo;
+
+	statusWidgetState currentState = eBad;
 
 	void setLabelActive(QLabel *lab, bool state);
 };

@@ -45,6 +45,7 @@ public:
 struct memWorkerParams {
 	void *thisptr;
 	GAMECLIENTINFO *clientInfo;
+	bool started = false;
 };
 
 
@@ -65,10 +66,20 @@ public:
 private:
 	void main_loop();
 	void grabKeys(GAMECLIENTINFO *clientInfo);
+	void keyGrabController(GAMECLIENTINFO *gameClient);
 	bool insertKey(DWORD pid, DWORD *keyblobptr, DWORD foundAddress);
+	bool openClientHandle(GAMECLIENTINFO *gameClient);
 	int getClientPIDs(std::vector <DWORD>& resultsList);
 	GAMECLIENTINFO* get_process_obj(DWORD pid);
 	void memoryScanWorker(GAMECLIENTINFO *);
+
+	static DWORD WINAPI scanControllerStart(void* Param) {
+		memWorkerParams *paramsPtr = (memWorkerParams*)Param;
+		key_grabber_thread* This = (key_grabber_thread*)paramsPtr->thisptr;
+		This->keyGrabController(paramsPtr->clientInfo);
+		paramsPtr->started = true;
+		return 0;
+	}
 	static DWORD WINAPI scanWorkerStart(void* Param) {
 		memWorkerParams *paramsPtr = (memWorkerParams*)Param;
 		key_grabber_thread* This = (key_grabber_thread*)paramsPtr->thisptr;
