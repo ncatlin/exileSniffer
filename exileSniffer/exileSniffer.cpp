@@ -25,9 +25,9 @@ exileSniffer::exileSniffer(QWidget *parent)
 	init_loginPkt_Actioners();
 	init_gamePkt_Actioners();
 
-	setup_decryption_tab();
-
 	start_threads();
+
+	setup_decryption_tab();
 
 	std::cout << "writing to log " << "N:\\code\\POEcode\\poeSRE\\clientX\\Debug\\latestconndump.txt" << std::endl;
 	outfile = std::ofstream("N:\\code\\POEcode\\poeSRE\\clientX\\Debug\\latestconndump.txt",
@@ -89,22 +89,28 @@ void exileSniffer::setLabelActive(QLabel *lab, bool state)
 	}
 }
 
-void exileSniffer::fadeTimerLabels()
+void exileSniffer::setStateNotDecrypting()
 {
-	//if (fadeInfoKeyex.active) fadeTimerLabel(fadeInfoKeyex, ui.keyex_lab_pending);
-	//if (fadeInfoSniff.active) fadeTimerLabel(fadeInfoSniff, ui.sniff_lab_pending);
+	activeDecryption = false;
+	packetProcessor->requestIters(false);
+	setLabelActive(ui.yes_decrypt_label, false);
+	setLabelActive(ui.no_decrypt_label, true);
+
+	ui.decrypt_details_stack->setCurrentIndex(0);
 }
 
 void exileSniffer::setup_decryption_tab()
 {
 	ui.keyExStatusWidget->setTitle("Client Key Extraction");
+	ui.keyExStatusWidget->setText("Waiting for game processes");
+
 	ui.sniffStatusWidget->setTitle("Network Stream Sniffing");
+	ui.sniffStatusWidget->setText("Waiting for game packets");
 
 	ui.no_decrypt_label->setPixmap(QPixmap(":/icons/padlock-red-locked.png"));
 	ui.yes_decrypt_label->setPixmap(QPixmap(":/icons/padlock-green.png"));
 
-	setLabelActive(ui.yes_decrypt_label, false);
-	setLabelActive(ui.no_decrypt_label, true);
+	setStateNotDecrypting();
 
 }
 
@@ -194,54 +200,248 @@ void exileSniffer::read_UI_Q()
 	}
 }
 
+void exileSniffer::set_keyEx_scanning_count(int total, int scanning)
+{
+
+	if (total == 0)
+	{
+		ui.keyExStatusWidget->setState(statusWidgetState::eBad);
+		ui.keyExStatusWidget->setText("No running game clients detected");
+	}
+	else
+	{
+		if (scanning != total)
+		{
+			stringstream msg;
+			if (total == 0)
+				msg << "No active clients found but ";
+			else if (total == 1)
+				msg << "1 active client found but ";
+			else
+				msg << total << " active clients found but ";
+
+			msg << scanning << " being scanned";
+
+			if (scanning > 0)
+				ui.keyExStatusWidget->setState(statusWidgetState::ePending);
+			else
+				ui.keyExStatusWidget->setState(statusWidgetState::eBad);
+
+			ui.keyExStatusWidget->setText(QString::fromStdString(msg.str()));
+		}
+		else
+		{
+			ui.keyExStatusWidget->setState(statusWidgetState::ePending);
+			QString stateString = "Scanning " + QString::number(total) + " clients for stream keys";
+			ui.keyExStatusWidget->setText(stateString);
+		}
+	}
+}
+
+void exileSniffer::setStateDecrypting(int streamID)
+{
+	activeDecryption = true;
+
+	STREAM_NETWORK_DATA *streamData = packetSniffer->get_stream_data(streamID);
+	if (streamData)
+	{
+		std::stringstream streamWidgetMsg;
+		streamWidgetMsg << "Decrypting connection to " << streamData->serverIP << ":" << streamData->serverPort << std::endl;
+		ui.sniffStatusWidget->setState(statusWidgetState::eGood);
+		ui.sniffStatusWidget->setText(QString::fromStdString(streamWidgetMsg.str()));
+
+		std::stringstream keyexWidgetMsg;
+		keyexWidgetMsg << "Decrypting stream of game process " << std::dec << packetProcessor->getLatestDecryptProcess() << std::endl;
+		ui.keyExStatusWidget->setState(statusWidgetState::eGood);
+		ui.keyExStatusWidget->setText(QString::fromStdString(keyexWidgetMsg.str()));
+	}
+	else
+	{
+		ui.sniffStatusWidget->setState(statusWidgetState::eBad);
+		ui.sniffStatusWidget->setText("ERROR: Decrypting unknown stream. Voices from beyond?");
+	}
+
+	setLabelActive(ui.yes_decrypt_label, true);
+	setLabelActive(ui.no_decrypt_label, false);
+	ui.decrypt_details_stack->setCurrentIndex(1);
+	packetProcessor->requestIters(true);
+}
+
+void exileSniffer::updateStreamStateWidget()
+{
+	int active = 0;
+	int failed = 0;
+	
+	int decryptingStream = -1;
+
+	for (auto it = streamStates.begin(); it != streamStates.end(); it++)
+	{
+		if (it->second == eStreamDecrypting)
+		{
+			decryptingStream = it->first;
+			break;
+		}
+		if (it->second == eStreamFailed) failed++;
+		active++;
+	}
+
+	if (decryptingStream != -1)
+	{
+		if (!activeDecryption)
+		{
+			setStateDecrypting(decryptingStream);
+		}
+	}
+	else
+	{
+		if (active == 0)
+		{
+			ui.sniffStatusWidget->setState(statusWidgetState::eBad);
+			ui.sniffStatusWidget->setText("No streams being sniffed");
+		}
+		else
+		{
+			std::stringstream msg;
+			int actualActive = active - failed;
+			if (actualActive > 0)
+			{
+				msg << "Sniffing " << actualActive << " stream";
+				if (actualActive != 1)
+					msg << "s";
+				msg << " for logon packets";
+
+				if (failed > 0)
+					msg << " (" << failed << " abandoned)";
+
+				ui.sniffStatusWidget->setState(statusWidgetState::ePending);
+			}
+			else
+			{
+				msg << "Abandoned decryption of " << failed << " stream";
+				if (failed != 1)
+					msg << "s";
+				msg << ". Must start before logon.";
+
+				ui.sniffStatusWidget->setState(statusWidgetState::eBad);
+			}
+
+			ui.sniffStatusWidget->setText(QString::fromStdString(msg.str()));
+		}
+	}
+}
+
 void exileSniffer::action_UI_Msg(UI_MESSAGE *msg)
 {
 	bool deleteAfterUse = true;
 
 	switch (msg->msgType)
 	{
-	case uiMsgType::eMetaLog:
-	{
-		UI_METALOG_MSG *metalogmsg = (UI_METALOG_MSG *)msg;
-		add_metalog_update(metalogmsg->stringData, metalogmsg->pid);
-		break;
-	}
-	case uiMsgType::eClientEvent:
-	{
-		UI_CLIENTEVENT_MSG *cliEvtMsg = (UI_CLIENTEVENT_MSG *)msg;
-		handle_client_event(cliEvtMsg->pid, cliEvtMsg->running);
-		break;
-	}
-	case uiMsgType::eLoginNote:
-	{
-		UI_LOGIN_NOTE *lgn = (UI_LOGIN_NOTE *)msg;
-		auto it = clients.find(lgn->pid);
-		if (it != clients.end())
-			it->second->isLoggedIn = true;
-		break;
-	}
-	case uiMsgType::ePacketHex:
-	{
-		deleteAfterUse = false; //archived
-		handle_raw_packet_data((UI_RAWHEX_PKT *)msg);
-		break;
-	}
-	case uiMsgType::eDecodedPacket:
-	{
-		deleteAfterUse = false; //archived
-		UIDecodedPkt &uiDecodedMsg = *((UIDecodedPkt *)msg);
 
-		if(!uiDecodedMsg.decodeError())
-			action_decoded_packet(uiDecodedMsg); 
-		else
+		case uiMsgType::eMetaLog:
 		{
-			if (uiDecodedMsg.wasAbandoned())
-				action_decoded_packet(uiDecodedMsg);
-			else
-				action_undecoded_packet(uiDecodedMsg);
+			UI_METALOG_MSG *metalogmsg = (UI_METALOG_MSG *)msg;
+			add_metalog_update(metalogmsg->stringData, metalogmsg->pid);
+			break;
 		}
-		break;
-	}
+
+		case uiMsgType::eClientEvent:
+		{
+			UI_CLIENTEVENT_MSG *cliEvtMsg = (UI_CLIENTEVENT_MSG *)msg;
+			handle_client_event(cliEvtMsg->pid, cliEvtMsg->running);
+
+			if (cliEvtMsg->pid && !activeDecryption)
+				set_keyEx_scanning_count(cliEvtMsg->totalClients, cliEvtMsg->totalScanning);
+
+			break;
+		}
+
+		case uiMsgType::eStreamEvent:
+		{
+			UI_STREAMEVENT_MSG *streamNote = (UI_STREAMEVENT_MSG *)msg;
+			if (streamNote->state == eStreamState::eStreamEnded)
+			{
+				auto streamIt = streamStates.find(streamNote->streamID);
+				if (streamIt->second == eStreamDecrypting)
+					activeDecryption = false;
+				streamStates.erase(streamIt);
+			}
+			else
+				streamStates[streamNote->streamID] = streamNote->state;
+
+			updateStreamStateWidget();
+			break;
+		}
+
+		case uiMsgType::eSniffNote:
+		{
+			UI_SNIFF_NOTE *sniffnote = (UI_SNIFF_NOTE *)msg;
+			ui.sniffStatusWidget->setState(statusWidgetState::ePending);
+			ui.sniffStatusWidget->setText("Sniffing for new game streams on interface "+ sniffnote->iface);
+			break;
+		}
+
+		case uiMsgType::eLoginNote:
+		{
+			UI_LOGIN_NOTE *lgn = (UI_LOGIN_NOTE *)msg;
+			auto it = clients.find(lgn->pid);
+			if (it != clients.end())
+				it->second->isLoggedIn = true;
+			break;
+		}
+
+		case uiMsgType::ePacketHex:
+		{
+			deleteAfterUse = false; //archived
+			handle_raw_packet_data((UI_RAWHEX_PKT *)msg);
+			break;
+		}
+
+		case uiMsgType::eDecodedPacket:
+		{
+			deleteAfterUse = false; //archived
+			UIDecodedPkt &uiDecodedMsg = *((UIDecodedPkt *)msg);
+
+			if(!uiDecodedMsg.decodeError())
+				action_decoded_packet(uiDecodedMsg); 
+			else
+			{
+				if (uiDecodedMsg.wasAbandoned())
+					action_decoded_packet(uiDecodedMsg);
+				else
+					action_undecoded_packet(uiDecodedMsg);
+			}
+			break;
+		}
+
+		case uiMsgType::eKeyUpdate:
+		{
+			UI_KEY *keymsg = (UI_KEY *)msg;
+			ui.keyHexText->clear();
+			QString keys = byteVecToHex(keymsg->key);
+			keys.insert(48, '\n');
+			ui.keyHexText->appendPlainText(keys);
+			break;
+		}
+
+		case uiMsgType::eIVUpdate:
+		{
+			UI_IV *ivmsg = (UI_IV *)msg;
+			if(!ivmsg->sendIV.empty())
+				ui.sendIVText->setText(byteVecToHex(ivmsg->sendIV));
+			if (!ivmsg->recvIV.empty())
+				ui.recvIVText->setText(byteVecToHex(ivmsg->recvIV));
+			break;
+		}
+
+		case uiMsgType::eCryptIterUpdate:
+		{
+			UI_CRYPTITER *ivmsg = (UI_CRYPTITER *)msg;
+			if (!ivmsg->sendIter.empty())
+				ui.sendIterText->setText(byteVecToHex(ivmsg->sendIter));
+			if (!ivmsg->recvIter.empty())
+				ui.recvIterText->setText(byteVecToHex(ivmsg->recvIter));
+			break;
+		}
 	}
 
 	if(deleteAfterUse)

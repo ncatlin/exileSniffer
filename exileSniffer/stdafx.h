@@ -48,3 +48,4 @@ rapidjson for ggpk data
 
 #include <cryptopp\cryptlib.h>
 #include <cryptopp\salsa.h>
+#include <cryptopp\modes.h>

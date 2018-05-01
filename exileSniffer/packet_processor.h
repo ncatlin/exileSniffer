@@ -17,6 +17,7 @@ public:
 	KEYDATA *workingSendKey = NULL;
 	unsigned short lastPktID = 0;
 	int ephKeys = 0;
+	bool failed = false;
 };
 
 class packet_processor :
@@ -29,6 +30,8 @@ public:
 		keyGrabber = keyGrabPtr; uiMsgQueue = uiq; ggpk = &ggpkRef;
 	}
 	~packet_processor() {};
+	DWORD getLatestDecryptProcess() { return activeClientPID; }
+	void requestIters(bool state) { displayingIters = state; }
 
 private:
 	UIDecodedPkt * testpk;
@@ -49,7 +52,6 @@ private:
 	void handle_packet_to_patchserver(byte* data, unsigned int dataLen);
 	void handle_packet_from_gameserver(byte* data, unsigned int dataLen, long long timems);
 	void handle_packet_to_gameserver(byte* data, unsigned int dataLen, long long timems);
-
 
 	inline void consume_add_byte(std::wstring name, UIDecodedPkt *uipkt) {	uipkt->add_byte(name, consume_Byte());}
 	inline void consume_add_word(std::wstring name, UIDecodedPkt *uipkt) { uipkt->add_word(name, consumeUShort()); }
@@ -234,6 +236,7 @@ private:
 	void emit_decoding_err_msg(unsigned short msgID, unsigned short lastMsgID);
 	void continue_gamebuffer_next_packet();
 
+	void sendIterationToUI(CryptoPP::Salsa20::Encryption sobj, bool send);
 
 private:
 	vector<UIDecodedPkt *> deserialisedPkts;
@@ -270,6 +273,7 @@ private:
 
 	//this is where a single logical message spans multiple tcp packets
 	bool currentMsgMultiPacket = false;
+	bool displayingIters = false;
 
 	struct {
 		bool active = false;

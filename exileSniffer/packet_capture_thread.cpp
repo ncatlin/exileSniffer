@@ -109,60 +109,57 @@ void packet_capture_thread::on_gameserver_data(Tins::TCPIP::Stream& stream)
 
 void packet_capture_thread::on_new_stream(Tins::TCPIP::Stream& stream)
 {
-	printf("New stream [#%d]: client:%d -> %s:%d ", connectionCount, stream.client_port(), 
-		stream.server_addr_v4().to_string().c_str(), stream.server_port());
+	int streamID = connectionCount++;
+
+	streamList[stream.create_time()] = streamID;
+
+	EnterCriticalSection(&streamDataCritsec);
+	streamRecords[streamID].serverPort = stream.server_port();
+	streamRecords[streamID].serverIP = stream.server_addr_v4().to_string(); //ipv6 anyone? no? no.
+	LeaveCriticalSection(&streamDataCritsec);
+
 	char serverType = portStreamType(stream.server_port());
 
-	streamList[stream.create_time()] = connectionCount++;
 	using std::placeholders::_1;
 	switch (serverType)
 	{
 	case ePatch:
-		printf(" (Patch server)\n");
 		stream.client_data_callback(std::bind(&packet_capture_thread::on_patchclient_data, this, _1));
 		stream.server_data_callback(std::bind(&packet_capture_thread::on_patchserver_data, this, _1));
 		break;
 
 	case eLogin:
-		printf(" (Login server)\n");
 		stream.client_data_callback(std::bind(&packet_capture_thread::on_loginclient_data, this, _1));
 		stream.server_data_callback(std::bind(&packet_capture_thread::on_loginserver_data, this, _1));
 		break;
 
 	case eGame:
-		printf(" (Game server)\n");
 		stream.client_data_callback(std::bind(&packet_capture_thread::on_gameclient_data, this, _1));
 		stream.server_data_callback(std::bind(&packet_capture_thread::on_gameserver_data, this, _1));
 		break;
 	default:
-		std::cout << "Ignoring unknown port: " << stream.server_port() << std::endl;
+		std::cout << "Ignoring unknown server port: " << stream.server_port() << std::endl;
 	}
+
+	std::stringstream newStreamMsg;
+	newStreamMsg << "New stream[#" << std::dec << streamID << "]: Client:" << stream.client_port() <<
+		" -> " << stream.server_addr_v4().to_string() << ":" << stream.server_port();
+
+	UIaddLogMsg(newStreamMsg.str().c_str(), 0, uiMsgQueue);
+
+	UInotifyStreamState(streamID, eStreamState::eStreamStarted, uiMsgQueue);
 }
 
 
 void packet_capture_thread::on_stream_terminated(Tins::TCPIP::Stream& stream, Tins::TCPIP::StreamFollower::TerminationReason reason)
 {
+	std::stringstream newStreamMsg;
+	newStreamMsg << "Stream "<< std::dec << getStreamID(stream) <<" ended. Client:" << stream.client_port() <<
+		" -> " << stream.server_addr_v4().to_string() << ":" << stream.server_port();
 
-	char serverType = portStreamType(stream.server_port());
-	switch (serverType) 
-	{
-	case ePatch:
-		std::cout << "Patchserver Stream Ended -";
-		break;
-
-	case eLogin:
-		std::cout << "Loginserver Stream Ended -" ;
-		break;
-
-	case eGame:
-		std::cout << "Gameserver Stream Ended -";
-		break;
-	default:
-		break;
-	}
-
-	printf("[#%d]: client:%d -> %s:%d ", connectionCount, stream.client_port(), stream.server_addr_v4().to_string().c_str(), stream.server_port());
-
+	UIaddLogMsg(newStreamMsg.str().c_str(), 0, uiMsgQueue);
+	UInotifyStreamState(getStreamID(stream), eStreamState::eStreamEnded, uiMsgQueue);
+	
 }
 
 HANDLE createPipe(std::wstring pipename)
@@ -205,8 +202,8 @@ void packet_capture_thread::main_loop()
 	filterString.append(" tcp port " + std::to_string(LOGINSERVER_PORT));
 	filterString.append(" or");
 	filterString.append(" tcp port " + std::to_string(GAMESERVER_PORT));
-	filterString.append(" or");
-	filterString.append(" tcp port " + std::to_string(PATCHSERVER_PORT));
+	//filterString.append(" or");
+	//filterString.append(" tcp port " + std::to_string(PATCHSERVER_PORT));
 	filterString.append(" )");
 
 	std::stringstream listenStartMsg;
@@ -218,6 +215,8 @@ void packet_capture_thread::main_loop()
 	config.set_promisc_mode(true);
 	config.set_filter(filterString);
 	Tins::Sniffer sniffer(iface.name(), config);
+
+	UIsniffingStarted(QString::fromStdString(hostAddr.to_string()), uiMsgQueue);
 
 	sniffer.sniff_loop([&](Tins::PDU& pdu) { follower.process_packet(pdu); return true; });
 }
@@ -233,4 +232,25 @@ packet_capture_thread::packet_capture_thread(SafeQueue<UI_MESSAGE>* uiq)
 
 packet_capture_thread::~packet_capture_thread()
 {
+}
+
+
+STREAM_NETWORK_DATA* packet_capture_thread::get_stream_data(int streamID)
+{
+	STREAM_NETWORK_DATA* result = NULL;
+
+	EnterCriticalSection(&streamDataCritsec);
+	auto it = streamRecords.find(streamID);
+	if (it == streamRecords.end())
+	{
+		LeaveCriticalSection(&streamDataCritsec);
+		UIaddLogMsg("Error: Tried to retrieve streamdata for nonexistant stream", 0, uiMsgQueue);
+	}
+	else
+	{
+		result = &it->second;
+		LeaveCriticalSection(&streamDataCritsec);
+
+	}
+	return result;
 }

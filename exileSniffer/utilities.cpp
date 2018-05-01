@@ -175,3 +175,36 @@ std::wstring IPToString(DWORD ip)
 	return res.str();
 }
 
+
+QString byteVecToHex(std::vector<byte> data)
+{
+	std::stringstream hexss;
+	hexss << std::setfill('0') << std::uppercase;
+	for (int i = 0; i < data.size(); ++i)
+	{
+		byte item = data.at(i);
+		if (item)
+			hexss << " " << std::hex << std::setw(2) << (int)item;
+		else
+			hexss << " 00";
+	}
+	return QString::fromStdString(hexss.str());
+}
+
+//dirty dirty code. requires changing the crypto++ headers to unprotect the m_state object
+std::vector<byte> extract_Iter_from_salsaObj(CryptoPP::Salsa20::Encryption& keyblob)
+{
+	byte *keydata = (byte *)keyblob.m_state.data();
+
+	std::vector<byte> iv;
+	iv.reserve(8);
+	iv.push_back(*(keydata + 23));
+	iv.push_back(*(keydata + 22));
+	iv.push_back(*(keydata + 21));
+	iv.push_back(*(keydata + 20));
+	iv.push_back(*(keydata + 35));
+	iv.push_back(*(keydata + 34));
+	iv.push_back(*(keydata + 33));
+	iv.push_back(*(keydata + 32));
+	return iv;
+}

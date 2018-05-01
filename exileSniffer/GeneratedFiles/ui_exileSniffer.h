@@ -28,6 +28,7 @@
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPlainTextEdit>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QSpacerItem>
 #include <QtWidgets/QSplitter>
 #include <QtWidgets/QStackedWidget>
 #include <QtWidgets/QStatusBar>
@@ -59,7 +60,7 @@ public:
     QLabel *yes_decrypt_label;
     QFrame *decryptionInfoFrame;
     QHBoxLayout *horizontalLayout_9;
-    QStackedWidget *stackedWidget_3;
+    QStackedWidget *decrypt_details_stack;
     QWidget *noDecryptStack;
     QVBoxLayout *verticalLayout_9;
     QLabel *decryptionStatusText;
@@ -71,9 +72,15 @@ public:
     QLabel *label_2;
     QLabel *label_3;
     QLabel *label_4;
-    QPlainTextEdit *plainTextEdit;
-    QLineEdit *lineEdit;
-    QLineEdit *lineEdit_2;
+    QPlainTextEdit *keyHexText;
+    QLineEdit *sendIVText;
+    QLineEdit *recvIVText;
+    QLabel *label_5;
+    QLineEdit *sendIterText;
+    QLabel *label_6;
+    QLineEdit *recvIterText;
+    QSpacerItem *verticalSpacer;
+    QSpacerItem *verticalSpacer_2;
     QWidget *decodeTab;
     QGridLayout *gridLayout_3;
     QFrame *decodeDisplayFrame;
@@ -190,8 +197,8 @@ public:
         horizontalLayout_9->setSpacing(6);
         horizontalLayout_9->setContentsMargins(11, 11, 11, 11);
         horizontalLayout_9->setObjectName(QStringLiteral("horizontalLayout_9"));
-        stackedWidget_3 = new QStackedWidget(decryptionInfoFrame);
-        stackedWidget_3->setObjectName(QStringLiteral("stackedWidget_3"));
+        decrypt_details_stack = new QStackedWidget(decryptionInfoFrame);
+        decrypt_details_stack->setObjectName(QStringLiteral("decrypt_details_stack"));
         noDecryptStack = new QWidget();
         noDecryptStack->setObjectName(QStringLiteral("noDecryptStack"));
         verticalLayout_9 = new QVBoxLayout(noDecryptStack);
@@ -207,7 +214,7 @@ public:
 
         verticalLayout_9->addWidget(decryptionStatusText);
 
-        stackedWidget_3->addWidget(noDecryptStack);
+        decrypt_details_stack->addWidget(noDecryptStack);
         yesDecryptStack = new QWidget();
         yesDecryptStack->setObjectName(QStringLiteral("yesDecryptStack"));
         verticalLayout_10 = new QVBoxLayout(yesDecryptStack);
@@ -223,6 +230,7 @@ public:
 
         groupBox_3 = new QGroupBox(yesDecryptStack);
         groupBox_3->setObjectName(QStringLiteral("groupBox_3"));
+        groupBox_3->setMaximumSize(QSize(16777215, 16777206));
         QFont font1;
         font1.setPointSize(12);
         groupBox_3->setFont(font1);
@@ -230,7 +238,7 @@ public:
         formLayout_2->setSpacing(6);
         formLayout_2->setContentsMargins(11, 11, 11, 11);
         formLayout_2->setObjectName(QStringLiteral("formLayout_2"));
-        formLayout_2->setHorizontalSpacing(32);
+        formLayout_2->setHorizontalSpacing(22);
         formLayout_2->setContentsMargins(20, -1, 20, -1);
         label_2 = new QLabel(groupBox_3);
         label_2->setObjectName(QStringLiteral("label_2"));
@@ -240,34 +248,83 @@ public:
         label_3 = new QLabel(groupBox_3);
         label_3->setObjectName(QStringLiteral("label_3"));
 
-        formLayout_2->setWidget(1, QFormLayout::LabelRole, label_3);
+        formLayout_2->setWidget(2, QFormLayout::LabelRole, label_3);
 
         label_4 = new QLabel(groupBox_3);
         label_4->setObjectName(QStringLiteral("label_4"));
 
-        formLayout_2->setWidget(2, QFormLayout::LabelRole, label_4);
+        formLayout_2->setWidget(5, QFormLayout::LabelRole, label_4);
 
-        plainTextEdit = new QPlainTextEdit(groupBox_3);
-        plainTextEdit->setObjectName(QStringLiteral("plainTextEdit"));
+        keyHexText = new QPlainTextEdit(groupBox_3);
+        keyHexText->setObjectName(QStringLiteral("keyHexText"));
+        keyHexText->setMaximumSize(QSize(16777215, 99));
+        QFont font2;
+        font2.setFamily(QStringLiteral("Courier"));
+        font2.setPointSize(10);
+        keyHexText->setFont(font2);
+        keyHexText->setLineWrapMode(QPlainTextEdit::WidgetWidth);
+        keyHexText->setReadOnly(true);
+        keyHexText->setTabStopWidth(80);
+        keyHexText->setMaximumBlockCount(0);
 
-        formLayout_2->setWidget(0, QFormLayout::FieldRole, plainTextEdit);
+        formLayout_2->setWidget(0, QFormLayout::FieldRole, keyHexText);
 
-        lineEdit = new QLineEdit(groupBox_3);
-        lineEdit->setObjectName(QStringLiteral("lineEdit"));
+        sendIVText = new QLineEdit(groupBox_3);
+        sendIVText->setObjectName(QStringLiteral("sendIVText"));
+        QFont font3;
+        font3.setFamily(QStringLiteral("Courier"));
+        sendIVText->setFont(font3);
+        sendIVText->setReadOnly(true);
 
-        formLayout_2->setWidget(1, QFormLayout::FieldRole, lineEdit);
+        formLayout_2->setWidget(2, QFormLayout::FieldRole, sendIVText);
 
-        lineEdit_2 = new QLineEdit(groupBox_3);
-        lineEdit_2->setObjectName(QStringLiteral("lineEdit_2"));
+        recvIVText = new QLineEdit(groupBox_3);
+        recvIVText->setObjectName(QStringLiteral("recvIVText"));
+        recvIVText->setFont(font3);
+        recvIVText->setReadOnly(true);
 
-        formLayout_2->setWidget(2, QFormLayout::FieldRole, lineEdit_2);
+        formLayout_2->setWidget(5, QFormLayout::FieldRole, recvIVText);
+
+        label_5 = new QLabel(groupBox_3);
+        label_5->setObjectName(QStringLiteral("label_5"));
+        label_5->setIndent(0);
+
+        formLayout_2->setWidget(3, QFormLayout::LabelRole, label_5);
+
+        sendIterText = new QLineEdit(groupBox_3);
+        sendIterText->setObjectName(QStringLiteral("sendIterText"));
+        sendIterText->setFont(font3);
+        sendIterText->setReadOnly(true);
+
+        formLayout_2->setWidget(3, QFormLayout::FieldRole, sendIterText);
+
+        label_6 = new QLabel(groupBox_3);
+        label_6->setObjectName(QStringLiteral("label_6"));
+        label_6->setIndent(0);
+
+        formLayout_2->setWidget(6, QFormLayout::LabelRole, label_6);
+
+        recvIterText = new QLineEdit(groupBox_3);
+        recvIterText->setObjectName(QStringLiteral("recvIterText"));
+        recvIterText->setFont(font3);
+        recvIterText->setReadOnly(true);
+
+        formLayout_2->setWidget(6, QFormLayout::FieldRole, recvIterText);
+
+        verticalSpacer = new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding);
+
+        formLayout_2->setItem(1, QFormLayout::FieldRole, verticalSpacer);
+
+        verticalSpacer_2 = new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding);
+
+        formLayout_2->setItem(4, QFormLayout::FieldRole, verticalSpacer_2);
 
 
         verticalLayout_10->addWidget(groupBox_3);
 
-        stackedWidget_3->addWidget(yesDecryptStack);
+        decrypt_details_stack->addWidget(yesDecryptStack);
 
-        horizontalLayout_9->addWidget(stackedWidget_3);
+        horizontalLayout_9->addWidget(decrypt_details_stack);
 
 
         horizontalLayout_10->addWidget(decryptionInfoFrame);
@@ -372,10 +429,10 @@ public:
         decodedListTable->verticalHeader()->setHighlightSections(false);
         decodedText = new QPlainTextEdit(splitter);
         decodedText->setObjectName(QStringLiteral("decodedText"));
-        QFont font2;
-        font2.setFamily(QStringLiteral("Courier New"));
-        font2.setPointSize(11);
-        decodedText->setFont(font2);
+        QFont font4;
+        font4.setFamily(QStringLiteral("Courier New"));
+        font4.setPointSize(11);
+        decodedText->setFont(font4);
         splitter->addWidget(decodedText);
 
         verticalLayout_3->addWidget(splitter);
@@ -395,10 +452,10 @@ public:
         textPaneFrame->setObjectName(QStringLiteral("textPaneFrame"));
         ptHexPane = new QTextEdit(rawDecryptTab);
         ptHexPane->setObjectName(QStringLiteral("ptHexPane"));
-        QFont font3;
-        font3.setFamily(QStringLiteral("Courier New"));
-        font3.setPointSize(8);
-        ptHexPane->setFont(font3);
+        QFont font5;
+        font5.setFamily(QStringLiteral("Courier New"));
+        font5.setPointSize(8);
+        ptHexPane->setFont(font5);
         ptHexPane->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
         ptHexPane->setLineWrapMode(QTextEdit::NoWrap);
         ptHexPane->setReadOnly(true);
@@ -408,9 +465,9 @@ public:
 
         ptASCIIPane = new QTextEdit(rawDecryptTab);
         ptASCIIPane->setObjectName(QStringLiteral("ptASCIIPane"));
-        QFont font4;
-        font4.setFamily(QStringLiteral("Courier New"));
-        ptASCIIPane->setFont(font4);
+        QFont font6;
+        font6.setFamily(QStringLiteral("Courier New"));
+        ptASCIIPane->setFont(font6);
         ptASCIIPane->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
         ptASCIIPane->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
@@ -536,6 +593,7 @@ public:
         QObject::connect(decodedListTable, SIGNAL(customContextMenuRequested(QPoint)), exileSniffer, SLOT(decodedTableMenuRequest(QPoint)));
 
         processTabs->setCurrentIndex(0);
+        decrypt_details_stack->setCurrentIndex(1);
 
 
         QMetaObject::connectSlotsByName(exileSniffer);
@@ -552,6 +610,10 @@ public:
         label_2->setText(QApplication::translate("exileSniffer", "Key", Q_NULLPTR));
         label_3->setText(QApplication::translate("exileSniffer", "Send IV", Q_NULLPTR));
         label_4->setText(QApplication::translate("exileSniffer", "Receive IV", Q_NULLPTR));
+        keyHexText->setPlainText(QApplication::translate("exileSniffer", "33 56 29 3D B7 82 89 24 1D BA E8 CD 9A 00 01 F4 \n"
+"FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD", Q_NULLPTR));
+        label_5->setText(QApplication::translate("exileSniffer", "Iteration", Q_NULLPTR));
+        label_6->setText(QApplication::translate("exileSniffer", "Iteration", Q_NULLPTR));
         processTabs->setTabText(processTabs->indexOf(interceptionTab), QApplication::translate("exileSniffer", "Decryption", Q_NULLPTR));
         decodedAutoscrollCheck->setText(QApplication::translate("exileSniffer", "Auto Scroll", Q_NULLPTR));
         decodedDisplayedLabel->setText(QApplication::translate("exileSniffer", "No packets decoded", Q_NULLPTR));

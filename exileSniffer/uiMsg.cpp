@@ -32,15 +32,75 @@ void UIrecordLogin(DWORD clientPID,  SafeQueue<UI_MESSAGE> *uiMsgQueue)
 	uiMsgQueue->addItem(loginmsg);
 }
 
+void UIsniffingStarted(QString iface, SafeQueue<UI_MESSAGE> *uiMsgQueue)
+{
+	UI_SNIFF_NOTE *sniffmsg = new UI_SNIFF_NOTE;
+	sniffmsg->msgType = uiMsgType::eSniffNote;
+	sniffmsg->iface = iface;
+	uiMsgQueue->addItem(sniffmsg);
+}
 
-void UInotifyClientRunning(DWORD clientPID, bool running, SafeQueue<UI_MESSAGE> *uiMsgQueue)
+void UInotifyClientRunning(DWORD clientPID, bool running, int activeClients, int scanningClients, SafeQueue<UI_MESSAGE> *uiMsgQueue)
 {
 	UI_CLIENTEVENT_MSG *initmsg = new UI_CLIENTEVENT_MSG;
 	initmsg->msgType = uiMsgType::eClientEvent;
 	initmsg->running = running;
 	initmsg->pid = clientPID;
+	initmsg->totalClients = activeClients;
+	initmsg->totalScanning = activeClients;
 	uiMsgQueue->addItem(initmsg);
 }
+
+void UInotifyStreamState(int streamID, eStreamState state, SafeQueue<UI_MESSAGE> *uiMsgQueue)
+{
+	UI_STREAMEVENT_MSG *initmsg = new UI_STREAMEVENT_MSG;
+	initmsg->msgType = uiMsgType::eStreamEvent;
+	initmsg->state = state;
+	initmsg->streamID = streamID;
+	uiMsgQueue->addItem(initmsg);
+}
+
+void UIdisplaySalsaKey(std::vector<byte> key, SafeQueue<UI_MESSAGE> *uiMsgQueue)
+{
+	UI_KEY *initmsg = new UI_KEY;
+	initmsg->msgType = uiMsgType::eKeyUpdate;
+	initmsg->key = key;
+	uiMsgQueue->addItem(initmsg);
+}
+
+void UIUpdateSendIV(std::vector<byte> sendIV, SafeQueue<UI_MESSAGE> *uiMsgQueue)
+{
+	UI_IV *initmsg = new UI_IV;
+	initmsg->msgType = uiMsgType::eIVUpdate;
+	initmsg->sendIV = sendIV;
+	uiMsgQueue->addItem(initmsg);
+}
+
+void UIUpdateRecvIV(std::vector<byte> recvIV, SafeQueue<UI_MESSAGE> *uiMsgQueue)
+{
+	UI_IV *initmsg = new UI_IV;
+	initmsg->msgType = uiMsgType::eIVUpdate;
+	initmsg->recvIV = recvIV;
+	uiMsgQueue->addItem(initmsg);
+}
+
+
+void UIUpdateSendIter(std::vector<byte> sendIter, SafeQueue<UI_MESSAGE> *uiMsgQueue)
+{
+	UI_CRYPTITER *initmsg = new UI_CRYPTITER;
+	initmsg->msgType = uiMsgType::eCryptIterUpdate;
+	initmsg->sendIter = sendIter;
+	uiMsgQueue->addItem(initmsg);
+}
+
+void UIUpdateRecvIter(std::vector<byte> recvIter, SafeQueue<UI_MESSAGE> *uiMsgQueue)
+{
+	UI_CRYPTITER *initmsg = new UI_CRYPTITER;
+	initmsg->msgType = uiMsgType::eCryptIterUpdate;
+	initmsg->recvIter = recvIter;
+	uiMsgQueue->addItem(initmsg);
+}
+
 
 UI_RAWHEX_PKT::UI_RAWHEX_PKT(DWORD processID, streamType streamServer, bool isIncoming) 
 {

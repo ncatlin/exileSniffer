@@ -92,13 +92,16 @@ class exileSniffer : public QMainWindow
 		void decodedTableMenuRequest(QPoint);
 		void copySelected();
 		void filterSelected();
-		void fadeTimerLabels();
 
 	private:
 		void setup_raw_stream_tab();
 		void setup_decoded_messages_tab();
 		void setup_decryption_tab();
 		void setLabelActive(QLabel *lab, bool state);
+		void set_keyEx_scanning_count(int total, int scanning);
+		void updateStreamStateWidget();
+		void setStateDecrypting(int streamID);
+		void setStateNotDecrypting();
 
 		void init_gamePkt_Actioners();
 		void init_loginPkt_Actioners();
@@ -292,6 +295,7 @@ class exileSniffer : public QMainWindow
 		
 		SafeQueue<UI_MESSAGE> uiMsgQueue; //read by ui thread, written by all others
 		map<DWORD, clientData *> clients;
+		map<int, eStreamState> streamStates;
 
 		typedef void (exileSniffer::*actionFunc)(UIDecodedPkt&, QString*);
 		map<unsigned short, actionFunc> gamePktActioners;
@@ -300,7 +304,7 @@ class exileSniffer : public QMainWindow
 		std::vector<std::pair<UI_DECODED_LIST_ENTRY, UIDecodedPkt *>> decodedListEntries;
 
 		const long long startMSSinceEpoch = ms_since_epoch();
-
+		bool activeDecryption = false;
 
 private:
 	gameDataStore ggpk;

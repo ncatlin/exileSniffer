@@ -15,3 +15,5 @@ long long ms_since_epoch();
 
 std::wstring IPToString(DWORD ip);
 
+QString byteVecToHex(std::vector<byte> data);
+std::vector<byte> extract_Iter_from_salsaObj(CryptoPP::Salsa20::Encryption& keyblob);

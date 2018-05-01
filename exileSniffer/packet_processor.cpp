@@ -177,10 +177,8 @@ void packet_processor::handle_packet_from_loginserver(byte* data, unsigned int d
 			assert(!keyCandidate->used);
 
 			currentStreamObj->fromLoginSalsa.SetKeyWithIV((const byte *)keyCandidate->salsakey,
-				32,
-				(const byte *)keyCandidate->IV);
+				32,	(const byte *)keyCandidate->IV);
 			currentStreamObj->fromLoginSalsa.ProcessData(decryptedBuffer->data(), data, dataLen);
-
 
 			unsigned short packetID = ntohs(getUshort(decryptedBuffer->data()));
 			if (packetID == 0x0004)
@@ -192,10 +190,16 @@ void packet_processor::handle_packet_from_loginserver(byte* data, unsigned int d
 				UIaddLogMsg("Loginserver receive key recovered",
 					keyCandidate->sourceProcess,
 					uiMsgQueue);
+
 				UIrecordLogin(keyCandidate->sourceProcess, uiMsgQueue);
 
 				keyGrabber->stopProcessScan(keyCandidate->sourceProcess);
 				currentStreamObj->workingRecvKey = keyCandidate;
+
+				vector<byte> IVVec(keyCandidate->IV, keyCandidate->IV + 8);
+				UIUpdateRecvIV(IVVec, uiMsgQueue);
+				sendIterationToUI(currentStreamObj->fromLoginSalsa, false);
+
 				break;
 			}
 			else
@@ -213,8 +217,11 @@ void packet_processor::handle_packet_from_loginserver(byte* data, unsigned int d
 
 	}
 
-	if(!alreadyDecrypted)
+	if (!alreadyDecrypted)
+	{
 		currentStreamObj->fromLoginSalsa.ProcessData(decryptedBuffer->data(), data, dataLen);
+		sendIterationToUI(currentStreamObj->fromLoginSalsa, false);
+	}
 
 	UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(currentStreamObj->workingSendKey->sourceProcess, eLogin, true);
 	msg->setData(decryptedBuffer);
@@ -302,6 +309,16 @@ void packet_processor::handle_packet_from_loginserver(byte* data, unsigned int d
 	*/
 }
 
+void packet_processor::sendIterationToUI(CryptoPP::Salsa20::Encryption sobj, bool send)
+{
+	if (!displayingIters) return;
+
+	if (send)
+		UIUpdateSendIter(extract_Iter_from_salsaObj(sobj), uiMsgQueue);
+	else
+		UIUpdateRecvIter(extract_Iter_from_salsaObj(sobj), uiMsgQueue);
+}
+
 void packet_processor::handle_packet_to_loginserver(byte* data, unsigned int dataLen, long long timems)
 {
 	std::cout << "got loginpkt size " << std::dec << dataLen << std::endl;
@@ -368,22 +385,34 @@ void packet_processor::handle_packet_to_loginserver(byte* data, unsigned int dat
 			currentStreamObj->toLoginSalsa.SetKeyWithIV((byte *)keyCandidate->salsakey,
 				32,
 				(byte *)keyCandidate->IV);
+
 			currentStreamObj->toLoginSalsa.ProcessData(decryptedBuffer->data(), data, dataLen);
 
 			if (decryptedBuffer->at(0) == 0 && decryptedBuffer->at(1) == 3)
 			{
 				keyCandidate->used = true;
 				keyGrabber->claimKey(keyCandidate, currentMsgStreamID);
+				activeClientPID = keyCandidate->sourceProcess;
+
+				currentStreamObj->workingSendKey = keyCandidate;
+
+				UInotifyStreamState(currentMsgStreamID, eStreamState::eStreamDecrypting, uiMsgQueue);
+
+				vector<byte> keyVec(keyCandidate->salsakey, keyCandidate->salsakey + 32);
+				UIdisplaySalsaKey(keyVec, uiMsgQueue);
+				vector<byte> IVVec(keyCandidate->IV, keyCandidate->IV + 8);
+				UIUpdateSendIV(IVVec, uiMsgQueue);
 
 				UIaddLogMsg("Loginserver send key recovered", 
 					keyCandidate->sourceProcess, 
 					uiMsgQueue);
 
-				currentStreamObj->workingSendKey = keyCandidate;
 				break;
 			}
 		}
-		
+
+		sendIterationToUI(currentStreamObj->toLoginSalsa, true);
+
 		//overwrite the creds before proceeding
 		ushort namelen = ntohs(getUshort(&decryptedBuffer->at(6)));
 		ushort credsloc = 2 + 4 + 2 + (namelen * 2) + 32;
@@ -416,7 +445,8 @@ void packet_processor::handle_packet_to_loginserver(byte* data, unsigned int dat
 	}
 
 	currentStreamObj->toLoginSalsa.ProcessData(decryptedBuffer->data(), data, dataLen);
-	
+	sendIterationToUI(currentStreamObj->toLoginSalsa, true);
+
 	UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(currentStreamObj->workingSendKey->sourceProcess, eLogin, false);
 	msg->setData(decryptedBuffer);
 	uiMsgQueue->addItem(msg);
@@ -425,59 +455,6 @@ void packet_processor::handle_packet_to_loginserver(byte* data, unsigned int dat
 	decryptedIndex = 0;
 
 	deserialise_packets_from_decrypted(eLogin, PKTBIT_OUTBOUND, timems);
-	/*
-	unsigned short pktIDWord = ntohs(consumeUShort());
-	std::cout << "pkid " << pktIDWord << std::endl;
-
-	switch (pktIDWord)
-	{
-	case LOGIN_CLI_KEEP_ALIVE:
-	{
-		UIDecodedPkt *ui_decodedpkt =
-			new UIDecodedPkt(currentStreamObj->workingSendKey->sourceProcess, eLogin, PKTBIT_OUTBOUND, timems);
-		deserialisedPkts.push_back(ui_decodedpkt);
-		ui_decodedpkt->setStartOffset(decryptedIndex - 2);
-		ui_decodedpkt->messageID = pktIDWord;
-		ui_decodedpkt->toggle_payload_operations(true);
-		uiMsgQueue->addItem(ui_decodedpkt);
-
-		std::cout << "Client sent KeepAlive pkt (0x01) to login server" << std::endl;
-		return;
-	}
-	case LOGIN_CLI_CHARACTER_SELECTED_SELECTED:
-	{
-		printf("Play request\n");
-
-		unsigned int charNameLen = decryptedBuffer->at(3) * 2;
-		if (decryptedBuffer->at(2) != 0)
-			printf("Warning, long login charname not handled\n");
-		std::wstring charn(reinterpret_cast<wchar_t*>(decryptedBuffer + 4), (charNameLen) / sizeof(wchar_t));
-		std::wcout << "\tSelected Char: " << charn << std::endl;
-		//uidata.charname = charn;
-
-		return;
-	}
-	case 11:
-	{
-		std::cout << "Character selection sent to login server by number: " << (int)decryptedBuffer->at(6) << std::endl;
-		return;
-	}
-	default:
-		printf("Client sent unknown packet to login server: 0x%x\n", decryptedBuffer->at(1));
-
-		std::cout << "Hex Payload: " << std::endl;
-		for (int i = 0; i < dataLen; ++i)
-		{
-			byte item = decryptedBuffer->at(i);
-			std::cout << std::hex << std::setw(2) << (int)item;
-			if (i % 16 == 0) std::cout << std::endl;
-		}
-		std::cout << std::endl;
-
-		return;
-	}
-	*/
-
 }
 
 void packet_processor::handle_login_data(byte* data)
@@ -524,6 +501,8 @@ bool packet_processor::handle_game_data(byte* data)
 	char *streamID_s = strtok_s(next_token, ",", &next_token);
 	currentMsgStreamID = (networkStreamID)atoi(streamID_s);
 	currentStreamObj = &streamDatas[currentMsgStreamID];
+	if (currentStreamObj->failed)
+		return false;
 
 	char *incoming = strtok_s(next_token, ",", &next_token);
 	currentMsgIncoming = (*incoming == '1');
@@ -649,7 +628,6 @@ void packet_processor::deserialise_packets_from_decrypted(streamType streamServe
 void packet_processor::handle_packet_to_gameserver(byte* data, 
 	unsigned int dataLen, long long timems)
 {
-	currentStreamObj = &streamDatas.at(currentMsgStreamID);
 	if (currentStreamObj->workingSendKey == NULL)
 	{
 		if (data[0] == 0 && data[1] == 3)
@@ -658,6 +636,7 @@ void packet_processor::handle_packet_to_gameserver(byte* data,
 
 			if (pendingGameserverKeys.find(connectionID) == pendingGameserverKeys.end())
 			{
+				/*
 				if (!pendingGameserverKeys.empty())
 				{
 					std::cout << "no pending for conid but found a key... trying";
@@ -665,11 +644,13 @@ void packet_processor::handle_packet_to_gameserver(byte* data,
 					currentStreamObj->workingRecvKey = pendingGameserverKeys.begin()->second.second;
 					pendingGameserverKeys.clear();
 				}
-				else
-				{
-					UIaddLogMsg("Error: No pending gameserver key", activeClientPID, uiMsgQueue);
-					return;
-				}
+				*/
+
+				UIaddLogMsg("Error: No pending gameserver key. Set during login or previous instance server.", activeClientPID, uiMsgQueue);
+				currentStreamObj->failed = true;
+				UInotifyStreamState(currentMsgStreamID, eStreamState::eStreamFailed, uiMsgQueue);
+				return;
+
 			}
 			else
 			{
@@ -686,6 +667,18 @@ void packet_processor::handle_packet_to_gameserver(byte* data,
 				(byte *)currentStreamObj->workingSendKey->salsakey, 32,
 				(byte *)currentStreamObj->workingSendKey->IV);
 
+			vector<byte> keyVec(currentStreamObj->workingSendKey->salsakey, 
+				currentStreamObj->workingSendKey->salsakey + 32);
+			UIdisplaySalsaKey(keyVec, uiMsgQueue);
+
+			vector<byte> IVsVec(currentStreamObj->workingSendKey->IV, currentStreamObj->workingSendKey->IV + 8);
+			UIUpdateSendIV(IVsVec, uiMsgQueue);
+			vector<byte> IVrVec(currentStreamObj->workingRecvKey->IV, currentStreamObj->workingRecvKey->IV + 8);
+			UIUpdateRecvIV(IVrVec, uiMsgQueue);
+
+			sendIterationToUI(currentStreamObj->toGameSalsa, true);
+			sendIterationToUI(currentStreamObj->fromGameSalsa, false);
+
 			pendingGameserverKeys.erase(connectionID);
 
 			//todo: decoded ui packet
@@ -699,7 +692,9 @@ void packet_processor::handle_packet_to_gameserver(byte* data,
 		}
 		else
 		{
-			std::cerr << "Warning! Unexpected first client packet|||!!!" << std::endl;
+			currentStreamObj->failed = true;
+			UIaddLogMsg("Failed to decrypt first packet - was sniffing started before login?", activeClientPID, uiMsgQueue);
+			UInotifyStreamState(currentMsgStreamID, eStreamState::eStreamFailed, uiMsgQueue);
 		}
 		return;
 	}
@@ -712,7 +707,7 @@ void packet_processor::handle_packet_to_gameserver(byte* data,
 	decryptedBuffer = new vector<byte>;
 	decryptedBuffer->resize(dataLen, 0);
 	currentStreamObj->toGameSalsa.ProcessData(decryptedBuffer->data(), data, dataLen);
-
+	sendIterationToUI(currentStreamObj->toGameSalsa, true);
 
 
 	UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(currentStreamObj->workingSendKey->sourceProcess, eGame, false);
@@ -731,8 +726,6 @@ void packet_processor::handle_packet_to_gameserver(byte* data,
 
 void packet_processor::handle_packet_from_gameserver(byte* data, unsigned int dataLen, long long timems)
 {
-	currentStreamObj = &streamDatas.at(currentMsgStreamID);
-
 	decryptedBuffer = new vector<byte>;
 	decryptedBuffer->resize(dataLen, 0);
 	decryptedIndex = 0;
@@ -750,11 +743,14 @@ void packet_processor::handle_packet_from_gameserver(byte* data, unsigned int da
 
 		dataLen -= 2;
 		currentStreamObj->fromGameSalsa.ProcessData(decryptedBuffer->data(), data+2, dataLen);
+
 	}
 	else
 	{
 		currentStreamObj->fromGameSalsa.ProcessData(decryptedBuffer->data(), data, dataLen);
 	}
+	sendIterationToUI(currentStreamObj->fromGameSalsa, false);
+
 
 	//print the whole blob in the raw log
 	UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(currentStreamObj->workingRecvKey->sourceProcess, eGame, true);
