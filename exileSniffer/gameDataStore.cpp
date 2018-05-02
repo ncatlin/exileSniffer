@@ -278,8 +278,8 @@ called 0-3ish times on entering an area with a new monsterlevel so... meh
 */
 void gameDataStore::generateMonsterLevelHashes(unsigned int level)
 {
-	//search from the back because player prob going to encounter recent levels more often
 	if (level == lastAreaLevel)	return;
+	//search from the back because player prob going to encounter recent levels more often
 	if (std::find(hashedMonsterLevels.rbegin(), hashedMonsterLevels.rend(), level) != hashedMonsterLevels.rend())
 		return;
 

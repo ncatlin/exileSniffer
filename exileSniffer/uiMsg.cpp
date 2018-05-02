@@ -35,7 +35,7 @@ void UIrecordLogin(DWORD clientPID,  SafeQueue<UI_MESSAGE> *uiMsgQueue)
 void UIsniffingStarted(QString iface, SafeQueue<UI_MESSAGE> *uiMsgQueue)
 {
 	UI_SNIFF_NOTE *sniffmsg = new UI_SNIFF_NOTE;
-	sniffmsg->msgType = uiMsgType::eSniffNote;
+	sniffmsg->msgType = uiMsgType::eSniffingStarted;
 	sniffmsg->iface = iface;
 	uiMsgQueue->addItem(sniffmsg);
 }
@@ -47,7 +47,7 @@ void UInotifyClientRunning(DWORD clientPID, bool running, int activeClients, int
 	initmsg->running = running;
 	initmsg->pid = clientPID;
 	initmsg->totalClients = activeClients;
-	initmsg->totalScanning = activeClients;
+	initmsg->totalScanning = scanningClients;
 	uiMsgQueue->addItem(initmsg);
 }
 
@@ -122,7 +122,7 @@ void UI_RAWHEX_PKT::setData(vector<byte> *source)
 
 }
 
-UIDecodedPkt::UIDecodedPkt(DWORD processID, streamType streamServer, byte isIncoming, long long timeSeen)
+UIDecodedPkt::UIDecodedPkt(DWORD processID, streamType streamServer,int nwkStream, byte isIncoming, long long timeSeen)
 {
 	jsn.SetObject();
 
@@ -150,6 +150,7 @@ UIDecodedPkt::UIDecodedPkt(DWORD processID, streamType streamServer, byte isInco
 	}
 
 	add_byte(L"Flags", streamFlags);
+	nwkstreamID = nwkStream;
 
 	isIncoming = (streamFlags & PKTBIT_INBOUND);
 	mstime = timeSeen;

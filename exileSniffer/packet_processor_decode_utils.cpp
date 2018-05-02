@@ -17,8 +17,8 @@ void packet_processor::emit_decoding_err_msg(unsigned short msgID, unsigned shor
 		break;
 
 	case eDecodingErr::eBadPacketID:
-		errmsg << "Probably bad packet ID 0x" << std::hex << msgID <<
-			". Possible: Decrypt out of sync, bad key/IV," <<
+		errmsg << "[Probably bad packet ID 0x" << std::hex << msgID <<
+			"]. Possible: Bad decoding, Decrypt out of sync, Bad key/IV," <<
 			" missed multi-packet blob or unusual valid packet ID.";
 		break;
 
@@ -34,13 +34,19 @@ void packet_processor::emit_decoding_err_msg(unsigned short msgID, unsigned shor
 		errmsg << "Bad error flag '" << errorFlag << "' set";
 		break;
 	}
-	errmsg << " processing msgID 0x" << std::hex << msgID << " at index "
+	errmsg << " while processing msgID 0x" << std::hex << msgID << " at index "
 		<< decryptedIndex << " after previous packet ID 0x" << lastMsgID;
 	UIaddLogMsg(QString::fromStdString(errmsg.str()), activeClientPID, uiMsgQueue);
 }
 
 /*
-todo... method of getting stuff from the next packet in the case of underflow
+Sometimes a message takes up more than a single packet (> ~1400 bytes).
+This transparently fetches data from the next packet outside the 
+normal workflow and appends it to the remaining decrypted buffer so the decoder can
+ continue
+
+ Unfortunately if the decoding is bad and we interpret a large number as a length field
+ then decoding will hang as this keeps getting called to fill the requested data requirement
 */
 void packet_processor::continue_gamebuffer_next_packet()
 {
@@ -50,8 +56,6 @@ void packet_processor::continue_gamebuffer_next_packet()
 	pendingPktQueue.pop_front();
 	STREAMDATA *streamObj = &streamDatas[currentMsgStreamID];
 	streamObj->packetCount++;
-
-	this->currentMsgMultiPacket = true;
 
 	while (true)
 	{
@@ -70,8 +74,6 @@ void packet_processor::continue_gamebuffer_next_packet()
 
 			if (streamID == currentMsgStreamID && isIncoming == currentMsgIncoming)
 			{
-				
-
 				char *timeprocessed = strtok_s(next_token, ",", &next_token);
 				char *dLen = strtok_s(next_token, ",", &next_token);
 				byte *data = (byte *)next_token;
@@ -110,6 +112,7 @@ void packet_processor::continue_gamebuffer_next_packet()
 	}
 }
 
+//get 1 byte from decrypted buffer
 UINT8 packet_processor::consume_Byte()
 {
 	if (errorFlag != eDecodingErr::eNoErr) return 0;
@@ -131,7 +134,8 @@ UINT8 packet_processor::consume_Byte()
 	return result;
 }
 
-UINT16 packet_processor::consumeUShort()
+//get 2 bytes from decrypted buffer
+UINT16 packet_processor::consume_WORD()
 {
 	if (errorFlag != eDecodingErr::eNoErr) return 0;
 
@@ -152,6 +156,7 @@ UINT16 packet_processor::consumeUShort()
 	return result;
 }
 
+//get 4 bytes from decrypted buffer
 UINT32 packet_processor::consume_DWORD()
 {
 	if (errorFlag != eDecodingErr::eNoErr) return 0;
@@ -173,6 +178,7 @@ UINT32 packet_processor::consume_DWORD()
 	return result;
 }
 
+//get 8 bytes from decrypted buffer
 UINT64 packet_processor::consume_QWORD()
 {
 	if (errorFlag != eDecodingErr::eNoErr) return 0;
@@ -192,6 +198,7 @@ UINT64 packet_processor::consume_QWORD()
 	return result;
 }
 
+//consume and discard byteCount bytes from decrypted buffer
 void packet_processor::consume_blob(ushort byteCount)
 {
 	if (errorFlag != eDecodingErr::eNoErr) return;
@@ -211,75 +218,34 @@ void packet_processor::consume_blob(ushort byteCount)
 	remainingDecrypted -= byteCount;
 }
 
-void packet_processor::consume_blob(ushort byteCount, vector <byte>& blobBuf)
+//consume byteCount bytes from decrypted buffer and store in blobBuf
+void packet_processor::consume_blob(ushort requiredBytes, vector <byte>& blobBuf)
 {
 	if (errorFlag != eDecodingErr::eNoErr) return;
-	if (byteCount > 10000)
+	/*
+	last ditch "something is awful here" check
+	for bad decoding intepreting inappropriate things as length fields
+	*/
+	if (requiredBytes > 10000)
 	{
 		errorFlag = eDecodingErr::eErrUnderflow;
 		return;
 	}
 
-	while (remainingDecrypted < byteCount)
+	while (remainingDecrypted < requiredBytes)
 	{
 		if (errorFlag != eDecodingErr::eNoErr) return;
 		continue_gamebuffer_next_packet();
 	}
 
 	blobBuf = vector<byte>(decryptedBuffer->data() + decryptedIndex,
-		decryptedBuffer->data() + decryptedIndex + byteCount);
+		decryptedBuffer->data() + decryptedIndex + requiredBytes);
 
-	decryptedIndex += byteCount;
-	remainingDecrypted -= byteCount;
+	decryptedIndex += requiredBytes;
+	remainingDecrypted -= requiredBytes;
 }
 
-
-void packet_processor::consume_add_lenprefix_string(std::wstring name, WValue& container, rapidjson::Document::AllocatorType& allocator)
-{
-	WValue nameItem(name.c_str(), allocator);
-
-	ushort stringlen = ntohs(consumeUShort());
-	std::wstring stringval = consumeWString(stringlen * 2);
-	WValue stringItem(stringval.c_str(), allocator);
-
-	container.AddMember(nameItem, stringItem, allocator);
-}
-
-
-void packet_processor::rewind_buffer(size_t countBytes)
-{
-	assert(!restorePoint.active);
-	restorePoint.active = true;
-
-	restorePoint.savedIndex = decryptedIndex;
-	restorePoint.savedRemaining = remainingDecrypted;
-	decryptedIndex -= countBytes;
-	remainingDecrypted += countBytes;
-}
-
-void packet_processor::restore_buffer()
-{
-	assert(restorePoint.active);
-	restorePoint.active = false;
-
-	this->decryptedIndex = restorePoint.savedIndex;
-	this->remainingDecrypted = restorePoint.savedRemaining;
-}
-
-/*
-stop processing any more of the packet.
-intended for use when we don't know how to process the rest
-of the packet
-*/
-void packet_processor::abandon_processing()
-{
-	errorFlag = eDecodingErr::eAbandoned;
-	errorCount += 1;
-
-	decryptedIndex += remainingDecrypted;
-	remainingDecrypted = 0;
-}
-
+//read a wstring of size 'bytesLength' from decrypted buffer
 std::wstring packet_processor::consumeWString(size_t bytesLength)
 {
 
@@ -292,7 +258,7 @@ std::wstring packet_processor::consumeWString(size_t bytesLength)
 		if (bytesLength > 0xff)
 		{
 			std::stringstream err;
-			err << "Warning! Long string " << bytesLength <<" possible bad byte order" << std::endl;
+			err << "Warning! Long string " << bytesLength << " possible bad byte order" << std::endl;
 			std::cout << err.str();
 			UIaddLogMsg(QString::fromStdString(err.str()), activeClientPID, uiMsgQueue);
 		}
@@ -301,7 +267,7 @@ std::wstring packet_processor::consumeWString(size_t bytesLength)
 		continue_gamebuffer_next_packet();
 	}
 
-	std::string msgmb(decryptedBuffer->data() + decryptedIndex, 
+	std::string msgmb(decryptedBuffer->data() + decryptedIndex,
 		decryptedBuffer->data() + decryptedIndex + bytesLength);
 	std::wstring msg = mb_to_utf8(msgmb);
 
@@ -311,6 +277,59 @@ std::wstring packet_processor::consumeWString(size_t bytesLength)
 	return msg;
 }
 
+/*
+consume from decryption buffer a 2 byte length field 
+and get a wstring of that length
+place result in the 'container' json object with name 'name'
+*/
+void packet_processor::consume_add_lenprefix_string(std::wstring name, WValue& container, rapidjson::Document::AllocatorType& allocator)
+{
+	WValue nameItem(name.c_str(), allocator);
+
+	ushort stringlen = ntohs(consume_WORD());
+	std::wstring stringval = consumeWString(stringlen * 2);
+	WValue stringItem(stringval.c_str(), allocator);
+
+	container.AddMember(nameItem, stringItem, allocator);
+}
+
+//rewind time to before we read 'countBytes' bytes
+void packet_processor::rewind_buffer(size_t countBytes)
+{
+	assert(!restorePoint.active);
+	restorePoint.active = true;
+
+	restorePoint.savedIndex = decryptedIndex;
+	restorePoint.savedRemaining = remainingDecrypted;
+	decryptedIndex -= countBytes;
+	remainingDecrypted += countBytes;
+}
+
+//revert forward to before we called rewind_buffer
+void packet_processor::restore_buffer()
+{
+	assert(restorePoint.active);
+	restorePoint.active = false;
+
+	this->decryptedIndex = restorePoint.savedIndex;
+	this->remainingDecrypted = restorePoint.savedRemaining;
+}
+
+/*
+stop processing any more of the packet - abandoning its data.
+intended for use when we don't know how to process the rest
+of the packet
+*/
+void packet_processor::abandon_processing()
+{
+	errorFlag = eDecodingErr::eAbandoned;
+	errorCount += 1;
+
+	decryptedIndex += remainingDecrypted;
+	remainingDecrypted = 0;
+}
+
+//retrives the variable sized multibyte encoded values POE uses
 UINT32 packet_processor::customSizeByteGet()
 {
 	unsigned char startByte = consume_Byte();
@@ -362,7 +381,7 @@ UINT32 packet_processor::customSizeByteGet()
 	return result;
 }
 
-
+//retrives the variable sized multibyte encoded values POE uses - with negatives
 INT32 packet_processor::customSizeByteGet_signed()
 {
 	unsigned char startByte = consume_Byte();
@@ -428,6 +447,7 @@ INT32 packet_processor::customSizeByteGet_signed()
 	return result;
 }
 
+//consume 'size' bytes, return them as a hex encoded string
 std::wstring packet_processor::consume_hexblob(unsigned int size)
 {
 	vector <byte> ephKey;

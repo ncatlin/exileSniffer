@@ -23,12 +23,6 @@ void exileSniffer::init_loginPkt_Actioners()
 
 void exileSniffer::action_decoded_login_packet(UIDecodedPkt& decoded)
 {
-	clientData *client = get_client(decoded.clientProcessID());
-	if (!client) {
-		std::cerr << "Error: Client had PID 0 when decoding login pkt id 0x" << std::hex << decoded.messageID << std::endl;
-		return;
-	}
-
 	auto it = loginPktActioners.find(decoded.messageID);
 	if (it != loginPktActioners.end())
 	{

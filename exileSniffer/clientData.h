@@ -1,16 +1,13 @@
 #pragma once
 
+
 #include "uiMsg.h"
-class clientData
+class clientHexData
 {
 public:
-	clientData();
-	~clientData();
+	clientHexData() {};
+	~clientHexData() {};
 
-	void cleanup();
-
-	DWORD processID;
-	bool isRunning;
 	bool isLoggedIn = false;
 
 	vector <UI_RAWHEX_PKT *> rawHexPackets;

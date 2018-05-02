@@ -11,7 +11,7 @@
 enum streamType { eLogin = 'L', eGame = 'G', ePatch = 'P', eNone = 0 };
 
 typedef rapidjson::GenericValue<rapidjson::UTF16<> > WValue;
-enum uiMsgType {eMetaLog, eClientEvent, eStreamEvent, eSniffNote, 
+enum uiMsgType {eMetaLog, eClientEvent, eStreamEvent, eSniffingStarted,
 	eLoginNote, ePacketHex, eDecodedPacket, eKeyUpdate, eIVUpdate, eCryptIterUpdate};
 
 class UI_MESSAGE
@@ -36,7 +36,7 @@ public:
 	int totalScanning = 0;
 };
 
-enum eStreamState{ eStreamStarted, eStreamEnded, eStreamFailed, eStreamDecrypting};
+enum eStreamState{ eStreamStarted, eStreamEnded, eStreamLoggingIn, eStreamTransition, eStreamFailed, eStreamDecrypting};
 class UI_STREAMEVENT_MSG : public UI_MESSAGE
 {
 public:
@@ -105,7 +105,7 @@ public:
 class UIDecodedPkt : public UI_MESSAGE
 {
 public:
-	UIDecodedPkt(DWORD processID, streamType streamServer, byte isIncoming, long long timeSeen);
+	UIDecodedPkt(DWORD processID, streamType streamServer,int nwkStream, byte isIncoming, long long timeSeen);
 	void toggle_payload_operations(bool state) { payloadOperations = state; }
 
 	void add_dword(std::wstring name, DWORD dwordfield);
@@ -132,9 +132,11 @@ public:
 	bool spansMultiplePackets() { return multiPacket; }
 	long long time_processed_ms() { return mstime; }
 	DWORD clientProcessID() { return PID; }
+	int streamID() { return nwkstreamID; }
 
 public:
 	ushort messageID;
+	int nwkstreamID;
 	byte streamFlags = 0;
 	vector<byte> *originalbuf = NULL;
 	std::pair<ushort, ushort> bufferOffsets;

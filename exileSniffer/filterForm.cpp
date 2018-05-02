@@ -46,7 +46,6 @@ void filterForm::add_filter_category(unsigned short pktid, QString description,
 	setFilterRowState(statusItem->row(), initialState);
 }
 
-//todo default all minus heartbeats
 bool filterForm::isDisplayed(ushort pktID)
 {
 	auto it = filterStates.find(pktID);
@@ -254,7 +253,7 @@ void filterForm::populateFiltersList()
 	//be
 	//bf
 	add_filter_category(CLI_PACKET_EXIT, "Client exit 1", ePktDirection::outgoing);
-	add_filter_category(CLI_PACKET_EXIT_2, "Client exit 2", ePktDirection::outgoing);
+	add_filter_category(SRV_LOGINSRV_CRYPT, "Client exit 2", ePktDirection::outgoing);
 	add_filter_category(CLI_DUEL_CHALLENGE, "Player sent duel challenge", ePktDirection::outgoing);
 	add_filter_category(SRV_DUEL_RESPONSE, "Received response to duel challenge", ePktDirection::incoming);
 	add_filter_category(SRV_DUEL_CHALLENGE, "Received duel challenge", ePktDirection::incoming);
@@ -402,6 +401,8 @@ void filterForm::buildBuiltinPresets()
 	mostPkts.description = "Excludes keep-alives (noisy)";
 	builtinPresets.push_back(mostPkts);
 
+	//set this as default - shouldn't be here but trying to get this code done
+	activatePresetList(mostPkts);
 
 	PRESET_LIST clientOnlyPackets;
 	PRESET_LIST serverOnlyPackets;
@@ -671,16 +672,42 @@ void filterForm::deletePreset()
 	savePresetLists();
 }
 
-void filterForm::activatePresetList()
+void filterForm::activateBuiltInPresetList(int index)
+{
+	PRESET_LIST& filters = builtinPresets.at(index);
+
+	//reset all to hidden initially
+	for (auto it = filterStates.begin(); it != filterStates.end(); it++)
+	{
+		ushort pktID = it->first;
+		setPktIDFilterState(pktID, eDisplayState::hidden);
+	}
+
+	//items in preset list get set to displayed
+	for (auto it = filters.IDs.begin(); it != filters.IDs.end(); it++)
+	{
+		ushort pktID = *it;
+		setPktIDFilterState(pktID, eDisplayState::displayed);
+	}
+
+	ui->tabWidget->setCurrentIndex(0); //show the filters
+}
+
+void filterForm::activatePresetListClicked()
 {
 	QTreeWidgetItem *item = ui->presetsTree->selectedItems().front();
 	ePresetCategory category = (ePresetCategory)item->data(2, Qt::UserRole).toInt();
 	int index = item->data(3, Qt::UserRole).toInt();
 
 	PRESET_LIST& filters = (category == ePresetCategory::builtin) ?
-							builtinPresets.at(index) : 	
-							customPresets.at(index);
+		builtinPresets.at(index) :
+		customPresets.at(index);
 
+	activatePresetList(filters);
+}
+
+void filterForm::activatePresetList(PRESET_LIST& filters)
+{
 	//reset all to hidden initially
 	for (auto it = filterStates.begin(); it != filterStates.end(); it++)
 	{

@@ -40,7 +40,7 @@ public Q_SLOTS:
 	void excludeSelectedFilters();
 	void saveCustom();
 	void showPresetContextMenu(const QPoint& pos);
-	void activatePresetList();
+	void activatePresetListClicked();
 	void deletePreset();
 	void buildBuiltinPresets();
 	void toggleSelectedFilter(); 
@@ -55,6 +55,9 @@ private:
 	void setFilterRowState(int row, eDisplayState newState);
 	void setPktIDFilterState(ushort pktID, eDisplayState newState);
 	PRESET_LIST load_saved_preset(QString groupname);
+	void activateBuiltInPresetList(int index); 
+	void activatePresetList(PRESET_LIST& filters);
+	
 
 	Ui::rawFilterForm *ui = NULL;
 

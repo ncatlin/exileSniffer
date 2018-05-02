@@ -62,6 +62,9 @@ public:
 	bool insertKey(KEYDATA *key);
 	void stopProcessScan(DWORD pid);
 	bool relaxScanFilters();
+	void restartScanOnClient(DWORD pid);
+	void suspend_scanning(DWORD activeProcessPID);
+	void resume_scanning();
 
 private:
 	void main_loop();
@@ -73,6 +76,7 @@ private:
 	GAMECLIENTINFO* get_process_obj(DWORD pid);
 	void memoryScanWorker(GAMECLIENTINFO *);
 	void purge_ended_processes(std::vector <DWORD>& latestClientPIDs);
+	void erase_client_objects();
 
 	static DWORD WINAPI scanControllerStart(void* Param) {
 		memWorkerParams *paramsPtr = (memWorkerParams*)Param;
@@ -90,13 +94,15 @@ private:
 	}
 
 	bool terminateScanning = false;
+	bool keyRequired = true;
+	DWORD activeProcess = 0;
 
 	SafeQueue<UI_MESSAGE> *uiMsgQueue;
 
 	std::mutex processListMutex;
 	std::vector <GAMECLIENTINFO *> activeClients;
-
-
+	std::vector <GAMECLIENTINFO *> restartProcessScanClients;
+	
 
 	HANDLE keyVecMutex = CreateMutex(0, 0, 0);
 	list<UNCLAIMED_KEY> unclaimedKeys;

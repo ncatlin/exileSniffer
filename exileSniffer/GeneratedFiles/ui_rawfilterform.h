@@ -169,8 +169,8 @@ public:
         QObject::connect(presetsTree, SIGNAL(customContextMenuRequested(QPoint)), rawFilterForm, SLOT(showPresetContextMenu(QPoint)));
         QObject::connect(saveBtn, SIGNAL(clicked()), rawFilterForm, SLOT(saveCustom()));
         QObject::connect(saveName, SIGNAL(returnPressed()), rawFilterForm, SLOT(saveCustom()));
-        QObject::connect(presetsTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)), rawFilterForm, SLOT(activatePresetList()));
-        QObject::connect(presetsTree, SIGNAL(itemActivated(QTreeWidgetItem*,int)), rawFilterForm, SLOT(activatePresetList()));
+        QObject::connect(presetsTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)), rawFilterForm, SLOT(activatePresetListClicked()));
+        QObject::connect(presetsTree, SIGNAL(itemActivated(QTreeWidgetItem*,int)), rawFilterForm, SLOT(activatePresetListClicked()));
         QObject::connect(filterTable, SIGNAL(cellActivated(int,int)), rawFilterForm, SLOT(toggleSelectedFilter()));
 
         tabWidget->setCurrentIndex(0);
