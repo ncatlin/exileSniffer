@@ -28,14 +28,14 @@ void packet_processor::deserialise_LOGIN_CLI_KEEP_ALIVE(UIDecodedPkt *)
 void packet_processor::deserialise_LOGIN_EPHERMERAL_PUBKEY(UIDecodedPkt *uipkt)
 {
 
-	DWORD keylen = ntohs(consumeUShort());
+	DWORD keylen = ntohs(consume_WORD());
 	uipkt->add_word(L"KeySize", keylen);
 
 	std::wstring keyhex = consume_hexblob(keylen);
 	WValue keyVal(keyhex.c_str(), keyhex.length(), uipkt->jsn.GetAllocator());
 	uipkt->payload.AddMember(L"EphermeralKey", keyVal, uipkt->jsn.GetAllocator());
 
-	DWORD siglen = ntohs(consumeUShort());
+	DWORD siglen = ntohs(consume_WORD());
 	uipkt->add_word(L"SignatureSize", siglen);
 
 	if (siglen)
@@ -51,8 +51,7 @@ void packet_processor::deserialise_LOGIN_CLI_AUTH_DATA(UIDecodedPkt *uipkt)
 {
 	consume_add_dword(L"Unk1", uipkt);
 
-	ushort emailLen = ntohs(consumeUShort());
-	std::cout << "emaillen " << emailLen << std::endl;
+	ushort emailLen = ntohs(consume_WORD());
 	uipkt->add_wstring(L"AccountName", consumeWString(emailLen * 2));
 
 
@@ -76,9 +75,9 @@ void packet_processor::deserialise_LOGIN_CLI_AUTH_DATA(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_LOGIN_SRV_UNK0x4(UIDecodedPkt *uipkt)
 {
-	UINT32 unk1 = ntohs(consumeUShort());
+	UINT32 unk1 = ntohs(consume_WORD());
 
-	ushort string1len = ntohs(consumeUShort());
+	ushort string1len = ntohs(consume_WORD());
 	if (string1len)
 		uipkt->add_wstring(L"String1", consumeWString(string1len * 2));
 
@@ -147,8 +146,8 @@ void packet_processor::deserialise_LOGIN_SRV_NOTIFY_GAMESERVER(UIDecodedPkt *uip
 	{
 		WValue blobObj(rapidjson::kObjectType);
 
-		blobObj.AddMember(L"Unk1", (UINT32)ntohs(consumeUShort()), allocator);
-		blobObj.AddMember(L"Port", (UINT32)ntohs(consumeUShort()), allocator);
+		blobObj.AddMember(L"Unk1", (UINT32)ntohs(consume_WORD()), allocator);
+		blobObj.AddMember(L"Port", (UINT32)ntohs(consume_WORD()), allocator);
 		blobObj.AddMember(L"IPAddr", (UINT32)ntohl(consume_DWORD()), allocator);
 
 		std::wstring remainingHex = consume_hexblob(20);
@@ -215,6 +214,7 @@ void packet_processor::deserialise_LOGIN_CLI_CREATED_CHARACTER(UIDecodedPkt *uip
 
 void packet_processor::deserialise_LOGIN_SRV_FINAL_PKT(UIDecodedPkt *uipkt)
 {
+	UInotifyStreamState(currentMsgStreamID, eStreamTransition, uiMsgQueue);
 	consume_add_word(L"Arg", uipkt);
 }
 

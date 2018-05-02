@@ -3,6 +3,7 @@
 #define ERASE_FROM_VECTOR(v, x) v.erase(std::remove(v.begin(), v.end(), x), v.end())
 #define FIND_IN_VECTOR(v, x) std::find(v.begin(), v.end(), x)
 #define IS_IN_VECTOR(v, x) (FIND_IN_VECTOR(v, x) != v.end())
+#define WSTRING_CONTAINS(s, t) (s.find(t) != std::wstring::npos)
 std::string timestamp();
 
 UINT64 getUlonglong(void *ptr);

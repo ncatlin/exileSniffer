@@ -54,10 +54,10 @@ private:
 	void handle_packet_to_gameserver(byte* data, unsigned int dataLen, long long timems);
 
 	inline void consume_add_byte(std::wstring name, UIDecodedPkt *uipkt) {	uipkt->add_byte(name, consume_Byte());}
-	inline void consume_add_word(std::wstring name, UIDecodedPkt *uipkt) { uipkt->add_word(name, consumeUShort()); }
+	inline void consume_add_word(std::wstring name, UIDecodedPkt *uipkt) { uipkt->add_word(name, consume_WORD()); }
 	inline void consume_add_dword(std::wstring name, UIDecodedPkt *uipkt) { uipkt->add_dword(name, consume_DWORD()); }
 	inline void consume_add_qword(std::wstring name, UIDecodedPkt *uipkt) { uipkt->add_dword(name, consume_QWORD()); }
-	inline void consume_add_word_ntoh(std::wstring name, UIDecodedPkt *uipkt) { uipkt->add_word(name, ntohs(consumeUShort())); }
+	inline void consume_add_word_ntoh(std::wstring name, UIDecodedPkt *uipkt) { uipkt->add_word(name, ntohs(consume_WORD())); }
 	inline void consume_add_dword_ntoh(std::wstring name, UIDecodedPkt *uipkt) { uipkt->add_dword(name, ntohl(consume_DWORD())); }
 	void consume_add_lenprefix_string(std::wstring name, WValue& container, rapidjson::Document::AllocatorType& allocator);
 	std::wstring consume_hexblob(unsigned int size);
@@ -76,8 +76,6 @@ private:
 	void deserialise_LOGIN_CLI_REQUEST_RACE_DATA(UIDecodedPkt *);
 	void deserialise_LOGIN_SRV_LEAGUE_LIST(UIDecodedPkt *);
 	void deserialise_LOGIN_CLI_REQUEST_LEAGUES(UIDecodedPkt *);
-
-
 
 	void deserialise_SRV_PKT_ENCAPSULATED(UIDecodedPkt *);
 	void deserialise_CLI_CHAT_MSG_ITEMS(UIDecodedPkt *);
@@ -163,7 +161,7 @@ private:
 	void deserialise_CLI_GUILD_CREATE(UIDecodedPkt *);
 
 	void deserialise_CLI_PACKET_EXIT(UIDecodedPkt *);
-	void deserialise_CLI_PACKET_EXIT_2(UIDecodedPkt *);
+	void deserialise_SRV_LOGINSRV_CRYPT(UIDecodedPkt *);
 	void deserialise_CLI_DUEL_CHALLENGE(UIDecodedPkt *);
 	void deserialise_SRV_DUEL_RESPONSE(UIDecodedPkt *);
 	void deserialise_SRV_DUEL_CHALLENGE(UIDecodedPkt *);
@@ -216,13 +214,13 @@ private:
 	
 	void deserialise_packets_from_decrypted(streamType, byte isIncoming, long long timeSeen);
 
-	UINT8 consume_Byte();
-	UINT16 consumeUShort();
+	UINT8 consume_Byte();   
+	UINT16 consume_WORD();  
 	UINT32 consume_DWORD(); 
-	UINT64 consume_QWORD();
+	UINT64 consume_QWORD(); 
 
 	std::wstring consumeWString(size_t bytesLength);
-	void consume_blob(ushort byteCount);
+	void consume_blob(ushort byteCount); 
 	void consume_blob(ushort byteCount, vector <byte>& blobBuf);
 	void abandon_processing();
 	UINT32 customSizeByteGet();
@@ -255,7 +253,6 @@ private:
 	map<unsigned short, deserialiser> loginPktDeserialisers;
 	
 
-	//used for continuing multi-packet messages
 	networkStreamID currentMsgStreamID;
 	bool currentMsgIncoming;
 	STREAMDATA *currentStreamObj = NULL;
@@ -271,8 +268,6 @@ private:
 	eDecodingErr errorFlag = eDecodingErr::eNoErr;
 	unsigned long errorCount = 0;
 
-	//this is where a single logical message spans multiple tcp packets
-	bool currentMsgMultiPacket = false;
 	bool displayingIters = false;
 
 	struct {

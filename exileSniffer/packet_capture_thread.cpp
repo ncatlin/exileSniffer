@@ -150,12 +150,24 @@ void packet_capture_thread::on_new_stream(Tins::TCPIP::Stream& stream)
 	UInotifyStreamState(streamID, eStreamState::eStreamStarted, uiMsgQueue);
 }
 
+/*
+These are rare. From the headers:
 
+	*A stream is terminated when either :
+	*
+	* * It contains too much buffered data.
+	* * No packets have been seen for some time interval.
+
+This is not a reliable way of detecting logout
+Have to infer it from the data (exit messages)
+*/
 void packet_capture_thread::on_stream_terminated(Tins::TCPIP::Stream& stream, Tins::TCPIP::StreamFollower::TerminationReason reason)
 {
 	std::stringstream newStreamMsg;
-	newStreamMsg << "Stream "<< std::dec << getStreamID(stream) <<" ended. Client:" << stream.client_port() <<
+	newStreamMsg << "Stream "<< std::dec << getStreamID(stream) <<" ended ("<<reason<<". Client:" << stream.client_port() <<
 		" -> " << stream.server_addr_v4().to_string() << ":" << stream.server_port();
+
+	std::cout << newStreamMsg.str() << std::endl;
 
 	UIaddLogMsg(newStreamMsg.str().c_str(), 0, uiMsgQueue);
 	UInotifyStreamState(getStreamID(stream), eStreamState::eStreamEnded, uiMsgQueue);

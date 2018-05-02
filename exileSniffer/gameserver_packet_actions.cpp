@@ -205,7 +205,7 @@ void exileSniffer::init_gamePkt_Actioners()
 	//be
 	//bf
 	gamePktActioners[CLI_PACKET_EXIT] = &exileSniffer::action_CLI_PACKET_EXIT;
-	gamePktActioners[CLI_PACKET_EXIT_2] = &exileSniffer::action_CLI_PACKET_EXIT_2;
+	gamePktActioners[SRV_LOGINSRV_CRYPT] = &exileSniffer::action_SRV_LOGINSRV_CRYPT;
 	gamePktActioners[CLI_DUEL_CHALLENGE] = &exileSniffer::action_CLI_DUEL_CHALLENGE;
 	gamePktActioners[SRV_DUEL_RESPONSE] = &exileSniffer::action_SRV_DUEL_RESPONSE;
 	gamePktActioners[SRV_DUEL_CHALLENGE] = &exileSniffer::action_SRV_DUEL_CHALLENGE;
@@ -440,12 +440,6 @@ void exileSniffer::action_decoded_packet(UIDecodedPkt& decoded)
 
 void exileSniffer::action_decoded_game_packet(UIDecodedPkt& decoded)
 {
-	clientData *client = get_client(decoded.clientProcessID());
-	if (!client) {
-		std::cerr << "Error: Client had PID 0 when decoding game pkt id 0x" << std::hex << decoded.messageID << std::endl;
-		return;
-	}
-
 	if (!packet_passes_decoded_filter(decoded.messageID))
 	{
 		++decodedCount_Displayed_Filtered.second;
@@ -2177,13 +2171,13 @@ void exileSniffer::action_CLI_PACKET_EXIT(UIDecodedPkt& obj, QString *analysis)
 	}
 }
 
-void exileSniffer::action_CLI_PACKET_EXIT_2(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_LOGINSRV_CRYPT(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
 		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Client exited <pkt 2>";
+		listentry.summary = "Server sent loginserver data for character screen display";
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}

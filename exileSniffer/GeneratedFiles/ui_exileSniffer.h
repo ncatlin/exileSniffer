@@ -23,9 +23,8 @@
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
+#include <QtWidgets/QListWidget>
 #include <QtWidgets/QMainWindow>
-#include <QtWidgets/QMenu>
-#include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPlainTextEdit>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSpacerItem>
@@ -35,7 +34,6 @@
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QTableWidget>
 #include <QtWidgets/QTextEdit>
-#include <QtWidgets/QToolBar>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 #include "statuswidget.h"
@@ -81,6 +79,8 @@ public:
     QLineEdit *recvIterText;
     QSpacerItem *verticalSpacer;
     QSpacerItem *verticalSpacer_2;
+    QHBoxLayout *horizontalLayout_4;
+    QPushButton *stopDecryptBtn;
     QWidget *decodeTab;
     QGridLayout *gridLayout_3;
     QFrame *decodeDisplayFrame;
@@ -115,10 +115,20 @@ public:
     QWidget *metaLogTab;
     QGridLayout *gridLayout_2;
     QPlainTextEdit *metaLog;
-    QMenuBar *menuBar;
-    QMenu *menuGame_Instances;
-    QMenu *menuSettings;
-    QToolBar *mainToolBar;
+    QWidget *settingsTab;
+    QHBoxLayout *horizontalLayout_7;
+    QListWidget *settingsChoiceList;
+    QStackedWidget *settingsStack;
+    QWidget *logSettings;
+    QVBoxLayout *verticalLayout;
+    QGroupBox *groupBox_2;
+    QFormLayout *formLayout;
+    QHBoxLayout *horizontalLayout_8;
+    QLineEdit *lineEdit;
+    QPushButton *pushButton;
+    QLabel *label_7;
+    QCheckBox *checkBox;
+    QWidget *feedSettings;
     QStatusBar *statusBar;
 
     void setupUi(QMainWindow *exileSniffer)
@@ -243,21 +253,21 @@ public:
         label_2 = new QLabel(groupBox_3);
         label_2->setObjectName(QStringLiteral("label_2"));
 
-        formLayout_2->setWidget(0, QFormLayout::LabelRole, label_2);
+        formLayout_2->setWidget(1, QFormLayout::LabelRole, label_2);
 
         label_3 = new QLabel(groupBox_3);
         label_3->setObjectName(QStringLiteral("label_3"));
 
-        formLayout_2->setWidget(2, QFormLayout::LabelRole, label_3);
+        formLayout_2->setWidget(3, QFormLayout::LabelRole, label_3);
 
         label_4 = new QLabel(groupBox_3);
         label_4->setObjectName(QStringLiteral("label_4"));
 
-        formLayout_2->setWidget(5, QFormLayout::LabelRole, label_4);
+        formLayout_2->setWidget(6, QFormLayout::LabelRole, label_4);
 
         keyHexText = new QPlainTextEdit(groupBox_3);
         keyHexText->setObjectName(QStringLiteral("keyHexText"));
-        keyHexText->setMaximumSize(QSize(16777215, 99));
+        keyHexText->setMaximumSize(QSize(16777215, 50));
         QFont font2;
         font2.setFamily(QStringLiteral("Courier"));
         font2.setPointSize(10);
@@ -267,7 +277,7 @@ public:
         keyHexText->setTabStopWidth(80);
         keyHexText->setMaximumBlockCount(0);
 
-        formLayout_2->setWidget(0, QFormLayout::FieldRole, keyHexText);
+        formLayout_2->setWidget(1, QFormLayout::FieldRole, keyHexText);
 
         sendIVText = new QLineEdit(groupBox_3);
         sendIVText->setObjectName(QStringLiteral("sendIVText"));
@@ -276,51 +286,70 @@ public:
         sendIVText->setFont(font3);
         sendIVText->setReadOnly(true);
 
-        formLayout_2->setWidget(2, QFormLayout::FieldRole, sendIVText);
+        formLayout_2->setWidget(3, QFormLayout::FieldRole, sendIVText);
 
         recvIVText = new QLineEdit(groupBox_3);
         recvIVText->setObjectName(QStringLiteral("recvIVText"));
         recvIVText->setFont(font3);
         recvIVText->setReadOnly(true);
 
-        formLayout_2->setWidget(5, QFormLayout::FieldRole, recvIVText);
+        formLayout_2->setWidget(6, QFormLayout::FieldRole, recvIVText);
 
         label_5 = new QLabel(groupBox_3);
         label_5->setObjectName(QStringLiteral("label_5"));
-        label_5->setIndent(0);
+        QFont font4;
+        font4.setPointSize(11);
+        font4.setItalic(false);
+        label_5->setFont(font4);
+        label_5->setIndent(15);
 
-        formLayout_2->setWidget(3, QFormLayout::LabelRole, label_5);
+        formLayout_2->setWidget(4, QFormLayout::LabelRole, label_5);
 
         sendIterText = new QLineEdit(groupBox_3);
         sendIterText->setObjectName(QStringLiteral("sendIterText"));
         sendIterText->setFont(font3);
         sendIterText->setReadOnly(true);
 
-        formLayout_2->setWidget(3, QFormLayout::FieldRole, sendIterText);
+        formLayout_2->setWidget(4, QFormLayout::FieldRole, sendIterText);
 
         label_6 = new QLabel(groupBox_3);
         label_6->setObjectName(QStringLiteral("label_6"));
-        label_6->setIndent(0);
+        QFont font5;
+        font5.setPointSize(11);
+        label_6->setFont(font5);
+        label_6->setIndent(15);
 
-        formLayout_2->setWidget(6, QFormLayout::LabelRole, label_6);
+        formLayout_2->setWidget(7, QFormLayout::LabelRole, label_6);
 
         recvIterText = new QLineEdit(groupBox_3);
         recvIterText->setObjectName(QStringLiteral("recvIterText"));
         recvIterText->setFont(font3);
         recvIterText->setReadOnly(true);
 
-        formLayout_2->setWidget(6, QFormLayout::FieldRole, recvIterText);
+        formLayout_2->setWidget(7, QFormLayout::FieldRole, recvIterText);
 
         verticalSpacer = new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
-        formLayout_2->setItem(1, QFormLayout::FieldRole, verticalSpacer);
+        formLayout_2->setItem(2, QFormLayout::FieldRole, verticalSpacer);
 
         verticalSpacer_2 = new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
-        formLayout_2->setItem(4, QFormLayout::FieldRole, verticalSpacer_2);
+        formLayout_2->setItem(5, QFormLayout::FieldRole, verticalSpacer_2);
 
 
         verticalLayout_10->addWidget(groupBox_3);
+
+        horizontalLayout_4 = new QHBoxLayout();
+        horizontalLayout_4->setSpacing(6);
+        horizontalLayout_4->setObjectName(QStringLiteral("horizontalLayout_4"));
+        stopDecryptBtn = new QPushButton(yesDecryptStack);
+        stopDecryptBtn->setObjectName(QStringLiteral("stopDecryptBtn"));
+        stopDecryptBtn->setMaximumSize(QSize(150, 16777215));
+
+        horizontalLayout_4->addWidget(stopDecryptBtn);
+
+
+        verticalLayout_10->addLayout(horizontalLayout_4);
 
         decrypt_details_stack->addWidget(yesDecryptStack);
 
@@ -387,7 +416,7 @@ public:
 
         decodedFiltersBtn = new QPushButton(decodedLabelFrame);
         decodedFiltersBtn->setObjectName(QStringLiteral("decodedFiltersBtn"));
-        decodedFiltersBtn->setMaximumSize(QSize(69, 16777215));
+        decodedFiltersBtn->setMaximumSize(QSize(60, 16777215));
 
         horizontalLayout_3->addWidget(decodedFiltersBtn);
 
@@ -429,10 +458,10 @@ public:
         decodedListTable->verticalHeader()->setHighlightSections(false);
         decodedText = new QPlainTextEdit(splitter);
         decodedText->setObjectName(QStringLiteral("decodedText"));
-        QFont font4;
-        font4.setFamily(QStringLiteral("Courier New"));
-        font4.setPointSize(11);
-        decodedText->setFont(font4);
+        QFont font6;
+        font6.setFamily(QStringLiteral("Courier New"));
+        font6.setPointSize(11);
+        decodedText->setFont(font6);
         splitter->addWidget(decodedText);
 
         verticalLayout_3->addWidget(splitter);
@@ -452,10 +481,10 @@ public:
         textPaneFrame->setObjectName(QStringLiteral("textPaneFrame"));
         ptHexPane = new QTextEdit(rawDecryptTab);
         ptHexPane->setObjectName(QStringLiteral("ptHexPane"));
-        QFont font5;
-        font5.setFamily(QStringLiteral("Courier New"));
-        font5.setPointSize(8);
-        ptHexPane->setFont(font5);
+        QFont font7;
+        font7.setFamily(QStringLiteral("Courier New"));
+        font7.setPointSize(8);
+        ptHexPane->setFont(font7);
         ptHexPane->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
         ptHexPane->setLineWrapMode(QTextEdit::NoWrap);
         ptHexPane->setReadOnly(true);
@@ -465,9 +494,9 @@ public:
 
         ptASCIIPane = new QTextEdit(rawDecryptTab);
         ptASCIIPane->setObjectName(QStringLiteral("ptASCIIPane"));
-        QFont font6;
-        font6.setFamily(QStringLiteral("Courier New"));
-        ptASCIIPane->setFont(font6);
+        QFont font8;
+        font8.setFamily(QStringLiteral("Courier New"));
+        ptASCIIPane->setFont(font8);
         ptASCIIPane->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
         ptASCIIPane->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
@@ -561,27 +590,89 @@ public:
         gridLayout_2->addWidget(metaLog, 0, 0, 1, 1);
 
         processTabs->addTab(metaLogTab, QString());
+        settingsTab = new QWidget();
+        settingsTab->setObjectName(QStringLiteral("settingsTab"));
+        horizontalLayout_7 = new QHBoxLayout(settingsTab);
+        horizontalLayout_7->setSpacing(6);
+        horizontalLayout_7->setContentsMargins(11, 11, 11, 11);
+        horizontalLayout_7->setObjectName(QStringLiteral("horizontalLayout_7"));
+        settingsChoiceList = new QListWidget(settingsTab);
+        new QListWidgetItem(settingsChoiceList);
+        new QListWidgetItem(settingsChoiceList);
+        settingsChoiceList->setObjectName(QStringLiteral("settingsChoiceList"));
+        settingsChoiceList->setMaximumSize(QSize(200, 16777215));
+        settingsChoiceList->setSpacing(3);
+        settingsChoiceList->setViewMode(QListView::ListMode);
+
+        horizontalLayout_7->addWidget(settingsChoiceList);
+
+        settingsStack = new QStackedWidget(settingsTab);
+        settingsStack->setObjectName(QStringLiteral("settingsStack"));
+        logSettings = new QWidget();
+        logSettings->setObjectName(QStringLiteral("logSettings"));
+        verticalLayout = new QVBoxLayout(logSettings);
+        verticalLayout->setSpacing(6);
+        verticalLayout->setContentsMargins(11, 11, 11, 11);
+        verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
+        groupBox_2 = new QGroupBox(logSettings);
+        groupBox_2->setObjectName(QStringLiteral("groupBox_2"));
+        groupBox_2->setMaximumSize(QSize(16777215, 104));
+        QFont font9;
+        font9.setFamily(QStringLiteral("MS Shell Dlg 2"));
+        font9.setPointSize(10);
+        groupBox_2->setFont(font9);
+        formLayout = new QFormLayout(groupBox_2);
+        formLayout->setSpacing(6);
+        formLayout->setContentsMargins(11, 11, 11, 11);
+        formLayout->setObjectName(QStringLiteral("formLayout"));
+        horizontalLayout_8 = new QHBoxLayout();
+        horizontalLayout_8->setSpacing(6);
+        horizontalLayout_8->setObjectName(QStringLiteral("horizontalLayout_8"));
+        lineEdit = new QLineEdit(groupBox_2);
+        lineEdit->setObjectName(QStringLiteral("lineEdit"));
+
+        horizontalLayout_8->addWidget(lineEdit);
+
+        pushButton = new QPushButton(groupBox_2);
+        pushButton->setObjectName(QStringLiteral("pushButton"));
+
+        horizontalLayout_8->addWidget(pushButton);
+
+
+        formLayout->setLayout(2, QFormLayout::FieldRole, horizontalLayout_8);
+
+        label_7 = new QLabel(groupBox_2);
+        label_7->setObjectName(QStringLiteral("label_7"));
+        QFont font10;
+        font10.setFamily(QStringLiteral("MS Shell Dlg 2"));
+        label_7->setFont(font10);
+
+        formLayout->setWidget(2, QFormLayout::LabelRole, label_7);
+
+        checkBox = new QCheckBox(groupBox_2);
+        checkBox->setObjectName(QStringLiteral("checkBox"));
+        checkBox->setChecked(true);
+
+        formLayout->setWidget(1, QFormLayout::FieldRole, checkBox);
+
+
+        verticalLayout->addWidget(groupBox_2);
+
+        settingsStack->addWidget(logSettings);
+        feedSettings = new QWidget();
+        feedSettings->setObjectName(QStringLiteral("feedSettings"));
+        settingsStack->addWidget(feedSettings);
+
+        horizontalLayout_7->addWidget(settingsStack);
+
+        processTabs->addTab(settingsTab, QString());
 
         gridLayout->addWidget(processTabs, 0, 0, 1, 1);
 
         exileSniffer->setCentralWidget(centralWidget);
-        menuBar = new QMenuBar(exileSniffer);
-        menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 827, 21));
-        menuGame_Instances = new QMenu(menuBar);
-        menuGame_Instances->setObjectName(QStringLiteral("menuGame_Instances"));
-        menuSettings = new QMenu(menuBar);
-        menuSettings->setObjectName(QStringLiteral("menuSettings"));
-        exileSniffer->setMenuBar(menuBar);
-        mainToolBar = new QToolBar(exileSniffer);
-        mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
-        exileSniffer->addToolBar(Qt::TopToolBarArea, mainToolBar);
         statusBar = new QStatusBar(exileSniffer);
         statusBar->setObjectName(QStringLiteral("statusBar"));
         exileSniffer->setStatusBar(statusBar);
-
-        menuBar->addAction(menuGame_Instances->menuAction());
-        menuBar->addAction(menuSettings->menuAction());
 
         retranslateUi(exileSniffer);
         QObject::connect(decodedFiltersBtn, SIGNAL(clicked()), exileSniffer, SLOT(showRawFiltersDLG()));
@@ -591,9 +682,13 @@ public:
         QObject::connect(decodedListTable, SIGNAL(clicked(QModelIndex)), exileSniffer, SLOT(decodedListClicked()));
         QObject::connect(decodedListTable, SIGNAL(cellPressed(int,int)), exileSniffer, SLOT(decodedCellActivated(int,int)));
         QObject::connect(decodedListTable, SIGNAL(customContextMenuRequested(QPoint)), exileSniffer, SLOT(decodedTableMenuRequest(QPoint)));
+        QObject::connect(stopDecryptBtn, SIGNAL(clicked()), exileSniffer, SLOT(stopDecrypting()));
+        QObject::connect(settingsChoiceList, SIGNAL(itemSelectionChanged()), exileSniffer, SLOT(settingsSelectionChanged()));
 
-        processTabs->setCurrentIndex(0);
+        processTabs->setCurrentIndex(4);
         decrypt_details_stack->setCurrentIndex(1);
+        settingsChoiceList->setCurrentRow(0);
+        settingsStack->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(exileSniffer);
@@ -614,6 +709,7 @@ public:
 "FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD", Q_NULLPTR));
         label_5->setText(QApplication::translate("exileSniffer", "Iteration", Q_NULLPTR));
         label_6->setText(QApplication::translate("exileSniffer", "Iteration", Q_NULLPTR));
+        stopDecryptBtn->setText(QApplication::translate("exileSniffer", "Stop Decrypting", Q_NULLPTR));
         processTabs->setTabText(processTabs->indexOf(interceptionTab), QApplication::translate("exileSniffer", "Decryption", Q_NULLPTR));
         decodedAutoscrollCheck->setText(QApplication::translate("exileSniffer", "Auto Scroll", Q_NULLPTR));
         decodedDisplayedLabel->setText(QApplication::translate("exileSniffer", "No packets decoded", Q_NULLPTR));
@@ -621,7 +717,7 @@ public:
         QTableWidgetItem *___qtablewidgetitem = decodedListTable->horizontalHeaderItem(0);
         ___qtablewidgetitem->setText(QApplication::translate("exileSniffer", "Time", Q_NULLPTR));
         QTableWidgetItem *___qtablewidgetitem1 = decodedListTable->horizontalHeaderItem(1);
-        ___qtablewidgetitem1->setText(QApplication::translate("exileSniffer", "Sender", Q_NULLPTR));
+        ___qtablewidgetitem1->setText(QApplication::translate("exileSniffer", "Origin", Q_NULLPTR));
         QTableWidgetItem *___qtablewidgetitem2 = decodedListTable->horizontalHeaderItem(2);
         ___qtablewidgetitem2->setText(QApplication::translate("exileSniffer", "PktID", Q_NULLPTR));
         QTableWidgetItem *___qtablewidgetitem3 = decodedListTable->horizontalHeaderItem(3);
@@ -651,8 +747,20 @@ public:
         filtersBtn->setText(QApplication::translate("exileSniffer", "Filters", Q_NULLPTR));
         processTabs->setTabText(processTabs->indexOf(rawDecryptTab), QApplication::translate("exileSniffer", "Raw Plaintext", Q_NULLPTR));
         processTabs->setTabText(processTabs->indexOf(metaLogTab), QApplication::translate("exileSniffer", "Log", Q_NULLPTR));
-        menuGame_Instances->setTitle(QApplication::translate("exileSniffer", "Game Processes", Q_NULLPTR));
-        menuSettings->setTitle(QApplication::translate("exileSniffer", "Settings", Q_NULLPTR));
+
+        const bool __sortingEnabled = settingsChoiceList->isSortingEnabled();
+        settingsChoiceList->setSortingEnabled(false);
+        QListWidgetItem *___qlistwidgetitem = settingsChoiceList->item(0);
+        ___qlistwidgetitem->setText(QApplication::translate("exileSniffer", "Logfiles", Q_NULLPTR));
+        QListWidgetItem *___qlistwidgetitem1 = settingsChoiceList->item(1);
+        ___qlistwidgetitem1->setText(QApplication::translate("exileSniffer", "Feeds", Q_NULLPTR));
+        settingsChoiceList->setSortingEnabled(__sortingEnabled);
+
+        groupBox_2->setTitle(QApplication::translate("exileSniffer", "Packet Hexdumps", Q_NULLPTR));
+        pushButton->setText(QApplication::translate("exileSniffer", "{}", Q_NULLPTR));
+        label_7->setText(QApplication::translate("exileSniffer", "Folder", Q_NULLPTR));
+        checkBox->setText(QApplication::translate("exileSniffer", "Enabled", Q_NULLPTR));
+        processTabs->setTabText(processTabs->indexOf(settingsTab), QApplication::translate("exileSniffer", "Settings", Q_NULLPTR));
     } // retranslateUi
 
 };

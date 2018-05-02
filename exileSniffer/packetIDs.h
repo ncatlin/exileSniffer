@@ -213,7 +213,7 @@ S->C UnkPkID: 0xef size: 23 bytes
 //be
 //bf
 #define CLI_PACKET_EXIT 0xc0
-#define CLI_PACKET_EXIT_2 0xc1 
+#define SRV_LOGINSRV_CRYPT 0xc1 
 #define CLI_DUEL_CHALLENGE 0xc2
 #define SRV_DUEL_RESPONSE 0xc3
 #define SRV_DUEL_CHALLENGE 0xc4 //namestring, byte. unimplemented

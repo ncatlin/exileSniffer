@@ -51,8 +51,7 @@ bool key_grabber_thread::insertKey(DWORD pid, DWORD *keyblobptr, DWORD foundAddr
 	}
 
 	std::stringstream resultMsg;
-	resultMsg << "Found candidate key blob at address: " <<
-		foundAddress;
+	resultMsg << "Found candidate key blob at address: 0x" << std::hex << foundAddress;
 	UIaddLogMsg(resultMsg.str(), pid, uiMsgQueue);
 
 	std::cout << std::setfill('0') << "KEY: ";
@@ -185,20 +184,23 @@ void key_grabber_thread::claimKey(KEYDATA *key, unsigned int keyStreamID)
 	else
 	{
 		stringstream errmsg;
-		errmsg << "ERROR: Stream " << keyStreamID <<
-			" tried to claim a key not present in unclaimed list";
+		errmsg << "ERROR: Stream " << keyStreamID << " tried to claim a key not present in unclaimed list";
 		UIaddLogMsg(errmsg.str(), key->sourceProcess, uiMsgQueue);
 	}
 
 	ReleaseMutex(keyVecMutex);
 }
 
-
+/*
+If the packet processor has to wait a long time for the key 
+then calling this will make the scan controllers less picky 
+about the memory they tell their workers to scan
+*/
 bool key_grabber_thread::relaxScanFilters()
 {
 	GAMECLIENTINFO* result = NULL;
 
-	bool atLeastOneDone = false;
+	bool relaxedAFilter = false;
 
 	processListMutex.lock();
 	for (auto it = activeClients.begin(); it != activeClients.end(); it++)
@@ -210,19 +212,19 @@ bool key_grabber_thread::relaxScanFilters()
 			{
 				client->memScanFiltersRelaxed += 1;
 
+				int remainingFilters = MEMSCAN_FILTERS_IMPLEMENTED - client->memScanFiltersRelaxed;
 				stringstream msg;
-				msg << "INFO: Keygrabber relaxed memory scan filters for unauthenticated client 0x" <<
-					std::hex << client->pid	<< " to " << std::dec << 
-					client->memScanFiltersRelaxed << " remaining filters";
+				msg << "INFO: Keygrabber relaxed memory scan filters for unauthenticated client " <<
+					std::dec << client->pid	<< " to " << remainingFilters << " remaining filters";
 				UIaddLogMsg(msg.str(), client->pid, uiMsgQueue);
 
-				atLeastOneDone = true;
+				relaxedAFilter = true;
 			}
 		}
 	}
 	processListMutex.unlock();
 
-	return atLeastOneDone;
+	return relaxedAFilter;
 }
 
 
@@ -242,7 +244,7 @@ void key_grabber_thread::memoryScanWorker(GAMECLIENTINFO *gameClient)
 
 	//UIaddLogMsg("New memory scan worker thread started", processID, uiMsgQueue);
 
-	while (true)
+	while (gameClient->needsLoginKey)
 	{
 		DWORD waitResult = WaitForSingleObject(gameClient->addressQueueMutex, 2000);
 		if (gameClient->addressQueue.empty())
@@ -280,7 +282,6 @@ void key_grabber_thread::memoryScanWorker(GAMECLIENTINFO *gameClient)
 		if (memRegion.first == (void *)PLEASE_TERMINATE && 
 			memRegion.second == PLEASE_TERMINATE)
 		{
-			//UIaddLogMsg("Memory scan worker thread terminating", processID, uiMsgQueue);
 			break;
 		}
 		//printf("Scanning region %p (size %d)\n", memRegion.first, memRegion.second);
@@ -295,8 +296,8 @@ void key_grabber_thread::memoryScanWorker(GAMECLIENTINFO *gameClient)
 		if (ReadProcessMemory(gameClient->processhandle, memAddr, 
 			&procesMemChunk[0], regionSize, &bytesRead))
 		{
-			//printf("Scanning chunk %lx (Size %d) (queuesize:%d)\n", memAddr, regionSize, addressQueue.size());
-			
+			//printf("Scanning chunk %lx (Size %d) (queuesize:%d)\n", memAddr, regionSize, gameClient->addressQueue.size());
+
 			for (size_t i = 0;
 				i < (((bytesRead - KEYBLOB_SIZE) / sizeof(DWORD)) - 1); 
 				i += 4) //string always starts on 16 byte boundary
@@ -319,11 +320,12 @@ void key_grabber_thread::memoryScanWorker(GAMECLIENTINFO *gameClient)
 		{
 			DWORD lasterr = GetLastError();
 			if (lasterr != ERROR_PARTIAL_COPY)
-				std::cout << " ReadProcessMem err 0x" << std::dec << lasterr << std::endl;
-			//Sleep(50);
+			{
+				UIaddLogMsg("ReadProcessMem err 0x" + QString::number(lasterr), processID, uiMsgQueue);
+			}
 		}
 	}
-
+	//UIaddLogMsg("Memory scan worker thread terminating", processID, uiMsgQueue);
 	gameClient->handlesOpen.wait();
 }
 
@@ -347,6 +349,32 @@ bool key_grabber_thread::openClientHandle(GAMECLIENTINFO *gameClient)
 		UIaddLogMsg("VirtualQueryEx of target process failed", gameClient->pid, uiMsgQueue);
 		return false;
 	}
+
+	return true;
+}
+
+//some filters to avoid scanning memory where the key (hopefully) won't be
+//homework: narrow them down to be as restrictive as possible without missing any keys
+bool memory_passes_filters(MEMORY_BASIC_INFORMATION &info, int filterRelaxedCount)
+{
+	switch (filterRelaxedCount)
+	{
+	case (MEMSCAN_FILTERS_IMPLEMENTED - 6):
+		if (info.AllocationProtect != PAGE_READWRITE) return false;
+	case (MEMSCAN_FILTERS_IMPLEMENTED - 5):
+		if (!(info.State & MEM_COMMIT))  return false;
+	case (MEMSCAN_FILTERS_IMPLEMENTED - 4):
+		if (info.Type != MEM_PRIVATE)  return false;
+	case (MEMSCAN_FILTERS_IMPLEMENTED - 3):
+		if (info.RegionSize > 20 * 1024 * 1024)  return false;
+	case (MEMSCAN_FILTERS_IMPLEMENTED - 2):
+		if (info.RegionSize <= 1024)  return false;
+	case (MEMSCAN_FILTERS_IMPLEMENTED - 1):
+		if (info.RegionSize > 60 * 1024 * 1024)  return false;
+	case MEMSCAN_FILTERS_IMPLEMENTED:
+		break;
+	}
+	return true;
 }
 
 void key_grabber_thread::keyGrabController(GAMECLIENTINFO *gameClient)
@@ -383,25 +411,9 @@ void key_grabber_thread::keyGrabController(GAMECLIENTINFO *gameClient)
 		if (VirtualQueryEx(gameClient->processhandle, p, &info, sizeof(info)) == sizeof(info))
 		{
 			nextp += info.RegionSize;
-			//some filters to avoid scanning memory where the key (hopefully) won't be
-			//homework: narrow them down to be as restrictive as possible without missing any keys
-			switch (gameClient->memScanFiltersRelaxed)
-			{
-			case (MEMSCAN_FILTERS_IMPLEMENTED - 6):
-				if (info.AllocationProtect != PAGE_READWRITE) continue;
-			case (MEMSCAN_FILTERS_IMPLEMENTED - 5):
-				if (!(info.State & MEM_COMMIT)) continue;
-			case (MEMSCAN_FILTERS_IMPLEMENTED - 4):
-				if (info.Type != MEM_PRIVATE) continue;
-			case (MEMSCAN_FILTERS_IMPLEMENTED - 3):
-				if (info.RegionSize > 20 * 1024 * 1024) continue;
-			case (MEMSCAN_FILTERS_IMPLEMENTED - 2):
-				if (info.RegionSize <= 1024) continue;
-			case (MEMSCAN_FILTERS_IMPLEMENTED - 1):
-				if (info.RegionSize > 60 * 1024 * 1024) continue;
-			case MEMSCAN_FILTERS_IMPLEMENTED:
-				break;
-			}
+
+			if (!memory_passes_filters(info, gameClient->memScanFiltersRelaxed))
+				continue;
 
 			//totalMem += info.RegionSize;
 			WaitForSingleObject(gameClient->addressQueueMutex, INFINITE);
@@ -413,11 +425,10 @@ void key_grabber_thread::keyGrabController(GAMECLIENTINFO *gameClient)
 			DWORD lasterr = GetLastError();
 			if (lasterr != ERROR_INVALID_PARAMETER)
 			{
-				/*
 				std::stringstream errMsg;
-				errMsg << "Warning: Failed to VirtualQueryEx the client process. Err: " << lasterr;
-				UIaddLogMsg(errMsg.str(), processID, uiMsgQueue);
-				*/
+				errMsg << "Warning: VirtualQueryEx failed with error: " <<std::dec<< lasterr;
+				UIaddLogMsg(errMsg.str(), gameClient->pid, uiMsgQueue);
+				
 				if (lasterr == ERROR_ACCESS_DENIED)
 					break;
 			}
@@ -433,11 +444,11 @@ void key_grabber_thread::keyGrabController(GAMECLIENTINFO *gameClient)
 		gameClient->addressQueue.emplace((void *)PLEASE_TERMINATE, PLEASE_TERMINATE);
 	ReleaseMutex(gameClient->addressQueueMutex);
 
-	UIaddLogMsg("Ending key scan for game process", gameClient->pid, uiMsgQueue);
-
 	//wait for workers to terminate then cleanup
 	while (!gameClient->handlesOpen.empty())
-		Sleep(5);
+		Sleep(25);
+
+	UIaddLogMsg("Ended key scan for game process", gameClient->pid, uiMsgQueue);
 
 	if (gameClient->processhandle)
 	{
@@ -481,8 +492,8 @@ int key_grabber_thread::getClientPIDs(std::vector <DWORD>& resultsList)
 		while (Process32Next(snapshot, &entry) == TRUE)
 		{
 			std::wstring binPath = entry.szExeFile;
-			if (binPath.find(L"PathOfExile.exe") != std::wstring::npos ||
-				binPath.find(L"PathOfExile_x64.exe") != std::wstring::npos) 
+			if (WSTRING_CONTAINS(binPath,L"PathOfExile.exe") ||
+				WSTRING_CONTAINS(binPath, L"PathOfExile_x64.exe"))
 			{
 				DWORD newPID = entry.th32ProcessID;
 				resultsList.push_back(newPID);
@@ -545,6 +556,8 @@ void key_grabber_thread::stopProcessScan(DWORD processID)
 	}
 }
 
+//looks for processes that we are tracking but no longer existing
+//removes from active list and tells ui
 void key_grabber_thread::purge_ended_processes(std::vector <DWORD>& latestClientPIDs)
 {
 	processListMutex.lock();
@@ -561,23 +574,82 @@ void key_grabber_thread::purge_ended_processes(std::vector <DWORD>& latestClient
 		}
 	}
 
-
 	if (latestClientPIDs.empty() && !activeClients.empty())
 	{
 		for (auto knownProcessIt = activeClients.begin();
 			knownProcessIt != activeClients.end(); knownProcessIt++)
 		{
-			DWORD knownProcessPID = (*knownProcessIt)->pid;
 
-			knownProcessIt = activeClients.erase(knownProcessIt);
+			GAMECLIENTINFO *client = (*knownProcessIt);
 
-			UInotifyClientRunning(knownProcessPID, false, 0, 0, uiMsgQueue);
+			UInotifyClientRunning(client->pid, false, 0, 0, uiMsgQueue);
+
+			delete client;
+			knownProcessIt = ERASE_FROM_VECTOR(activeClients, client);
 
 			if (knownProcessIt == activeClients.end())
 				break;
 		}
 	}
 	processListMutex.unlock();
+}
+
+//initiates new threads to open process handle and scan for keys
+//would be called after logout detected
+void key_grabber_thread::restartScanOnClient(DWORD pid)
+{
+	GAMECLIENTINFO* client = get_process_obj(pid);
+	client->needsLoginKey = true;
+
+	processListMutex.lock();
+	restartProcessScanClients.push_back(client);
+	processListMutex.unlock();
+}
+
+void key_grabber_thread::erase_client_objects()
+{
+	while (!activeClients.empty())
+	{
+		processListMutex.lock();
+		for (auto it = activeClients.begin(); it != activeClients.end(); it++)
+		{
+			GAMECLIENTINFO *client = *it;
+			if (client->processhandle == NULL)
+			{
+				delete client;
+				it = activeClients.erase(it);
+				if (it == activeClients.end()) break;
+			}
+		}
+		processListMutex.unlock();
+		Sleep(500);
+	}
+}
+
+void key_grabber_thread::suspend_scanning(DWORD activeProcessPID)
+{
+	keyRequired = false;
+	activeProcess = activeProcessPID;
+
+	WaitForSingleObject(this->keyVecMutex, INFINITE);
+	unclaimedKeys.clear();
+	ReleaseMutex(this->keyVecMutex);
+
+	processListMutex.lock();
+	for (auto it = activeClients.begin(); it != activeClients.end(); it++)
+	{
+		 ((GAMECLIENTINFO *)*it)->needsLoginKey = false;
+	}
+	processListMutex.unlock();
+
+	Sleep(500);
+
+	erase_client_objects();
+}
+
+void key_grabber_thread::resume_scanning()
+{
+	keyRequired = true;
 }
 
 /*
@@ -589,10 +661,48 @@ void key_grabber_thread::main_loop()
 {
 	while (!terminateScanning)
 	{
+
 		//get running clients
 		std::vector <DWORD> latestClientPIDs;
+		getClientPIDs(latestClientPIDs);
 
-		if (getClientPIDs(latestClientPIDs) == 0 && activeClients.empty()) {
+		if (!keyRequired)
+		{
+			if (IS_IN_VECTOR(latestClientPIDs, activeProcess))
+			{
+				Sleep(1000);
+				continue;
+			}
+			else
+			{
+				UInotifyClientRunning(activeProcess, false, latestClientPIDs.size(), activeClients.size(), uiMsgQueue);
+
+			}
+		}
+
+		processListMutex.lock();
+		if (!restartProcessScanClients.empty())
+		{
+			for (auto it = restartProcessScanClients.begin(); it != restartProcessScanClients.end(); it++)
+			{
+				GAMECLIENTINFO *client = *it;
+				if (openClientHandle(client))
+				{
+					UInotifyClientRunning(client->pid, true, latestClientPIDs.size(), activeClients.size(), uiMsgQueue);
+					grabKeys(client);
+				}
+				else
+				{
+					UIaddLogMsg("Error: Failed to reopen process handle to scan process", client->pid, uiMsgQueue);
+					delete client;
+					ERASE_FROM_VECTOR(activeClients, client);
+				}
+			}
+			restartProcessScanClients.clear();
+		}
+		processListMutex.unlock();
+
+		if (latestClientPIDs.size() == 0 && activeClients.empty()) {
 			//client will take a while to start and login
 			//so doesn't need to be a short sleep
 			Sleep(1000);  

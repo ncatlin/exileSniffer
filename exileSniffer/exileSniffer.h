@@ -40,6 +40,7 @@ class UI_DECODED_LIST_ENTRY
 			failedDecode = pktobj.decodeError();
 			originalbuf = pktobj.originalbuf;
 			bufferOffsets = pktobj.bufferOffsets;
+			streamID = pktobj.streamID();
 		}
 
 		QString dayMonTime() { return QString::fromStdWString(epochms_to_timestring(msTime)); }
@@ -64,6 +65,7 @@ class UI_DECODED_LIST_ENTRY
 		byte flags;
 		long long msTime;
 		unsigned short pktID;
+		int streamID;
 		vector<byte> *originalbuf;
 		std::pair <ushort, ushort> bufferOffsets;
 };
@@ -92,6 +94,9 @@ class exileSniffer : public QMainWindow
 		void decodedTableMenuRequest(QPoint);
 		void copySelected();
 		void filterSelected();
+		void stopDecrypting();
+		void resumeScanningEvent();
+		void settingsSelectionChanged();
 
 	private:
 		void setup_raw_stream_tab();
@@ -101,7 +106,9 @@ class exileSniffer : public QMainWindow
 		void set_keyEx_scanning_count(int total, int scanning);
 		void updateStreamStateWidget();
 		void setStateDecrypting(int streamID);
-		void setStateNotDecrypting();
+		void setStateNotDecrypting(); 
+		void action_ended_stream(int streamID);
+		void handle_stream_event(UI_STREAMEVENT_MSG *streamNote);
 
 		void init_gamePkt_Actioners();
 		void init_loginPkt_Actioners();
@@ -111,7 +118,6 @@ class exileSniffer : public QMainWindow
 
 		void action_UI_Msg(UI_MESSAGE *msg);
 		void add_metalog_update(QString msg, DWORD pid);
-		void handle_client_event(DWORD pid, bool isRunning);
 		void handle_raw_packet_data(UI_RAWHEX_PKT *pkt);
 		void action_undecoded_packet(UIDecodedPkt& decoded);
 		void action_decoded_packet(UIDecodedPkt& decoded);
@@ -119,7 +125,7 @@ class exileSniffer : public QMainWindow
 		void action_decoded_login_packet(UIDecodedPkt& decoded);
 		
 
-		clientData * get_client(DWORD pid);
+		clientHexData * get_clientdata(DWORD pid);
 		void reprintRawHex();
 		void insertRawText(std::string hexdump, std::string asciidump);
 		void print_raw_packet(UI_RAWHEX_PKT *pkt);
@@ -237,7 +243,7 @@ class exileSniffer : public QMainWindow
 
 
 		void action_CLI_PACKET_EXIT(UIDecodedPkt&, QString*);
-		void action_CLI_PACKET_EXIT_2(UIDecodedPkt&, QString*);
+		void action_SRV_LOGINSRV_CRYPT(UIDecodedPkt&, QString*);
 		void action_CLI_DUEL_CHALLENGE(UIDecodedPkt&, QString*);
 		void action_SRV_DUEL_RESPONSE(UIDecodedPkt&, QString*);
 		void action_SRV_DUEL_CHALLENGE(UIDecodedPkt&, QString*);
@@ -294,8 +300,12 @@ class exileSniffer : public QMainWindow
 		int decodedErrorPacketCount = 0;
 		
 		SafeQueue<UI_MESSAGE> uiMsgQueue; //read by ui thread, written by all others
-		map<DWORD, clientData *> clients;
+		map<DWORD, clientHexData *> clients;
 		map<int, eStreamState> streamStates;
+		//id of an ending stream if we expect a new one soon
+		int transitionStream = -1; 
+		int latestDecryptingStream = -1;
+		std::pair<int, int> active_total_ClientScanCount = make_pair(0,0);
 
 		typedef void (exileSniffer::*actionFunc)(UIDecodedPkt&, QString*);
 		map<unsigned short, actionFunc> gamePktActioners;
