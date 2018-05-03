@@ -223,9 +223,12 @@ void packet_processor::deserialise_LOGIN_CLI_REQUEST_RACE_DATA(UIDecodedPkt *)
 	consume_blob(remainingDecrypted);
 }
 
-void packet_processor::deserialise_LOGIN_SRV_LEAGUE_LIST(UIDecodedPkt *)
+void packet_processor::deserialise_LOGIN_SRV_LEAGUE_LIST(UIDecodedPkt *uipkt)
 {
-	consume_blob(remainingDecrypted);
+	vector<byte> firstBlob;
+	consume_add_qword(L"UnkBlob1", uipkt);
+
+	deserialise_SRV_EVENTSLIST_2(uipkt);
 }
 
 void packet_processor::deserialise_LOGIN_CLI_REQUEST_LEAGUES(UIDecodedPkt *)

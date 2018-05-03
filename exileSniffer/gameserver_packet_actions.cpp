@@ -61,8 +61,8 @@ void exileSniffer::init_gamePkt_Actioners()
 	//2d
 	gamePktActioners[CLI_SET_HOTBARSKILL] = &exileSniffer::action_CLI_SET_HOTBARSKILL;
 	gamePktActioners[SRV_SKILL_SLOTS_LIST] = &exileSniffer::action_SRV_SKILL_SLOTS_LIST;
-	//30
-	//31
+	gamePktActioners[CLI_REVIVE_CHOICE] = &exileSniffer::action_CLI_REVIVE_CHOICE;
+	gamePktActioners[SRV_YOU_DIED] = &exileSniffer::action_SRV_YOU_DIED;
 	//32
 	//33
 	//34
@@ -224,7 +224,7 @@ void exileSniffer::init_gamePkt_Actioners()
 	//d2
 	//d3
 	//d4
-	gamePktActioners[SRV_UNK_0xD5] = &exileSniffer::action_SRV_UNK_0xD5;
+	gamePktActioners[SRV_EVENTSLIST_2] = &exileSniffer::action_SRV_EVENTSLIST_2;
 	//d6
 	//d7
 	gamePktActioners[CLI_USED_SKILL] = &exileSniffer::action_CLI_USED_SKILL;
@@ -350,7 +350,7 @@ void exileSniffer::addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPk
 		ui.decodedListTable->scrollToBottom();
 
 	QTableWidgetItem *time = new QTableWidgetItem(entry.floatSeconds(startMSSinceEpoch));
-	time->setData(Qt::UserRole, QVariant::fromValue<UIDecodedPkt *>(obj));
+	time->setData(Qt::UserRole, QVariant::fromValue<UIDecodedPkt *>(obj)); //add object pointer to first column
 	ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_TIME, time);
 
 	QTableWidgetItem *sender = new QTableWidgetItem(entry.sender());
@@ -416,7 +416,12 @@ void exileSniffer::action_undecoded_packet(UIDecodedPkt& obj)
 		return;
 	}
 
-	size_t sizeAfterID = obj.originalbuf->size() - obj.bufferOffsets.first;
+	size_t sizeAfterID;
+	if (obj.bufferOffsets.first <= obj.originalbuf->size())
+		sizeAfterID = obj.originalbuf->size() - obj.bufferOffsets.first;
+	else
+		sizeAfterID = obj.originalbuf->size();
+
 	wstringstream summary;
 	summary << "Undecoded packet or multipacket blob (~ "
 		<< std::dec << sizeAfterID << " byte";
@@ -1306,6 +1311,67 @@ void exileSniffer::action_SRV_SKILL_SLOTS_LIST(UIDecodedPkt& obj, QString *analy
 	*analysis = QString::fromStdWString(analysisStream.str());
 }
 
+void exileSniffer::action_CLI_REVIVE_CHOICE(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+
+	UINT32 choice = obj.get_UInt32(L"Choice");
+
+	if (!analysis)
+	{
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = "Player chose revive option " + QString::number(choice);
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
+
+void exileSniffer::action_SRV_YOU_DIED(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+
+	QString summary;
+	UINT32 choices = obj.get_UInt32(L"Slot");
+	UINT32 unk1 = obj.get_UInt32(L"Unk");
+	
+
+	if (choices & 0x2)
+	{
+		summary = "Ressurection dialog removed";
+	}
+	else if (choices & 0x1)
+	{
+		summary = "Ressurection dialog: Exit";
+	}
+	else
+	{
+		switch (choices)
+		{
+		case 4:
+			summary = "Ressurection dialog: Checkpoint";
+			break;
+		case 8:
+			summary = "Ressurection dialog: Town";
+			break;
+		case 0xc:
+			summary = "Ressurection dialog: Town or Checkpoint";
+			break;
+		default:
+			summary = "Ressurection dialog: Error";
+			break;
+		}
+	}
+
+	if (!analysis)
+	{
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = summary + " [0x"+QString::number(unk1, 16)+"]";
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
 
 void exileSniffer::action_CLI_USE_BELT_SLOT(UIDecodedPkt& obj, QString *analysis)
 {
@@ -2013,24 +2079,22 @@ void exileSniffer::action_SRV_UNK_0xCA(UIDecodedPkt& obj, QString *analysis)
 	//todo, list the lists
 }
 
-void exileSniffer::action_SRV_UNK_0xD5(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_EVENTSLIST_2(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
-	UINT32 sizeCount = obj.get_UInt32(L"SizeCount");
+	WValue &eventlist = obj.payload.FindMember(L"EventList")->value;
+	size_t listSize = eventlist.Size();
 
 	if (!analysis)
 	{
 		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Client sent (Leagues related?) strings msg ID 0xD5 ";
-		if (sizeCount != 0)
-			listentry.summary += "[HAS COUNT! USE ME]";
-		else
-			listentry.summary += " Empty.";
-
+		listentry.summary = "List of " + QString::number(listSize) + " available events to join";
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
+
+	*analysis = stringify_eventslist(eventlist);
 }
 
 void exileSniffer::action_CLI_USED_SKILL(UIDecodedPkt& obj, QString *analysis)

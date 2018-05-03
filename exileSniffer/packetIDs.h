@@ -60,8 +60,8 @@
 //2d
 #define CLI_SET_HOTBARSKILL 0x2e
 #define SRV_SKILL_SLOTS_LIST (CLI_SET_HOTBARSKILL+1)
-//30
-//31
+#define CLI_REVIVE_CHOICE (SRV_SKILL_SLOTS_LIST+1)
+#define SRV_YOU_DIED (CLI_REVIVE_CHOICE+1) //thats dark souls
 //32
 //33
 //34
@@ -232,7 +232,7 @@ S->C UnkPkID: 0xef size: 23 bytes
 //d2
 //d3
 //d4
-#define SRV_UNK_0xD5 0xd5
+#define SRV_EVENTSLIST_2 0xd5
 //d6
 //d7
 #define CLI_USED_SKILL 0xd8

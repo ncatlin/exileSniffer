@@ -176,9 +176,9 @@ void packet_processor::handle_packet_from_loginserver(byte* data, unsigned int d
 			if (keyCandidate->used) std::cout << "assert 3" << std::endl;
 			assert(!keyCandidate->used);
 
-			currentStreamObj->fromLoginSalsa.SetKeyWithIV((const byte *)keyCandidate->salsakey,
+			currentStreamObj->recvSalsa.SetKeyWithIV((const byte *)keyCandidate->salsakey,
 				32,	(const byte *)keyCandidate->IV);
-			currentStreamObj->fromLoginSalsa.ProcessData(decryptedBuffer->data(), data, dataLen);
+			currentStreamObj->recvSalsa.ProcessData(decryptedBuffer->data(), data, dataLen);
 
 			unsigned short packetID = ntohs(getUshort(decryptedBuffer->data()));
 			if (packetID == LOGIN_SRV_UNK0x4)
@@ -197,7 +197,7 @@ void packet_processor::handle_packet_from_loginserver(byte* data, unsigned int d
 
 				vector<byte> IVVec((byte*)keyCandidate->IV, ((byte*)keyCandidate->IV) + 8);
 				UIUpdateRecvIV(IVVec, uiMsgQueue);
-				sendIterationToUI(currentStreamObj->fromLoginSalsa, false);
+				sendIterationToUI(currentStreamObj->recvSalsa, false);
 
 
 				UInotifyStreamState(currentMsgStreamID, eStreamState::eStreamDecrypting, uiMsgQueue);
@@ -222,8 +222,8 @@ void packet_processor::handle_packet_from_loginserver(byte* data, unsigned int d
 
 	if (!alreadyDecrypted)
 	{
-		currentStreamObj->fromLoginSalsa.ProcessData(decryptedBuffer->data(), data, dataLen);
-		sendIterationToUI(currentStreamObj->fromLoginSalsa, false);
+		currentStreamObj->recvSalsa.ProcessData(decryptedBuffer->data(), data, dataLen);
+		sendIterationToUI(currentStreamObj->recvSalsa, false);
 	}
 
 	UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(currentStreamObj->workingSendKey->sourceProcess, eLogin, true);
@@ -252,7 +252,10 @@ void packet_processor::handle_packet_to_loginserver(byte* data, unsigned int dat
 	if (currentStreamObj->ephKeys < 2)
 	{
 		if (currentStreamObj->ephKeys == 0)
+		{
+			currentStreamObj->pipe = loginpipe;
 			UInotifyStreamState(currentMsgStreamID, eStreamLoggingIn, uiMsgQueue);
+		}
 
 		if (dataLen < 2) return;
 		ushort pktID = ntohs(getUshort(data));
@@ -326,11 +329,11 @@ void packet_processor::handle_packet_to_loginserver(byte* data, unsigned int dat
 			if (keyCandidate->used) std::cout << "assert 4" << std::endl;
 			assert(!keyCandidate->used);
 
-			currentStreamObj->toLoginSalsa.SetKeyWithIV((byte *)keyCandidate->salsakey,
+			currentStreamObj->sendSalsa.SetKeyWithIV((byte *)keyCandidate->salsakey,
 				32,
 				(byte *)keyCandidate->IV);
 
-			currentStreamObj->toLoginSalsa.ProcessData(decryptedBuffer->data(), data, dataLen);
+			currentStreamObj->sendSalsa.ProcessData(decryptedBuffer->data(), data, dataLen);
 
 			if (decryptedBuffer->at(0) == 0 && decryptedBuffer->at(1) == 3)
 			{
@@ -352,7 +355,7 @@ void packet_processor::handle_packet_to_loginserver(byte* data, unsigned int dat
 			}
 		}
 
-		sendIterationToUI(currentStreamObj->toLoginSalsa, true);
+		sendIterationToUI(currentStreamObj->sendSalsa, true);
 
 		//overwrite the creds before proceeding
 		ushort namelen = ntohs(getUshort(&decryptedBuffer->at(6)));
@@ -385,8 +388,8 @@ void packet_processor::handle_packet_to_loginserver(byte* data, unsigned int dat
 		return;
 	}
 
-	currentStreamObj->toLoginSalsa.ProcessData(decryptedBuffer->data(), data, dataLen);
-	sendIterationToUI(currentStreamObj->toLoginSalsa, true);
+	currentStreamObj->sendSalsa.ProcessData(decryptedBuffer->data(), data, dataLen);
+	sendIterationToUI(currentStreamObj->sendSalsa, true);
 
 	UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(currentStreamObj->workingSendKey->sourceProcess, eLogin, false);
 	msg->setData(decryptedBuffer);
@@ -565,6 +568,7 @@ void packet_processor::handle_packet_to_gameserver(byte* data, unsigned int data
 {
 	if (currentStreamObj->workingSendKey == NULL)
 	{
+		currentStreamObj->pipe = gamepipe;
 		if (data[0] == 0 && data[1] == 3)
 		{
 			unsigned long connectionID = ntohl(getUlong(data + 2));
@@ -603,7 +607,7 @@ void packet_processor::handle_packet_to_gameserver(byte* data, unsigned int data
 			byte *salsaSendIV = (byte *)currentStreamObj->workingSendKey->IV;
 			byte *salsaRecvIV = (byte *)currentStreamObj->workingRecvKey->IV;
 
-			currentStreamObj->toGameSalsa.SetKeyWithIV(salsaSendKey, 32, salsaSendIV);
+			currentStreamObj->sendSalsa.SetKeyWithIV(salsaSendKey, 32, salsaSendIV);
 
 			vector<byte> keyVec(salsaSendKey, salsaSendKey + 32);
 			vector<byte> IVsVec(salsaSendIV, salsaSendIV + 8);
@@ -612,8 +616,8 @@ void packet_processor::handle_packet_to_gameserver(byte* data, unsigned int data
 			UIdisplaySalsaKey(keyVec, uiMsgQueue);
 			UIUpdateSendIV(IVsVec, uiMsgQueue);
 			UIUpdateRecvIV(IVrVec, uiMsgQueue);
-			sendIterationToUI(currentStreamObj->toGameSalsa, true);
-			sendIterationToUI(currentStreamObj->fromGameSalsa, false);
+			sendIterationToUI(currentStreamObj->sendSalsa, true);
+			sendIterationToUI(currentStreamObj->recvSalsa, false);
 
 			pendingGameserverKeys.erase(connectionID);
 
@@ -640,8 +644,8 @@ void packet_processor::handle_packet_to_gameserver(byte* data, unsigned int data
 	*/
 	decryptedBuffer = new vector<byte>;
 	decryptedBuffer->resize(dataLen, 0);
-	currentStreamObj->toGameSalsa.ProcessData(decryptedBuffer->data(), data, dataLen);
-	sendIterationToUI(currentStreamObj->toGameSalsa, true);
+	currentStreamObj->sendSalsa.ProcessData(decryptedBuffer->data(), data, dataLen);
+	sendIterationToUI(currentStreamObj->sendSalsa, true);
 
 
 	UI_RAWHEX_PKT *msg = new UI_RAWHEX_PKT(currentStreamObj->workingSendKey->sourceProcess, eGame, false);
@@ -671,19 +675,19 @@ void packet_processor::handle_packet_from_gameserver(byte* data, unsigned int da
 		ushort firstPktID = ntohs(getUshort(data));
 		assert(firstPktID == SRV_PKT_ENCAPSULATED);
 
-		currentStreamObj->fromGameSalsa.SetKeyWithIV(
+		currentStreamObj->recvSalsa.SetKeyWithIV(
 			(byte *)currentStreamObj->workingRecvKey->salsakey, 32,
 				(byte *)currentStreamObj->workingRecvKey->IV);
 
 		dataLen -= 2;
-		currentStreamObj->fromGameSalsa.ProcessData(decryptedBuffer->data(), data+2, dataLen);
+		currentStreamObj->recvSalsa.ProcessData(decryptedBuffer->data(), data+2, dataLen);
 
 	}
 	else
 	{
-		currentStreamObj->fromGameSalsa.ProcessData(decryptedBuffer->data(), data, dataLen);
+		currentStreamObj->recvSalsa.ProcessData(decryptedBuffer->data(), data, dataLen);
 	}
-	sendIterationToUI(currentStreamObj->fromGameSalsa, false);
+	sendIterationToUI(currentStreamObj->recvSalsa, false);
 
 
 	//print the whole blob in the raw log
