@@ -208,3 +208,8 @@ std::vector<byte> extract_Iter_from_salsaObj(CryptoPP::Salsa20::Encryption& keyb
 	iv.push_back(*(keydata + 32));
 	return iv;
 }
+
+QString msToQStringSeconds(long long start, long long eventTime)
+{ 
+	return QString::number((eventTime - start) / 1000.0, 'd', 4); 
+}

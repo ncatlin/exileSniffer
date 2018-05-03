@@ -16,6 +16,7 @@ bool checkPipe(HANDLE pipe, std::deque< std::vector<byte>> *pktQueue);
 
 std::wstring epochms_to_timestring(long long epochms);
 long long ms_since_epoch();
+QString msToQStringSeconds(long long start, long long eventTime);
 
 std::wstring IPToString(DWORD ip);
 

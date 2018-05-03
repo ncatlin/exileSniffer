@@ -10,14 +10,14 @@ enum eDecodingErr{ eNoErr, eErrUnderflow,
 
 class STREAMDATA {
 public:
-	CryptoPP::Salsa20::Encryption toLoginSalsa, fromLoginSalsa;
-	CryptoPP::Salsa20::Encryption fromGameSalsa, toGameSalsa;
+	CryptoPP::Salsa20::Encryption sendSalsa, recvSalsa;
 	unsigned long packetCount = 0;
 	KEYDATA *workingRecvKey = NULL;
 	KEYDATA *workingSendKey = NULL;
 	unsigned short lastPktID = 0;
 	int ephKeys = 0;
 	bool failed = false;
+	HANDLE pipe = NULL;
 };
 
 class packet_processor :
@@ -109,7 +109,9 @@ private:
 	void deserialise_CLI_UNK_0x2c(UIDecodedPkt *);
 	void deserialise_CLI_SET_HOTBARSKILL(UIDecodedPkt *);
 	void deserialise_SRV_SKILL_SLOTS_LIST(UIDecodedPkt *);
-	
+	void deserialise_CLI_REVIVE_CHOICE(UIDecodedPkt*);
+	void deserialise_SRV_YOU_DIED(UIDecodedPkt*);
+
 	void deserialise_CLI_USE_BELT_SLOT(UIDecodedPkt *);
 	void deserialise_CLI_USE_ITEM(UIDecodedPkt *);
 	void deserialise_CLI_UNK_0x41(UIDecodedPkt *);
@@ -171,7 +173,7 @@ private:
 
 	void deserialise_SRV_UNK_0xCA(UIDecodedPkt *);
 
-	void deserialise_SRV_UNK_0xD5(UIDecodedPkt *);
+	void deserialise_SRV_EVENTSLIST_2(UIDecodedPkt *);
 
 	void deserialise_CLI_USED_SKILL(UIDecodedPkt *);
 
@@ -232,7 +234,7 @@ private:
 
 	bool sanityCheckPacketID(unsigned short pktID);
 	void emit_decoding_err_msg(unsigned short msgID, unsigned short lastMsgID);
-	void continue_gamebuffer_next_packet();
+	void continue_buffer_next_packet();
 
 	void sendIterationToUI(CryptoPP::Salsa20::Encryption sobj, bool send);
 

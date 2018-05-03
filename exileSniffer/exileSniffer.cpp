@@ -417,16 +417,8 @@ void exileSniffer::action_UI_Msg(UI_MESSAGE *msg)
 		case uiMsgType::eClientEvent:
 		{
 			UI_CLIENTEVENT_MSG *cliEvtMsg = (UI_CLIENTEVENT_MSG *)msg;
-			if (cliEvtMsg->pid)
-			{
-				if (activeDecryption && cliEvtMsg->pid == packetProcessor->getLatestDecryptProcess())
-				{
-					setStateNotDecrypting();
-					streamStates[latestDecryptingStream] = eStreamEnded;
-				}
+			handle_client_event(cliEvtMsg, true);
 
-				set_keyEx_scanning_count(cliEvtMsg->totalClients, cliEvtMsg->totalScanning);
-			}
 
 			break;
 		}
@@ -523,28 +515,34 @@ void exileSniffer::add_metalog_update(QString msg, DWORD pid)
 
 	ui.metaLog->appendPlainText(QString::fromStdString(ss.str()));
 }
-/*
-void exileSniffer::handle_client_event(DWORD pid, bool isRunning)
+
+void exileSniffer::handle_client_event(UI_CLIENTEVENT_MSG *cliEvtMsg, bool isRunning)
 {
-	auto it = clients.find(pid);
+	DWORD processID = cliEvtMsg->pid;
+	if (cliEvtMsg->pid)
+	{
+		if (!isRunning && activeDecryption && processID == packetProcessor->getLatestDecryptProcess())
+		{
+			setStateNotDecrypting();
+			streamStates[latestDecryptingStream] = eStreamEnded;
+		}
+
+		set_keyEx_scanning_count(cliEvtMsg->totalClients, cliEvtMsg->totalScanning);
+	}
+
+	auto it = clients.find(processID);
 	if (isRunning)
 	{
 		if (it == clients.end())
 		{
-			clientData *client = new clientData;
-			client->processID = pid;
-			client->isRunning = true;
+			clientHexData *client = new clientHexData(true, true, QDir::current());
 			client->isLoggedIn = false;
-			clients.emplace(make_pair(pid,client));
-
-			QString msg = "Client started";
-			add_metalog_update(msg, pid);
+			clients.emplace(make_pair(processID, client));
 		}
 		else
 		{
 			//logged out and logged back in again
-			clientData *oldclient = it->second;
-			oldclient->isRunning = true;
+			clientHexData *oldclient = it->second;
 			oldclient->isLoggedIn = false;
 		}
 	}
@@ -552,23 +550,19 @@ void exileSniffer::handle_client_event(DWORD pid, bool isRunning)
 	{
 		if (it != clients.end())
 		{
-			clientData *oldclient = it->second;
-			oldclient->isRunning = false;
+			clientHexData *oldclient = it->second;
 			oldclient->isLoggedIn = false;
-
-			QString msg = "Client terminated";
-			add_metalog_update(msg, pid);
 		}
 		else
 		{
 			QString warnmsg = "WARNING: A client we have never seen just vanished \
 								from the list of clients we have seen. Everything \
 								is probably on fire.";
-			add_metalog_update(warnmsg, pid);
+			add_metalog_update(warnmsg, processID);
 		}
 	}
 }
-*/
+
 
 std::string serverString(streamType server, string IP)
 {
@@ -603,8 +597,68 @@ void exileSniffer::insertRawText(std::string hexdump, std::string asciidump)
 		ui.ptASCIIPane->verticalScrollBar()->setSliderPosition(oldScrollPos);
 }
 
+void exileSniffer::output_hex_to_file(UI_RAWHEX_PKT *pkt, std::ofstream& file)
+{
+	if (!file.is_open()) return;
+
+	std::stringstream mixeddump;
+
+	char timestamp[20];
+	struct tm *tm = gmtime(&pkt->createdtime);
+	strftime(timestamp, sizeof(timestamp), "%H:%M:%S", tm);
+
+	mixeddump << "#" << rawCount_Recorded_Filtered.first << " " << timestamp << " ";
+
+	if (pkt->incoming)
+		mixeddump << serverString(pkt->stream, "f") << " to PlayerClient";
+	else
+		mixeddump << "PlayerClient to " << serverString(pkt->stream, "f");
+	mixeddump << " (" << std::dec << pkt->pktBytes->size() << " bytes)" << std::endl;
+
+	stringstream::pos_type bytesStart = mixeddump.tellp();
+
+	mixeddump << std::setfill('0') << std::uppercase << "  ";
+	for (int i = 0; i < pkt->pktBytes->size(); ++i)
+	{
+		byte item = pkt->pktBytes->at(i);
+
+		if (item)
+			mixeddump << " " << std::hex << std::setw(2) << (int)item;
+		else
+			mixeddump << " 00";
+
+		if ((i + 1) % UIhexPacketsPerRow == 0)
+		{
+			mixeddump << std::endl << "  ";
+		}
+	}
+	mixeddump << "\n" << std::endl << std::nouppercase;
+
+	mixeddump << "   ";
+	for (int i = 0; i < pkt->pktBytes->size(); ++i)
+	{
+		byte item = pkt->pktBytes->at(i);
+
+		if (item >= ' ' && item <= '~')
+			mixeddump << (char)item;
+		else
+			mixeddump << '.';//replace unprintable with dots
+
+		if ((i + 1) % UIhexPacketsPerRow == 0)
+		{
+			mixeddump << std::endl << "   ";
+		}
+	}
+
+	mixeddump << "\n" << std::endl;
+
+	std::string hexdumpstring = mixeddump.str();
+
+	file << hexdumpstring << std::endl;
+}
+
 //todo: bold first two bytes, may need to add a 'continuationpacket' field
-void exileSniffer::print_raw_packet(UI_RAWHEX_PKT *pkt)
+void exileSniffer::output_hex_to_pane(UI_RAWHEX_PKT *pkt)
 {
 	std::stringstream hexdump;
 	std::stringstream asciidump;
@@ -619,7 +673,7 @@ void exileSniffer::print_raw_packet(UI_RAWHEX_PKT *pkt)
 		hexdump << serverString(pkt->stream, "f") << " to PlayerClient";
 	else
 		hexdump << "PlayerClient to " << serverString(pkt->stream, "f");
-	hexdump << "("<<std::dec<<pkt->pktBytes->size()<<" bytes)"<< std::endl;
+	hexdump << "(" << std::dec << pkt->pktBytes->size() << " bytes)" << std::endl;
 	asciidump << std::endl;
 
 
@@ -631,7 +685,7 @@ void exileSniffer::print_raw_packet(UI_RAWHEX_PKT *pkt)
 		byte item = pkt->pktBytes->at(i);
 
 		if (item)
-			hexdump << " " << std::hex << std::setw(2) << (int)item ;
+			hexdump << " " << std::hex << std::setw(2) << (int)item;
 		else
 			hexdump << " 00";
 
@@ -656,18 +710,6 @@ void exileSniffer::print_raw_packet(UI_RAWHEX_PKT *pkt)
 	outfile << hexdumpstring << std::endl;
 	insertRawText(hexdumpstring, asciidump.str());
 
-}
-
-bool exileSniffer::packet_passes_raw_filter(UI_RAWHEX_PKT *pkt)
-{
-	//todo user specified
-	if (pkt->startBytes == CLI_PING_CHALLENGE || 
-		pkt->startBytes == SRV_PING_RESPONSE || 
-		pkt->startBytes == SRV_HEARTBEAT ||
-		pkt->startBytes == SRV_CHAT_MESSAGE)
-		return false;
-
-	return true;
 }
 
 bool exileSniffer::packet_passes_decoded_filter(ushort msgID)
@@ -710,15 +752,20 @@ void exileSniffer::handle_raw_packet_data(UI_RAWHEX_PKT *pkt)
 
 	if (!client)
 	{
-		add_metalog_update("Warning: Dropped packet with no associated PID", 0);
+		add_metalog_update("Warning: Dropped packet with no associated PID", pkt->pid);
 		return;
 	}
 
-	if (packet_passes_raw_filter(pkt))
-		print_raw_packet(pkt);
+	if (packet_passes_decoded_filter(pkt->startBytes))
+	{
+		output_hex_to_pane(pkt);
+		output_hex_to_file(pkt, client->get_filtered_hexlog());
+	}
 	else
 		++rawCount_Recorded_Filtered.second;
 	++rawCount_Recorded_Filtered.first;
+
+	output_hex_to_file(pkt, client->get_unfiltered_hexlog());
 
 	client->rawHexPackets.push_back(pkt);
 	updateRawFilterLabel();
@@ -754,8 +801,8 @@ void exileSniffer::reprintRawHex()
 	{
 		UI_RAWHEX_PKT *pkt = *pktIt;
 
-		if (packet_passes_raw_filter(pkt))
-			print_raw_packet(pkt);
+		if (packet_passes_decoded_filter(pkt->startBytes))
+			output_hex_to_pane(pkt);
 		else
 			++rawCount_Recorded_Filtered.second;
 	}
@@ -869,49 +916,66 @@ void exileSniffer::decodedCellActivated(int row, int col)
 		return;
 	}
 
+	size_t msgSize;
+	if (obj->decodeError())
+		msgSize = obj->originalbuf->size() - obj->bufferOffsets.first;
+	else
+		msgSize = obj->bufferOffsets.second - obj->bufferOffsets.first;
+
+	std::wstring serverName = (obj->streamFlags & PKTBIT_GAMESERVER) ? L"GameServer" : L"LoginServer";
+	size_t bufStart = obj->bufferOffsets.first;
+	long long pktTime = obj->time_processed_ms();
+
 	std::wstringstream hexdump;
 	hexdump << "----Hex Dump----" << std::endl;
-	hexdump << epochms_to_timestring(obj->time_processed_ms()) << " ";
-
-	size_t bytessize;
-	if (obj->decodeError())
-		bytessize = obj->originalbuf->size() - obj->bufferOffsets.first;
-	else
-		bytessize = obj->bufferOffsets.second - obj->bufferOffsets.first;
-	
-	std::wstring serverName  = (obj->streamFlags & PKTBIT_GAMESERVER) ? L"GameServer" : L"LoginServer";
+	hexdump << epochms_to_timestring(pktTime);
+	hexdump << " (start +" << msToQStringSeconds(startMSSinceEpoch, pktTime).toStdWString() << "s) - ";
 
 	if (obj->streamFlags & PKTBIT_INBOUND)
 		hexdump << serverName << " to PlayerClient";
 	else
 		hexdump << "PlayerClient to " << serverName;
 
-	hexdump << " (" << std::dec << bytessize << " bytes)" << std::endl;
+	hexdump << " (" << std::dec << msgSize << " bytes)" << std::endl;
 
-	size_t bufStart = obj->bufferOffsets.first;
-	
 	hexdump << std::setfill(L'0') << std::uppercase << L" ";
-	for (int i = 0; i < bytessize; ++i)
+	for (int i = 0; i < msgSize; ++i)
 	{
-		byte item = obj->originalbuf->at(bufStart + i);
+		int index = bufStart + i;
+		if (index >= obj->originalbuf->size()) break;
+		byte item = obj->originalbuf->at(index);
 
 		if (item)
 			hexdump << " " << std::hex << std::setw(2) << (int)item;
 		else
 			hexdump << " 00";
 
-		//if (item >= ' ' && item <= '~')
-		//	asciidump << (char)item;
-		//else
-		//	asciidump << '.';//replace unprintable with dots
-
 		if ((i + 1) % UIhexPacketsPerRow == 0)
 		{
 			hexdump << std::endl << " ";
-			//asciidump << std::endl;
 		}
 	}
 	hexdump << "\n" << std::endl << std::nouppercase;
+
+	//do ascii dump afterwards so we don't make copy/paste difficult
+	for (int i = 0; i < msgSize; ++i)
+	{
+		int index = bufStart + i;
+		if (index >= obj->originalbuf->size()) break;
+		byte item = obj->originalbuf->at(index);
+
+		if (item >= ' ' && item <= '~')
+			hexdump << (char)item;
+		else
+			hexdump << '.';//replace unprintable with dots
+
+		if ((i + 1) % UIhexPacketsPerRow == 0)
+		{
+			hexdump << " " << std::endl;
+		}
+	}
+	hexdump << "\n" << std::endl << std::nouppercase;
+
 	
 	std::wstring hexdumpstring = hexdump.str();
 	ui.decodedText->insertPlainText(QString::fromStdWString(hexdumpstring));

@@ -48,7 +48,7 @@ normal workflow and appends it to the remaining decrypted buffer so the decoder 
  Unfortunately if the decoding is bad and we interpret a large number as a length field
  then decoding will hang as this keeps getting called to fill the requested data requirement
 */
-void packet_processor::continue_gamebuffer_next_packet()
+void packet_processor::continue_buffer_next_packet()
 {
 	std::vector<byte> pkt;
 	int attemptsCount = 0;
@@ -59,7 +59,7 @@ void packet_processor::continue_gamebuffer_next_packet()
 
 	while (true)
 	{
-		checkPipe(gamepipe, &pendingPktQueue);
+		checkPipe(streamObj->pipe, &pendingPktQueue);
 
 		for (auto it = pendingPktQueue.begin(); it != pendingPktQueue.end(); it++)
 		{
@@ -84,12 +84,12 @@ void packet_processor::continue_gamebuffer_next_packet()
 
 				if (isIncoming)
 				{
-					streamObj->fromGameSalsa.ProcessData(decryptedBuffer->data()+originalSize,
+					streamObj->recvSalsa.ProcessData(decryptedBuffer->data()+originalSize,
 						data, dataLen);
 				}
 				else
 				{
-					streamObj->toGameSalsa.ProcessData(decryptedBuffer->data() + originalSize,
+					streamObj->sendSalsa.ProcessData(decryptedBuffer->data() + originalSize,
 						data, dataLen);
 				}
 
@@ -120,7 +120,7 @@ UINT8 packet_processor::consume_Byte()
 	while (remainingDecrypted < 1)
 	{
 		if (errorFlag != eDecodingErr::eNoErr) return 0;
-		continue_gamebuffer_next_packet();
+		continue_buffer_next_packet();
 	}
 
 	if (decryptedIndex >= decryptedBuffer->size()) {
@@ -142,7 +142,7 @@ UINT16 packet_processor::consume_WORD()
 	while (remainingDecrypted < 2)
 	{
 		if (errorFlag != eDecodingErr::eNoErr) return 0;
-		continue_gamebuffer_next_packet();
+		continue_buffer_next_packet();
 	}
 
 	if (decryptedIndex >= decryptedBuffer->size()-1) {
@@ -164,7 +164,7 @@ UINT32 packet_processor::consume_DWORD()
 	while (remainingDecrypted < 4)
 	{
 		if (errorFlag != eDecodingErr::eNoErr) return 0;
-		continue_gamebuffer_next_packet();
+		continue_buffer_next_packet();
 	}
 
 	if (decryptedIndex >= decryptedBuffer->size()-3) {
@@ -186,7 +186,7 @@ UINT64 packet_processor::consume_QWORD()
 	while (remainingDecrypted < 8)
 	{
 		if (errorFlag != eDecodingErr::eNoErr) return 0;
-		continue_gamebuffer_next_packet();
+		continue_buffer_next_packet();
 	}
 	if (decryptedIndex >= decryptedBuffer->size()-8) {
 		errorFlag = eDecodingErr::eErrUnderflow;
@@ -211,7 +211,7 @@ void packet_processor::consume_blob(ushort byteCount)
 	while (remainingDecrypted < byteCount)
 	{
 		if (errorFlag != eDecodingErr::eNoErr) return;
-		continue_gamebuffer_next_packet();
+		continue_buffer_next_packet();
 	}
 
 	decryptedIndex += byteCount;
@@ -235,7 +235,7 @@ void packet_processor::consume_blob(ushort requiredBytes, vector <byte>& blobBuf
 	while (remainingDecrypted < requiredBytes)
 	{
 		if (errorFlag != eDecodingErr::eNoErr) return;
-		continue_gamebuffer_next_packet();
+		continue_buffer_next_packet();
 	}
 
 	blobBuf = vector<byte>(decryptedBuffer->data() + decryptedIndex,
@@ -255,7 +255,7 @@ std::wstring packet_processor::consumeWString(size_t bytesLength)
 
 	while (remainingDecrypted < bytesLength)
 	{
-		if (bytesLength > 0xff)
+		if (bytesLength > 500)
 		{
 			std::stringstream err;
 			err << "Warning! Long string " << bytesLength << " possible bad byte order" << std::endl;
@@ -264,7 +264,7 @@ std::wstring packet_processor::consumeWString(size_t bytesLength)
 		}
 
 		if (errorFlag != eDecodingErr::eNoErr) return 0;
-		continue_gamebuffer_next_packet();
+		continue_buffer_next_packet();
 	}
 
 	std::string msgmb(decryptedBuffer->data() + decryptedIndex,
@@ -287,10 +287,17 @@ void packet_processor::consume_add_lenprefix_string(std::wstring name, WValue& c
 	WValue nameItem(name.c_str(), allocator);
 
 	ushort stringlen = ntohs(consume_WORD());
-	std::wstring stringval = consumeWString(stringlen * 2);
-	WValue stringItem(stringval.c_str(), allocator);
-
-	container.AddMember(nameItem, stringItem, allocator);
+	if (stringlen > 0)
+	{
+		std::wstring stringval = consumeWString(stringlen * 2);
+		WValue stringItem(stringval.c_str(), allocator);
+		container.AddMember(nameItem, stringItem, allocator);
+	}
+	else
+	{
+		container.AddMember(nameItem, L"", allocator);
+	}
+	
 }
 
 //rewind time to before we read 'countBytes' bytes

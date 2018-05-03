@@ -52,8 +52,8 @@ void packet_processor::init_gamePkt_deserialisers()
 	//2d
 	gamePktDeserialisers[CLI_SET_HOTBARSKILL] = (deserialiser)&packet_processor::deserialise_CLI_SET_HOTBARSKILL;
 	gamePktDeserialisers[SRV_SKILL_SLOTS_LIST] = (deserialiser)&packet_processor::deserialise_SRV_SKILL_SLOTS_LIST;
-	//30
-	//31
+	gamePktDeserialisers[CLI_REVIVE_CHOICE] = (deserialiser)&packet_processor::deserialise_CLI_REVIVE_CHOICE;
+	gamePktDeserialisers[SRV_YOU_DIED] = (deserialiser)&packet_processor::deserialise_SRV_YOU_DIED;
 	//32
 	//33
 	//34
@@ -215,7 +215,7 @@ void packet_processor::init_gamePkt_deserialisers()
 	//d2
 	//d3
 	//d4
-	gamePktDeserialisers[SRV_UNK_0xD5] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xD5;
+	gamePktDeserialisers[SRV_EVENTSLIST_2] = (deserialiser)&packet_processor::deserialise_SRV_EVENTSLIST_2;
 	//d6
 	//d7
 	gamePktDeserialisers[CLI_USED_SKILL] = (deserialiser)&packet_processor::deserialise_CLI_USED_SKILL;
@@ -998,7 +998,16 @@ void packet_processor::deserialise_SRV_SKILL_SLOTS_LIST(UIDecodedPkt *uipkt)
 	}
 }
 
+void packet_processor::deserialise_CLI_REVIVE_CHOICE(UIDecodedPkt *uipkt)
+{
+	consume_add_byte(L"Choice", uipkt);
+}
 
+void packet_processor::deserialise_SRV_YOU_DIED(UIDecodedPkt *uipkt)
+{
+	consume_add_byte(L"ChoiceBits", uipkt);
+	consume_add_dword(L"Unk", uipkt);
+}
 
 void packet_processor::deserialise_CLI_USE_BELT_SLOT(UIDecodedPkt *uipkt)
 {
@@ -1368,6 +1377,7 @@ void packet_processor::deserialise_SRV_PVP_MATCHLIST(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_SRV_EVENTSLIST(UIDecodedPkt *uipkt)
 {
+	std::cout << "steevel" <<std::endl;
 	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
 
 	ushort count = ntohs(consume_WORD());
@@ -1464,8 +1474,6 @@ void packet_processor::deserialise_SRV_UNK_0xCA(UIDecodedPkt *uipkt)
 	consume_add_word(L"UnkWord1", uipkt);
 	consume_add_byte(L"UnkByte2", uipkt);
 
-
-
 	byte listSize = consume_Byte();
 	for (int i = 0; i < listSize; i++)
 	{
@@ -1484,15 +1492,37 @@ void packet_processor::deserialise_SRV_UNK_0xCA(UIDecodedPkt *uipkt)
 	uipkt->payload.AddMember(L"ItemArray", itemArray, allocator);
 }
 
-void packet_processor::deserialise_SRV_UNK_0xD5(UIDecodedPkt *uipkt)
-{
 
-	DWORD sizeCount = consume_DWORD();
-	
-	uipkt->add_dword(L"SizeCount", sizeCount);
-	if (sizeCount != 0)
-		abandon_processing();
+void packet_processor::deserialise_SRV_EVENTSLIST_2(UIDecodedPkt *uipkt)
+{
+	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+
+	uint count = ntohl(consume_DWORD());
+
+	std::cout << "steevel loading " << std::dec << count  << std::endl;
+	WValue eventArray(rapidjson::kArrayType);
+	for (int i = 0; i < count; i++)
+	{
+		std::cout << "processing entry " << std::dec << i << std::endl;
+		WValue eventObj(rapidjson::kObjectType);
+
+
+		consume_add_lenprefix_string(L"Name", eventObj, allocator);
+		consume_add_lenprefix_string(L"Label1", eventObj, allocator);
+		consume_add_lenprefix_string(L"Label2", eventObj, allocator);
+
+		eventObj.AddMember(L"StartTime", consume_QWORD(), allocator);
+		eventObj.AddMember(L"RegisterTime", consume_QWORD(), allocator);
+		eventObj.AddMember(L"Unk5_64", consume_QWORD(), allocator);
+		eventObj.AddMember(L"Unk6", consume_DWORD(), allocator);
+		eventObj.AddMember(L"Unk7", consume_Byte(), allocator);
+
+		eventArray.PushBack(eventObj, allocator);
+	}
+
+	uipkt->payload.AddMember(L"EventList", eventArray, allocator);
 }
+
 
 void packet_processor::deserialise_CLI_USED_SKILL(UIDecodedPkt *uipkt)
 {

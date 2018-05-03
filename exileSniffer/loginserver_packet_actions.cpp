@@ -371,16 +371,37 @@ void exileSniffer::action_LOGIN_CLI_REQUEST_RACE_DATA(UIDecodedPkt& obj, QString
 void exileSniffer::action_LOGIN_SRV_LEAGUE_LIST(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
+
+	auto evntIt = obj.payload.FindMember(L"EventList");
+	WValue &blobList = evntIt->value;
+	unsigned short blobListSize = blobList.Size();
+
 	if (!analysis)
 	{
 		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "League list";
+		listentry.summary = "League list with "+QString::number(blobListSize)+" entries";
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
 
-	//wstringstream analysisStream;
-	//*analysis = QString::fromStdWString(analysisStream.str());
+	wstringstream analysisStream;
+
+	for (auto it = blobList.Begin(); it != blobList.End(); it++)
+	{
+		analysisStream << "Name: " << it->FindMember(L"Name")->value.GetString() << std::endl;
+		analysisStream << "Label1: " << it->FindMember(L"Label1")->value.GetString() << std::endl;
+		analysisStream << "Label2: " << it->FindMember(L"Label2")->value.GetString() << std::endl;
+
+		analysisStream << "StartTime: " << it->FindMember(L"StartTime")->value.GetUint64() << std::endl;
+		analysisStream << "RegisterTime: " << it->FindMember(L"RegisterTime")->value.GetUint64() << std::endl;
+		analysisStream << "Time3: " << it->FindMember(L"Unk5_64")->value.GetUint64() << std::endl;
+		analysisStream << "x7: " << it->FindMember(L"Unk6")->value.GetUint() << std::endl;
+		analysisStream << "x8: " << it->FindMember(L"Unk7")->value.GetUint() << std::endl;
+
+		analysisStream << std::endl;
+	}
+
+	*analysis = QString::fromStdWString(analysisStream.str());
 }
 
 void exileSniffer::action_LOGIN_CLI_REQUEST_LEAGUES(UIDecodedPkt& obj, QString *analysis)

@@ -109,6 +109,9 @@ class exileSniffer : public QMainWindow
 		void setStateNotDecrypting(); 
 		void action_ended_stream(int streamID);
 		void handle_stream_event(UI_STREAMEVENT_MSG *streamNote);
+		void handle_client_event(UI_CLIENTEVENT_MSG *cliEvtMsg, bool isRunning);
+		void output_hex_to_file(UI_RAWHEX_PKT *pkt, std::ofstream& file);
+		void output_hex_to_pane(UI_RAWHEX_PKT *pkt);
 
 		void init_gamePkt_Actioners();
 		void init_loginPkt_Actioners();
@@ -128,11 +131,9 @@ class exileSniffer : public QMainWindow
 		clientHexData * get_clientdata(DWORD pid);
 		void reprintRawHex();
 		void insertRawText(std::string hexdump, std::string asciidump);
-		void print_raw_packet(UI_RAWHEX_PKT *pkt);
 		void addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPkt *obj, bool isNewEntry = true);
 		void setRowColor(int row, QColor colour);
 
-		bool packet_passes_raw_filter(UI_RAWHEX_PKT *pkt);
 		bool packet_passes_decoded_filter(ushort msgID);
 		void updateRawFilterLabel();
 		void updateDecodedFilterLabel();
@@ -189,7 +190,9 @@ class exileSniffer : public QMainWindow
 		void action_CLI_UNK_0x2c(UIDecodedPkt&, QString*);
 		void action_CLI_SET_HOTBARSKILL(UIDecodedPkt&, QString*);
 		void action_SRV_SKILL_SLOTS_LIST(UIDecodedPkt&, QString*);
-		
+		void action_CLI_REVIVE_CHOICE(UIDecodedPkt&, QString*);
+		void action_SRV_YOU_DIED(UIDecodedPkt&, QString*);
+
 		void action_CLI_USE_BELT_SLOT(UIDecodedPkt&, QString*);
 		void action_CLI_USE_ITEM(UIDecodedPkt&, QString*);
 		void action_CLI_UNK_0x41(UIDecodedPkt&, QString*);
@@ -252,7 +255,7 @@ class exileSniffer : public QMainWindow
 
 		void action_SRV_UNK_0xCA(UIDecodedPkt&, QString*);
 
-		void action_SRV_UNK_0xD5(UIDecodedPkt&, QString*);
+		void action_SRV_EVENTSLIST_2(UIDecodedPkt&, QString*);
 
 		void action_CLI_USED_SKILL(UIDecodedPkt&, QString*);
 

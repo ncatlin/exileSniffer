@@ -272,7 +272,7 @@ void filterForm::populateFiltersList()
 	//d2
 	//d3
 	//d4
-	add_filter_category(SRV_UNK_0xD5, "Unknown", ePktDirection::incoming);
+	add_filter_category(SRV_EVENTSLIST, "Unknown", ePktDirection::incoming);
 	//d6
 	//d7
 	add_filter_category(CLI_USED_SKILL, "Player used skill (lockstep)", ePktDirection::outgoing);

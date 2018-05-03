@@ -111,7 +111,6 @@ public:
     QFrame *frame;
     QHBoxLayout *horizontalLayout;
     QLabel *filterLabel;
-    QPushButton *filtersBtn;
     QWidget *metaLogTab;
     QGridLayout *gridLayout_2;
     QPlainTextEdit *metaLog;
@@ -565,12 +564,6 @@ public:
 
         horizontalLayout->addWidget(filterLabel);
 
-        filtersBtn = new QPushButton(frame);
-        filtersBtn->setObjectName(QStringLiteral("filtersBtn"));
-        filtersBtn->setMaximumSize(QSize(84, 16777215));
-
-        horizontalLayout->addWidget(filtersBtn);
-
 
         rawControls->addWidget(frame);
 
@@ -675,7 +668,6 @@ public:
         exileSniffer->setStatusBar(statusBar);
 
         retranslateUi(exileSniffer);
-        QObject::connect(decodedFiltersBtn, SIGNAL(clicked()), exileSniffer, SLOT(showRawFiltersDLG()));
         QObject::connect(bytesRowCombo, SIGNAL(activated(QString)), exileSniffer, SLOT(rawBytesRowChanged(QString)));
         QObject::connect(rawLinewrapCheck, SIGNAL(toggled(bool)), exileSniffer, SLOT(toggleRawLineWrap(bool)));
         QObject::connect(rawAutoScrollCheck, SIGNAL(toggled(bool)), exileSniffer, SLOT(toggleRawAutoScroll(bool)));
@@ -685,7 +677,7 @@ public:
         QObject::connect(stopDecryptBtn, SIGNAL(clicked()), exileSniffer, SLOT(stopDecrypting()));
         QObject::connect(settingsChoiceList, SIGNAL(itemSelectionChanged()), exileSniffer, SLOT(settingsSelectionChanged()));
 
-        processTabs->setCurrentIndex(4);
+        processTabs->setCurrentIndex(2);
         decrypt_details_stack->setCurrentIndex(1);
         settingsChoiceList->setCurrentRow(0);
         settingsStack->setCurrentIndex(0);
@@ -744,7 +736,6 @@ public:
         rawLinewrapCheck->setText(QApplication::translate("exileSniffer", "Line Wrap", Q_NULLPTR));
         rawAutoScrollCheck->setText(QApplication::translate("exileSniffer", "AutoScroll", Q_NULLPTR));
         filterLabel->setText(QApplication::translate("exileSniffer", "0 Packets Captured", Q_NULLPTR));
-        filtersBtn->setText(QApplication::translate("exileSniffer", "Filters", Q_NULLPTR));
         processTabs->setTabText(processTabs->indexOf(rawDecryptTab), QApplication::translate("exileSniffer", "Raw Plaintext", Q_NULLPTR));
         processTabs->setTabText(processTabs->indexOf(metaLogTab), QApplication::translate("exileSniffer", "Log", Q_NULLPTR));
 

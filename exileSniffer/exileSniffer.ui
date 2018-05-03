@@ -21,7 +21,7 @@
        <enum>QTabWidget::North</enum>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="interceptionTab">
        <attribute name="title">
@@ -778,19 +778,6 @@ p, li { white-space: pre-wrap; }
                </property>
               </widget>
              </item>
-             <item>
-              <widget class="QPushButton" name="filtersBtn">
-               <property name="maximumSize">
-                <size>
-                 <width>84</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Filters</string>
-               </property>
-              </widget>
-             </item>
             </layout>
            </widget>
           </item>
@@ -932,22 +919,6 @@ p, li { white-space: pre-wrap; }
   <include location="exileSniffer.qrc"/>
  </resources>
  <connections>
-  <connection>
-   <sender>decodedFiltersBtn</sender>
-   <signal>clicked()</signal>
-   <receiver>exileSniffer</receiver>
-   <slot>showRawFiltersDLG()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>129</x>
-     <y>99</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>413</x>
-     <y>336</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>bytesRowCombo</sender>
    <signal>activated(QString)</signal>
