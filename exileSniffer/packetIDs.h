@@ -56,9 +56,9 @@
 //29
 //2a
 #define CLI_CANCEL_BUF 0x2b
-#define CLI_UNK_0x2c 0x2c
-//2d
-#define CLI_SET_HOTBARSKILL 0x2e
+#define CLI_UNK_0x2c (CLI_CANCEL_BUF + 1)
+#define CLI_SELECT_MAPTRAVEL (CLI_UNK_0x2c + 1)
+#define CLI_SET_HOTBARSKILL (CLI_SELECT_MAPTRAVEL +1)
 #define SRV_SKILL_SLOTS_LIST (CLI_SET_HOTBARSKILL+1)
 #define CLI_REVIVE_CHOICE (SRV_SKILL_SLOTS_LIST+1)
 #define SRV_YOU_DIED (CLI_REVIVE_CHOICE+1) //thats dark souls
@@ -129,8 +129,8 @@ S->C UnkPkID: 0xef size: 23 bytes
 //69
 //6a
 //6b
-//6c
-#define SRV_CREATE_ITEM 0x6d
+#define SRV_UNK_0x6c 0x6c
+#define SRV_CREATE_ITEM (SRV_UNK_0x6c +1)
 #define SRV_SLOT_ITEMSLIST (SRV_CREATE_ITEM+1)
 //6f
 #define UNK_MESSAGE_0x70 0x70
@@ -238,7 +238,7 @@ S->C UnkPkID: 0xef size: 23 bytes
 #define CLI_USED_SKILL 0xd8
 #define CLI_CLICK_OBJ (CLI_USED_SKILL+1) //0xd9
 #define CLI_MOUSE_HELD (CLI_CLICK_OBJ+1) //0xda
-//db
+//db  //seen before going afk?
 #define CLI_MOUSE_RELEASE 0xdc
 //dd
 //de
@@ -264,10 +264,10 @@ S->C UnkPkID: 0xef size: 23 bytes
 #define SRV_UNK_0xf2 0xf2
 #define SRV_UNK_0xf3 0xf3
 //f4
-//f5
+#define SRV_UNK_0xf5 0xf5
 //f6
-//f7
-//f8
+#define SRV_UNK_0xf7 0xf7
+#define SRV_UNK_0xf8 0xf8
 //f9
 #define SRV_START_EFFECT 0xfa
 #define SRV_END_EFFECT 0xfb
@@ -281,9 +281,9 @@ S->C UnkPkID: 0xef size: 23 bytes
 //103
 //104
 //105
-//106
+#define SRV_UNKNOWN_0x106 0x106
 //107
-//108
+#define SRV_UNKNOWN_0x108 0x108
 //109
 //10a
 //10b

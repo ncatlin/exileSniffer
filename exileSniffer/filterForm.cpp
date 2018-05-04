@@ -730,12 +730,12 @@ void filterForm::showPresetContextMenu(const QPoint& pos)
 	QMenu contextMenu(tr("Context menu"), this);
 
 	QAction action1("Load", this);
-	connect(&action1, SIGNAL(triggered()), this, SLOT(activatePresetList()));
+	connect(&action1, SIGNAL(triggered()), this, SLOT(activatePresetListClicked()));
 	contextMenu.addAction(&action1);
 
 	//doesnt appear if nested in the if statements?
 	QAction action2("Delete", this);
-	connect(&action2, SIGNAL(triggered()), this, SLOT(deletePreset()));
+	connect(&action2, SIGNAL(&QAction::triggered()), this, SLOT(deletePreset()));
 
 	QTreeWidgetItem *selectedItem = ui->presetsTree->selectedItems().front();
 	if (selectedItem)

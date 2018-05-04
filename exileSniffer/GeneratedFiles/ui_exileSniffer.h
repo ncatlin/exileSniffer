@@ -676,8 +676,9 @@ public:
         QObject::connect(decodedListTable, SIGNAL(customContextMenuRequested(QPoint)), exileSniffer, SLOT(decodedTableMenuRequest(QPoint)));
         QObject::connect(stopDecryptBtn, SIGNAL(clicked()), exileSniffer, SLOT(stopDecrypting()));
         QObject::connect(settingsChoiceList, SIGNAL(itemSelectionChanged()), exileSniffer, SLOT(settingsSelectionChanged()));
+        QObject::connect(decodedFiltersBtn, SIGNAL(clicked()), exileSniffer, SLOT(showRawFiltersDLG()));
 
-        processTabs->setCurrentIndex(2);
+        processTabs->setCurrentIndex(1);
         decrypt_details_stack->setCurrentIndex(1);
         settingsChoiceList->setCurrentRow(0);
         settingsStack->setCurrentIndex(0);

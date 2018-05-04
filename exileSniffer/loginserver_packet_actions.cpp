@@ -386,20 +386,7 @@ void exileSniffer::action_LOGIN_SRV_LEAGUE_LIST(UIDecodedPkt& obj, QString *anal
 
 	wstringstream analysisStream;
 
-	for (auto it = blobList.Begin(); it != blobList.End(); it++)
-	{
-		analysisStream << "Name: " << it->FindMember(L"Name")->value.GetString() << std::endl;
-		analysisStream << "Label1: " << it->FindMember(L"Label1")->value.GetString() << std::endl;
-		analysisStream << "Label2: " << it->FindMember(L"Label2")->value.GetString() << std::endl;
-
-		analysisStream << "StartTime: " << it->FindMember(L"StartTime")->value.GetUint64() << std::endl;
-		analysisStream << "RegisterTime: " << it->FindMember(L"RegisterTime")->value.GetUint64() << std::endl;
-		analysisStream << "Time3: " << it->FindMember(L"Unk5_64")->value.GetUint64() << std::endl;
-		analysisStream << "x7: " << it->FindMember(L"Unk6")->value.GetUint() << std::endl;
-		analysisStream << "x8: " << it->FindMember(L"Unk7")->value.GetUint() << std::endl;
-
-		analysisStream << std::endl;
-	}
+	analysisStream << stringify_eventslist_2(blobList).toStdWString() << std::endl;
 
 	*analysis = QString::fromStdWString(analysisStream.str());
 }

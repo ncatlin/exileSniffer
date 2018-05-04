@@ -492,7 +492,7 @@ bool packet_processor::sanityCheckPacketID(unsigned short pktID)
 }
 
 
-void packet_processor::deserialise_packets_from_decrypted(streamType streamServer, byte isIncoming, long long timeSeen)
+void packet_processor::deserialise_packets_from_decrypted(streamType streamServer, byte directionBit, long long timeSeen)
 {
 	unsigned int dataLen = remainingDecrypted;
 	while (remainingDecrypted > 0)
@@ -500,7 +500,7 @@ void packet_processor::deserialise_packets_from_decrypted(streamType streamServe
 		unsigned short pktIDWord = ntohs(consume_WORD());
 		DWORD sourceProcess = currentStreamObj->workingSendKey->sourceProcess;
 		UIDecodedPkt *ui_decodedpkt = new UIDecodedPkt(sourceProcess,	
-			streamServer, currentMsgStreamID, isIncoming, timeSeen);
+			streamServer, currentMsgStreamID, directionBit, timeSeen);
 
 		deserialisedPkts.push_back(ui_decodedpkt);
 		ui_decodedpkt->setStartOffset(decryptedIndex - 2);
@@ -658,7 +658,7 @@ void packet_processor::handle_packet_to_gameserver(byte* data, unsigned int data
 	decryptedIndex = 0;
 	errorFlag = eNoErr;
 
-	deserialise_packets_from_decrypted(eGame, false, timems);
+	deserialise_packets_from_decrypted(eGame, PKTBIT_OUTBOUND, timems);
 
 }
 

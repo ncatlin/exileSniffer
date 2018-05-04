@@ -107,6 +107,7 @@ private:
 
 	void deserialise_CLI_CANCEL_BUF(UIDecodedPkt *);
 	void deserialise_CLI_UNK_0x2c(UIDecodedPkt *);
+	void deserialise_CLI_SELECT_MAPTRAVEL(UIDecodedPkt *);
 	void deserialise_CLI_SET_HOTBARSKILL(UIDecodedPkt *);
 	void deserialise_SRV_SKILL_SLOTS_LIST(UIDecodedPkt *);
 	void deserialise_CLI_REVIVE_CHOICE(UIDecodedPkt*);
@@ -132,12 +133,13 @@ private:
 	void deserialise_SRV_FRIENDSLIST(UIDecodedPkt *);
 
 	void deserialise_SRV_PARTY_DETAILS(UIDecodedPkt *);
-	void deserialise_SRV_PARTY_ENDED(UIDecodedPkt *uipkt);
+	void deserialise_SRV_PARTY_ENDED(UIDecodedPkt *);
 	void deserialise_CLI_REQUEST_PUBLICPARTIES(UIDecodedPkt *);
 	void deserialise_SRV_PUBLIC_PARTY_LIST(UIDecodedPkt *);
 
 	void deserialise_CLI_MOVE_ITEM_PANE(UIDecodedPkt *);
 
+	void deserialise_SRV_UNK_0x6c(UIDecodedPkt *);
 	void deserialise_SRV_CREATE_ITEM(UIDecodedPkt *);
 	void deserialise_SRV_SLOT_ITEMSLIST(UIDecodedPkt *);
 	void deserialise_UNK_MESSAGE_0x70(UIDecodedPkt *);
@@ -197,24 +199,34 @@ private:
 	void deserialise_SRV_STAT_CHANGED(UIDecodedPkt *);
 	void deserialise_SRV_UNK_0xf2(UIDecodedPkt *);
 	void deserialise_SRV_UNK_0xf3(UIDecodedPkt *);
+
+	void deserialise_SRV_UNK_0xf5(UIDecodedPkt *);
+
+	void deserialise_SRV_UNK_0xf7(UIDecodedPkt *);
+	void deserialise_SRV_UNK_0xf8(UIDecodedPkt *);
+
 	void deserialise_SRV_START_EFFECT(UIDecodedPkt *);
 	void deserialise_SRV_END_EFFECT(UIDecodedPkt *);
+
+	void deserialise_SRV_UNKNOWN_0x106(UIDecodedPkt *);
+
+	void deserialise_SRV_UNKNOWN_0x108(UIDecodedPkt *);
 
 	void deserialise_CLI_REQUEST_PLAYERID(UIDecodedPkt *);
 	void deserialise_SRV_NOTIFY_PLAYERID(UIDecodedPkt *);
 	void deserialise_SRV_UNKNOWN_0x111(UIDecodedPkt *);
 	void deserialise_SRV_UNKNOWN_0x118(UIDecodedPkt *);
 	void deserialise_CLI_OPTOUT_TUTORIALS(UIDecodedPkt *); 
-	void deserialise_SRV_SHOW_ENTERING_MSG(UIDecodedPkt *uipkt);
-	void deserialise_SRV_HEARTBEAT(UIDecodedPkt *uipkt);
-	void deserialise_SRV_ADD_OBJECT(UIDecodedPkt *uipkt);
+	void deserialise_SRV_SHOW_ENTERING_MSG(UIDecodedPkt *);
+	void deserialise_SRV_HEARTBEAT(UIDecodedPkt *);
+	void deserialise_SRV_ADD_OBJECT(UIDecodedPkt *);
 
 	void SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t objBlobDataLen);
 
 	void deserialise_SRV_UPDATE_OBJECT(UIDecodedPkt *uipkt);
 	void deserialise_SRV_IDNOTIFY_0x137(UIDecodedPkt *uipkt);
 	
-	void deserialise_packets_from_decrypted(streamType, byte isIncoming, long long timeSeen);
+	void deserialise_packets_from_decrypted(streamType, byte directionBit, long long timeSeen);
 
 	UINT8 consume_Byte();   
 	UINT16 consume_WORD();  
