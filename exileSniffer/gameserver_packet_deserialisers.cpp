@@ -49,7 +49,7 @@ void packet_processor::init_gamePkt_deserialisers()
 	//2a
 	gamePktDeserialisers[CLI_CANCEL_BUF] = (deserialiser)&packet_processor::deserialise_CLI_CANCEL_BUF;
 	gamePktDeserialisers[CLI_UNK_0x2c] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0x2c;
-	//2d
+	gamePktDeserialisers[CLI_SELECT_MAPTRAVEL] = (deserialiser)&packet_processor::deserialise_CLI_SELECT_MAPTRAVEL;
 	gamePktDeserialisers[CLI_SET_HOTBARSKILL] = (deserialiser)&packet_processor::deserialise_CLI_SET_HOTBARSKILL;
 	gamePktDeserialisers[SRV_SKILL_SLOTS_LIST] = (deserialiser)&packet_processor::deserialise_SRV_SKILL_SLOTS_LIST;
 	gamePktDeserialisers[CLI_REVIVE_CHOICE] = (deserialiser)&packet_processor::deserialise_CLI_REVIVE_CHOICE;
@@ -112,7 +112,7 @@ void packet_processor::init_gamePkt_deserialisers()
 	//69
 	//6a
 	//6b
-	//6c
+	gamePktDeserialisers[SRV_UNK_0x6c] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x6c;
 	gamePktDeserialisers[SRV_CREATE_ITEM] = (deserialiser)&packet_processor::deserialise_SRV_CREATE_ITEM;
 	gamePktDeserialisers[SRV_SLOT_ITEMSLIST] = (deserialiser)&packet_processor::deserialise_SRV_SLOT_ITEMSLIST;
 	//6f
@@ -247,10 +247,10 @@ void packet_processor::init_gamePkt_deserialisers()
 	gamePktDeserialisers[SRV_UNK_0xf2] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xf2;
 	gamePktDeserialisers[SRV_UNK_0xf3] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xf3;
 	//f4
-	//f5
+	gamePktDeserialisers[SRV_UNK_0xf5] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xf5;
 	//f6
-	//f7
-	//f8
+	gamePktDeserialisers[SRV_UNK_0xf7] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xf7;	
+	gamePktDeserialisers[SRV_UNK_0xf8] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xf8;
 	//f9
 	gamePktDeserialisers[SRV_START_EFFECT] = (deserialiser)&packet_processor::deserialise_SRV_START_EFFECT;
 	gamePktDeserialisers[SRV_END_EFFECT] = (deserialiser)&packet_processor::deserialise_SRV_END_EFFECT;
@@ -264,9 +264,9 @@ void packet_processor::init_gamePkt_deserialisers()
 	//103
 	//104
 	//105
-	//106
+	gamePktDeserialisers[SRV_UNKNOWN_0x106] = (deserialiser)&packet_processor::deserialise_SRV_UNKNOWN_0x106;
 	//107
-	//108
+	gamePktDeserialisers[SRV_UNKNOWN_0x108] = (deserialiser)&packet_processor::deserialise_SRV_UNKNOWN_0x108;
 	//109
 	//10a
 	//10b
@@ -982,6 +982,13 @@ void packet_processor::deserialise_CLI_UNK_0x2c(UIDecodedPkt *uipkt)
 
 }
 
+void packet_processor::deserialise_CLI_SELECT_MAPTRAVEL(UIDecodedPkt *uipkt)
+{
+	consume_add_dword_ntoh(L"AreaChosen", uipkt);
+	consume_add_dword_ntoh(L"Arg2", uipkt);
+	consume_add_byte(L"Arg3", uipkt);
+}
+
 void packet_processor::deserialise_CLI_SET_HOTBARSKILL(UIDecodedPkt *uipkt)
 {
 	consume_add_dword_ntoh(L"Slot", uipkt);
@@ -1245,6 +1252,28 @@ void packet_processor::deserialise_CLI_MOVE_ITEM_PANE(UIDecodedPkt *uipkt)
 	consume_add_byte(L"Row", uipkt);
 }
 
+void packet_processor::deserialise_SRV_UNK_0x6c(UIDecodedPkt *uipkt)
+{
+	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+
+	WValue entryArray(rapidjson::kArrayType);
+
+	consume_add_byte(L"Unk1", uipkt);
+	consume_add_byte(L"Unk2", uipkt);
+	consume_add_byte(L"Unk3", uipkt);
+
+	byte count = consume_Byte();
+	for(int i = 0; i < count; i++)
+	{
+		WValue entry(rapidjson::kObjectType);
+		consume_add_lenprefix_string(L"String", entry, allocator);
+		entry.AddMember(L"Byte", consume_Byte(), allocator);
+
+		entryArray.PushBack(entry, allocator);
+	}
+	uipkt->payload.AddMember(L"UnkList", entryArray, allocator);
+}
+
 void packet_processor::deserialise_SRV_CREATE_ITEM(UIDecodedPkt *uipkt)
 {
 	//routine outer
@@ -1499,13 +1528,10 @@ void packet_processor::deserialise_SRV_EVENTSLIST_2(UIDecodedPkt *uipkt)
 
 	uint count = ntohl(consume_DWORD());
 
-	std::cout << "steevel loading " << std::dec << count  << std::endl;
 	WValue eventArray(rapidjson::kArrayType);
 	for (int i = 0; i < count; i++)
 	{
-		std::cout << "processing entry " << std::dec << i << std::endl;
 		WValue eventObj(rapidjson::kObjectType);
-
 
 		consume_add_lenprefix_string(L"Name", eventObj, allocator);
 		consume_add_lenprefix_string(L"Label1", eventObj, allocator);
@@ -1546,7 +1572,7 @@ void packet_processor::deserialise_CLI_MOUSE_RELEASE(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_CLI_OPEN_WORLD_SCREEN(UIDecodedPkt *uipkt)
 {
-	abandon_processing();
+	//no data expected
 }
 
 void packet_processor::deserialise_SRV_CHAT_CHANNEL_ID(UIDecodedPkt *uipkt)
@@ -1626,17 +1652,11 @@ void packet_processor::deserialise_SRV_MOBILE_START_SKILL(UIDecodedPkt *uipkt)
 		uipkt->add_dword(L"TargID", consume_DWORD());
 	}
 
-	//shouldnt actually do this - the 8 (high bit) is a signal to read another byte. 
-	//will wreck things when we get coords that under- or over- flow
-	//worry when it happens
-	unsigned short startCoord1 = consume_WORD() - 0x8000;
-	uipkt->add_word(L"StartCoord1", startCoord1);
-	unsigned short startCoord2 = consume_WORD() - 0x8000;
-	uipkt->add_word(L"StartCoord2", startCoord2);
-	unsigned short targCoord1 = consume_WORD() - 0x8000;
-	uipkt->add_word(L"TargCoord1", targCoord1);
-	unsigned short targCoord2 = consume_WORD() - 0x8000;
-	uipkt->add_word(L"TargCoord2", targCoord2);
+	
+	uipkt->add_word(L"StartCoord1", customSizeByteGet_signed());
+	uipkt->add_word(L"StartCoord2", customSizeByteGet_signed());
+	uipkt->add_word(L"TargCoord1", customSizeByteGet_signed());
+	uipkt->add_word(L"TargCoord2", customSizeByteGet_signed());
 
 	consume_add_word_ntoh(L"SkillID", uipkt);
 	consume_add_word_ntoh(L"PkCount", uipkt); //0x1408EF03D
@@ -1673,18 +1693,19 @@ void packet_processor::deserialise_SRV_MOBILE_UNK_0xee(UIDecodedPkt *uipkt)
 	consume_add_byte(L"B2", uipkt);
 	consume_add_dword_ntoh(L"D1", uipkt);
 
-	ushort skillid = ntohs(consume_WORD());
-	uipkt->add_word(L"SkillID", skillid);  //skill id?
+	ushort skillid_n = consume_WORD();
+	uipkt->add_word(L"SkillID", ntohs(skillid_n));
 
 	ushort zerobyte = consume_Byte();
 	uipkt->add_byte(L"ZeroByte", zerobyte);
 
-	if (skillid & 0x400) //if XX4XX
+	if (skillid_n & 0x400)
 	{
 		ushort skillword2 = consume_WORD();
 		uipkt->add_word(L"SkillBit400", skillword2);
 	}
-	if (skillid >= 0x4000 && skillid < 0x8000)
+
+	if (skillid_n & 0x4000)
 	{
 		ushort skillbyte2 = consume_Byte();
 		uipkt->add_byte(L"SkillByte4k8k", skillbyte2);
@@ -1784,6 +1805,39 @@ void packet_processor::deserialise_SRV_UNK_0xf3(UIDecodedPkt *uipkt)
 
 }
 
+void packet_processor::deserialise_SRV_UNK_0xf5(UIDecodedPkt *uipkt)
+{
+	//10 b objid
+	consume_add_dword_ntoh(L"ID1", uipkt);
+	consume_add_dword_ntoh(L"ID2", uipkt);
+	consume_add_word_ntoh(L"ID3", uipkt);
+
+	consume_add_dword_ntoh(L"Arg1", uipkt);
+	consume_add_byte(L"Arg2", uipkt);
+}
+
+void packet_processor::deserialise_SRV_UNK_0xf7(UIDecodedPkt *uipkt)
+{
+	//10 b objid
+	consume_add_dword_ntoh(L"ID1", uipkt);
+	consume_add_dword_ntoh(L"ID2", uipkt);
+	consume_add_word_ntoh(L"ID3", uipkt);
+
+	consume_add_byte(L"Arg1", uipkt);
+	consume_add_byte(L"Arg2", uipkt);
+	consume_add_byte(L"Arg3", uipkt);
+}
+
+void packet_processor::deserialise_SRV_UNK_0xf8(UIDecodedPkt *uipkt)
+{
+	//10 b objid
+	consume_add_dword_ntoh(L"ID1", uipkt);
+	consume_add_dword_ntoh(L"ID2", uipkt);
+	consume_add_word_ntoh(L"ID3", uipkt);
+
+	consume_add_byte(L"Arg", uipkt);
+}
+
 void packet_processor::deserialise_SRV_START_EFFECT(UIDecodedPkt *uipkt)
 {
 	//10 b objid
@@ -1834,7 +1888,8 @@ void packet_processor::deserialise_SRV_START_EFFECT(UIDecodedPkt *uipkt)
 	//there is a list of dwords to get here too
 }
 
-void packet_processor::deserialise_SRV_END_EFFECT(UIDecodedPkt *uipkt) {
+void packet_processor::deserialise_SRV_END_EFFECT(UIDecodedPkt *uipkt) 
+{
 	//10 b objid
 	consume_add_dword_ntoh(L"ID1", uipkt);
 	consume_add_dword_ntoh(L"ID2", uipkt);
@@ -1843,6 +1898,32 @@ void packet_processor::deserialise_SRV_END_EFFECT(UIDecodedPkt *uipkt) {
 	consume_add_word_ntoh(L"BuffID", uipkt);
 }
 
+void packet_processor::deserialise_SRV_UNKNOWN_0x106(UIDecodedPkt *uipkt)
+{
+	//10 b objid
+	consume_add_dword_ntoh(L"ID1", uipkt);
+	consume_add_dword_ntoh(L"ID2", uipkt);
+	consume_add_word_ntoh(L"ID3", uipkt);
+
+	consume_add_word(L"Unk1", uipkt);
+	consume_add_word_ntoh(L"Unk2", uipkt);
+	consume_add_dword_ntoh(L"UnkDW1", uipkt);
+	consume_add_dword_ntoh(L"UnkDW2", uipkt);
+	consume_add_dword_ntoh(L"UnkDW3", uipkt);
+	consume_add_byte(L"Unk3", uipkt);
+}
+
+void packet_processor::deserialise_SRV_UNKNOWN_0x108(UIDecodedPkt *uipkt)
+{
+	//10 b objid
+	consume_add_dword_ntoh(L"ID1", uipkt);
+	consume_add_dword_ntoh(L"ID2", uipkt);
+	consume_add_word_ntoh(L"ID3", uipkt);
+
+	consume_add_dword_ntoh(L"UnkDW1", uipkt);
+	consume_add_byte(L"Unk2", uipkt);
+	consume_add_byte(L"Unk3", uipkt);
+}
 
 void packet_processor::deserialise_CLI_REQUEST_PLAYERID(UIDecodedPkt *)
 {
@@ -1911,7 +1992,7 @@ void packet_processor::deserialise_CLI_OPTOUT_TUTORIALS(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_SRV_SHOW_ENTERING_MSG(UIDecodedPkt *uipkt)
 {
-	UInotifyStreamState(currentMsgStreamID, eStreamEnded, uiMsgQueue);
+	UInotifyStreamState(currentMsgStreamID, eStreamTransition, uiMsgQueue);
 	consume_add_dword_ntoh(L"AreaCode", uipkt);
 }
 

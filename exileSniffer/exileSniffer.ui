@@ -21,7 +21,7 @@
        <enum>QTabWidget::North</enum>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="interceptionTab">
        <attribute name="title">
@@ -1040,6 +1040,22 @@ p, li { white-space: pre-wrap; }
     <hint type="sourcelabel">
      <x>119</x>
      <y>335</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>413</x>
+     <y>336</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>decodedFiltersBtn</sender>
+   <signal>clicked()</signal>
+   <receiver>exileSniffer</receiver>
+   <slot>showRawFiltersDLG()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>753</x>
+     <y>66</y>
     </hint>
     <hint type="destinationlabel">
      <x>413</x>

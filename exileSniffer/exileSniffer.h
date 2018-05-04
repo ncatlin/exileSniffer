@@ -139,6 +139,8 @@ class exileSniffer : public QMainWindow
 		void updateDecodedFilterLabel();
 
 		QString stringify_eventslist(WValue &eventlist);
+		QString stringify_eventslist_2(WValue &eventlist);
+		
 		
 	private:
 
@@ -188,6 +190,7 @@ class exileSniffer : public QMainWindow
 
 		void action_CLI_CANCEL_BUF(UIDecodedPkt&, QString*);
 		void action_CLI_UNK_0x2c(UIDecodedPkt&, QString*);
+		void action_CLI_SELECT_MAPTRAVEL(UIDecodedPkt&, QString*);
 		void action_CLI_SET_HOTBARSKILL(UIDecodedPkt&, QString*);
 		void action_SRV_SKILL_SLOTS_LIST(UIDecodedPkt&, QString*);
 		void action_CLI_REVIVE_CHOICE(UIDecodedPkt&, QString*);
@@ -219,6 +222,7 @@ class exileSniffer : public QMainWindow
 
 		void action_CLI_MOVE_ITEM_PANE(UIDecodedPkt&, QString*);
 
+		void action_SRV_UNK_0x6c(UIDecodedPkt&, QString*);
 		void action_SRV_CREATE_ITEM(UIDecodedPkt&, QString*);
 		void action_SRV_SLOT_ITEMSLIST(UIDecodedPkt&, QString*);
 		void action_UNK_MESSAGE_0x70(UIDecodedPkt&, QString*);
@@ -277,12 +281,24 @@ class exileSniffer : public QMainWindow
 		void action_SRV_STAT_CHANGED(UIDecodedPkt&, QString*);
 		void action_SRV_UNK_0xf2(UIDecodedPkt&, QString*);
 		void action_SRV_UNK_0xf3(UIDecodedPkt&, QString*);
+
+		void action_SRV_UNK_0xf5(UIDecodedPkt&, QString*);
+
+		void action_SRV_UNK_0xf7(UIDecodedPkt&, QString*);
+		void action_SRV_UNK_0xf8(UIDecodedPkt&, QString*);
+
 		void action_SRV_START_BUFF(UIDecodedPkt&, QString*);
 		void action_SRV_END_EFFECT(UIDecodedPkt&, QString*);
+
+		void action_SRV_UNK_0x106(UIDecodedPkt&, QString*); 
+		
+		void action_SRV_UNK_0x108(UIDecodedPkt&, QString*);
+
 		void action_CLI_REQUEST_PLAYERID(UIDecodedPkt&, QString *);
+		void action_SRV_NOTIFY_PLAYERID(UIDecodedPkt&, QString *);
+
 		void action_SRV_UNKNOWN_0x111(UIDecodedPkt&, QString*);
 		void action_SRV_UNKNOWN_0x118(UIDecodedPkt&, QString*);
-		void action_SRV_NOTIFY_PLAYERID(UIDecodedPkt&, QString *);
 		void action_CLI_OPTOUT_TUTORIALS(UIDecodedPkt&, QString*);
 		void action_SRV_SHOW_ENTERING_MSG(UIDecodedPkt&, QString*);
 		void action_SRV_HEARTBEAT(UIDecodedPkt&, QString*);
