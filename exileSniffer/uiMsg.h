@@ -36,7 +36,8 @@ public:
 	int totalScanning = 0;
 };
 
-enum eStreamState{ eStreamStarted, eStreamEnded, eStreamLoggingIn, eStreamTransition, eStreamFailed, eStreamDecrypting};
+enum eStreamState{ eStreamStarted, eStreamEnded, eStreamLoggingIn, eStreamTransitionGame, 
+	eStreamTransitionLogin, eStreamFailed, eStreamDecrypting};
 class UI_STREAMEVENT_MSG : public UI_MESSAGE
 {
 public:
@@ -152,16 +153,16 @@ private:
 
 Q_DECLARE_METATYPE(UIDecodedPkt *);
 
-void UIaddLogMsg(QString msg, DWORD clientPID, SafeQueue<UI_MESSAGE> *uiMsgQueue);
-void UIaddLogMsg(std::string msg, DWORD clientPID, SafeQueue<UI_MESSAGE> *uiMsgQueue);
-void UIaddLogMsg(const char* msg, DWORD clientPID, SafeQueue<UI_MESSAGE> *uiMsgQueue);
-void UIsniffingStarted(QString iface, SafeQueue<UI_MESSAGE> *uiMsgQueue);
+void UIaddLogMsg(QString msg, DWORD clientPID, SafeQueue<UI_MESSAGE *> *uiMsgQueue);
+void UIaddLogMsg(std::string msg, DWORD clientPID, SafeQueue<UI_MESSAGE *> *uiMsgQueue);
+void UIaddLogMsg(const char* msg, DWORD clientPID, SafeQueue<UI_MESSAGE *> *uiMsgQueue);
+void UIsniffingStarted(QString iface, SafeQueue<UI_MESSAGE *> *uiMsgQueue);
 void UInotifyClientRunning(DWORD clientPID, bool running, int activeClients, 
-	int scanningClients, SafeQueue<UI_MESSAGE> *uiMsgQueue);
-void UIrecordLogin(DWORD clientPID, SafeQueue<UI_MESSAGE> *uiMsgQueue);
-void UInotifyStreamState(int streamID, eStreamState state, SafeQueue<UI_MESSAGE> *uiMsgQueue);
-void UIdisplaySalsaKey(std::vector<byte> key, SafeQueue<UI_MESSAGE> *uiMsgQueue); 
-void UIUpdateSendIV(std::vector<byte> sendIV, SafeQueue<UI_MESSAGE> *uiMsgQueue);
-void UIUpdateRecvIV(std::vector<byte> recvIV, SafeQueue<UI_MESSAGE> *uiMsgQueue);
-void UIUpdateSendIter(std::vector<byte> sendIter, SafeQueue<UI_MESSAGE> *uiMsgQueue);
-void UIUpdateRecvIter(std::vector<byte> recvIter, SafeQueue<UI_MESSAGE> *uiMsgQueue);
+	int scanningClients, SafeQueue<UI_MESSAGE *> *uiMsgQueue);
+void UIrecordLogin(DWORD clientPID, SafeQueue<UI_MESSAGE *> *uiMsgQueue);
+void UInotifyStreamState(int streamID, eStreamState state, SafeQueue<UI_MESSAGE *> *uiMsgQueue);
+void UIdisplaySalsaKey(std::vector<byte> key, SafeQueue<UI_MESSAGE *> *uiMsgQueue); 
+void UIUpdateSendIV(std::vector<byte> sendIV, SafeQueue<UI_MESSAGE *> *uiMsgQueue);
+void UIUpdateRecvIV(std::vector<byte> recvIV, SafeQueue<UI_MESSAGE *> *uiMsgQueue);
+void UIUpdateSendIter(std::vector<byte> sendIter, SafeQueue<UI_MESSAGE *> *uiMsgQueue);
+void UIUpdateRecvIter(std::vector<byte> recvIter, SafeQueue<UI_MESSAGE *> *uiMsgQueue);

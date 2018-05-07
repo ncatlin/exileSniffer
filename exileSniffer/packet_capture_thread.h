@@ -19,11 +19,22 @@ struct STREAM_NETWORK_DATA {
 	int serverPort;
 };
 
+class GAMEPACKET {
+public:
+	bool incoming = false;
+	int streamID;
+	vector<byte> data;
+	long long time;
+};
+
+bool checkQueue(SafeQueue<GAMEPACKET > *q, std::deque< GAMEPACKET  > &pendingPktQueue);
+
+
 class packet_capture_thread :
 	public base_thread
 {
 public:
-	packet_capture_thread(SafeQueue<UI_MESSAGE>* uiq);
+	packet_capture_thread(SafeQueue<UI_MESSAGE *>* uiq, SafeQueue<GAMEPACKET > *gameP, SafeQueue<GAMEPACKET > *loginP);
 	~packet_capture_thread();
 	STREAM_NETWORK_DATA *get_stream_data(int streamID);
 
@@ -48,13 +59,10 @@ private:
 	CRITICAL_SECTION streamDataCritsec;
 	map<int, STREAM_NETWORK_DATA> streamRecords;
 
-	SafeQueue<UI_MESSAGE> *uiMsgQueue;
+	SafeQueue<UI_MESSAGE *> *uiMsgQueue;
+	SafeQueue<GAMEPACKET> *gameQueue, *loginQueue;
 
 	std::map<std::chrono::microseconds, networkStreamID> streamList;
 	int connectionCount = 0;
-
-	HANDLE patchPipe = 0;
-	HANDLE loginPipe = 0;
-	HANDLE gamePipe = 0;
 };
 

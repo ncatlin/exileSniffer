@@ -266,6 +266,7 @@ void key_grabber_thread::memoryScanWorker(GAMECLIENTINFO *gameClient)
 
 		void * memAddr = memRegion.first;
 		size_t regionSize = memRegion.second;
+		if (regionSize > (80 * 1024 * 1024)) continue;
 		if (regionSize > procesMemChunk.size())
 			procesMemChunk.resize(regionSize);
 
@@ -299,7 +300,7 @@ void key_grabber_thread::memoryScanWorker(GAMECLIENTINFO *gameClient)
 			DWORD lasterr = GetLastError();
 			if (lasterr != ERROR_PARTIAL_COPY)
 			{
-				UIaddLogMsg("ReadProcessMem err 0x" + QString::number(lasterr), processID, uiMsgQueue);
+				UIaddLogMsg("ReadProcessMem err " + QString::number(lasterr), processID, uiMsgQueue);
 			}
 		}
 	}

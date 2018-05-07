@@ -204,7 +204,7 @@ void exileSniffer::init_gamePkt_Actioners()
 	//bd
 	//be
 	//bf
-	gamePktActioners[CLI_PACKET_EXIT] = &exileSniffer::action_CLI_PACKET_EXIT;
+	gamePktActioners[CLI_EXIT_TO_CHARSCREEN] = &exileSniffer::action_CLI_EXIT_TO_CHARSCREEN;
 	gamePktActioners[SRV_LOGINSRV_CRYPT] = &exileSniffer::action_SRV_LOGINSRV_CRYPT;
 	gamePktActioners[CLI_DUEL_CHALLENGE] = &exileSniffer::action_CLI_DUEL_CHALLENGE;
 	gamePktActioners[SRV_DUEL_RESPONSE] = &exileSniffer::action_SRV_DUEL_RESPONSE;
@@ -399,9 +399,9 @@ void exileSniffer::addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPk
 		if (flags & PKTBIT_LOGINSERVER)
 		{
 			if (incoming)
-				setRowColor(rowIndex, QColor(255, 255, 200, 255));
-			else
 				setRowColor(rowIndex, QColor(255, 255, 230, 255));
+			else
+				setRowColor(rowIndex, QColor(255, 255, 200, 255));			
 		}
 		//else if (flags & PKTBIT_PATCHSERVER)
 		//	setRowColor(rowIndex, QColor(153, 217, 234, 255));
@@ -1312,10 +1312,14 @@ void exileSniffer::action_CLI_SELECT_MAPTRAVEL(UIDecodedPkt& obj, QString *analy
 void exileSniffer::action_CLI_SET_HOTBARSKILL(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
+
+	byte slot = obj.get_UInt32(L"Slot");
+	byte skillID = obj.get_UInt32(L"SkillID");
+
 	if (!analysis)
 	{
 		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player(You) changed a hotbar skill";
+		listentry.summary = "Set hotbar slot "+QString::number(slot)+" to 0x"+QString::number(skillID, 16);
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
@@ -1491,7 +1495,6 @@ void exileSniffer::action_SRV_SHOW_NPC_DIALOG(UIDecodedPkt& obj, QString *analys
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
-
 
 	std::wstringstream analysisStream;
 
@@ -2671,7 +2674,7 @@ void exileSniffer::action_SRV_UNK_0xE6(UIDecodedPkt& obj, QString *analysis)
 }
 
 
-void exileSniffer::action_CLI_PACKET_EXIT(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_CLI_EXIT_TO_CHARSCREEN(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 	if (!analysis)
@@ -2693,6 +2696,19 @@ void exileSniffer::action_SRV_LOGINSRV_CRYPT(UIDecodedPkt& obj, QString *analysi
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
+
+	std::wstringstream analysisStream;
+
+	analysisStream << "Unk1: 0x" << std::hex << obj.get_UInt32(L"Unk1") << std::endl;
+
+	analysisStream << "Data [byte][port][ip][zeros?]:" << std::endl;
+	WValue &bloblist = obj.payload.FindMember(L"BlobList")->value;
+	for (auto listit = bloblist.Begin(); listit != bloblist.End(); listit++)
+	{
+		analysisStream << listit->GetString() << std::endl;
+	}
+
+	*analysis = QString::fromStdWString(analysisStream.str());
 }
 
 void exileSniffer::action_CLI_DUEL_CHALLENGE(UIDecodedPkt& obj, QString *analysis)
@@ -2705,6 +2721,9 @@ void exileSniffer::action_CLI_DUEL_CHALLENGE(UIDecodedPkt& obj, QString *analysi
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
+
+	std::wstringstream analysisStream;
+	*analysis = QString::fromStdWString(analysisStream.str());
 }
 
 void exileSniffer::action_SRV_DUEL_RESPONSE(UIDecodedPkt& obj, QString *analysis)
@@ -2717,6 +2736,9 @@ void exileSniffer::action_SRV_DUEL_RESPONSE(UIDecodedPkt& obj, QString *analysis
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
+
+	std::wstringstream analysisStream;
+	*analysis = QString::fromStdWString(analysisStream.str());
 }
 
 void exileSniffer::action_SRV_DUEL_CHALLENGE(UIDecodedPkt& obj, QString *analysis)
@@ -2729,6 +2751,9 @@ void exileSniffer::action_SRV_DUEL_CHALLENGE(UIDecodedPkt& obj, QString *analysi
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
+
+	std::wstringstream analysisStream;
+	*analysis = QString::fromStdWString(analysisStream.str());
 }
 
 
@@ -2753,6 +2778,9 @@ void exileSniffer::action_SRV_OBJ_REMOVED(UIDecodedPkt& obj, QString *analysis)
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
+
+	std::wstringstream analysisStream;
+	*analysis = QString::fromStdWString(analysisStream.str());
 }
 
 void exileSniffer::action_SRV_MOBILE_START_SKILL(UIDecodedPkt& obj, QString *analysis)
@@ -2824,6 +2852,9 @@ void exileSniffer::action_SRV_MOBILE_START_SKILL(UIDecodedPkt& obj, QString *ana
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
+
+	std::wstringstream analysisStream;
+	*analysis = QString::fromStdWString(analysisStream.str());
 }
 
 void exileSniffer::action_SRV_MOBILE_FINISH_SKILL(UIDecodedPkt& obj, QString *analysis)
@@ -2843,6 +2874,8 @@ void exileSniffer::action_SRV_MOBILE_FINISH_SKILL(UIDecodedPkt& obj, QString *an
 		return;
 	}
 
+	std::wstringstream analysisStream;
+	*analysis = QString::fromStdWString(analysisStream.str());
 }
 
 void exileSniffer::action_SRV_MOBILE_UNK_0xee(UIDecodedPkt& obj, QString *analysis)

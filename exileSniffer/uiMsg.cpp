@@ -5,7 +5,7 @@
 #include "rapidjson\writer.h"
 
 
-void UIaddLogMsg(QString msg, DWORD clientPID, SafeQueue<UI_MESSAGE> *uiMsgQueue)
+void UIaddLogMsg(QString msg, DWORD clientPID, SafeQueue<UI_MESSAGE *> *uiMsgQueue)
 {
 	UI_METALOG_MSG *initmsg = new UI_METALOG_MSG;
 	initmsg->msgType = uiMsgType::eMetaLog;
@@ -14,17 +14,17 @@ void UIaddLogMsg(QString msg, DWORD clientPID, SafeQueue<UI_MESSAGE> *uiMsgQueue
 	uiMsgQueue->addItem(initmsg);
 }
 
-void UIaddLogMsg(std::string msg, DWORD clientPID, SafeQueue<UI_MESSAGE> *uiMsgQueue)
+void UIaddLogMsg(std::string msg, DWORD clientPID, SafeQueue<UI_MESSAGE *> *uiMsgQueue)
 {
 	UIaddLogMsg(QString::fromStdString(msg), clientPID, uiMsgQueue);
 }
 
-void UIaddLogMsg(const char* msg, DWORD clientPID, SafeQueue<UI_MESSAGE> *uiMsgQueue)
+void UIaddLogMsg(const char* msg, DWORD clientPID, SafeQueue<UI_MESSAGE *> *uiMsgQueue)
 {
 	UIaddLogMsg(QString(msg), clientPID, uiMsgQueue);
 }
 
-void UIrecordLogin(DWORD clientPID,  SafeQueue<UI_MESSAGE> *uiMsgQueue)
+void UIrecordLogin(DWORD clientPID,  SafeQueue<UI_MESSAGE *> *uiMsgQueue)
 {
 	UI_LOGIN_NOTE *loginmsg = new UI_LOGIN_NOTE;
 	loginmsg->msgType = uiMsgType::eLoginNote;
@@ -32,7 +32,7 @@ void UIrecordLogin(DWORD clientPID,  SafeQueue<UI_MESSAGE> *uiMsgQueue)
 	uiMsgQueue->addItem(loginmsg);
 }
 
-void UIsniffingStarted(QString iface, SafeQueue<UI_MESSAGE> *uiMsgQueue)
+void UIsniffingStarted(QString iface, SafeQueue<UI_MESSAGE *> *uiMsgQueue)
 {
 	UI_SNIFF_NOTE *sniffmsg = new UI_SNIFF_NOTE;
 	sniffmsg->msgType = uiMsgType::eSniffingStarted;
@@ -40,7 +40,7 @@ void UIsniffingStarted(QString iface, SafeQueue<UI_MESSAGE> *uiMsgQueue)
 	uiMsgQueue->addItem(sniffmsg);
 }
 
-void UInotifyClientRunning(DWORD clientPID, bool running, int activeClients, int scanningClients, SafeQueue<UI_MESSAGE> *uiMsgQueue)
+void UInotifyClientRunning(DWORD clientPID, bool running, int activeClients, int scanningClients, SafeQueue<UI_MESSAGE *> *uiMsgQueue)
 {
 	UI_CLIENTEVENT_MSG *initmsg = new UI_CLIENTEVENT_MSG;
 	initmsg->msgType = uiMsgType::eClientEvent;
@@ -51,7 +51,7 @@ void UInotifyClientRunning(DWORD clientPID, bool running, int activeClients, int
 	uiMsgQueue->addItem(initmsg);
 }
 
-void UInotifyStreamState(int streamID, eStreamState state, SafeQueue<UI_MESSAGE> *uiMsgQueue)
+void UInotifyStreamState(int streamID, eStreamState state, SafeQueue<UI_MESSAGE *> *uiMsgQueue)
 {
 	UI_STREAMEVENT_MSG *initmsg = new UI_STREAMEVENT_MSG;
 	initmsg->msgType = uiMsgType::eStreamEvent;
@@ -60,7 +60,7 @@ void UInotifyStreamState(int streamID, eStreamState state, SafeQueue<UI_MESSAGE>
 	uiMsgQueue->addItem(initmsg);
 }
 
-void UIdisplaySalsaKey(std::vector<byte> key, SafeQueue<UI_MESSAGE> *uiMsgQueue)
+void UIdisplaySalsaKey(std::vector<byte> key, SafeQueue<UI_MESSAGE *> *uiMsgQueue)
 {
 	UI_KEY *initmsg = new UI_KEY;
 	initmsg->msgType = uiMsgType::eKeyUpdate;
@@ -68,7 +68,7 @@ void UIdisplaySalsaKey(std::vector<byte> key, SafeQueue<UI_MESSAGE> *uiMsgQueue)
 	uiMsgQueue->addItem(initmsg);
 }
 
-void UIUpdateSendIV(std::vector<byte> sendIV, SafeQueue<UI_MESSAGE> *uiMsgQueue)
+void UIUpdateSendIV(std::vector<byte> sendIV, SafeQueue<UI_MESSAGE *> *uiMsgQueue)
 {
 	UI_IV *initmsg = new UI_IV;
 	initmsg->msgType = uiMsgType::eIVUpdate;
@@ -76,7 +76,7 @@ void UIUpdateSendIV(std::vector<byte> sendIV, SafeQueue<UI_MESSAGE> *uiMsgQueue)
 	uiMsgQueue->addItem(initmsg);
 }
 
-void UIUpdateRecvIV(std::vector<byte> recvIV, SafeQueue<UI_MESSAGE> *uiMsgQueue)
+void UIUpdateRecvIV(std::vector<byte> recvIV, SafeQueue<UI_MESSAGE *> *uiMsgQueue)
 {
 	UI_IV *initmsg = new UI_IV;
 	initmsg->msgType = uiMsgType::eIVUpdate;
@@ -85,7 +85,7 @@ void UIUpdateRecvIV(std::vector<byte> recvIV, SafeQueue<UI_MESSAGE> *uiMsgQueue)
 }
 
 
-void UIUpdateSendIter(std::vector<byte> sendIter, SafeQueue<UI_MESSAGE> *uiMsgQueue)
+void UIUpdateSendIter(std::vector<byte> sendIter, SafeQueue<UI_MESSAGE *> *uiMsgQueue)
 {
 	UI_CRYPTITER *initmsg = new UI_CRYPTITER;
 	initmsg->msgType = uiMsgType::eCryptIterUpdate;
@@ -93,7 +93,7 @@ void UIUpdateSendIter(std::vector<byte> sendIter, SafeQueue<UI_MESSAGE> *uiMsgQu
 	uiMsgQueue->addItem(initmsg);
 }
 
-void UIUpdateRecvIter(std::vector<byte> recvIter, SafeQueue<UI_MESSAGE> *uiMsgQueue)
+void UIUpdateRecvIter(std::vector<byte> recvIter, SafeQueue<UI_MESSAGE *> *uiMsgQueue)
 {
 	UI_CRYPTITER *initmsg = new UI_CRYPTITER;
 	initmsg->msgType = uiMsgType::eCryptIterUpdate;

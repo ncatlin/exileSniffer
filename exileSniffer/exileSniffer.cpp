@@ -161,7 +161,7 @@ void exileSniffer::setup_decoded_messages_tab()
 void exileSniffer::start_threads()
 {
 	//start the packet capture thread to grab streams
-	packetSniffer = new packet_capture_thread(&uiMsgQueue);
+	packetSniffer = new packet_capture_thread(&uiMsgQueue, &gamePktQueue, &loginPktQueue);
 	std::thread packetSnifferInstance(&packet_capture_thread::ThreadEntry, packetSniffer);
 	packetSnifferInstance.detach();
 
@@ -172,7 +172,7 @@ void exileSniffer::start_threads()
 
 
 	//start a thread to process streams
-	packetProcessor = new packet_processor(keyGrabber, &uiMsgQueue, ggpk);
+	packetProcessor = new packet_processor(keyGrabber, &uiMsgQueue, &gamePktQueue, &loginPktQueue, ggpk);
 	std::thread packetProcessorInstance(&packet_processor::ThreadEntry, packetProcessor);
 	packetProcessorInstance.detach();
 
@@ -421,13 +421,19 @@ void exileSniffer::handle_stream_event(UI_STREAMEVENT_MSG *streamNote)
 	}
 	else
 	{
-		if (streamNote->state == eStreamState::eStreamTransition)
+		if (streamNote->state == eStreamState::eStreamTransitionGame)
 		{
 			if (streamNote->streamID == latestDecryptingStream)
 			{
 				transitionStream = streamNote->streamID;
 				QTimer::singleShot(15000, this, SLOT(resumeScanningEvent()));
 			}
+		}
+		if (streamNote->state == eStreamState::eStreamTransitionLogin)
+		{
+			transitionStream = streamNote->streamID;
+			setStateNotDecrypting();
+			resumeScanningEvent();
 		}
 		streamStates[streamNote->streamID] = streamNote->state;
 	}

@@ -17,7 +17,7 @@ public:
 	unsigned short lastPktID = 0;
 	int ephKeys = 0;
 	bool failed = false;
-	HANDLE pipe = NULL;
+	SafeQueue<GAMEPACKET > *queue = NULL;
 };
 
 class packet_processor :
@@ -25,9 +25,11 @@ class packet_processor :
 {
 public:
 
-	packet_processor(key_grabber_thread *keyGrabPtr, SafeQueue<UI_MESSAGE>* uiq, gameDataStore& ggpkRef)
+	packet_processor(key_grabber_thread *keyGrabPtr, SafeQueue<UI_MESSAGE *>* uiq, 
+		SafeQueue<GAMEPACKET > *gameP, SafeQueue<GAMEPACKET > *loginP, gameDataStore& ggpkRef)
 	{
 		keyGrabber = keyGrabPtr; uiMsgQueue = uiq; ggpk = &ggpkRef;
+		gameQueue = gameP; loginQueue = loginP;
 	}
 	~packet_processor() {};
 	DWORD getLatestDecryptProcess() { return activeClientPID; }
@@ -42,16 +44,17 @@ private:
 	void init_loginPkt_deserialisers();
 
 	bool process_packet_loop();
-	void handle_patch_data(byte* data);
-	void handle_login_data(byte* data);
-	bool handle_game_data(byte* data);
+	//void handle_patch_data(byte* data);
+	void handle_login_data(GAMEPACKET &pkt);
+	bool handle_game_data(GAMEPACKET &pkt);
 
-	void handle_packet_from_loginserver(byte* data, unsigned int dataLen, long long timems);
-	void handle_packet_to_loginserver(byte* data, unsigned int dataLen, long long timems);
+	/*
 	void handle_packet_from_patchserver(byte* data, unsigned int dataLen);
-	void handle_packet_to_patchserver(byte* data, unsigned int dataLen);
-	void handle_packet_from_gameserver(byte* data, unsigned int dataLen, long long timems);
-	void handle_packet_to_gameserver(byte* data, unsigned int dataLen, long long timems);
+	void handle_packet_to_patchserver(byte* data, unsigned int dataLen);*/
+	void handle_packet_from_loginserver(vector<byte> &nwkData, long long timems);
+	void handle_packet_to_loginserver(vector<byte> &nwkData, long long timems);
+	void handle_packet_from_gameserver(vector<byte> &nwkData, long long timems);
+	void handle_packet_to_gameserver(vector<byte> &nwkData, long long timems);
 
 	inline void consume_add_byte(std::wstring name, UIDecodedPkt *uipkt) {	uipkt->add_byte(name, consume_Byte());}
 	inline void consume_add_word(std::wstring name, UIDecodedPkt *uipkt) { uipkt->add_word(name, consume_WORD()); }
@@ -69,6 +72,7 @@ private:
 	void deserialise_LOGIN_EPHERMERAL_PUBKEY(UIDecodedPkt *);
 	void deserialise_LOGIN_CLI_AUTH_DATA(UIDecodedPkt *);
 	void deserialise_LOGIN_SRV_UNK0x4(UIDecodedPkt *);
+	void deserialise_LOGIN_CLI_RESYNC(UIDecodedPkt *);
 	void deserialise_LOGIN_CLI_CHANGE_PASSWORD(UIDecodedPkt *);
 	void deserialise_LOGIN_CLI_DELETE_CHARACTER(UIDecodedPkt *);
 	void deserialise_LOGIN_CLI_CHARACTER_SELECTED(UIDecodedPkt *);
@@ -179,7 +183,7 @@ private:
 
 	void deserialise_CLI_GUILD_CREATE(UIDecodedPkt *);
 
-	void deserialise_CLI_PACKET_EXIT(UIDecodedPkt *);
+	void deserialise_CLI_EXIT_TO_CHARSCREEN(UIDecodedPkt *);
 	void deserialise_SRV_LOGINSRV_CRYPT(UIDecodedPkt *);
 	void deserialise_CLI_DUEL_CHALLENGE(UIDecodedPkt *);
 	void deserialise_SRV_DUEL_RESPONSE(UIDecodedPkt *);
@@ -274,15 +278,16 @@ private:
 
 private:
 	vector<UIDecodedPkt *> deserialisedPkts;
-	std::deque< std::vector<byte>> pendingPktQueue;
+	std::deque< GAMEPACKET  > pendingPktQueue;
 	gameDataStore* ggpk = NULL;
 
-	key_grabber_thread * keyGrabber;
+	key_grabber_thread *keyGrabber;
 
 	std::map<networkStreamID, STREAMDATA> streamDatas;
 	map<unsigned long, std::pair<KEYDATA *, KEYDATA *> > pendingGameserverKeys;
 	map<networkStreamID, unsigned long> connectionIDStreamIDmapping;
-	SafeQueue<UI_MESSAGE>* uiMsgQueue;
+	SafeQueue<UI_MESSAGE *> *uiMsgQueue;
+	SafeQueue<GAMEPACKET > *gameQueue, *loginQueue;
 
 	typedef void (packet_processor::*deserialiser)(UIDecodedPkt *);
 	map<unsigned short, deserialiser> gamePktDeserialisers;
@@ -290,12 +295,8 @@ private:
 	
 
 	networkStreamID currentMsgStreamID;
-	bool currentMsgIncoming;
+	bool currentMsgIncoming = NULL;
 	STREAMDATA *currentStreamObj = NULL;
-
-	HANDLE patchpipe = NULL;
-	HANDLE loginpipe = NULL;
-	HANDLE gamepipe = NULL;
 
 	DWORD activeClientPID = 0;
 	vector<byte> *decryptedBuffer = NULL;

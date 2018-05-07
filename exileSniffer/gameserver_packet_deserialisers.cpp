@@ -195,7 +195,7 @@ void packet_processor::init_gamePkt_deserialisers()
 	//bd
 	//be
 	//bf
-	gamePktDeserialisers[CLI_PACKET_EXIT] = (deserialiser)&packet_processor::deserialise_CLI_PACKET_EXIT;
+	gamePktDeserialisers[CLI_EXIT_TO_CHARSCREEN] = (deserialiser)&packet_processor::deserialise_CLI_EXIT_TO_CHARSCREEN;
 	gamePktDeserialisers[SRV_LOGINSRV_CRYPT] = (deserialiser)&packet_processor::deserialise_SRV_LOGINSRV_CRYPT;
 	gamePktDeserialisers[CLI_DUEL_CHALLENGE] = (deserialiser)&packet_processor::deserialise_CLI_DUEL_CHALLENGE;
 	gamePktDeserialisers[SRV_DUEL_RESPONSE] = (deserialiser)&packet_processor::deserialise_SRV_DUEL_RESPONSE;
@@ -1004,7 +1004,7 @@ void packet_processor::deserialise_CLI_SELECT_MAPTRAVEL(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_CLI_SET_HOTBARSKILL(UIDecodedPkt *uipkt)
 {
-	consume_add_dword_ntoh(L"Slot", uipkt);
+	consume_add_byte(L"Slot", uipkt);
 	consume_add_word_ntoh(L"SkillID", uipkt);
 }
 
@@ -1567,26 +1567,39 @@ void packet_processor::deserialise_SRV_UNK_A5(UIDecodedPkt *uipkt)
 	deserialise_UNK_13_A5_LIST(uipkt);
 }
 
-void packet_processor::deserialise_CLI_PACKET_EXIT(UIDecodedPkt *uipkt)
+void packet_processor::deserialise_CLI_EXIT_TO_CHARSCREEN(UIDecodedPkt *uipkt)
 {
-	consume_add_byte(L"State", uipkt);
+	UInotifyStreamState(currentMsgStreamID, eStreamTransitionLogin, uiMsgQueue);
 }
 
 
-void packet_processor::deserialise_SRV_LOGINSRV_CRYPT(UIDecodedPkt *)
+void packet_processor::deserialise_SRV_LOGINSRV_CRYPT(UIDecodedPkt *uipkt)
+{
+	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+
+	consume_add_dword_ntoh(L"Unk1", uipkt);
+
+	byte listsize = consume_Byte();
+
+	WValue serverList(rapidjson::kArrayType);
+	for (int i = 0; i < listsize; i++)
+	{
+		std::wstring blobstring = consume_hexblob(0x1c);
+		WValue blobval(blobstring.c_str(), allocator);
+		serverList.PushBack(blobval, allocator);
+	}
+	uipkt->payload.AddMember(L"ServerList", serverList, allocator);
+}
+void packet_processor::deserialise_CLI_DUEL_CHALLENGE(UIDecodedPkt *uipkt)
 {
 	abandon_processing();//todo
 }
-void packet_processor::deserialise_CLI_DUEL_CHALLENGE(UIDecodedPkt *)
-{
-	abandon_processing();//todo
-}
-void packet_processor::deserialise_SRV_DUEL_RESPONSE(UIDecodedPkt *)
+void packet_processor::deserialise_SRV_DUEL_RESPONSE(UIDecodedPkt *uipkt)
 {
 
 	abandon_processing();//todo
 }
-void packet_processor::deserialise_SRV_DUEL_CHALLENGE(UIDecodedPkt *)
+void packet_processor::deserialise_SRV_DUEL_CHALLENGE(UIDecodedPkt *uipkt)
 {
 
 	abandon_processing();//todo
@@ -1594,12 +1607,12 @@ void packet_processor::deserialise_SRV_DUEL_CHALLENGE(UIDecodedPkt *)
 
 void packet_processor::deserialise_CLI_UNK_0xC6(UIDecodedPkt *uipkt)
 {
-	//no data
+	//no data expected
 }
 
 void packet_processor::deserialise_CLI_UNK_0xC7(UIDecodedPkt *uipkt)
 {
- //no data
+	//no data expected
 }
 
 void packet_processor::deserialise_SRV_UNK_0xCA(UIDecodedPkt *uipkt)
@@ -2164,7 +2177,7 @@ void packet_processor::deserialise_SRV_BESTIARY_UNLOCKED_LIST(UIDecodedPkt *uipk
 
 void packet_processor::deserialise_SRV_SHOW_ENTERING_MSG(UIDecodedPkt *uipkt)
 {
-	UInotifyStreamState(currentMsgStreamID, eStreamTransition, uiMsgQueue);
+	UInotifyStreamState(currentMsgStreamID, eStreamTransitionGame, uiMsgQueue);
 	consume_add_dword_ntoh(L"AreaCode", uipkt);
 }
 
@@ -2380,6 +2393,7 @@ void packet_processor::deserialise_SRV_UPDATE_OBJECT(UIDecodedPkt *uipkt)
 	consume_add_word_ntoh(L"ID3", uipkt);
 	
 	unsigned short dataLen = ntohs(consume_WORD());
+	uipkt->add_word(L"DataLen", dataLen);
 	//byte arrayIndex = consume_Byte();
 	//ushort controlBits = consume_WORD();
 	consume_blob(dataLen); //todo

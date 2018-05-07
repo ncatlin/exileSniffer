@@ -50,7 +50,7 @@ normal workflow and appends it to the remaining decrypted buffer so the decoder 
 */
 void packet_processor::continue_buffer_next_packet()
 {
-	std::vector<byte> pkt;
+	GAMEPACKET pkt;
 	int attemptsCount = 0;
 
 	pendingPktQueue.pop_front();
@@ -59,36 +59,27 @@ void packet_processor::continue_buffer_next_packet()
 
 	while (true)
 	{
-		checkPipe(streamObj->pipe, &pendingPktQueue);
+		checkQueue(streamObj->queue, pendingPktQueue);
 
 		for (auto it = pendingPktQueue.begin(); it != pendingPktQueue.end(); it++)
 		{
 			pkt = *it;
 
-			char *next_token = (char *)pkt.data();
+			networkStreamID streamID = pkt.streamID;
 
-			char *streamID_s = strtok_s(next_token, ",", &next_token);
-			networkStreamID streamID = (networkStreamID)atoi(streamID_s);
-			char *incoming = strtok_s(next_token, ",", &next_token);
-			bool isIncoming = (*incoming == '1');
-
-			if (streamID == currentMsgStreamID && isIncoming == currentMsgIncoming)
+			if (streamID == currentMsgStreamID && pkt.incoming == currentMsgIncoming)
 			{
-				char *timeprocessed = strtok_s(next_token, ",", &next_token);
-				char *dLen = strtok_s(next_token, ",", &next_token);
-				byte *data = (byte *)next_token;
-
-				unsigned int dataLen = atoi(dLen);
+				size_t dataLen = pkt.data.size();
 				size_t originalSize = decryptedBuffer->size();
 				decryptedBuffer->resize(originalSize + dataLen, 0);
 
-				CryptoPP::Salsa20::Encryption& keyObj = isIncoming ? 
+				CryptoPP::Salsa20::Encryption& keyObj = pkt.incoming ?
 					streamObj->recvSalsa : 
 					streamObj->sendSalsa;
 
 				//i don't know if exceptions get thrown here but can't hurt to try
 				try {
-					keyObj.ProcessData(decryptedBuffer->data()+originalSize, data, dataLen);
+					keyObj.ProcessData(decryptedBuffer->data()+originalSize, pkt.data.data(), dataLen);
 				}
 				catch (const CryptoPP::Exception& exception) {
 					QString msg = "An exception was caught during salsa decrypt of multipacket data.";
