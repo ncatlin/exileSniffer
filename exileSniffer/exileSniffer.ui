@@ -21,7 +21,7 @@
        <enum>QTabWidget::North</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>5</number>
       </property>
       <widget class="QWidget" name="interceptionTab">
        <attribute name="title">
@@ -832,7 +832,7 @@ p, li { white-space: pre-wrap; }
         <item>
          <widget class="QStackedWidget" name="settingsStack">
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="logSettings">
            <layout class="QVBoxLayout" name="verticalLayout">
@@ -841,7 +841,7 @@ p, li { white-space: pre-wrap; }
               <property name="maximumSize">
                <size>
                 <width>16777215</width>
-                <height>104</height>
+                <height>115</height>
                </size>
               </property>
               <property name="font">
@@ -854,20 +854,6 @@ p, li { white-space: pre-wrap; }
                <string>Packet Hexdumps</string>
               </property>
               <layout class="QFormLayout" name="formLayout">
-               <item row="2" column="1">
-                <layout class="QHBoxLayout" name="horizontalLayout_8">
-                 <item>
-                  <widget class="QLineEdit" name="lineEdit"/>
-                 </item>
-                 <item>
-                  <widget class="QPushButton" name="pushButton">
-                   <property name="text">
-                    <string>{}</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
                <item row="2" column="0">
                 <widget class="QLabel" name="label_7">
                  <property name="font">
@@ -880,13 +866,132 @@ p, li { white-space: pre-wrap; }
                  </property>
                 </widget>
                </item>
+               <item row="2" column="1">
+                <layout class="QHBoxLayout" name="horizontalLayout_8">
+                 <item>
+                  <widget class="QLineEdit" name="lineEdit"/>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="pushButton">
+                   <property name="minimumSize">
+                    <size>
+                     <width>95</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>{}</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item row="0" column="1">
+                <widget class="QFrame" name="horizontalFrame_4">
+                 <property name="layoutDirection">
+                  <enum>Qt::RightToLeft</enum>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_11">
+                  <item>
+                   <widget class="QPushButton" name="logsOpenDirBtn">
+                    <property name="minimumSize">
+                     <size>
+                      <width>95</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>100</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string>Open Directory</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="logsEnabledCheck">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="minimumSize">
+                     <size>
+                      <width>100</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>16777215</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="layoutDirection">
+                     <enum>Qt::LeftToRight</enum>
+                    </property>
+                    <property name="text">
+                     <string>Logging Enabled</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="feedSettings">
+           <layout class="QVBoxLayout" name="verticalLayout_5">
+            <item>
+             <widget class="QGroupBox" name="groupBox">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>115</height>
+               </size>
+              </property>
+              <property name="title">
+               <string>Named Pipe (Decoded Packets - JSON)</string>
+              </property>
+              <layout class="QFormLayout" name="formLayout_3">
                <item row="1" column="1">
-                <widget class="QCheckBox" name="checkBox">
+                <widget class="QLineEdit" name="namedPipeChosenName"/>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_8">
+                 <property name="text">
+                  <string>Name</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel" name="label_9">
+                 <property name="text">
+                  <string>Path:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QLabel" name="namedPipePathResult">
+                 <property name="text">
+                  <string>TextLabel</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QCheckBox" name="pipeFeedEnableCheck">
                  <property name="text">
                   <string>Enabled</string>
-                 </property>
-                 <property name="checked">
-                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
@@ -895,7 +1000,116 @@ p, li { white-space: pre-wrap; }
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="feedSettings"/>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="utilsTab">
+       <attribute name="title">
+        <string>Utilities</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_6">
+        <item>
+         <widget class="QGroupBox" name="groupBox_4">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>135</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="title">
+           <string>Hash Lookup</string>
+          </property>
+          <layout class="QFormLayout" name="formLayout_4">
+           <property name="verticalSpacing">
+            <number>10</number>
+           </property>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_10">
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Input Hex:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLineEdit" name="hashUtilInputText">
+             <property name="maximumSize">
+              <size>
+               <width>230</width>
+               <height>16777215</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="order1hash">
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="order2hash">
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QLabel" name="order1hashres">
+             <property name="font">
+              <font>
+               <pointsize>9</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QLabel" name="order2hashres">
+             <property name="font">
+              <font>
+               <pointsize>9</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLabel" name="label_11">
+             <property name="text">
+              <string>Enter a sequence of hex bytes to lookup a murmur2 hash. Only works for the GGPK strings we have catalogued.</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </widget>
         </item>
        </layout>
@@ -1063,6 +1277,22 @@ p, li { white-space: pre-wrap; }
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>hashUtilInputText</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>exileSniffer</receiver>
+   <slot>hashUtilInput()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>465</x>
+     <y>313</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>413</x>
+     <y>336</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>showRawFiltersDLG()</slot>
@@ -1075,5 +1305,6 @@ p, li { white-space: pre-wrap; }
   <slot>stopDecrypting()</slot>
   <slot>showSettings()</slot>
   <slot>settingsSelectionChanged()</slot>
+  <slot>hashUtilInput()</slot>
  </slots>
 </ui>

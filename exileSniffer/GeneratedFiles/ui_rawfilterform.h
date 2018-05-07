@@ -173,7 +173,7 @@ public:
         QObject::connect(presetsTree, SIGNAL(itemActivated(QTreeWidgetItem*,int)), rawFilterForm, SLOT(activatePresetListClicked()));
         QObject::connect(filterTable, SIGNAL(cellActivated(int,int)), rawFilterForm, SLOT(toggleSelectedFilter()));
 
-        tabWidget->setCurrentIndex(0);
+        tabWidget->setCurrentIndex(1);
 
 
         QMetaObject::connectSlotsByName(rawFilterForm);

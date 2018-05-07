@@ -122,12 +122,34 @@ public:
     QVBoxLayout *verticalLayout;
     QGroupBox *groupBox_2;
     QFormLayout *formLayout;
+    QLabel *label_7;
     QHBoxLayout *horizontalLayout_8;
     QLineEdit *lineEdit;
     QPushButton *pushButton;
-    QLabel *label_7;
-    QCheckBox *checkBox;
+    QFrame *horizontalFrame_4;
+    QHBoxLayout *horizontalLayout_11;
+    QPushButton *logsOpenDirBtn;
+    QCheckBox *logsEnabledCheck;
     QWidget *feedSettings;
+    QVBoxLayout *verticalLayout_5;
+    QGroupBox *groupBox;
+    QFormLayout *formLayout_3;
+    QLineEdit *namedPipeChosenName;
+    QLabel *label_8;
+    QLabel *label_9;
+    QLabel *namedPipePathResult;
+    QCheckBox *pipeFeedEnableCheck;
+    QWidget *utilsTab;
+    QVBoxLayout *verticalLayout_6;
+    QGroupBox *groupBox_4;
+    QFormLayout *formLayout_4;
+    QLabel *label_10;
+    QLineEdit *hashUtilInputText;
+    QLabel *order1hash;
+    QLabel *order2hash;
+    QLabel *order1hashres;
+    QLabel *order2hashres;
+    QLabel *label_11;
     QStatusBar *statusBar;
 
     void setupUi(QMainWindow *exileSniffer)
@@ -609,7 +631,7 @@ public:
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
         groupBox_2 = new QGroupBox(logSettings);
         groupBox_2->setObjectName(QStringLiteral("groupBox_2"));
-        groupBox_2->setMaximumSize(QSize(16777215, 104));
+        groupBox_2->setMaximumSize(QSize(16777215, 115));
         QFont font9;
         font9.setFamily(QStringLiteral("MS Shell Dlg 2"));
         font9.setPointSize(10);
@@ -618,6 +640,14 @@ public:
         formLayout->setSpacing(6);
         formLayout->setContentsMargins(11, 11, 11, 11);
         formLayout->setObjectName(QStringLiteral("formLayout"));
+        label_7 = new QLabel(groupBox_2);
+        label_7->setObjectName(QStringLiteral("label_7"));
+        QFont font10;
+        font10.setFamily(QStringLiteral("MS Shell Dlg 2"));
+        label_7->setFont(font10);
+
+        formLayout->setWidget(2, QFormLayout::LabelRole, label_7);
+
         horizontalLayout_8 = new QHBoxLayout();
         horizontalLayout_8->setSpacing(6);
         horizontalLayout_8->setObjectName(QStringLiteral("horizontalLayout_8"));
@@ -628,25 +658,43 @@ public:
 
         pushButton = new QPushButton(groupBox_2);
         pushButton->setObjectName(QStringLiteral("pushButton"));
+        pushButton->setMinimumSize(QSize(95, 0));
 
         horizontalLayout_8->addWidget(pushButton);
 
 
         formLayout->setLayout(2, QFormLayout::FieldRole, horizontalLayout_8);
 
-        label_7 = new QLabel(groupBox_2);
-        label_7->setObjectName(QStringLiteral("label_7"));
-        QFont font10;
-        font10.setFamily(QStringLiteral("MS Shell Dlg 2"));
-        label_7->setFont(font10);
+        horizontalFrame_4 = new QFrame(groupBox_2);
+        horizontalFrame_4->setObjectName(QStringLiteral("horizontalFrame_4"));
+        horizontalFrame_4->setLayoutDirection(Qt::RightToLeft);
+        horizontalLayout_11 = new QHBoxLayout(horizontalFrame_4);
+        horizontalLayout_11->setSpacing(6);
+        horizontalLayout_11->setContentsMargins(11, 11, 11, 11);
+        horizontalLayout_11->setObjectName(QStringLiteral("horizontalLayout_11"));
+        logsOpenDirBtn = new QPushButton(horizontalFrame_4);
+        logsOpenDirBtn->setObjectName(QStringLiteral("logsOpenDirBtn"));
+        logsOpenDirBtn->setMinimumSize(QSize(95, 0));
+        logsOpenDirBtn->setMaximumSize(QSize(100, 16777215));
 
-        formLayout->setWidget(2, QFormLayout::LabelRole, label_7);
+        horizontalLayout_11->addWidget(logsOpenDirBtn);
 
-        checkBox = new QCheckBox(groupBox_2);
-        checkBox->setObjectName(QStringLiteral("checkBox"));
-        checkBox->setChecked(true);
+        logsEnabledCheck = new QCheckBox(horizontalFrame_4);
+        logsEnabledCheck->setObjectName(QStringLiteral("logsEnabledCheck"));
+        QSizePolicy sizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
+        sizePolicy.setHorizontalStretch(0);
+        sizePolicy.setVerticalStretch(0);
+        sizePolicy.setHeightForWidth(logsEnabledCheck->sizePolicy().hasHeightForWidth());
+        logsEnabledCheck->setSizePolicy(sizePolicy);
+        logsEnabledCheck->setMinimumSize(QSize(100, 0));
+        logsEnabledCheck->setMaximumSize(QSize(16777215, 16777215));
+        logsEnabledCheck->setLayoutDirection(Qt::LeftToRight);
+        logsEnabledCheck->setChecked(true);
 
-        formLayout->setWidget(1, QFormLayout::FieldRole, checkBox);
+        horizontalLayout_11->addWidget(logsEnabledCheck);
+
+
+        formLayout->setWidget(0, QFormLayout::FieldRole, horizontalFrame_4);
 
 
         verticalLayout->addWidget(groupBox_2);
@@ -654,11 +702,112 @@ public:
         settingsStack->addWidget(logSettings);
         feedSettings = new QWidget();
         feedSettings->setObjectName(QStringLiteral("feedSettings"));
+        verticalLayout_5 = new QVBoxLayout(feedSettings);
+        verticalLayout_5->setSpacing(6);
+        verticalLayout_5->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_5->setObjectName(QStringLiteral("verticalLayout_5"));
+        groupBox = new QGroupBox(feedSettings);
+        groupBox->setObjectName(QStringLiteral("groupBox"));
+        groupBox->setMaximumSize(QSize(16777215, 115));
+        formLayout_3 = new QFormLayout(groupBox);
+        formLayout_3->setSpacing(6);
+        formLayout_3->setContentsMargins(11, 11, 11, 11);
+        formLayout_3->setObjectName(QStringLiteral("formLayout_3"));
+        namedPipeChosenName = new QLineEdit(groupBox);
+        namedPipeChosenName->setObjectName(QStringLiteral("namedPipeChosenName"));
+
+        formLayout_3->setWidget(1, QFormLayout::FieldRole, namedPipeChosenName);
+
+        label_8 = new QLabel(groupBox);
+        label_8->setObjectName(QStringLiteral("label_8"));
+
+        formLayout_3->setWidget(1, QFormLayout::LabelRole, label_8);
+
+        label_9 = new QLabel(groupBox);
+        label_9->setObjectName(QStringLiteral("label_9"));
+
+        formLayout_3->setWidget(2, QFormLayout::LabelRole, label_9);
+
+        namedPipePathResult = new QLabel(groupBox);
+        namedPipePathResult->setObjectName(QStringLiteral("namedPipePathResult"));
+
+        formLayout_3->setWidget(2, QFormLayout::FieldRole, namedPipePathResult);
+
+        pipeFeedEnableCheck = new QCheckBox(groupBox);
+        pipeFeedEnableCheck->setObjectName(QStringLiteral("pipeFeedEnableCheck"));
+
+        formLayout_3->setWidget(0, QFormLayout::FieldRole, pipeFeedEnableCheck);
+
+
+        verticalLayout_5->addWidget(groupBox);
+
         settingsStack->addWidget(feedSettings);
 
         horizontalLayout_7->addWidget(settingsStack);
 
         processTabs->addTab(settingsTab, QString());
+        utilsTab = new QWidget();
+        utilsTab->setObjectName(QStringLiteral("utilsTab"));
+        verticalLayout_6 = new QVBoxLayout(utilsTab);
+        verticalLayout_6->setSpacing(6);
+        verticalLayout_6->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_6->setObjectName(QStringLiteral("verticalLayout_6"));
+        groupBox_4 = new QGroupBox(utilsTab);
+        groupBox_4->setObjectName(QStringLiteral("groupBox_4"));
+        groupBox_4->setMaximumSize(QSize(16777215, 135));
+        QFont font11;
+        font11.setPointSize(9);
+        groupBox_4->setFont(font11);
+        formLayout_4 = new QFormLayout(groupBox_4);
+        formLayout_4->setSpacing(6);
+        formLayout_4->setContentsMargins(11, 11, 11, 11);
+        formLayout_4->setObjectName(QStringLiteral("formLayout_4"));
+        formLayout_4->setVerticalSpacing(10);
+        label_10 = new QLabel(groupBox_4);
+        label_10->setObjectName(QStringLiteral("label_10"));
+        label_10->setMinimumSize(QSize(100, 0));
+
+        formLayout_4->setWidget(1, QFormLayout::LabelRole, label_10);
+
+        hashUtilInputText = new QLineEdit(groupBox_4);
+        hashUtilInputText->setObjectName(QStringLiteral("hashUtilInputText"));
+        hashUtilInputText->setMaximumSize(QSize(230, 16777215));
+
+        formLayout_4->setWidget(1, QFormLayout::FieldRole, hashUtilInputText);
+
+        order1hash = new QLabel(groupBox_4);
+        order1hash->setObjectName(QStringLiteral("order1hash"));
+        order1hash->setMinimumSize(QSize(100, 0));
+
+        formLayout_4->setWidget(2, QFormLayout::LabelRole, order1hash);
+
+        order2hash = new QLabel(groupBox_4);
+        order2hash->setObjectName(QStringLiteral("order2hash"));
+        order2hash->setMinimumSize(QSize(100, 0));
+
+        formLayout_4->setWidget(3, QFormLayout::LabelRole, order2hash);
+
+        order1hashres = new QLabel(groupBox_4);
+        order1hashres->setObjectName(QStringLiteral("order1hashres"));
+        order1hashres->setFont(font11);
+
+        formLayout_4->setWidget(2, QFormLayout::FieldRole, order1hashres);
+
+        order2hashres = new QLabel(groupBox_4);
+        order2hashres->setObjectName(QStringLiteral("order2hashres"));
+        order2hashres->setFont(font11);
+
+        formLayout_4->setWidget(3, QFormLayout::FieldRole, order2hashres);
+
+        label_11 = new QLabel(groupBox_4);
+        label_11->setObjectName(QStringLiteral("label_11"));
+
+        formLayout_4->setWidget(0, QFormLayout::FieldRole, label_11);
+
+
+        verticalLayout_6->addWidget(groupBox_4);
+
+        processTabs->addTab(utilsTab, QString());
 
         gridLayout->addWidget(processTabs, 0, 0, 1, 1);
 
@@ -677,11 +826,12 @@ public:
         QObject::connect(stopDecryptBtn, SIGNAL(clicked()), exileSniffer, SLOT(stopDecrypting()));
         QObject::connect(settingsChoiceList, SIGNAL(itemSelectionChanged()), exileSniffer, SLOT(settingsSelectionChanged()));
         QObject::connect(decodedFiltersBtn, SIGNAL(clicked()), exileSniffer, SLOT(showRawFiltersDLG()));
+        QObject::connect(hashUtilInputText, SIGNAL(textChanged(QString)), exileSniffer, SLOT(hashUtilInput()));
 
-        processTabs->setCurrentIndex(1);
+        processTabs->setCurrentIndex(5);
         decrypt_details_stack->setCurrentIndex(1);
         settingsChoiceList->setCurrentRow(0);
-        settingsStack->setCurrentIndex(0);
+        settingsStack->setCurrentIndex(1);
 
 
         QMetaObject::connectSlotsByName(exileSniffer);
@@ -749,10 +899,24 @@ public:
         settingsChoiceList->setSortingEnabled(__sortingEnabled);
 
         groupBox_2->setTitle(QApplication::translate("exileSniffer", "Packet Hexdumps", Q_NULLPTR));
-        pushButton->setText(QApplication::translate("exileSniffer", "{}", Q_NULLPTR));
         label_7->setText(QApplication::translate("exileSniffer", "Folder", Q_NULLPTR));
-        checkBox->setText(QApplication::translate("exileSniffer", "Enabled", Q_NULLPTR));
+        pushButton->setText(QApplication::translate("exileSniffer", "{}", Q_NULLPTR));
+        logsOpenDirBtn->setText(QApplication::translate("exileSniffer", "Open Directory", Q_NULLPTR));
+        logsEnabledCheck->setText(QApplication::translate("exileSniffer", "Logging Enabled", Q_NULLPTR));
+        groupBox->setTitle(QApplication::translate("exileSniffer", "Named Pipe (Decoded Packets - JSON)", Q_NULLPTR));
+        label_8->setText(QApplication::translate("exileSniffer", "Name", Q_NULLPTR));
+        label_9->setText(QApplication::translate("exileSniffer", "Path:", Q_NULLPTR));
+        namedPipePathResult->setText(QApplication::translate("exileSniffer", "TextLabel", Q_NULLPTR));
+        pipeFeedEnableCheck->setText(QApplication::translate("exileSniffer", "Enabled", Q_NULLPTR));
         processTabs->setTabText(processTabs->indexOf(settingsTab), QApplication::translate("exileSniffer", "Settings", Q_NULLPTR));
+        groupBox_4->setTitle(QApplication::translate("exileSniffer", "Hash Lookup", Q_NULLPTR));
+        label_10->setText(QApplication::translate("exileSniffer", "Input Hex:", Q_NULLPTR));
+        order1hash->setText(QString());
+        order2hash->setText(QString());
+        order1hashres->setText(QString());
+        order2hashres->setText(QString());
+        label_11->setText(QApplication::translate("exileSniffer", "Enter a sequence of hex bytes to lookup a murmur2 hash. Only works for the GGPK strings we have catalogued.", Q_NULLPTR));
+        processTabs->setTabText(processTabs->indexOf(utilsTab), QApplication::translate("exileSniffer", "Utilities", Q_NULLPTR));
     } // retranslateUi
 
 };

@@ -38,8 +38,8 @@
 #define SRV_TRANSFER_INSTANCE (CLI_ACTION_PREDICTIVE+1) //0x17
 #define SRV_INSTANCE_SERVER_DATA (SRV_TRANSFER_INSTANCE+1) //0x18
 #define CLI_PICKUP_ITEM (SRV_INSTANCE_SERVER_DATA+1) //0x19
-//1a
-#define CLI_PLACE_ITEM 0x1b
+#define CLI_DROP_ITEM (CLI_PICKUP_ITEM+1)
+#define CLI_PLACE_ITEM (CLI_DROP_ITEM+1) 
 //1c
 #define CLI_REMOVE_SOCKET 0x1d
 #define CLI_INSERT_SOCKET (CLI_REMOVE_SOCKET+1) //0x1e
@@ -54,15 +54,15 @@
 //27
 //28
 //29
-//2a
+//2a   //client merge item stack?
 #define CLI_CANCEL_BUF 0x2b
 #define CLI_UNK_0x2c (CLI_CANCEL_BUF + 1)
 #define CLI_SELECT_MAPTRAVEL (CLI_UNK_0x2c + 1)
 #define CLI_SET_HOTBARSKILL (CLI_SELECT_MAPTRAVEL +1)
 #define SRV_SKILL_SLOTS_LIST (CLI_SET_HOTBARSKILL+1)
 #define CLI_REVIVE_CHOICE (SRV_SKILL_SLOTS_LIST+1)
-#define SRV_YOU_DIED (CLI_REVIVE_CHOICE+1) //thats dark souls
-//32
+#define SRV_YOU_DIED (CLI_REVIVE_CHOICE+1) //"thats dark souls"
+//32  //seen when using portal scroll
 //33
 //34
 //35
@@ -85,7 +85,7 @@ S->C UnkPkID: 0xef size: 23 bytes
 //3d
 //3e
 #define SRV_OPEN_UI_PANE 0x3f
-//40
+#define CLI_UNK_0x40 //client split item stack
 #define CLI_UNK_0x41 0x41
 //42
 //43
@@ -95,10 +95,10 @@ S->C UnkPkID: 0xef size: 23 bytes
 #define SRV_SHOW_NPC_DIALOG 0x47 
 #define CLI_CLOSE_NPC_DIALOG 0x48 
 //49
-//4a
+#define CLI_UNK_0x4a  //seen when buying from vendor
 //4b
 //4c
-//4d
+#define SRV_UNK_0x4d  //seen when buying from vendor
 //4e
 //4f
 #define CLI_SEND_PARTY_INVITE 0x50
@@ -119,26 +119,26 @@ S->C UnkPkID: 0xef size: 23 bytes
 //5f
 //60
 //61
-//62
+#define CLI_UNK_0x62 //seen while selling stuff to vendor
 #define CLI_MOVE_ITEM_PANE 0x63
 //64
-//65
+#define CLI_CONFIRM_SELL 0x65
 //66
-//67
-//68
+#define SRV_UNK_0x67 0x67//seen while selling stuff to vendor
+#define SRV_UNK_0x68 0x68//seen while selling stuff to vendor
 //69
 //6a
-//6b
+//6b   CLI_QUEST_DIALOGUE_CHOICE
 #define SRV_UNK_0x6c 0x6c
 #define SRV_CREATE_ITEM (SRV_UNK_0x6c +1)
 #define SRV_SLOT_ITEMSLIST (SRV_CREATE_ITEM+1)
-//6f
+#define CLI_UNK_0x6f //seen while selling stuff to vendor/closing window
 #define UNK_MESSAGE_0x70 0x70
 #define CLI_UNK_0x71 0x71
 #define SRV_UNK_0x72 0x72
 #define UNK_MESSAGE_0x73 0x73
 #define CLI_SET_STATUS_MESSAGE 0x74
-//75
+#define SRV_UNK_0x75 0x75
 //76
 //77
 //78
@@ -175,9 +175,9 @@ S->C UnkPkID: 0xef size: 23 bytes
 //97
 #define CLI_SKILLPANE_ACTION 0x98
 //99
-//9a
-#define SRV_SKILLPANE_DATA 0x9b
-//9c
+#define SRV_ACHIEVEMENT 0x9a
+#define SRV_SKILLPANE_DATA (SRV_ACHIEVEMENT+1)
+#define SRV_UNK_POSITION_LIST (SRV_SKILLPANE_DATA+1)
 //9d
 //9e
 #define CLI_MICROTRANSACTION_SHOP_ACTION 0x9f
@@ -186,7 +186,7 @@ S->C UnkPkID: 0xef size: 23 bytes
 //a2
 #define SRV_UNK_A3 0xa3
 #define SRV_CHAT_CHANNEL_ID 0xa4
-//a5
+#define SRV_UNK_A5 (SRV_CHAT_CHANNEL_ID+1)
 //a6
 //a7
 //a8
@@ -202,12 +202,12 @@ S->C UnkPkID: 0xef size: 23 bytes
 //b2
 //b3
 //b4
-//b5
+#define SRV_GUILD_MEMBER_LIST 0xb5
 //b6
 //b7
 //b8
-//b9
-//ba
+//b9 //srv guild status message
+//ba //cli set guild status message
 //bc
 //bd
 //be
@@ -218,7 +218,7 @@ S->C UnkPkID: 0xef size: 23 bytes
 #define SRV_DUEL_RESPONSE 0xc3
 #define SRV_DUEL_CHALLENGE 0xc4 //namestring, byte. unimplemented
 //c5
-#define CLI_UNK_0xC6 0xc6 //both sent after clickign join pvp
+#define CLI_UNK_0xC6 0xc6 //both sent after clicking join pvp
 #define CLI_UNK_0xC7 0xc7
 //c8
 //c9
@@ -262,7 +262,7 @@ S->C UnkPkID: 0xef size: 23 bytes
 #define SRV_MOBILE_UPDATE_HMS 0xf0
 #define SRV_STAT_CHANGED 0xf1
 #define SRV_UNK_0xf2 0xf2
-#define SRV_UNK_0xf3 0xf3
+#define SRV_UNK_0xf3 0xf3 //aura?
 //f4
 #define SRV_UNK_0xf5 0xf5
 //f6
@@ -274,7 +274,7 @@ S->C UnkPkID: 0xef size: 23 bytes
 //fc
 //fd
 //fe
-//ff
+#define SRV_EVENT_TRIGGERED 0xff
 //100
 //101
 //102
@@ -314,12 +314,12 @@ S->C UnkPkID: 0xef size: 23 bytes
 //124
 //125
 //126
-//127
+#define SRV_BESTIARY_CAPTIVES 0x127
 //128
 //129
-//12a
+#define CLI_OPEN_BESTIARY 0x12a
 //12b
-//12c
+#define SRV_BESTIARY_UNLOCKED_LIST 0x12c
 //12d
 //12e
 #define SRV_SHOW_ENTERING_MSG 0x12f

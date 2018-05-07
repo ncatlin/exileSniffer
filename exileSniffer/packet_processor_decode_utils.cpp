@@ -34,8 +34,8 @@ void packet_processor::emit_decoding_err_msg(unsigned short msgID, unsigned shor
 		errmsg << "Bad error flag '" << errorFlag << "' set";
 		break;
 	}
-	errmsg << " while processing msgID 0x" << std::hex << msgID << " at index "
-		<< decryptedIndex << " after previous packet ID 0x" << lastMsgID;
+	errmsg << " while processing msgID 0x" << std::hex << msgID << " at index " <<
+		std::dec << decryptedIndex << " after previous packet ID 0x" << std::hex << lastMsgID;
 	UIaddLogMsg(QString::fromStdString(errmsg.str()), activeClientPID, uiMsgQueue);
 }
 
@@ -82,15 +82,21 @@ void packet_processor::continue_buffer_next_packet()
 				size_t originalSize = decryptedBuffer->size();
 				decryptedBuffer->resize(originalSize + dataLen, 0);
 
-				if (isIncoming)
-				{
-					streamObj->recvSalsa.ProcessData(decryptedBuffer->data()+originalSize,
-						data, dataLen);
+				CryptoPP::Salsa20::Encryption& keyObj = isIncoming ? 
+					streamObj->recvSalsa : 
+					streamObj->sendSalsa;
+
+				//i don't know if exceptions get thrown here but can't hurt to try
+				try {
+					keyObj.ProcessData(decryptedBuffer->data()+originalSize, data, dataLen);
 				}
-				else
-				{
-					streamObj->sendSalsa.ProcessData(decryptedBuffer->data() + originalSize,
-						data, dataLen);
+				catch (const CryptoPP::Exception& exception) {
+					QString msg = "An exception was caught during salsa decrypt of multipacket data.";
+					msg = msg + " This is usually due to incorrect deserialisation";
+					UIaddLogMsg(msg, getLatestDecryptProcess(), uiMsgQueue);
+					currentStreamObj->failed = true;
+					UInotifyStreamState(currentMsgStreamID, eStreamState::eStreamFailed, uiMsgQueue);
+					return;
 				}
 
 				remainingDecrypted += dataLen;
@@ -145,7 +151,7 @@ UINT16 packet_processor::consume_WORD()
 		continue_buffer_next_packet();
 	}
 
-	if (decryptedIndex >= decryptedBuffer->size()-1) {
+	if (decryptedIndex >= decryptedBuffer->size() - 1) {
 		errorFlag = eDecodingErr::eErrUnderflow;
 		return 0;
 	}
@@ -167,7 +173,7 @@ UINT32 packet_processor::consume_DWORD()
 		continue_buffer_next_packet();
 	}
 
-	if (decryptedIndex >= decryptedBuffer->size()-3) {
+	if (decryptedIndex >= decryptedBuffer->size() - 3) {
 		errorFlag = eDecodingErr::eErrUnderflow;
 		return 0;
 	}
@@ -188,7 +194,7 @@ UINT64 packet_processor::consume_QWORD()
 		if (errorFlag != eDecodingErr::eNoErr) return 0;
 		continue_buffer_next_packet();
 	}
-	if (decryptedIndex >= decryptedBuffer->size()-8) {
+	if (decryptedIndex >= decryptedBuffer->size() - 7) {
 		errorFlag = eDecodingErr::eErrUnderflow;
 		return 0;
 	}
@@ -202,7 +208,7 @@ UINT64 packet_processor::consume_QWORD()
 void packet_processor::consume_blob(ushort byteCount)
 {
 	if (errorFlag != eDecodingErr::eNoErr) return;
-	if (byteCount > 10000)
+	if (byteCount > 10000) //smoke test - may need adjusting if game ever sends a blob this big
 	{
 		errorFlag = eDecodingErr::eErrUnderflow;
 		return;
@@ -323,9 +329,9 @@ void packet_processor::restore_buffer()
 }
 
 /*
-stop processing any more of the packet - abandoning its data.
+stop processing any more of the packet - abandoning its message(s).
 intended for use when we don't know how to process the rest
-of the packet
+of a message
 */
 void packet_processor::abandon_processing()
 {

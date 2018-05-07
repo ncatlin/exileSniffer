@@ -62,6 +62,9 @@ private:
 	void consume_add_lenprefix_string(std::wstring name, WValue& container, rapidjson::Document::AllocatorType& allocator);
 	std::wstring consume_hexblob(unsigned int size);
 
+	void deserialise_item(UIDecodedPkt *uipkt, WValue& container);
+	void deserialise_UNK_13_A5_LIST(UIDecodedPkt * uipkt);
+
 	void deserialise_LOGIN_CLI_KEEP_ALIVE(UIDecodedPkt *);
 	void deserialise_LOGIN_EPHERMERAL_PUBKEY(UIDecodedPkt *);
 	void deserialise_LOGIN_CLI_AUTH_DATA(UIDecodedPkt *);
@@ -97,6 +100,7 @@ private:
 	void deserialise_SRV_INSTANCE_SERVER_DATA(UIDecodedPkt *);
 	void deserialise_CLI_PICKUP_ITEM(UIDecodedPkt *);
 	void deserialise_CLI_PLACE_ITEM(UIDecodedPkt *);
+	void deserialise_CLI_DROP_ITEM(UIDecodedPkt *);
 	void deserialise_CLI_REMOVE_SOCKET(UIDecodedPkt *);
 	void deserialise_CLI_INSERT_SOCKET(UIDecodedPkt *);
 
@@ -139,6 +143,11 @@ private:
 
 	void deserialise_CLI_MOVE_ITEM_PANE(UIDecodedPkt *);
 
+	void deserialise_CLI_CONFIRM_SELL(UIDecodedPkt*);
+
+	void deserialise_SRV_UNK_0x67(UIDecodedPkt*);
+	void deserialise_SRV_UNK_0x68(UIDecodedPkt*);
+
 	void deserialise_SRV_UNK_0x6c(UIDecodedPkt *);
 	void deserialise_SRV_CREATE_ITEM(UIDecodedPkt *);
 	void deserialise_SRV_SLOT_ITEMSLIST(UIDecodedPkt *);
@@ -147,12 +156,14 @@ private:
 	void deserialise_SRV_UNK_0x72(UIDecodedPkt *);
 	void deserialise_UNK_MESSAGE_0x73(UIDecodedPkt *);
 	void deserialise_CLI_SET_STATUS_MESSAGE(UIDecodedPkt *);
+	void deserialise_SRV_UNK_0x75(UIDecodedPkt *);
 
 	void deserialise_CLI_SWAPPED_WEAPONS(UIDecodedPkt *);
 
 	void deserialise_CLI_SKILLPANE_ACTION(UIDecodedPkt *);
 
 	void deserialise_SRV_SKILLPANE_DATA(UIDecodedPkt *);
+	void deserialise_SRV_UNK_POSITION_LIST(UIDecodedPkt *);
 	
 	void deserialise_SRV_PVP_MATCHLIST(UIDecodedPkt *uipkt);
 	void deserialise_SRV_EVENTSLIST(UIDecodedPkt *uipkt);
@@ -161,6 +172,10 @@ private:
 	void deserialise_SRV_MICROTRANSACTION_SHOP_DETAILS(UIDecodedPkt *);
 	void deserialise_SRV_UNK_A3(UIDecodedPkt *);
 	void deserialise_SRV_CHAT_CHANNEL_ID(UIDecodedPkt *);
+
+	void deserialise_SRV_UNK_A5(UIDecodedPkt *);
+
+	void deserialise_SRV_GUILD_MEMBER_LIST(UIDecodedPkt *);
 
 	void deserialise_CLI_GUILD_CREATE(UIDecodedPkt *);
 
@@ -208,6 +223,8 @@ private:
 	void deserialise_SRV_START_EFFECT(UIDecodedPkt *);
 	void deserialise_SRV_END_EFFECT(UIDecodedPkt *);
 
+	void deserialise_SRV_EVENT_TRIGGERED(UIDecodedPkt *);
+
 	void deserialise_SRV_UNKNOWN_0x106(UIDecodedPkt *);
 
 	void deserialise_SRV_UNKNOWN_0x108(UIDecodedPkt *);
@@ -217,6 +234,11 @@ private:
 	void deserialise_SRV_UNKNOWN_0x111(UIDecodedPkt *);
 	void deserialise_SRV_UNKNOWN_0x118(UIDecodedPkt *);
 	void deserialise_CLI_OPTOUT_TUTORIALS(UIDecodedPkt *); 
+
+	void deserialise_SRV_BESTIARY_CAPTIVES(UIDecodedPkt *);
+	void deserialise_CLI_OPEN_BESTIARY(UIDecodedPkt *);
+	void deserialise_SRV_BESTIARY_UNLOCKED_LIST(UIDecodedPkt *);
+
 	void deserialise_SRV_SHOW_ENTERING_MSG(UIDecodedPkt *);
 	void deserialise_SRV_HEARTBEAT(UIDecodedPkt *);
 	void deserialise_SRV_ADD_OBJECT(UIDecodedPkt *);
