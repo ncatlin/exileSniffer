@@ -8,6 +8,7 @@ void packet_processor::init_loginPkt_deserialisers()
 	loginPktDeserialisers[LOGIN_EPHERMERAL_PUBKEY] = (deserialiser)&packet_processor::deserialise_LOGIN_EPHERMERAL_PUBKEY;
 	loginPktDeserialisers[LOGIN_CLI_AUTH_DATA] = (deserialiser)&packet_processor::deserialise_LOGIN_CLI_AUTH_DATA;
 	loginPktDeserialisers[LOGIN_SRV_UNK0x4] = (deserialiser)&packet_processor::deserialise_LOGIN_SRV_UNK0x4;
+	loginPktDeserialisers[LOGIN_CLI_RESYNC] = (deserialiser)&packet_processor::deserialise_LOGIN_CLI_RESYNC;
 	loginPktDeserialisers[LOGIN_CLI_CHANGE_PASSWORD] = (deserialiser)&packet_processor::deserialise_LOGIN_CLI_CHANGE_PASSWORD;
 	loginPktDeserialisers[LOGIN_CLI_DELETE_CHARACTER] = (deserialiser)&packet_processor::deserialise_LOGIN_CLI_DELETE_CHARACTER;
 	loginPktDeserialisers[LOGIN_CLI_CHARACTER_SELECTED_SELECTED] = (deserialiser)&packet_processor::deserialise_LOGIN_CLI_CHARACTER_SELECTED;
@@ -83,6 +84,11 @@ void packet_processor::deserialise_LOGIN_SRV_UNK0x4(UIDecodedPkt *uipkt)
 
 	std::wstring blob1 = consume_hexblob(32);
 	UINT32 unk2 = consume_DWORD();
+}
+
+void packet_processor::deserialise_LOGIN_CLI_RESYNC(UIDecodedPkt *uipkt)
+{
+	consume_add_dword(L"Unk1", uipkt);
 }
 
 void packet_processor::deserialise_LOGIN_SRV_CHAR_LIST(UIDecodedPkt *uipkt)
@@ -214,7 +220,7 @@ void packet_processor::deserialise_LOGIN_CLI_CREATED_CHARACTER(UIDecodedPkt *uip
 
 void packet_processor::deserialise_LOGIN_SRV_FINAL_PKT(UIDecodedPkt *uipkt)
 {
-	UInotifyStreamState(currentMsgStreamID, eStreamTransition, uiMsgQueue);
+	UInotifyStreamState(currentMsgStreamID, eStreamTransitionGame, uiMsgQueue);
 	consume_add_word(L"Arg", uipkt);
 }
 

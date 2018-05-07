@@ -151,6 +151,7 @@ class exileSniffer : public QMainWindow
 		void action_LOGIN_EPHERMERAL_PUBKEY(UIDecodedPkt&, QString *);
 		void action_LOGIN_CLI_AUTH_DATA(UIDecodedPkt&, QString*);
 		void action_LOGIN_SRV_UNK0x4(UIDecodedPkt&, QString*);
+		void action_LOGIN_CLI_RESYNC(UIDecodedPkt&, QString*);
 		void action_LOGIN_CLI_CHANGE_PASSWORD(UIDecodedPkt&, QString*);
 		void action_LOGIN_CLI_DELETE_CHARACTER(UIDecodedPkt&, QString*);
 		void action_LOGIN_CLI_CHARACTER_SELECTED(UIDecodedPkt&, QString*);
@@ -264,7 +265,7 @@ class exileSniffer : public QMainWindow
 		void action_CLI_GUILD_CREATE(UIDecodedPkt&, QString*);
 
 
-		void action_CLI_PACKET_EXIT(UIDecodedPkt&, QString*);
+		void action_CLI_EXIT_TO_CHARSCREEN(UIDecodedPkt&, QString*);
 		void action_SRV_LOGINSRV_CRYPT(UIDecodedPkt&, QString*);
 		void action_CLI_DUEL_CHALLENGE(UIDecodedPkt&, QString*);
 		void action_SRV_DUEL_RESPONSE(UIDecodedPkt&, QString*);
@@ -345,7 +346,8 @@ class exileSniffer : public QMainWindow
 
 		unsigned short UIhexPacketsPerRow = 16;
 
-		SafeQueue<UI_MESSAGE> uiMsgQueue; //read by ui thread, written by all others
+		SafeQueue<UI_MESSAGE *> uiMsgQueue; //read by ui thread, written by all others
+		SafeQueue<GAMEPACKET > gamePktQueue, loginPktQueue;
 		map<DWORD, clientHexData *> clients;
 		map<int, eStreamState> streamStates;
 		//id of an ending stream if we expect a new one soon
@@ -370,3 +372,4 @@ private:
 	key_grabber_thread* keyGrabber;
 	packet_processor* packetProcessor;
 };
+

@@ -9,6 +9,7 @@ void exileSniffer::init_loginPkt_Actioners()
 	loginPktActioners[LOGIN_EPHERMERAL_PUBKEY] = &exileSniffer::action_LOGIN_EPHERMERAL_PUBKEY;
 	loginPktActioners[LOGIN_CLI_AUTH_DATA] = &exileSniffer::action_LOGIN_CLI_AUTH_DATA;	
 	loginPktActioners[LOGIN_SRV_UNK0x4] = &exileSniffer::action_LOGIN_SRV_UNK0x4;
+	loginPktActioners[LOGIN_CLI_RESYNC] = &exileSniffer::action_LOGIN_CLI_RESYNC;
 	loginPktActioners[LOGIN_CLI_CHANGE_PASSWORD] = &exileSniffer::action_LOGIN_CLI_CHANGE_PASSWORD;
 	loginPktActioners[LOGIN_CLI_DELETE_CHARACTER] = &exileSniffer::action_LOGIN_CLI_DELETE_CHARACTER;
 	loginPktActioners[LOGIN_CLI_CHARACTER_SELECTED_SELECTED] = &exileSniffer::action_LOGIN_CLI_CHARACTER_SELECTED;
@@ -159,6 +160,18 @@ void exileSniffer::action_LOGIN_SRV_UNK0x4(UIDecodedPkt& obj, QString *analysis)
 
 	////wstringstream analysisStream;
 	////*analysis = QString::fromStdWString(analysisStream.str());
+}
+
+void exileSniffer::action_LOGIN_CLI_RESYNC(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+	if (!analysis)
+	{
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = "Character Select Resync. Arg 0x"+QString::number(obj.get_UInt32(L"Arg"));
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
 }
 
 wstring bannerCodeLookup(uint code)

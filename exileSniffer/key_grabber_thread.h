@@ -54,7 +54,7 @@ class key_grabber_thread :
 	public base_thread
 {
 public:
-	key_grabber_thread(SafeQueue<UI_MESSAGE>* uiq) {uiMsgQueue = uiq;}
+	key_grabber_thread(SafeQueue<UI_MESSAGE *>* uiq) {uiMsgQueue = uiq;}
 	~key_grabber_thread();
 	KEYDATA * getUnusedMemoryKey(unsigned int streamID, bool recvKey, KEYDATA *hintKey = NULL);
 
@@ -97,7 +97,7 @@ private:
 	bool keyRequired = true;
 	DWORD activeProcess = 0;
 
-	SafeQueue<UI_MESSAGE> *uiMsgQueue;
+	SafeQueue<UI_MESSAGE *> *uiMsgQueue;
 
 	std::mutex processListMutex;
 	std::vector <GAMECLIENTINFO *> activeClients;

@@ -7,12 +7,6 @@
 #define LOGINSERVER_PORT 20481
 #define GAMESERVER_PORT 6112
 
-struct GAMEPACKET {
-	char serverType;
-	bool incoming = false;
-	unsigned int size;
-	std::vector<byte> contents;
-};
 
 streamType portStreamType(unsigned int port)
 {
@@ -27,8 +21,17 @@ unsigned int packet_capture_thread::getStreamID(Tins::TCPIP::Stream& stream)
 	return streamList[stream.create_time()];
 }
 
+bool checkQueue(SafeQueue<GAMEPACKET > *q, std::deque< GAMEPACKET  > &pendingPktQueue)
+{
+	while (!q->empty())
+	{
+		GAMEPACKET pkt = q->waitItem();
+		pendingPktQueue.push_back(pkt);
+	}
+	return !pendingPktQueue.empty();
+}
 
-
+/*
 void packet_capture_thread::on_patchclient_data(Tins::TCPIP::Stream& stream) 
 {
 	//printf("patch client data\n");
@@ -39,7 +42,9 @@ void packet_capture_thread::on_patchclient_data(Tins::TCPIP::Stream& stream)
 	std::string pktstr = pktstringstr.str();
 	WriteFile(patchPipe, pktstr.c_str(), pktstr.size(), 0, 0);
 }
+*/
 
+/*
 // This will be called when there's new server data
 void packet_capture_thread::on_patchserver_data(Tins::TCPIP::Stream& stream) 
 {
@@ -53,57 +58,61 @@ void packet_capture_thread::on_patchserver_data(Tins::TCPIP::Stream& stream)
 	std::string pktstr = pktstringstr.str();
 	WriteFile(patchPipe, pktstr.c_str(), pktstr.size(), 0, 0);
 }
+*/
 
 void packet_capture_thread::on_loginclient_data(Tins::TCPIP::Stream& stream) 
 {
-	//printf("login client data, getting clientpayload of stream %lx\n",&stream);
 	const Tins::TCPIP::Stream::payload_type& payload = stream.client_payload();
 	
-	std::stringstream pktstringstr;
-	pktstringstr << getStreamID(stream) << "," << PACKET_OUTGOING << "," << ms_since_epoch() << "," <<
-		payload.size() << "," << std::string(payload.begin(), payload.end());
-	
-	std::string pktstr = pktstringstr.str();
-	DWORD writtens = 0;
-	WriteFile(loginPipe, pktstr.c_str(), pktstr.size(), &writtens, 0);
+	GAMEPACKET pktobj;
+	pktobj.incoming = false;
+	pktobj.streamID = getStreamID(stream);
+	pktobj.data = std::vector<byte>(payload.begin(), payload.end());
+	pktobj.time = ms_since_epoch();
+
+	loginQueue->addItem(pktobj);
 }
 
 // This will be called when there's new server data
 void packet_capture_thread::on_loginserver_data(Tins::TCPIP::Stream& stream) 
 {
-	//printf("login server data\n"); 
 	const Tins::TCPIP::Stream::payload_type& payload = stream.server_payload();
-	std::stringstream pktstringstr;
-	pktstringstr << getStreamID(stream) << "," << PACKET_INCOMING << "," << ms_since_epoch() << "," <<
-		payload.size() << "," << std::string(payload.begin(), payload.end());
-	std::string pktstr = pktstringstr.str();
-	DWORD writtens = 0;
-	WriteFile(loginPipe, pktstr.c_str(), pktstr.size(), &writtens, 0);
+
+	GAMEPACKET pktobj;
+	pktobj.incoming = true;
+	pktobj.streamID = getStreamID(stream);
+	pktobj.data = std::vector<byte>(payload.begin(), payload.end());
+	pktobj.time = ms_since_epoch();
+
+	loginQueue->addItem(pktobj);
 }
 
 
 void packet_capture_thread::on_gameclient_data(Tins::TCPIP::Stream& stream) 
 {
 	const Tins::TCPIP::Stream::payload_type& payload = stream.client_payload();
-	std::stringstream pktstringstr;
-	pktstringstr << getStreamID(stream) << "," << PACKET_OUTGOING << "," << ms_since_epoch() << "," <<
-		payload.size() << "," << std::string(payload.begin(), payload.end());
-	std::string pktstr = pktstringstr.str();
-	DWORD writtens = 0;
-	WriteFile(gamePipe, pktstr.c_str(), pktstr.size(), &writtens, 0);
+
+	GAMEPACKET pktobj;
+	pktobj.incoming = false;
+	pktobj.streamID = getStreamID(stream);
+	pktobj.data = std::vector<byte>(payload.begin(), payload.end());
+	pktobj.time = ms_since_epoch();
+
+	gameQueue->addItem(pktobj);
 }
 
 // This will be called when there's new server data
 void packet_capture_thread::on_gameserver_data(Tins::TCPIP::Stream& stream) 
 {
-	//printf("game server data\n");
 	const Tins::TCPIP::Stream::payload_type& payload = stream.server_payload();
-	std::stringstream pktstringstr;
-	pktstringstr << getStreamID(stream) << "," << PACKET_INCOMING << "," << ms_since_epoch() << "," <<
-		payload.size() << "," << std::string(payload.begin(), payload.end());
-	std::string pktstr = pktstringstr.str();
-	DWORD writtens = 0;
-	WriteFile(gamePipe, pktstr.c_str(), pktstr.size(), &writtens, 0);
+
+	GAMEPACKET pktobj;
+	pktobj.incoming = true;
+	pktobj.streamID = getStreamID(stream);
+	pktobj.data = std::vector<byte>(payload.begin(), payload.end());
+	pktobj.time = ms_since_epoch();
+
+	gameQueue->addItem(pktobj);
 }
 
 
@@ -124,8 +133,9 @@ void packet_capture_thread::on_new_stream(Tins::TCPIP::Stream& stream)
 	switch (serverType)
 	{
 	case ePatch:
-		stream.client_data_callback(std::bind(&packet_capture_thread::on_patchclient_data, this, _1));
-		stream.server_data_callback(std::bind(&packet_capture_thread::on_patchserver_data, this, _1));
+		//stream.client_data_callback(std::bind(&packet_capture_thread::on_patchclient_data, this, _1));
+		//stream.server_data_callback(std::bind(&packet_capture_thread::on_patchserver_data, this, _1));
+		assert(false);
 		break;
 
 	case eLogin:
@@ -174,26 +184,6 @@ void packet_capture_thread::on_stream_terminated(Tins::TCPIP::Stream& stream, Ti
 	
 }
 
-HANDLE createPipe(std::wstring pipename)
-{
-	const wchar_t* szName = pipename.c_str();
-	HANDLE newhandle = CreateNamedPipe(szName,
-		PIPE_ACCESS_DUPLEX,
-		PIPE_TYPE_MESSAGE,
-		50, //max instances
-		1024 * 1024 * 10, //outbuffer
-		1024 * 1024, //inbuffermax
-		20, //timeout?
-		NULL);
-
-	if ((int)newhandle == -1)
-	{
-		std::cerr << "Error: Could not create sniff pipe. error:" << GetLastError() << std::endl;
-		return 0;
-	}
-	return newhandle;
-}
-
 void packet_capture_thread::main_loop()
 {
 	std::vector<Tins::NetworkInterface> interfaces = Tins::NetworkInterface::all();
@@ -233,12 +223,12 @@ void packet_capture_thread::main_loop()
 	sniffer.sniff_loop([&](Tins::PDU& pdu) { follower.process_packet(pdu); return true; });
 }
 
-packet_capture_thread::packet_capture_thread(SafeQueue<UI_MESSAGE>* uiq)
+packet_capture_thread::packet_capture_thread(SafeQueue<UI_MESSAGE *>* uiq, 
+	SafeQueue<GAMEPACKET > *gameP, SafeQueue<GAMEPACKET > *loginP)
 {
-	patchPipe = createPipe(L"\\\\.\\pipe\\patchpipe");
-	loginPipe = createPipe(L"\\\\.\\pipe\\loginpipe");
-	gamePipe = createPipe(L"\\\\.\\pipe\\gamepipe");
 	uiMsgQueue = uiq;
+	gameQueue = gameP;
+	loginQueue = loginP;
 }
 
 

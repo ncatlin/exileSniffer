@@ -252,7 +252,7 @@ void filterForm::populateFiltersList()
 	//bd
 	//be
 	//bf
-	add_filter_category(CLI_PACKET_EXIT, "Client exit 1", ePktDirection::outgoing);
+	add_filter_category(CLI_EXIT_TO_CHARSCREEN, "Client exit 1", ePktDirection::outgoing);
 	add_filter_category(SRV_LOGINSRV_CRYPT, "Client exit 2", ePktDirection::outgoing);
 	add_filter_category(CLI_DUEL_CHALLENGE, "Player sent duel challenge", ePktDirection::outgoing);
 	add_filter_category(SRV_DUEL_RESPONSE, "Received response to duel challenge", ePktDirection::incoming);

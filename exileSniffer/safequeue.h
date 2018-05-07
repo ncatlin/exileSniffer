@@ -10,7 +10,7 @@ public:
 	SafeQueue() {};
 	~SafeQueue() {};
 
-	void addItem(T * item)
+	void addItem(T item)
 	{
 		mymutex.lock();
 		q.push_back(item);
@@ -18,19 +18,34 @@ public:
 		mymutex.unlock();
 	}
 
-	T *waitItem() {
+	T waitItem() {
 		sem.wait();
 		mymutex.lock();
-		T *item = q.dequeue();
+		T item = q.dequeue();
 		mymutex.unlock();
 		return item;
+	}
 
+	T front() {
+		sem.wait();
+		mymutex.lock();
+		T item = q.front();
+		mymutex.unlock();
+		return item;
+	}
+
+	void pop() {
+		sem.wait();
+		mymutex.lock();
+		q.dequeue();
+		mymutex.unlock();
 	}
 
 	bool empty() { return q.empty(); }
 
 private:
-	QQueue<T *> q;
+	QQueue<T> q;
 	semaphore sem;
 	std::mutex mymutex;
 };
+
