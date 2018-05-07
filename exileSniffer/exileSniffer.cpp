@@ -96,6 +96,9 @@ void exileSniffer::refreshFilters()
 
 	ui.decodedListTable->setRowCount(0);
 
+	decodedCount_Displayed_Filtered = make_pair(0, 0);
+
+	refreshingFilters = true;
 	for (auto it = decodedListEntries.begin(); it != decodedListEntries.end(); it++)
 	{
 		if (packet_passes_decoded_filter(it->second->messageID))
@@ -103,6 +106,8 @@ void exileSniffer::refreshFilters()
 			addDecodedListEntry(it->first, it->second, false);
 		}
 	}
+	refreshingFilters = false;
+	updateDecodedFilterLabel();
 }
 
 void exileSniffer::initFilters()
@@ -119,7 +124,7 @@ void exileSniffer::setup_decoded_messages_tab()
 	ui.decodedListTable->horizontalHeader()->resizeSection(DECODED_SECTION_TIME, 70);
 	ui.decodedListTable->horizontalHeader()->resizeSection(DECODED_SECTION_SENDER, 95);
 	ui.decodedListTable->horizontalHeader()->resizeSection(DECODED_SECTION_MSGID, 45);
-	ui.decodedListTable->horizontalHeader()->resizeSection(DECODED_SECTION_SUMMARY, 450);
+	ui.decodedListTable->horizontalHeader()->setSectionResizeMode(DECODED_SECTION_SUMMARY, QHeaderView::Stretch);
 	ui.decodedListTable->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
 }
 
@@ -820,6 +825,9 @@ void exileSniffer::updateRawFilterLabel()
 
 void exileSniffer::updateDecodedFilterLabel()
 {
+	if (refreshingFilters)
+		ui.decodedDisplayedLabel->setText("Refreshing filters...");
+
 	std::stringstream filterLabTxt;
 	filterLabTxt << std::dec << "Packets ( Displayed: " << decodedCount_Displayed_Filtered.first <<
 	" / Filtered: " << decodedCount_Displayed_Filtered.second <<
@@ -955,7 +963,7 @@ void exileSniffer::decodedCellActivated(int row, int col)
 			hexdump << std::endl << " ";
 		}
 	}
-	hexdump << "\n" << std::endl << std::nouppercase;
+	hexdump << "\n" << std::endl << std::nouppercase << "  ";
 
 	//do ascii dump afterwards so we don't make copy/paste difficult
 	for (int i = 0; i < msgSize; ++i)
@@ -971,7 +979,7 @@ void exileSniffer::decodedCellActivated(int row, int col)
 
 		if ((i + 1) % UIhexPacketsPerRow == 0)
 		{
-			hexdump << " " << std::endl;
+			hexdump << " " << std::endl << "  ";
 		}
 	}
 	hexdump << "\n" << std::endl << std::nouppercase;
@@ -1035,4 +1043,32 @@ void exileSniffer::settingsSelectionChanged()
 {
 	int row = ui.settingsChoiceList->currentRow();
 	ui.settingsStack->setCurrentIndex(row);
+}
+
+void exileSniffer::hashUtilInput()
+{
+	QString indata = ui.hashUtilInputText->text();
+	indata.replace(" ", "");
+	UINT32 testhash = indata.toULong(NULL, 16);
+
+	std::string hashResult;
+	std::string hashCategory;
+
+	ui.order1hash->setText("0x"+QString::number(testhash,16));
+	if (ggpk.lookup_hash(testhash, hashResult, hashCategory))
+	{
+		QString result = QString::fromStdString(hashCategory) + ": " + QString::fromStdString(hashResult);
+		ui.order1hashres->setText(result);
+	}
+	else
+		ui.order1hashres->setText("Not found");
+
+	ui.order2hash->setText("0x" + QString::number(ntohl(testhash), 16));
+	if (ggpk.lookup_hash(ntohl(testhash), hashResult, hashCategory))
+	{
+		QString result = QString::fromStdString(hashCategory) + ": " + QString::fromStdString(hashResult);
+		ui.order2hashres->setText(result);
+	}
+	else
+		ui.order2hashres->setText("Not found");
 }

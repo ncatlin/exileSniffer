@@ -36,7 +36,7 @@ bool gameDataStore::lookup_areaCode(unsigned long code, std::wstring& result)
 	return false;
 }
 
-bool gameDataStore::lookup_hash(unsigned long hash, std::string& result, std::string& category)
+bool gameDataStore::threadsafe_lookup_hash(unsigned long hash, std::string& result, std::string& category)
 {
 	auto monstersIt = monsterHashes.find(hash);
 	if (monstersIt != monsterHashes.end())
@@ -106,6 +106,15 @@ bool gameDataStore::lookup_hash(unsigned long hash, std::string& result, std::st
 	category = "UnknownHash";
 
 	return false;
+}
+
+bool gameDataStore::lookup_hash(unsigned long hash, std::string& result, std::string& category)
+{
+	bool found;
+	myMutex.lock();
+	found = threadsafe_lookup_hash(hash, result, category);
+	myMutex.unlock();
+	return found;
 }
 
 void gameDataStore::fill_UI_pane_IDs()
@@ -193,7 +202,19 @@ void gameDataStore::fill_gamedata_lists()
 	recordsIt = buffDefsDoc.Begin();
 	for (; recordsIt != buffDefsDoc.End(); recordsIt++)
 	{
-		buffDefinitions.push_back(recordsIt->GetString());
+		auto &entry = recordsIt[0];
+		std::pair<std::string, byte> name_statCount;
+		name_statCount.first = entry[0].GetString();
+		name_statCount.second = entry[1].GetUint();
+		buffDefinitions_names_statCounts.push_back(name_statCount);
+	}
+
+	rapidjson::Value& recovBufsDoc = jsondoc.FindMember("RecoveryBuffs")->value;
+	recordsIt = recovBufsDoc.Begin();
+	for (; recordsIt != recovBufsDoc.End(); recordsIt++)
+	{
+		unsigned int buffRow = recordsIt->GetUint();
+		recoveryBuffs.push_back(buffRow);
 	}
 
 	rapidjson::Value& buffVisDoc = jsondoc.FindMember("BuffVisuals")->value;
@@ -226,6 +247,8 @@ void gameDataStore::fill_gamedata_lists()
 
 	rapidjson::Value& itemsDoc = jsondoc.FindMember("ItemHashes")->value;
 	genericHashesLoad(itemsDoc, itemHashes);
+
+
 
 	fill_UI_pane_IDs();
 }

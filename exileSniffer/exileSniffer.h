@@ -96,7 +96,8 @@ class exileSniffer : public QMainWindow
 		void filterSelected();
 		void stopDecrypting();
 		void resumeScanningEvent();
-		void settingsSelectionChanged();
+		void settingsSelectionChanged(); 
+		void hashUtilInput();
 
 	private:
 		void setup_raw_stream_tab();
@@ -179,6 +180,7 @@ class exileSniffer : public QMainWindow
 		void action_SRV_INSTANCE_SERVER_DATA(UIDecodedPkt&, QString*);
 		void action_CLI_PICKUP_ITEM(UIDecodedPkt&, QString*);
 		void action_CLI_PLACE_ITEM(UIDecodedPkt&, QString*);
+		void action_CLI_DROP_ITEM(UIDecodedPkt&, QString*);
 		void action_CLI_REMOVE_SOCKET(UIDecodedPkt&, QString*);
 		void action_CLI_INSERT_SOCKET(UIDecodedPkt&, QString*);
 
@@ -222,6 +224,11 @@ class exileSniffer : public QMainWindow
 
 		void action_CLI_MOVE_ITEM_PANE(UIDecodedPkt&, QString*);
 
+		void action_CLI_CONFIRM_SELL(UIDecodedPkt&, QString*);
+
+		void action_SRV_UNK_0x67(UIDecodedPkt&, QString*);
+		void action_SRV_UNK_0x68(UIDecodedPkt&, QString*);
+
 		void action_SRV_UNK_0x6c(UIDecodedPkt&, QString*);
 		void action_SRV_CREATE_ITEM(UIDecodedPkt&, QString*);
 		void action_SRV_SLOT_ITEMSLIST(UIDecodedPkt&, QString*);
@@ -230,6 +237,7 @@ class exileSniffer : public QMainWindow
 		void action_SRV_UNK_0x72(UIDecodedPkt&, QString*);
 		void action_UNK_MESSAGE_0x73(UIDecodedPkt&, QString*);
 		void action_CLI_SET_STATUS_MESSAGE(UIDecodedPkt&, QString*);
+		void action_SRV_UNK_0x75(UIDecodedPkt&, QString*);
 
 		void action_CLI_SWAPPED_WEAPONS(UIDecodedPkt&, QString*);
 
@@ -239,12 +247,17 @@ class exileSniffer : public QMainWindow
 		void action_CLI_SKILLPANE_ACTION(UIDecodedPkt&, QString*);
 
 		void action_SRV_SKILLPANE_DATA(UIDecodedPkt&, QString*);
+		void action_SRV_UNK_POSITION_LIST(UIDecodedPkt&, QString*);
 
 		void action_CLI_MICROTRANSACTION_SHOP_ACTION(UIDecodedPkt&, QString*);
 		void action_SRV_MICROTRANSACTION_SHOP_DETAILS(UIDecodedPkt&, QString*);
 		void action_SRV_UNK_A3(UIDecodedPkt&, QString*);
 
 		void action_SRV_CHAT_CHANNEL_ID(UIDecodedPkt&, QString*);
+
+		void action_SRV_UNK_A5(UIDecodedPkt&, QString*);
+
+		void action_SRV_GUILD_MEMBER_LIST(UIDecodedPkt&, QString*);
 
 		void action_CLI_GUILD_CREATE(UIDecodedPkt&, QString*);
 
@@ -290,6 +303,8 @@ class exileSniffer : public QMainWindow
 		void action_SRV_START_BUFF(UIDecodedPkt&, QString*);
 		void action_SRV_END_EFFECT(UIDecodedPkt&, QString*);
 
+		void action_SRV_EVENT_TRIGGERED(UIDecodedPkt&, QString*);
+
 		void action_SRV_UNK_0x106(UIDecodedPkt&, QString*); 
 		
 		void action_SRV_UNK_0x108(UIDecodedPkt&, QString*);
@@ -300,6 +315,9 @@ class exileSniffer : public QMainWindow
 		void action_SRV_UNKNOWN_0x111(UIDecodedPkt&, QString*);
 		void action_SRV_UNKNOWN_0x118(UIDecodedPkt&, QString*);
 		void action_CLI_OPTOUT_TUTORIALS(UIDecodedPkt&, QString*);
+		void action_SRV_BESTIARY_CAPTIVES(UIDecodedPkt&, QString*);
+		void action_CLI_OPEN_BESTIARY(UIDecodedPkt&, QString*);
+		void action_SRV_BESTIARY_UNLOCKED_LIST(UIDecodedPkt&, QString*);
 		void action_SRV_SHOW_ENTERING_MSG(UIDecodedPkt&, QString*);
 		void action_SRV_HEARTBEAT(UIDecodedPkt&, QString*);
 		void action_SRV_ADD_OBJECT(UIDecodedPkt&, QString*);
@@ -317,6 +335,7 @@ class exileSniffer : public QMainWindow
 		std::pair <unsigned long, unsigned long> rawCount_Recorded_Filtered;
 		std::pair <int, int> decodedCount_Displayed_Filtered;	 //table row index is int
 		int decodedErrorPacketCount = 0;
+		bool refreshingFilters = false;
 		
 		SafeQueue<UI_MESSAGE> uiMsgQueue; //read by ui thread, written by all others
 		map<DWORD, clientHexData *> clients;

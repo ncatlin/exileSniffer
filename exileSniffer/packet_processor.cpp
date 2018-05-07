@@ -222,7 +222,17 @@ void packet_processor::handle_packet_from_loginserver(byte* data, unsigned int d
 
 	if (!alreadyDecrypted)
 	{
-		currentStreamObj->recvSalsa.ProcessData(decryptedBuffer->data(), data, dataLen);
+		try {
+			currentStreamObj->recvSalsa.ProcessData(decryptedBuffer->data(), data, dataLen);
+		}
+		catch (...) {
+			QString msg = "An exception was caught during salsa decrypt. This is usually due to incorrect deserialisation";
+			UIaddLogMsg(msg, getLatestDecryptProcess(), uiMsgQueue);
+			currentStreamObj->failed = true;
+			UInotifyStreamState(currentMsgStreamID, eStreamState::eStreamFailed, uiMsgQueue);
+			return;
+		}
+
 		sendIterationToUI(currentStreamObj->recvSalsa, false);
 	}
 
@@ -319,6 +329,7 @@ void packet_processor::handle_packet_to_loginserver(byte* data, unsigned int dat
 						{
 							UIaddLogMsg("Decryption abandoned due to long wait", 0, uiMsgQueue);
 							currentStreamObj->failed = true;
+							UInotifyStreamState(currentMsgStreamID, eStreamState::eStreamFailed, uiMsgQueue);
 							return;
 						}
 					}
@@ -439,7 +450,7 @@ void packet_processor::handle_login_data(byte* data)
 
 bool packet_processor::handle_game_data(byte* data)
 {
-
+	//todo: this is no longer IPC, can move this to the sniffer thread and ditch tokens
 	char *next_token = (char *)data;
 
 	char *streamID_s = strtok_s(next_token, ",", &next_token);
@@ -453,7 +464,7 @@ bool packet_processor::handle_game_data(byte* data)
 
 	//the keys are established during handling of the first packet to the gameserver
 	//sometimes we will process the response from the gameserver first, causing badness.
-	//this delays processing of recv data until we have a recv key
+	//delays processing of recv data until we have a recv key
 	if (currentMsgIncoming && currentStreamObj->workingRecvKey == NULL)
 		return false;
 
@@ -585,6 +596,7 @@ void packet_processor::handle_packet_to_gameserver(byte* data, unsigned int data
 					currentStreamObj->workingSendKey = pendingGameserverKeys.at(connectionID).first;
 					currentStreamObj->workingRecvKey = pendingGameserverKeys.at(connectionID).second;
 					UInotifyStreamState(currentMsgStreamID, eStreamDecrypting, uiMsgQueue);
+					pendingGameserverKeys.clear();
 				}
 				else
 				{
