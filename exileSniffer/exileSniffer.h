@@ -100,6 +100,8 @@ class exileSniffer : public QMainWindow
 		void hashUtilInput();
 
 	private:
+		void setup_settings_tab();
+		void save_settings();
 		void setup_raw_stream_tab();
 		void setup_decoded_messages_tab();
 		void setup_decryption_tab();
@@ -110,7 +112,7 @@ class exileSniffer : public QMainWindow
 		void setStateNotDecrypting(); 
 		void action_ended_stream(int streamID);
 		void handle_stream_event(UI_STREAMEVENT_MSG *streamNote);
-		void handle_client_event(UI_CLIENTEVENT_MSG *cliEvtMsg, bool isRunning);
+		void handle_client_event(UI_CLIENTEVENT_MSG *cliEvtMsg);
 		void output_hex_to_file(UI_RAWHEX_PKT *pkt, std::ofstream& file);
 		void output_hex_to_pane(UI_RAWHEX_PKT *pkt);
 
@@ -330,13 +332,19 @@ class exileSniffer : public QMainWindow
 		Ui::rawFilterForm rawFiltersFormUI;
 		filterForm filterFormObj;
 
-		unsigned short UIhexPacketsPerRow = 16;
+		QSettings *settings = new QSettings("ExileSniffer", "Settings");
+		bool doLogging = true, doPipe = true;
+		QString pipeName;
+		QDir logDir;
 
 		std::pair <unsigned long, unsigned long> rawCount_Recorded_Filtered;
 		std::pair <int, int> decodedCount_Displayed_Filtered;	 //table row index is int
 		int decodedErrorPacketCount = 0;
 		bool refreshingFilters = false;
 		
+
+		unsigned short UIhexPacketsPerRow = 16;
+
 		SafeQueue<UI_MESSAGE> uiMsgQueue; //read by ui thread, written by all others
 		map<DWORD, clientHexData *> clients;
 		map<int, eStreamState> streamStates;

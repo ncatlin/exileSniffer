@@ -121,15 +121,11 @@ public:
     QWidget *logSettings;
     QVBoxLayout *verticalLayout;
     QGroupBox *groupBox_2;
-    QFormLayout *formLayout;
-    QLabel *label_7;
-    QHBoxLayout *horizontalLayout_8;
-    QLineEdit *lineEdit;
-    QPushButton *pushButton;
-    QFrame *horizontalFrame_4;
-    QHBoxLayout *horizontalLayout_11;
-    QPushButton *logsOpenDirBtn;
+    QGridLayout *gridLayout_4;
     QCheckBox *logsEnabledCheck;
+    QPushButton *logsOpenDirBtn;
+    QLineEdit *logDirLine;
+    QPushButton *logSetDirBtn;
     QWidget *feedSettings;
     QVBoxLayout *verticalLayout_5;
     QGroupBox *groupBox;
@@ -454,7 +450,10 @@ public:
         decodedListTable = new QTableWidget(splitter);
         if (decodedListTable->columnCount() < 4)
             decodedListTable->setColumnCount(4);
+        QBrush brush(QColor(0, 0, 0, 255));
+        brush.setStyle(Qt::SolidPattern);
         QTableWidgetItem *__qtablewidgetitem = new QTableWidgetItem();
+        __qtablewidgetitem->setForeground(brush);
         decodedListTable->setHorizontalHeaderItem(0, __qtablewidgetitem);
         QTableWidgetItem *__qtablewidgetitem1 = new QTableWidgetItem();
         decodedListTable->setHorizontalHeaderItem(1, __qtablewidgetitem1);
@@ -465,6 +464,7 @@ public:
         decodedListTable->setObjectName(QStringLiteral("decodedListTable"));
         decodedListTable->setContextMenuPolicy(Qt::CustomContextMenu);
         decodedListTable->setLayoutDirection(Qt::LeftToRight);
+        decodedListTable->setStyleSheet(QStringLiteral(""));
         decodedListTable->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
         decodedListTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
         decodedListTable->setProperty("showDropIndicator", QVariant(false));
@@ -636,50 +636,11 @@ public:
         font9.setFamily(QStringLiteral("MS Shell Dlg 2"));
         font9.setPointSize(10);
         groupBox_2->setFont(font9);
-        formLayout = new QFormLayout(groupBox_2);
-        formLayout->setSpacing(6);
-        formLayout->setContentsMargins(11, 11, 11, 11);
-        formLayout->setObjectName(QStringLiteral("formLayout"));
-        label_7 = new QLabel(groupBox_2);
-        label_7->setObjectName(QStringLiteral("label_7"));
-        QFont font10;
-        font10.setFamily(QStringLiteral("MS Shell Dlg 2"));
-        label_7->setFont(font10);
-
-        formLayout->setWidget(2, QFormLayout::LabelRole, label_7);
-
-        horizontalLayout_8 = new QHBoxLayout();
-        horizontalLayout_8->setSpacing(6);
-        horizontalLayout_8->setObjectName(QStringLiteral("horizontalLayout_8"));
-        lineEdit = new QLineEdit(groupBox_2);
-        lineEdit->setObjectName(QStringLiteral("lineEdit"));
-
-        horizontalLayout_8->addWidget(lineEdit);
-
-        pushButton = new QPushButton(groupBox_2);
-        pushButton->setObjectName(QStringLiteral("pushButton"));
-        pushButton->setMinimumSize(QSize(95, 0));
-
-        horizontalLayout_8->addWidget(pushButton);
-
-
-        formLayout->setLayout(2, QFormLayout::FieldRole, horizontalLayout_8);
-
-        horizontalFrame_4 = new QFrame(groupBox_2);
-        horizontalFrame_4->setObjectName(QStringLiteral("horizontalFrame_4"));
-        horizontalFrame_4->setLayoutDirection(Qt::RightToLeft);
-        horizontalLayout_11 = new QHBoxLayout(horizontalFrame_4);
-        horizontalLayout_11->setSpacing(6);
-        horizontalLayout_11->setContentsMargins(11, 11, 11, 11);
-        horizontalLayout_11->setObjectName(QStringLiteral("horizontalLayout_11"));
-        logsOpenDirBtn = new QPushButton(horizontalFrame_4);
-        logsOpenDirBtn->setObjectName(QStringLiteral("logsOpenDirBtn"));
-        logsOpenDirBtn->setMinimumSize(QSize(95, 0));
-        logsOpenDirBtn->setMaximumSize(QSize(100, 16777215));
-
-        horizontalLayout_11->addWidget(logsOpenDirBtn);
-
-        logsEnabledCheck = new QCheckBox(horizontalFrame_4);
+        gridLayout_4 = new QGridLayout(groupBox_2);
+        gridLayout_4->setSpacing(6);
+        gridLayout_4->setContentsMargins(11, 11, 11, 11);
+        gridLayout_4->setObjectName(QStringLiteral("gridLayout_4"));
+        logsEnabledCheck = new QCheckBox(groupBox_2);
         logsEnabledCheck->setObjectName(QStringLiteral("logsEnabledCheck"));
         QSizePolicy sizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
         sizePolicy.setHorizontalStretch(0);
@@ -687,14 +648,30 @@ public:
         sizePolicy.setHeightForWidth(logsEnabledCheck->sizePolicy().hasHeightForWidth());
         logsEnabledCheck->setSizePolicy(sizePolicy);
         logsEnabledCheck->setMinimumSize(QSize(100, 0));
-        logsEnabledCheck->setMaximumSize(QSize(16777215, 16777215));
+        logsEnabledCheck->setMaximumSize(QSize(128, 60));
         logsEnabledCheck->setLayoutDirection(Qt::LeftToRight);
         logsEnabledCheck->setChecked(true);
 
-        horizontalLayout_11->addWidget(logsEnabledCheck);
+        gridLayout_4->addWidget(logsEnabledCheck, 0, 0, 1, 1);
 
+        logsOpenDirBtn = new QPushButton(groupBox_2);
+        logsOpenDirBtn->setObjectName(QStringLiteral("logsOpenDirBtn"));
+        logsOpenDirBtn->setMinimumSize(QSize(95, 0));
+        logsOpenDirBtn->setMaximumSize(QSize(100, 16777215));
+        logsOpenDirBtn->setLayoutDirection(Qt::LeftToRight);
 
-        formLayout->setWidget(0, QFormLayout::FieldRole, horizontalFrame_4);
+        gridLayout_4->addWidget(logsOpenDirBtn, 0, 1, 1, 1);
+
+        logDirLine = new QLineEdit(groupBox_2);
+        logDirLine->setObjectName(QStringLiteral("logDirLine"));
+
+        gridLayout_4->addWidget(logDirLine, 1, 0, 1, 1);
+
+        logSetDirBtn = new QPushButton(groupBox_2);
+        logSetDirBtn->setObjectName(QStringLiteral("logSetDirBtn"));
+        logSetDirBtn->setMinimumSize(QSize(95, 0));
+
+        gridLayout_4->addWidget(logSetDirBtn, 1, 1, 1, 1);
 
 
         verticalLayout->addWidget(groupBox_2);
@@ -755,9 +732,9 @@ public:
         groupBox_4 = new QGroupBox(utilsTab);
         groupBox_4->setObjectName(QStringLiteral("groupBox_4"));
         groupBox_4->setMaximumSize(QSize(16777215, 135));
-        QFont font11;
-        font11.setPointSize(9);
-        groupBox_4->setFont(font11);
+        QFont font10;
+        font10.setPointSize(9);
+        groupBox_4->setFont(font10);
         formLayout_4 = new QFormLayout(groupBox_4);
         formLayout_4->setSpacing(6);
         formLayout_4->setContentsMargins(11, 11, 11, 11);
@@ -789,13 +766,13 @@ public:
 
         order1hashres = new QLabel(groupBox_4);
         order1hashres->setObjectName(QStringLiteral("order1hashres"));
-        order1hashres->setFont(font11);
+        order1hashres->setFont(font10);
 
         formLayout_4->setWidget(2, QFormLayout::FieldRole, order1hashres);
 
         order2hashres = new QLabel(groupBox_4);
         order2hashres->setObjectName(QStringLiteral("order2hashres"));
-        order2hashres->setFont(font11);
+        order2hashres->setFont(font10);
 
         formLayout_4->setWidget(3, QFormLayout::FieldRole, order2hashres);
 
@@ -828,7 +805,7 @@ public:
         QObject::connect(decodedFiltersBtn, SIGNAL(clicked()), exileSniffer, SLOT(showRawFiltersDLG()));
         QObject::connect(hashUtilInputText, SIGNAL(textChanged(QString)), exileSniffer, SLOT(hashUtilInput()));
 
-        processTabs->setCurrentIndex(5);
+        processTabs->setCurrentIndex(4);
         decrypt_details_stack->setCurrentIndex(1);
         settingsChoiceList->setCurrentRow(0);
         settingsStack->setCurrentIndex(1);
@@ -898,13 +875,12 @@ public:
         ___qlistwidgetitem1->setText(QApplication::translate("exileSniffer", "Feeds", Q_NULLPTR));
         settingsChoiceList->setSortingEnabled(__sortingEnabled);
 
-        groupBox_2->setTitle(QApplication::translate("exileSniffer", "Packet Hexdumps", Q_NULLPTR));
-        label_7->setText(QApplication::translate("exileSniffer", "Folder", Q_NULLPTR));
-        pushButton->setText(QApplication::translate("exileSniffer", "{}", Q_NULLPTR));
-        logsOpenDirBtn->setText(QApplication::translate("exileSniffer", "Open Directory", Q_NULLPTR));
+        groupBox_2->setTitle(QApplication::translate("exileSniffer", "Packet Hexdumps Directory", Q_NULLPTR));
         logsEnabledCheck->setText(QApplication::translate("exileSniffer", "Logging Enabled", Q_NULLPTR));
+        logsOpenDirBtn->setText(QApplication::translate("exileSniffer", "Open", Q_NULLPTR));
+        logSetDirBtn->setText(QApplication::translate("exileSniffer", "{}", Q_NULLPTR));
         groupBox->setTitle(QApplication::translate("exileSniffer", "Named Pipe (Decoded Packets - JSON)", Q_NULLPTR));
-        label_8->setText(QApplication::translate("exileSniffer", "Name", Q_NULLPTR));
+        label_8->setText(QApplication::translate("exileSniffer", "Name:", Q_NULLPTR));
         label_9->setText(QApplication::translate("exileSniffer", "Path:", Q_NULLPTR));
         namedPipePathResult->setText(QApplication::translate("exileSniffer", "TextLabel", Q_NULLPTR));
         pipeFeedEnableCheck->setText(QApplication::translate("exileSniffer", "Enabled", Q_NULLPTR));

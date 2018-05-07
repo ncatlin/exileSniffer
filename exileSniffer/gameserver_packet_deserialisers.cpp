@@ -1660,17 +1660,23 @@ void packet_processor::deserialise_SRV_EVENTSLIST_2(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_CLI_USED_SKILL(UIDecodedPkt *uipkt)
 {
-	//todo
+	consume_add_dword_ntoh(L"Coord1", uipkt);
+	consume_add_dword_ntoh(L"Coord2", uipkt);
+	consume_add_word(L"SkillID", uipkt);
+	consume_add_byte(L"ControlModifier", uipkt);
 }
 
 void packet_processor::deserialise_CLI_CLICK_OBJ(UIDecodedPkt *uipkt)
 {
-	//todo
+	consume_add_dword_ntoh(L"ObjID", uipkt);
+	consume_add_word(L"SkillID", uipkt);
+	consume_add_byte(L"ControlModifier", uipkt);
 }
 
 void packet_processor::deserialise_CLI_MOUSE_HELD(UIDecodedPkt *uipkt)
 {
-	//todo
+	consume_add_dword_ntoh(L"Coord1", uipkt);
+	consume_add_dword_ntoh(L"Coord2", uipkt);
 }
 
 void packet_processor::deserialise_CLI_MOUSE_RELEASE(UIDecodedPkt *uipkt)

@@ -54,30 +54,8 @@ bool key_grabber_thread::insertKey(DWORD pid, DWORD *keyblobptr, DWORD foundAddr
 	resultMsg << "Found candidate key blob at address: 0x" << std::hex << foundAddress;
 	UIaddLogMsg(resultMsg.str(), pid, uiMsgQueue);
 
-	std::cout << std::setfill('0') << "KEY: ";
-	//outfile << std::setfill('0') << "KEY: ";
-	for (size_t i = 0; i < 8; ++i) {
-		DWORD item = newKey->salsakey[i];
-		std::cout << std::hex << std::setw(8) << (DWORD)item << " ";
-		//outfile << std::hex << std::setw(8) << (DWORD)item << " ";
-
-	}
-	std::cout << std::endl;
-	//outfile << std::endl;
-
-
-	std::cout << std::setfill('0') << "IV: ";
-	//outfile << std::setfill('0') << "IV: ";
-	for (size_t i = 0; i < 2; ++i) {
-		DWORD item = newKey->IV[i];
-		std::cout << std::hex << std::setw(8) << (DWORD)item;
-		//outfile << std::hex << std::setw(8) << (DWORD)item;
-	}
-	std::cout << std::endl;
-	//outfile << std::endl;
-
-	//pushing FIFO means that old dud keys don't have to be tested by every thread
-	//to get to the fresh keys
+	//theory: pushing FIFO so old dud keys don't have to be tested by every thread
+	//reality: only 1 client supported at once so keys cleared as soon as login works 
 	UNCLAIMED_KEY newUnc(newKey);
 	unclaimedKeys.push_front(newUnc);
 	
@@ -478,9 +456,8 @@ void key_grabber_thread::grabKeys(GAMECLIENTINFO *gameClient)
 /*
 Iterate through windows process list looking for pathofexile processes
 Argument: destination vector for processIDs of running clients
-Returns: number of processes found
 */
-int key_grabber_thread::getClientPIDs(std::vector <DWORD>& resultsList)
+void key_grabber_thread::getRunningClientPIDs(std::vector <DWORD>& resultsList)
 {
 	resultsList.clear();
 
@@ -501,7 +478,6 @@ int key_grabber_thread::getClientPIDs(std::vector <DWORD>& resultsList)
 		}
 	}
 	CloseHandle(snapshot);
-	return resultsList.size();
 }
 
 /*
@@ -647,11 +623,6 @@ void key_grabber_thread::suspend_scanning(DWORD activeProcessPID)
 	erase_client_objects();
 }
 
-void key_grabber_thread::resume_scanning()
-{
-	keyRequired = true;
-}
-
 /*
 This loop maintains a list of pathofexile processes
 When a new one is detected a set of memory scanning threads are launched for it
@@ -661,10 +632,8 @@ void key_grabber_thread::main_loop()
 {
 	while (!terminateScanning)
 	{
-
-		//get running clients
 		std::vector <DWORD> latestClientPIDs;
-		getClientPIDs(latestClientPIDs);
+		getRunningClientPIDs(latestClientPIDs);
 
 		if (!keyRequired)
 		{

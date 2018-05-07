@@ -438,6 +438,9 @@ void filterForm::buildBuiltinPresets()
 	//don't care about things moving - quite spammy
 	ERASE_FROM_VECTOR(ex_VeryCommon.IDs, SRV_MOBILE_START_SKILL);
 	ERASE_FROM_VECTOR(ex_VeryCommon.IDs, CLI_ACTION_PREDICTIVE);
+	ERASE_FROM_VECTOR(ex_VeryCommon.IDs, CLI_MOUSE_HELD);
+	ERASE_FROM_VECTOR(ex_VeryCommon.IDs, CLI_CLICK_OBJ);
+	ERASE_FROM_VECTOR(ex_VeryCommon.IDs, CLI_MOUSE_RELEASE);
 	
 
 	ex_VeryCommon.name = "Exclude chat/skills";
@@ -451,6 +454,7 @@ void filterForm::buildBuiltinPresets()
 	ERASE_FROM_VECTOR(exclude_Common.IDs, SRV_STAT_CHANGED);
 	ERASE_FROM_VECTOR(exclude_Common.IDs, SRV_START_EFFECT);
 	ERASE_FROM_VECTOR(exclude_Common.IDs, SRV_END_EFFECT);
+	ERASE_FROM_VECTOR(exclude_Common.IDs, SRV_IDNOTIFY_0x137);	//135 more useful
 
 	exclude_Common.name = "Exclude chat/skills/combat";
 	exclude_Common.description = "Filters out chat, actions and status updates";

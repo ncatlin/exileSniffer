@@ -126,10 +126,8 @@ public:
 	void setEndOffset(unsigned short off) { bufferOffsets.second = off; }
 	void setFailedDecode() { failedDecode = true; }
 	void setAbandoned() { abandoned = true; }
-	void setMultiPacket() { multiPacket = true; }
 	bool decodeError() { return failedDecode; }
 	bool wasAbandoned() { return abandoned; }
-	bool spansMultiplePackets() { return multiPacket; }
 	long long time_processed_ms() { return mstime; }
 	DWORD clientProcessID() { return PID; }
 	int streamID() { return nwkstreamID; }
@@ -148,7 +146,6 @@ private:
 	DWORD PID;
 	bool failedDecode = false;
 	bool abandoned = false;
-	bool multiPacket = false;
 	bool payloadOperations = false;
 	long long mstime;
 };

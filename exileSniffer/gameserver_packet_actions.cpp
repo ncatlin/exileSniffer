@@ -378,30 +378,34 @@ void exileSniffer::addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPk
 		ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_SUMMARY, summary);
 
 		setRowColor(rowIndex, QColor(255, 175, 175, 255));
-
-		//nice neutral light orangey colour - use it for something else
-		//setRowColor(rowIndex, QColor(255, 232, 209, 255));
 		return;
 	}
-
-	if (obj->spansMultiplePackets())
-		entry.summary = "<!MultiPkt!>" + entry.summary;
 
 	QTableWidgetItem *summary = new QTableWidgetItem(entry.summary);
 	ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_SUMMARY, summary);
 
 	byte flags = entry.pktFlags();
-	if (!(flags & PKTBIT_GAMESERVER))
+	bool incoming = ((flags & PKTBIT_INBOUND) != 0);
+
+	if (flags & PKTBIT_GAMESERVER)
+	{
+		if (incoming)
+			setRowColor(rowIndex, Qt::white);
+		else
+			setRowColor(rowIndex, QColor(235, 235, 235, 255));
+	}
+	else
 	{
 		if (flags & PKTBIT_LOGINSERVER)
-			setRowColor(rowIndex, QColor(232, 226, 155, 255));
-		else if (flags & PKTBIT_PATCHSERVER)
-			setRowColor(rowIndex, QColor(153, 217, 234, 255));
-		else
-			setRowColor(rowIndex, QColor(255, 0, 0, 0));
+		{
+			if (incoming)
+				setRowColor(rowIndex, QColor(255, 255, 200, 255));
+			else
+				setRowColor(rowIndex, QColor(255, 255, 230, 255));
+		}
+		//else if (flags & PKTBIT_PATCHSERVER)
+		//	setRowColor(rowIndex, QColor(153, 217, 234, 255));
 	}
-
-
 }
 
 void exileSniffer::action_undecoded_packet(UIDecodedPkt& obj)
@@ -1643,9 +1647,7 @@ void exileSniffer::action_SRV_FRIENDSLIST(UIDecodedPkt& obj, QString *analysis)
 	if (!analysis)
 	{
 		std::wstringstream summary;
-		summary << "Unknown social/account name " << obj.get_wstring(L"Name") << std::hex;
-		summary << "  -  Other data: 0x" << obj.get_UInt32(L"Unk1") << ", 0x" << obj.get_UInt32(L"Unk2")
-			<< ", 0x" << obj.get_UInt32(L"Unk3") << ", 0x" << obj.get_UInt32(L"Unk4");
+		summary << "Character socialpane " << obj.get_wstring(L"Name") << ", " << obj.get_wstring(L"String2");
 
 		UI_DECODED_LIST_ENTRY listentry(obj);
 		listentry.summary = listentry.summary = QString::fromStdWString(summary.str());
@@ -2486,8 +2488,20 @@ void exileSniffer::action_CLI_USED_SKILL(UIDecodedPkt& obj, QString *analysis)
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
+		UINT32 coord1 = obj.get_UInt32(L"Coord1");
+		UINT32 coord2 = obj.get_UInt32(L"Coord2");
+		UINT32 modifier = obj.get_UInt32(L"ControlModifier");
+
+		wstringstream summary;
+		summary << "[Lockstep]Used skill " << std::hex << obj.get_UInt32(L"SkillID") << " -> ";
+		summary << std::dec << "(" << coord1 << "," << coord2 << ")";
+
+		std::wstring modDetails = explainModifier(modifier);
+		if (!modDetails.empty())
+			summary << " [" << modDetails << "]";
+
 		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player(You) used skill (lockstep)";
+		listentry.summary = QString::fromStdWString(summary.str());
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
@@ -2496,10 +2510,22 @@ void exileSniffer::action_CLI_USED_SKILL(UIDecodedPkt& obj, QString *analysis)
 void exileSniffer::action_CLI_CLICK_OBJ(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
+
+	UINT32 objID = obj.get_UInt32(L"ObjID");
+	UINT32 skillID = obj.get_UInt32(L"SkillID");
+	UINT32 modifier = obj.get_UInt32(L"ControlModifier");
+
 	if (!analysis)
 	{
+		wstringstream summary;
+		summary << "[Lockstep]Clicked obj 0x" << std::hex << objID << " using skill: 0x" << skillID;
+
+		std::wstring modDetails = explainModifier(modifier);
+		if (!modDetails.empty())
+			summary << " [" << modDetails << "]";
+
 		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player(You) clicked object x";
+		listentry.summary = QString::fromStdWString(summary.str());
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
@@ -2510,8 +2536,12 @@ void exileSniffer::action_CLI_MOUSE_HELD(UIDecodedPkt& obj, QString *analysis)
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
+		wstringstream summary;
+		summary << "[Lockstep]Mouse Held (" << obj.get_UInt32(L"Coord1") 
+			<< "," << obj.get_UInt32(L"Coord2") << ")";
+		
 		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player(You) is holding mouse";
+		listentry.summary = QString::fromStdWString(summary.str());
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
@@ -2523,7 +2553,7 @@ void exileSniffer::action_CLI_MOUSE_RELEASE(UIDecodedPkt& obj, QString *analysis
 	if (!analysis)
 	{
 		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player(You) released mouse";
+		listentry.summary = "Released mouse";
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
