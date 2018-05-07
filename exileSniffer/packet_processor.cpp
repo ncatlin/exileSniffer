@@ -309,11 +309,8 @@ void packet_processor::handle_packet_to_loginserver(byte* data, unsigned int dat
 	if (!currentStreamObj->workingSendKey)
 	{
 		unsigned int msWaited = 0;
-		std::cout << "starting keytest loop on intercepted Login request for streamid " << currentMsgStreamID  << std::endl;
 		while (true)
 		{
-
-			//should use hint here, but have to reliably find corresponding stream
 			KEYDATA *keyCandidate = keyGrabber->getUnusedMemoryKey(currentMsgStreamID, false);
 			if (!keyCandidate) {
 				Sleep(200);

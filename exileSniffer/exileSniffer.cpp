@@ -18,6 +18,7 @@ exileSniffer::exileSniffer(QWidget *parent)
 
 	ui.setupUi(this);
 
+	setup_settings_tab();
 	setup_raw_stream_tab();
 	setup_decoded_messages_tab();
 	initFilters();
@@ -59,6 +60,35 @@ void exileSniffer::setLabelActive(QLabel *lab, bool state)
 	}
 }
 
+void exileSniffer::save_settings()
+{
+	settings->setValue("LoggingEnabled", ui.logsEnabledCheck->isChecked());
+	settings->setValue("LogDir", ui.logDirLine->text());
+
+	settings->setValue("PipeEnabled", ui.pipeFeedEnableCheck->isChecked());
+	settings->setValue("PipeName", ui.namedPipeChosenName->text());
+}
+
+void exileSniffer::setup_settings_tab()
+{
+	ui.settingsChoiceList->setItemSelected(ui.settingsChoiceList->item(0), true);
+	ui.settingsStack->setCurrentIndex(0);
+
+	doLogging = settings->value("LoggingEnabled", true).toBool();
+	ui.logsEnabledCheck->setChecked(doLogging);
+
+	QString logdirstring = settings->value("LogDir", "fff").toString();
+	ui.logDirLine->setText(logdirstring);
+	logDir = logdirstring;
+
+	doPipe = settings->value("PipeEnabled", true).toBool();
+	ui.pipeFeedEnableCheck->setChecked(doPipe);
+
+	QString pipename = settings->value("PipeName", "fff2").toString();
+	ui.namedPipeChosenName->setText(pipename);
+
+	settings->sync();
+}
 
 void exileSniffer::setup_decryption_tab()
 {
@@ -421,10 +451,7 @@ void exileSniffer::action_UI_Msg(UI_MESSAGE *msg)
 
 		case uiMsgType::eClientEvent:
 		{
-			UI_CLIENTEVENT_MSG *cliEvtMsg = (UI_CLIENTEVENT_MSG *)msg;
-			handle_client_event(cliEvtMsg, true);
-
-
+			handle_client_event((UI_CLIENTEVENT_MSG *)msg);
 			break;
 		}
 
@@ -521,10 +548,11 @@ void exileSniffer::add_metalog_update(QString msg, DWORD pid)
 	ui.metaLog->appendPlainText(QString::fromStdString(ss.str()));
 }
 
-void exileSniffer::handle_client_event(UI_CLIENTEVENT_MSG *cliEvtMsg, bool isRunning)
+void exileSniffer::handle_client_event(UI_CLIENTEVENT_MSG *cliEvtMsg)
 {
+	bool isRunning = cliEvtMsg->running;
 	DWORD processID = cliEvtMsg->pid;
-	if (cliEvtMsg->pid)
+	if (processID)
 	{
 		if (!isRunning && activeDecryption && processID == packetProcessor->getLatestDecryptProcess())
 		{

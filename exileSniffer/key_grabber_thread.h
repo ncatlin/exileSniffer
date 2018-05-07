@@ -64,7 +64,7 @@ public:
 	bool relaxScanFilters();
 	void restartScanOnClient(DWORD pid);
 	void suspend_scanning(DWORD activeProcessPID);
-	void resume_scanning();
+	void resume_scanning() { keyRequired = true; }
 
 private:
 	void main_loop();
@@ -72,7 +72,7 @@ private:
 	void keyGrabController(GAMECLIENTINFO *gameClient);
 	bool insertKey(DWORD pid, DWORD *keyblobptr, DWORD foundAddress);
 	bool openClientHandle(GAMECLIENTINFO *gameClient);
-	int getClientPIDs(std::vector <DWORD>& resultsList);
+	void getRunningClientPIDs(std::vector <DWORD>& resultsList);
 	GAMECLIENTINFO* get_process_obj(DWORD pid);
 	void memoryScanWorker(GAMECLIENTINFO *);
 	void purge_ended_processes(std::vector <DWORD>& latestClientPIDs);
