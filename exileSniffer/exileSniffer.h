@@ -334,7 +334,6 @@ class exileSniffer : public QMainWindow
 		void action_SRV_IDNOTIFY_0x137(UIDecodedPkt&, QString*);
 		
 	private:
-		std::ofstream outfile;
 		Ui::exileSniffer ui;
 		Ui::rawFilterForm rawFiltersFormUI;
 		filterForm filterFormObj;

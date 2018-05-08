@@ -5,13 +5,7 @@
 class clientHexData
 {
 public:
-	clientHexData(bool filtered, bool unfiltered, QDir filedir)
-	{ 
-		logFiltered = filtered; 
-		logUnfiltered = unfiltered; 
-		storageDir = filedir;
-	}
-
+	clientHexData(bool filtered, bool unfiltered, QDir filedir);
 	~clientHexData();
 
 

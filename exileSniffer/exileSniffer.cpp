@@ -29,17 +29,6 @@ exileSniffer::exileSniffer(QWidget *parent)
 	start_threads();
 
 	setup_decryption_tab();
-
-	std::cout << "writing to log " << "N:\\code\\POEcode\\poeSRE\\clientX\\Debug\\latestconndump.txt" << std::endl;
-	outfile = std::ofstream("N:\\code\\POEcode\\poeSRE\\clientX\\Debug\\latestconndump.txt",
-		std::ofstream::out | std::ofstream::app | std::ofstream::binary);
-
-	//TODO: logfile configuration
-	if (!outfile.is_open())
-		outfile = std::ofstream("latestconndump.txt",
-			std::ofstream::out | std::ofstream::app | std::ofstream::binary);
-
-	outfile << std::endl << std::endl << "New sniffing session" << std::endl << std::endl;
 }
 
 
@@ -589,7 +578,7 @@ void exileSniffer::handle_client_event(UI_CLIENTEVENT_MSG *cliEvtMsg)
 	{
 		if (it == clients.end())
 		{
-			clientHexData *client = new clientHexData(true, true, QDir::current());
+			clientHexData *client = new clientHexData(true, true, QDir("Logs"));
 			client->isLoggedIn = false;
 			clients.emplace(make_pair(processID, client));
 		}
@@ -686,7 +675,7 @@ void exileSniffer::output_hex_to_file(UI_RAWHEX_PKT *pkt, std::ofstream& file)
 			mixeddump << std::endl << "  ";
 		}
 	}
-	mixeddump << "\n" << std::endl << std::nouppercase;
+	mixeddump << "\r\n" << std::endl << std::nouppercase;
 
 	mixeddump << "   ";
 	for (int i = 0; i < pkt->pktBytes->size(); ++i)
@@ -758,12 +747,7 @@ void exileSniffer::output_hex_to_pane(UI_RAWHEX_PKT *pkt)
 	asciidump << "\n" << std::endl;
 
 	std::string hexdumpstring = hexdump.str();
-	//todo: work out position from bytes*2 + bytes*space + bytes/bytesperline*space
-	//if (pkt->decodeFailed)
-	//	hexdumpstring.at()
-	outfile << hexdumpstring << std::endl;
 	insertRawText(hexdumpstring, asciidump.str());
-
 }
 
 bool exileSniffer::packet_passes_decoded_filter(ushort msgID)
