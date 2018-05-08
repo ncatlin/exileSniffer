@@ -21,7 +21,7 @@
        <enum>QTabWidget::North</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="interceptionTab">
        <attribute name="title">
@@ -568,7 +568,7 @@ FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD</string>
                </property>
               </column>
              </widget>
-             <widget class="QTabWidget" name="tabWidget_5">
+             <widget class="QTabWidget" name="decodedDetailsTab">
               <property name="font">
                <font>
                 <family>Courier</family>
@@ -642,6 +642,9 @@ FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD</string>
                     <family>Courier New</family>
                    </font>
                   </property>
+                  <property name="readOnly">
+                   <bool>true</bool>
+                  </property>
                  </widget>
                 </item>
                 <item>
@@ -650,6 +653,9 @@ FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD</string>
                    <font>
                     <family>Courier New</family>
                    </font>
+                  </property>
+                  <property name="readOnly">
+                   <bool>true</bool>
                   </property>
                  </widget>
                 </item>
@@ -735,7 +741,7 @@ p, li { white-space: pre-wrap; }
            <widget class="QFrame" name="bytesPerRowFrame">
             <property name="maximumSize">
              <size>
-              <width>200</width>
+              <width>183</width>
               <height>16777215</height>
              </size>
             </property>
@@ -745,15 +751,15 @@ p, li { white-space: pre-wrap; }
             <property name="frameShadow">
              <enum>QFrame::Raised</enum>
             </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_2">
-             <property name="spacing">
+            <layout class="QFormLayout" name="formLayout_5">
+             <property name="verticalSpacing">
               <number>0</number>
              </property>
              <property name="leftMargin">
-              <number>0</number>
+              <number>6</number>
              </property>
              <property name="topMargin">
-              <number>0</number>
+              <number>6</number>
              </property>
              <property name="rightMargin">
               <number>0</number>
@@ -761,7 +767,7 @@ p, li { white-space: pre-wrap; }
              <property name="bottomMargin">
               <number>0</number>
              </property>
-             <item>
+             <item row="0" column="0">
               <widget class="QLabel" name="bytesRowLael">
                <property name="maximumSize">
                 <size>
@@ -774,7 +780,7 @@ p, li { white-space: pre-wrap; }
                </property>
               </widget>
              </item>
-             <item>
+             <item row="0" column="1">
               <widget class="QComboBox" name="bytesRowCombo">
                <property name="maximumSize">
                 <size>
@@ -805,6 +811,65 @@ p, li { white-space: pre-wrap; }
                  <string>64</string>
                 </property>
                </item>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QFrame" name="horizontalFrame_3">
+            <property name="maximumSize">
+             <size>
+              <width>150</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <layout class="QFormLayout" name="formLayout">
+             <property name="verticalSpacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>3</number>
+             </property>
+             <property name="topMargin">
+              <number>6</number>
+             </property>
+             <property name="rightMargin">
+              <number>4</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_7">
+               <property name="maximumSize">
+                <size>
+                 <width>60</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Max lines:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLineEdit" name="maxRawLinesEdit">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>11</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>79</width>
+                 <height>22</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>10000</string>
+               </property>
               </widget>
              </item>
             </layout>
@@ -1363,6 +1428,22 @@ p, li { white-space: pre-wrap; }
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>maxRawLinesEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>exileSniffer</receiver>
+   <slot>maxRawLinesSet()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>306</x>
+     <y>612</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>413</x>
+     <y>336</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>showRawFiltersDLG()</slot>
@@ -1376,5 +1457,6 @@ p, li { white-space: pre-wrap; }
   <slot>showSettings()</slot>
   <slot>settingsSelectionChanged()</slot>
   <slot>hashUtilInput()</slot>
+  <slot>maxRawLinesSet()</slot>
  </slots>
 </ui>

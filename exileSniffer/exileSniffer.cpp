@@ -75,16 +75,20 @@ void exileSniffer::setup_settings_tab()
 	ui.settingsStack->setCurrentIndex(0);
 
 	doLogging = settings->value("LoggingEnabled", true).toBool();
+	settings->setValue("LoggingEnabled", doPipe);
 	ui.logsEnabledCheck->setChecked(doLogging);
 
 	QString logdirstring = settings->value("LogDir", "fff").toString();
+	settings->setValue("LogDir", logdirstring);
 	ui.logDirLine->setText(logdirstring);
 	logDir = logdirstring;
 
 	doPipe = settings->value("PipeEnabled", true).toBool();
+	settings->setValue("PipeEnabled", doPipe);
 	ui.pipeFeedEnableCheck->setChecked(doPipe);
 
 	QString pipename = settings->value("PipeName", "fff2").toString();
+	settings->setValue("PipeName", pipename);
 	ui.namedPipeChosenName->setText(pipename);
 
 	settings->sync();
@@ -111,6 +115,10 @@ void exileSniffer::setup_raw_stream_tab()
 	filterFormObj.setUI(&rawFiltersFormUI);
 
 	toggleRawLineWrap(ui.rawLinewrapCheck->isChecked());
+
+	uint maxlines = settings->value("MaxRawLines", 10000).toUInt();
+	ui.ptHexPane->document()->setMaximumBlockCount(maxlines);
+	ui.ptASCIIPane->document()->setMaximumBlockCount(maxlines);
 
 	connect(ui.ptHexPane->verticalScrollBar(), SIGNAL(valueChanged(int)),
 		ui.ptASCIIPane->verticalScrollBar(), SLOT(setValue(int)));
@@ -161,6 +169,8 @@ void exileSniffer::setup_decoded_messages_tab()
 		ui.decodedRawHex->verticalScrollBar(), SLOT(setValue(int)));
 	connect(ui.decodedRawHex->verticalScrollBar(), SIGNAL(valueChanged(int)),
 		ui.decodedRawText->verticalScrollBar(), SLOT(setValue(int)));
+
+	ui.decodedDetailsTab->setCurrentIndex(0);
 }
 
 void exileSniffer::start_threads()
@@ -800,16 +810,14 @@ void exileSniffer::handle_raw_packet_data(UI_RAWHEX_PKT *pkt)
 		return;
 	}
 
-	if (packet_passes_decoded_filter(pkt->startBytes))
-	{
-		output_hex_to_pane(pkt);
-		output_hex_to_file(pkt, client->get_filtered_hexlog());
-	}
-	else
-		++rawCount_Recorded_Filtered.second;
+	output_hex_to_pane(pkt);
+	output_hex_to_file(pkt, client->get_unfiltered_hexlog());
 	++rawCount_Recorded_Filtered.first;
 
-	output_hex_to_file(pkt, client->get_unfiltered_hexlog());
+	if (packet_passes_decoded_filter(pkt->startBytes))
+		output_hex_to_file(pkt, client->get_filtered_hexlog());
+	else
+		++rawCount_Recorded_Filtered.second;
 
 	client->rawHexPackets.push_back(pkt);
 	updateRawFilterLabel();
@@ -1119,4 +1127,20 @@ void exileSniffer::hashUtilInput()
 	}
 	else
 		ui.order2hashres->setText("Not found");
+}
+
+void exileSniffer::maxRawLinesSet()
+{
+	QString valString = ui.maxRawLinesEdit->text();
+	uint value = valString.toUInt();
+	if (value < 1) return;
+	
+	//make sure the user sees what we think the number is (in case of bad text->int)
+	ui.maxRawLinesEdit->setText(QString::number(value));
+
+	ui.ptASCIIPane->document()->setMaximumBlockCount(value);
+	ui.ptHexPane->document()->setMaximumBlockCount(value);
+
+	settings->setValue("MaxRawLines", value);
+	settings->sync();
 }

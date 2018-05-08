@@ -98,6 +98,7 @@ class exileSniffer : public QMainWindow
 		void resumeScanningEvent();
 		void settingsSelectionChanged(); 
 		void hashUtilInput();
+		void maxRawLinesSet();
 
 	private:
 		void setup_settings_tab();
