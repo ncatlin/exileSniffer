@@ -156,6 +156,11 @@ void exileSniffer::setup_decoded_messages_tab()
 	ui.decodedListTable->horizontalHeader()->resizeSection(DECODED_SECTION_MSGID, 45);
 	ui.decodedListTable->horizontalHeader()->setSectionResizeMode(DECODED_SECTION_SUMMARY, QHeaderView::Stretch);
 	ui.decodedListTable->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
+
+	connect(ui.decodedRawText->verticalScrollBar(), SIGNAL(valueChanged(int)),
+		ui.decodedRawHex->verticalScrollBar(), SLOT(setValue(int)));
+	connect(ui.decodedRawHex->verticalScrollBar(), SIGNAL(valueChanged(int)),
+		ui.decodedRawText->verticalScrollBar(), SLOT(setValue(int)));
 }
 
 void exileSniffer::start_threads()
@@ -823,6 +828,7 @@ void exileSniffer::rawBytesRowChanged(QString arg)
 	reprintRawHex();
 }
 
+//todo: delete this when reworked hex
 void exileSniffer::reprintRawHex()
 {
 	std::cout << "reprinting raw" << std::endl;
@@ -968,19 +974,23 @@ void exileSniffer::decodedCellActivated(int row, int col)
 	size_t bufStart = obj->bufferOffsets.first;
 	long long pktTime = obj->time_processed_ms();
 
+	ui.decodedRawHex->clear();
+	ui.decodedRawText->clear();
+
 	std::wstringstream hexdump;
-	hexdump << "----Hex Dump----" << std::endl;
 	hexdump << epochms_to_timestring(pktTime);
-	hexdump << " (start +" << msToQStringSeconds(startMSSinceEpoch, pktTime).toStdWString() << "s) - ";
+	hexdump << " (start +" << msToQStringSeconds(startMSSinceEpoch, pktTime).toStdWString() << "s)" << std::endl;
 
 	if (obj->streamFlags & PKTBIT_INBOUND)
-		hexdump << serverName << " to PlayerClient";
+		hexdump << serverName << " -> PlayerClient";
 	else
-		hexdump << "PlayerClient to " << serverName;
-
-	hexdump << " (" << std::dec << msgSize << " bytes)" << std::endl;
+		hexdump << "PlayerClient -> " << serverName;
 
 	hexdump << std::setfill(L'0') << std::uppercase << L" ";
+	hexdump << " (" << std::dec << msgSize << " bytes)" << std::endl;
+	hexdump << std::endl;
+	hexdump << " ";
+
 	for (int i = 0; i < msgSize; ++i)
 	{
 		int index = bufStart + i;
@@ -992,14 +1002,19 @@ void exileSniffer::decodedCellActivated(int row, int col)
 		else
 			hexdump << " 00";
 
-		if ((i + 1) % UIhexPacketsPerRow == 0)
+		int nextIndex = i + 1;
+		if ((nextIndex % UIhexPacketsPerRow == 0) && nextIndex < msgSize)
 		{
-			hexdump << std::endl << " ";
+			hexdump << std::endl;
+			hexdump << " ";
 		}
 	}
-	hexdump << "\n" << std::endl << std::nouppercase << "  ";
 
-	//do ascii dump afterwards so we don't make copy/paste difficult
+	ui.decodedRawHex->insertPlainText(QString::fromStdWString(hexdump.str()));
+
+	std::wstringstream asciiDump;
+	asciiDump << std::setfill(L'0') << std::hex << std::setw(3);
+	asciiDump << "\n\n\n 000:";
 	for (int i = 0; i < msgSize; ++i)
 	{
 		int index = bufStart + i;
@@ -1007,20 +1022,19 @@ void exileSniffer::decodedCellActivated(int row, int col)
 		byte item = obj->originalbuf->at(index);
 
 		if (item >= ' ' && item <= '~')
-			hexdump << (char)item;
+			asciiDump << (char)item;
 		else
-			hexdump << '.';//replace unprintable with dots
-
-		if ((i + 1) % UIhexPacketsPerRow == 0)
+			asciiDump << '.';//replace unprintable with dots
+		
+		int nextIndex = i + 1;
+		if ((nextIndex % UIhexPacketsPerRow == 0) && nextIndex < msgSize)
 		{
-			hexdump << " " << std::endl << "  ";
+			asciiDump << std::endl;
+			asciiDump << " " << std::setw(3) << (i + 1) << ": ";
 		}
 	}
-	hexdump << "\n" << std::endl << std::nouppercase;
 
-	
-	std::wstring hexdumpstring = hexdump.str();
-	ui.decodedText->insertPlainText(QString::fromStdWString(hexdumpstring));
+	ui.decodedRawText->insertPlainText(QString::fromStdWString(asciiDump.str()));
 }
 
 

@@ -2394,8 +2394,6 @@ void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t 
 
 void packet_processor::deserialise_SRV_ADD_OBJECT(UIDecodedPkt *uipkt)
 {
-	
-
 	//10 bytes all retrieved at once
 	consume_add_dword_ntoh(L"ID1", uipkt);
 	consume_add_dword_ntoh(L"ID2", uipkt);
