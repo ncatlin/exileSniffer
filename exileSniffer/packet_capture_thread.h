@@ -37,7 +37,9 @@ public:
 	packet_capture_thread(SafeQueue<UI_MESSAGE *>* uiq, SafeQueue<GAMEPACKET > *gameP, SafeQueue<GAMEPACKET > *loginP);
 	~packet_capture_thread();
 	STREAM_NETWORK_DATA *get_stream_data(int streamID);
+	void stop_sniffing();
 
+	bool ded = false;
 private:
 
 	void main_loop();
@@ -46,15 +48,18 @@ private:
 	void on_stream_terminated(Tins::TCPIP::Stream& stream, Tins::TCPIP::StreamFollower::TerminationReason reason);
 
 	void on_new_stream(Tins::TCPIP::Stream& stream);
-
+	/*
 	void on_patchclient_data(Tins::TCPIP::Stream& stream);
 	void on_patchserver_data(Tins::TCPIP::Stream& stream);
-
+	*/
 	void on_loginclient_data(Tins::TCPIP::Stream& stream);
 	void on_loginserver_data(Tins::TCPIP::Stream& stream);
 
 	void on_gameclient_data(Tins::TCPIP::Stream& stream);
 	void on_gameserver_data(Tins::TCPIP::Stream& stream);
+
+private:
+	Tins::Sniffer *sniffer = NULL;
 
 	CRITICAL_SECTION streamDataCritsec;
 	map<int, STREAM_NETWORK_DATA> streamRecords;

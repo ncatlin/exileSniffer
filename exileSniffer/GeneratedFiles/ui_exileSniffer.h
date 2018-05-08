@@ -887,7 +887,7 @@ public:
         QObject::connect(hashUtilInputText, SIGNAL(textChanged(QString)), exileSniffer, SLOT(hashUtilInput()));
         QObject::connect(maxRawLinesEdit, SIGNAL(returnPressed()), exileSniffer, SLOT(maxRawLinesSet()));
 
-        processTabs->setCurrentIndex(1);
+        processTabs->setCurrentIndex(2);
         decrypt_details_stack->setCurrentIndex(1);
         decodedDetailsTab->setCurrentIndex(1);
         settingsChoiceList->setCurrentRow(0);

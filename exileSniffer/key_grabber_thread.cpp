@@ -631,7 +631,7 @@ When a current one terminates the ui is notified
 */
 void key_grabber_thread::main_loop()
 {
-	while (!terminateScanning)
+	while (running)
 	{
 		std::vector <DWORD> latestClientPIDs;
 		getRunningClientPIDs(latestClientPIDs);
@@ -705,6 +705,7 @@ void key_grabber_thread::main_loop()
 
 		Sleep(500);
 	}
+	ded = true;
 }
 
 key_grabber_thread::~key_grabber_thread()

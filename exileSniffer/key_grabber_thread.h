@@ -66,6 +66,9 @@ public:
 	void suspend_scanning(DWORD activeProcessPID);
 	void resume_scanning() { keyRequired = true; }
 
+	bool running = true;
+	bool ded = false;
+
 private:
 	void main_loop();
 	void grabKeys(GAMECLIENTINFO *clientInfo);
@@ -93,7 +96,6 @@ private:
 		return 0;
 	}
 
-	bool terminateScanning = false;
 	bool keyRequired = true;
 	DWORD activeProcess = 0;
 

@@ -35,6 +35,8 @@ public:
 	DWORD getLatestDecryptProcess() { return activeClientPID; }
 	void requestIters(bool state) { displayingIters = state; }
 
+	bool running = true;
+	bool ded = false;
 private:
 	UIDecodedPkt * testpk;
 
