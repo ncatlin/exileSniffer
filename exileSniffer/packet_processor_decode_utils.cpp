@@ -454,14 +454,14 @@ INT32 packet_processor::customSizeByteGet_signed()
 //consume 'size' bytes, return them as a hex encoded string
 std::wstring packet_processor::consume_hexblob(unsigned int size)
 {
-	vector <byte> ephKey;
-	consume_blob(size, ephKey);
+	vector <byte> blob;
+	consume_blob(size, blob);
 
 	std::wstringstream keyhexss;
 	keyhexss << std::setfill(L'0') << std::uppercase << " ";
-	for (int i = 0; i < ephKey.size(); ++i)
+	for (int i = 0; i < blob.size(); ++i)
 	{
-		byte item = ephKey.at(i);
+		byte item = blob.at(i);
 		if (item)
 			keyhexss << " " << std::hex << std::setw(2) << (int)item;
 		else

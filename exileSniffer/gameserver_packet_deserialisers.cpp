@@ -2335,12 +2335,58 @@ void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t 
 		unkobj.AddMember(L"Q3", (UINT64)consume_QWORD(), allocator);
 		unklist.PushBack(unkobj, allocator);
 	}
+	uipkt->payload.AddMember(L"UnkList", unklist, allocator);
 
 	consume_add_word(L"HideoutCode", uipkt);
 
-	consume_add_byte(L"Unk_B5", uipkt);
-	consume_add_byte(L"Unk_B6", uipkt);
+	byte bytescount = consume_Byte();
+	std::wstring unkb1 = consume_hexblob(bytescount);
+	std::cout << "Got hexblob size " << unkb1.size() << std::endl;
+	WValue UnkBytes1(unkb1.c_str(), allocator);
+	uipkt->payload.AddMember(L"UnkBytes1", UnkBytes1, allocator);
 
+	byte prophecyCount = consume_Byte();
+	std::cout << "loading " << std::dec << (int) prophecyCount << " prophecies" << std::endl;
+	WValue prophecylist(rapidjson::kArrayType);
+	for (int i = 0; i < prophecyCount; i++)
+	{
+		WValue prophecy(rapidjson::kObjectType);
+		prophecy.AddMember(L"DatRow", ntohs(consume_WORD()), allocator);
+		prophecy.AddMember(L"Pos", consume_Byte(), allocator);
+		prophecylist.PushBack(prophecy, allocator);
+	}
+	uipkt->payload.AddMember(L"Prophecies", prophecylist, allocator);
+
+	DWORD d1 = consume_DWORD();
+	byte b1 = consume_Byte();
+	byte b2 = consume_Byte();
+	byte b3 = consume_Byte();
+
+	std::cout << "d1: " << d1 << ", b2: " << (int)b1 << ", b3: " << (int)b2 << ", b4: " << (int)b3 << std::endl;
+
+	//handle obj worn items
+
+	byte itemCount = consume_Byte();
+	std::cout << "loading " << std::dec << (int)itemCount << " visual items" << std::endl;
+	WValue wornItemVisuals(rapidjson::kArrayType);
+
+	for (int i = 0; i < itemCount; i++)
+	{
+		WValue wornItem(rapidjson::kObjectType);
+		wornItem.AddMember(L"Unk1", consume_Byte(), allocator);
+		wornItem.AddMember(L"Unk2", consume_Byte(), allocator);
+
+		wornItem.AddMember(L"VisualIdentity", consume_WORD(), allocator);
+		wornItem.AddMember(L"Unk3", consume_WORD(), allocator);
+		wornItem.AddMember(L"Unk4", consume_WORD(), allocator);
+		wornItem.AddMember(L"Unk5", consume_Byte(), allocator);
+		wornItemVisuals.PushBack(wornItem, allocator);
+	}
+	uipkt->payload.AddMember(L"WornItems", wornItemVisuals, allocator);
+
+	//other sec - animation?
+	consume_add_word(L"UnkX1", uipkt);
+	consume_add_byte(L"UnkX2", uipkt);
 
 	//C: Restore index to start of next packet
 	restore_buffer();
