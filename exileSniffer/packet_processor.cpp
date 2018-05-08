@@ -696,13 +696,13 @@ bool packet_processor::process_packet_loop()
 {
 	GAMEPACKET pkt;
 
-	while (true)
+	while (running)
 	{
 		//highest priority - only check patch/login if game is quiet
 		if (checkQueue(gameQueue, pendingPktQueue))
 		{
 			bool done = false;
-			while (!pendingPktQueue.empty())
+			while (!pendingPktQueue.empty() && running)
 			{
 				pkt = pendingPktQueue.front();
 				done = handle_game_data(pkt);
@@ -738,7 +738,7 @@ bool packet_processor::process_packet_loop()
 
 		if (checkQueue(loginQueue, pendingPktQueue))
 		{
-			while (!pendingPktQueue.empty())
+			while (!pendingPktQueue.empty() && running)
 			{
 				pkt = pendingPktQueue.front();
 				handle_login_data(pkt);
@@ -773,5 +773,5 @@ void packet_processor::main_loop()
 
 	unsigned int errCount = 0;
 	process_packet_loop();
-
+	ded = true;
 }

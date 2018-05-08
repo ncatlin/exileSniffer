@@ -78,7 +78,13 @@ class exileSniffer : public QMainWindow
 
 	public:
 		exileSniffer(QWidget *parent = Q_NULLPTR);
-
+		~exileSniffer() {
+			if (packetProcessor) packetProcessor->running = false;
+			if (packetSniffer) packetSniffer->stop_sniffing();
+			if (keyGrabber) keyGrabber->running = false;
+			while (!keyGrabber->ded || !packetProcessor->ded || !packetSniffer->ded)
+				Sleep(6);
+		}
 	
 	private slots:
 		void read_UI_Q();
@@ -131,7 +137,6 @@ class exileSniffer : public QMainWindow
 		void action_decoded_game_packet(UIDecodedPkt& decoded);
 		void action_decoded_login_packet(UIDecodedPkt& decoded);
 		
-
 		clientHexData * get_clientdata(DWORD pid);
 		void reprintRawHex();
 		void insertRawText(std::string hexdump, std::string asciidump);

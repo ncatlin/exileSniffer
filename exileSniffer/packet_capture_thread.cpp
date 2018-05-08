@@ -216,11 +216,11 @@ void packet_capture_thread::main_loop()
 	Tins::SnifferConfiguration config;
 	config.set_promisc_mode(true);
 	config.set_filter(filterString);
-	Tins::Sniffer sniffer(iface.name(), config);
+	sniffer = new Tins::Sniffer(iface.name(), config);
 
 	UIsniffingStarted(QString::fromStdString(hostAddr.to_string()), uiMsgQueue);
 
-	sniffer.sniff_loop([&](Tins::PDU& pdu) { follower.process_packet(pdu); return true; });
+	sniffer->sniff_loop([&](Tins::PDU& pdu) { follower.process_packet(pdu); return true; });
 }
 
 packet_capture_thread::packet_capture_thread(SafeQueue<UI_MESSAGE *>* uiq, 
@@ -255,4 +255,11 @@ STREAM_NETWORK_DATA* packet_capture_thread::get_stream_data(int streamID)
 
 	}
 	return result;
+}
+
+void packet_capture_thread::stop_sniffing()
+{
+	if(sniffer)
+		sniffer->stop_sniff();
+	ded = true;
 }

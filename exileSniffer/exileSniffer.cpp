@@ -1133,7 +1133,11 @@ void exileSniffer::maxRawLinesSet()
 {
 	QString valString = ui.maxRawLinesEdit->text();
 	uint value = valString.toUInt();
-	if (value < 1) return;
+	if (value < 1) { 
+		value = ui.ptHexPane->document()->maximumBlockCount();
+		ui.maxRawLinesEdit->setText(QString::number(value));
+		return; 
+	}
 	
 	//make sure the user sees what we think the number is (in case of bad text->int)
 	ui.maxRawLinesEdit->setText(QString::number(value));
