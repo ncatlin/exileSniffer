@@ -1444,6 +1444,22 @@ p, li { white-space: pre-wrap; }
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>decodedAutoscrollCheck</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>exileSniffer</receiver>
+   <slot>toggleDecodedAutoScroll(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>221</x>
+     <y>66</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>413</x>
+     <y>336</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>showRawFiltersDLG()</slot>
@@ -1458,5 +1474,6 @@ p, li { white-space: pre-wrap; }
   <slot>settingsSelectionChanged()</slot>
   <slot>hashUtilInput()</slot>
   <slot>maxRawLinesSet()</slot>
+  <slot>toggleDecodedAutoScroll(bool)</slot>
  </slots>
 </ui>

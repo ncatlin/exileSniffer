@@ -886,6 +886,7 @@ public:
         QObject::connect(decodedFiltersBtn, SIGNAL(clicked()), exileSniffer, SLOT(showRawFiltersDLG()));
         QObject::connect(hashUtilInputText, SIGNAL(textChanged(QString)), exileSniffer, SLOT(hashUtilInput()));
         QObject::connect(maxRawLinesEdit, SIGNAL(returnPressed()), exileSniffer, SLOT(maxRawLinesSet()));
+        QObject::connect(decodedAutoscrollCheck, SIGNAL(toggled(bool)), exileSniffer, SLOT(toggleDecodedAutoScroll(bool)));
 
         processTabs->setCurrentIndex(2);
         decrypt_details_stack->setCurrentIndex(1);

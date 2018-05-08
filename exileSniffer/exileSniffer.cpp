@@ -14,8 +14,6 @@ This is the UI thread - try not to hang it
 exileSniffer::exileSniffer(QWidget *parent)
 	: QMainWindow(parent)
 {
-
-
 	ui.setupUi(this);
 
 	setup_settings_tab();
@@ -95,7 +93,32 @@ void exileSniffer::setup_decryption_tab()
 	ui.yes_decrypt_label->setPixmap(QPixmap(":/icons/padlock-green.png"));
 
 	setStateNotDecrypting();
+}
 
+void exileSniffer::rawWheel(QWheelEvent *)
+{
+	ui.rawAutoScrollCheck->setChecked(false);
+}
+
+bool exileSniffer::eventFilter(QObject *obj, QEvent *event) 
+{
+	if (event->type() == QEvent::Wheel) 
+	{
+		if (obj == ui.decodedListTable && ui.decodedAutoscrollCheck->isChecked())
+		{
+			ui.decodedAutoscrollCheck->setChecked(false);
+			ui.statusBar->showMessage("Manual scrolling detected: AutoScroll disabled", 6000);
+		}
+
+		if (obj == ui.ptHexPane && ui.rawAutoScrollCheck->isChecked())
+		{
+			ui.rawAutoScrollCheck->setChecked(false);
+			ui.statusBar->showMessage("Manual scrolling detected: AutoScroll disabled", 6000);
+		}
+
+	}
+	event->ignore();
+	return false;
 }
 
 void exileSniffer::setup_raw_stream_tab()
@@ -109,11 +132,16 @@ void exileSniffer::setup_raw_stream_tab()
 	ui.ptHexPane->document()->setMaximumBlockCount(maxlines);
 	ui.ptASCIIPane->document()->setMaximumBlockCount(maxlines);
 
+	//link the scrollbars, hide one
 	connect(ui.ptHexPane->verticalScrollBar(), SIGNAL(valueChanged(int)),
 		ui.ptASCIIPane->verticalScrollBar(), SLOT(setValue(int)));
 	connect(ui.ptASCIIPane->verticalScrollBar(), SIGNAL(valueChanged(int)),
 		ui.ptHexPane->verticalScrollBar(), SLOT(setValue(int)));
 	ui.ptHexPane->verticalScrollBar()->hide();
+
+	//catch scroll wheel movement to disable autoscroll
+	ui.ptHexPane->installEventFilter(this);
+	ui.ptASCIIPane->installEventFilter(this);
 }
 
 //full clear and reload of displayed packets
@@ -145,6 +173,11 @@ void exileSniffer::initFilters()
 	connect(&filterFormObj, SIGNAL(applyFilters()), this, SLOT(refreshFilters()));
 }
 
+void exileSniffer::decodedWheel(QWheelEvent *)
+{
+	ui.decodedAutoscrollCheck->setChecked(false);
+}
+
 void exileSniffer::setup_decoded_messages_tab()
 {
 	ui.decodedListTable->horizontalScrollBar()->setFixedHeight(10);
@@ -154,12 +187,17 @@ void exileSniffer::setup_decoded_messages_tab()
 	ui.decodedListTable->horizontalHeader()->setSectionResizeMode(DECODED_SECTION_SUMMARY, QHeaderView::Stretch);
 	ui.decodedListTable->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
 
+	//link scrollbars, hide one
 	connect(ui.decodedRawText->verticalScrollBar(), SIGNAL(valueChanged(int)),
 		ui.decodedRawHex->verticalScrollBar(), SLOT(setValue(int)));
 	connect(ui.decodedRawHex->verticalScrollBar(), SIGNAL(valueChanged(int)),
 		ui.decodedRawText->verticalScrollBar(), SLOT(setValue(int)));
+	ui.decodedRawText->verticalScrollBar()->hide();
 
 	ui.decodedDetailsTab->setCurrentIndex(0);
+
+	//catch scroll wheel movement to disable autoscroll
+	ui.decodedListTable->installEventFilter(this);
 }
 
 void exileSniffer::start_threads()
@@ -173,7 +211,6 @@ void exileSniffer::start_threads()
 	keyGrabber = new key_grabber_thread(&uiMsgQueue);
 	std::thread keyGrabberInstance(&key_grabber_thread::ThreadEntry, keyGrabber);
 	keyGrabberInstance.detach();
-
 
 	//start a thread to process streams
 	packetProcessor = new packet_processor(keyGrabber, &uiMsgQueue, &gamePktQueue, &loginPktQueue, ggpk);
@@ -882,6 +919,18 @@ void exileSniffer::toggleRawLineWrap(bool wrap)
 
 }
 
+void exileSniffer::toggleDecodedAutoScroll(bool enabled)
+{
+	if (enabled)
+	{
+		ui.decodedListTable->scrollToBottom();
+		ui.rawAutoScrollCheck->installEventFilter(this);
+	}
+	else
+	{
+		ui.rawAutoScrollCheck->removeEventFilter(this);
+	}
+}
 
 void exileSniffer::toggleRawAutoScroll(bool enabled)
 {
@@ -889,6 +938,11 @@ void exileSniffer::toggleRawAutoScroll(bool enabled)
 	{
 		ui.ptASCIIPane->moveCursor(QTextCursor::MoveOperation::End);
 		ui.ptHexPane->moveCursor(QTextCursor::MoveOperation::End);
+		ui.rawAutoScrollCheck->installEventFilter(this);
+	}
+	else
+	{
+		ui.rawAutoScrollCheck->removeEventFilter(this);
 	}
 }
 

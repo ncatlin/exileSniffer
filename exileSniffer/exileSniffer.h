@@ -95,6 +95,7 @@ class exileSniffer : public QMainWindow
 		void rawBytesRowChanged(QString arg);
 		void toggleRawLineWrap(bool state);
 		void toggleRawAutoScroll(bool state);
+		void toggleDecodedAutoScroll(bool enabled);
 		void decodedListClicked();
 		void decodedCellActivated(int, int);
 		void decodedTableMenuRequest(QPoint);
@@ -105,6 +106,8 @@ class exileSniffer : public QMainWindow
 		void settingsSelectionChanged(); 
 		void hashUtilInput();
 		void maxRawLinesSet();
+		void rawWheel(QWheelEvent *);
+		void decodedWheel(QWheelEvent *); 
 
 	private:
 		void setup_settings_tab();
@@ -149,7 +152,8 @@ class exileSniffer : public QMainWindow
 
 		QString stringify_eventslist(WValue &eventlist);
 		QString stringify_eventslist_2(WValue &eventlist);
-		
+
+		bool eventFilter(QObject *obj, QEvent *event);
 		
 	private:
 
