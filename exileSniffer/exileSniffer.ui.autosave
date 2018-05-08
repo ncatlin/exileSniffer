@@ -568,13 +568,99 @@ FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD</string>
                </property>
               </column>
              </widget>
-             <widget class="QPlainTextEdit" name="decodedText">
+             <widget class="QTabWidget" name="tabWidget_5">
               <property name="font">
                <font>
-                <family>Courier New</family>
-                <pointsize>11</pointsize>
+                <family>Courier</family>
+                <pointsize>10</pointsize>
+                <weight>75</weight>
+                <bold>true</bold>
                </font>
               </property>
+              <property name="tabPosition">
+               <enum>QTabWidget::West</enum>
+              </property>
+              <property name="currentIndex">
+               <number>1</number>
+              </property>
+              <widget class="QWidget" name="decodeAnalysisTab" native="true">
+               <attribute name="title">
+                <string>Analysis</string>
+               </attribute>
+               <layout class="QHBoxLayout" name="horizontalLayout_8">
+                <property name="spacing">
+                 <number>3</number>
+                </property>
+                <property name="leftMargin">
+                 <number>4</number>
+                </property>
+                <property name="topMargin">
+                 <number>4</number>
+                </property>
+                <property name="rightMargin">
+                 <number>4</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>4</number>
+                </property>
+                <item>
+                 <widget class="QPlainTextEdit" name="decodedText">
+                  <property name="font">
+                   <font>
+                    <family>Courier New</family>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+              <widget class="QWidget" name="decodeRawTab">
+               <attribute name="title">
+                <string>Raw</string>
+               </attribute>
+               <layout class="QHBoxLayout" name="horizontalLayout_11" stretch="5,3">
+                <property name="spacing">
+                 <number>1</number>
+                </property>
+                <property name="leftMargin">
+                 <number>4</number>
+                </property>
+                <property name="topMargin">
+                 <number>4</number>
+                </property>
+                <property name="rightMargin">
+                 <number>4</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>4</number>
+                </property>
+                <item>
+                 <widget class="QPlainTextEdit" name="decodedRawHex">
+                  <property name="font">
+                   <font>
+                    <family>Courier New</family>
+                   </font>
+                  </property>
+                  <property name="readOnly">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPlainTextEdit" name="decodedRawText">
+                  <property name="font">
+                   <font>
+                    <family>Courier New</family>
+                   </font>
+                  </property>
+                  <property name="readOnly">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
              </widget>
             </widget>
            </item>
