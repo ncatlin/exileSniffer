@@ -152,6 +152,7 @@ void gameDataStore::fill_UI_pane_IDs()
 
 }
 
+//todo check entries exist
 void gameDataStore::fill_gamedata_lists()
 {
 
@@ -222,6 +223,14 @@ void gameDataStore::fill_gamedata_lists()
 	for (; recordsIt != buffVisDoc.End(); recordsIt++)
 	{
 		buffVisuals.push_back(recordsIt->GetString());
+	}
+
+	rapidjson::Value& itemVisDoc = jsondoc.FindMember("ItemVisuals")->value;
+	rapidjson::Value::ConstMemberIterator mapIt = itemVisDoc.MemberBegin();
+	for (; mapIt != itemVisDoc.MemberEnd(); mapIt++)
+	{
+		int ref = std::stoi(mapIt->name.GetString());
+		itemVisuals[ref] = mapIt->value.GetString();
 	}
 
 	rapidjson::Value& monsterVarietyDoc = jsondoc.FindMember("MonsterVarietiesHashes")->value;

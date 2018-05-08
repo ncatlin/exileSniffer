@@ -131,6 +131,17 @@ def load_items(ggpkfile):
 
     return resultDict
 
+def load_item_visuals(ggpkfile):
+    print("Loading item visuals")
+    resultDict = {}
+
+    rit = getDatIterator(ggpkobj, "ItemVisualIdentity.dat")
+    for i in rit:
+        ref = i['UnknownUniqueInt']
+        resultDict[ref] = i['Id']
+    return resultDict
+    
+
 def load_stats(ggpkfile):
     print("Loading stats")
     resultList = []
@@ -201,6 +212,8 @@ def load_objregister(ggpkfile):
         
     return hashes
 
+#def load_hideouts()
+
 def savefile(resultdict, targetfilename):
     
     resultjson = json.dumps(resultdict)
@@ -240,6 +253,7 @@ if __name__ == "__main__":
     resultdict['NPCHashes'] = load_npcs(ggpkobj)
     resultdict['PetHashes'] = load_pets(ggpkobj)
     resultdict['ItemHashes'] = load_items(ggpkobj)
+    resultdict['ItemVisuals'] = load_item_visuals(ggpkobj)
     resultdict['StatIndexes'] = load_stats(ggpkobj)
     resultdict['BuffDefinitions'], resultdict['RecoveryBuffs'] = load_buf_defs(ggpkobj)
     resultdict['BuffVisuals'] = load_buf_visuals(ggpkobj)
