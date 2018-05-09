@@ -106,8 +106,6 @@ class exileSniffer : public QMainWindow
 		void settingsSelectionChanged(); 
 		void hashUtilInput();
 		void maxRawLinesSet();
-		void rawWheel(QWheelEvent *);
-		void decodedWheel(QWheelEvent *); 
 
 	private:
 		void setup_settings_tab();

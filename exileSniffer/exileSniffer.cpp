@@ -65,10 +65,13 @@ void exileSniffer::setup_settings_tab()
 	settings->setValue("LoggingEnabled", doPipe);
 	ui.logsEnabledCheck->setChecked(doLogging);
 
-	QString logdirstring = settings->value("LogDir", "fff").toString();
-	settings->setValue("LogDir", logdirstring);
-	ui.logDirLine->setText(logdirstring);
-	logDir = logdirstring;
+	QDir logdir = settings->value("LogDir", "").toString();
+	if (!logdir.exists()) {
+		logdir = QDir("Logs");
+		settings->setValue("LogDir", logdir.absolutePath());
+	}
+	ui.logDirLine->setText(logdir.absolutePath());
+	logDir = logdir.absolutePath();
 
 	doPipe = settings->value("PipeEnabled", true).toBool();
 	settings->setValue("PipeEnabled", doPipe);
@@ -77,6 +80,9 @@ void exileSniffer::setup_settings_tab()
 	QString pipename = settings->value("PipeName", "fff2").toString();
 	settings->setValue("PipeName", pipename);
 	ui.namedPipeChosenName->setText(pipename);
+
+
+
 
 	settings->sync();
 }
@@ -93,11 +99,6 @@ void exileSniffer::setup_decryption_tab()
 	ui.yes_decrypt_label->setPixmap(QPixmap(":/icons/padlock-green.png"));
 
 	setStateNotDecrypting();
-}
-
-void exileSniffer::rawWheel(QWheelEvent *)
-{
-	ui.rawAutoScrollCheck->setChecked(false);
 }
 
 bool exileSniffer::eventFilter(QObject *obj, QEvent *event) 
@@ -171,11 +172,6 @@ void exileSniffer::initFilters()
 	filterFormObj.populatePresetsList();
 
 	connect(&filterFormObj, SIGNAL(applyFilters()), this, SLOT(refreshFilters()));
-}
-
-void exileSniffer::decodedWheel(QWheelEvent *)
-{
-	ui.decodedAutoscrollCheck->setChecked(false);
 }
 
 void exileSniffer::setup_decoded_messages_tab()
@@ -615,7 +611,8 @@ void exileSniffer::handle_client_event(UI_CLIENTEVENT_MSG *cliEvtMsg)
 	{
 		if (it == clients.end())
 		{
-			clientHexData *client = new clientHexData(true, true, QDir("Logs"));
+			QDir logdir = settings->value("LogDir", "").toString();
+			clientHexData *client = new clientHexData(true, true, logdir);
 			client->isLoggedIn = false;
 			clients.emplace(make_pair(processID, client));
 		}
@@ -954,14 +951,6 @@ void exileSniffer::decodedListClicked()
 		ui.decodedAutoscrollCheck->setChecked(false);
 }
 
-QString UI_DECODED_LIST_ENTRY::sender()
-{
-	if (flags & PKTBIT_OUTBOUND) return "["+QString::number(streamID)+"] Client";
-	if (flags & PKTBIT_GAMESERVER) return "[" + QString::number(streamID) + "] GameServer";
-	if (flags & PKTBIT_LOGINSERVER) return "[" + QString::number(streamID) + "] LoginServer";
-	return "ErrorB";
-}
-
 void exileSniffer::decodedCellActivated(int row, int col)
 {
 	ui.decodedText->clear();
@@ -1185,4 +1174,13 @@ void exileSniffer::maxRawLinesSet()
 
 	settings->setValue("MaxRawLines", value);
 	settings->sync();
+}
+
+
+QString UI_DECODED_LIST_ENTRY::sender()
+{
+	if (flags & PKTBIT_OUTBOUND) return "[" + QString::number(streamID) + "] Client";
+	if (flags & PKTBIT_GAMESERVER) return "[" + QString::number(streamID) + "] GameServer";
+	if (flags & PKTBIT_LOGINSERVER) return "[" + QString::number(streamID) + "] LoginServer";
+	return "ErrorB";
 }

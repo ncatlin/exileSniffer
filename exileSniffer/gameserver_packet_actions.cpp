@@ -1264,10 +1264,13 @@ void exileSniffer::action_CLI_CHOSE_ASCENDANCY(UIDecodedPkt& obj, QString *analy
 void exileSniffer::action_CLI_CANCEL_BUF(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
+
+	int buffID = obj.get_UInt32(L"BuffID");
+
 	if (!analysis)
 	{
 		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player(You) cancelled a buff";
+		listentry.summary = "Attempted to cancel buff "+QString::number(buffID,10);
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
@@ -1379,30 +1382,32 @@ void exileSniffer::action_SRV_YOU_DIED(UIDecodedPkt& obj, QString *analysis)
 	UINT32 choices = obj.get_UInt32(L"Slot");
 	UINT32 unk1 = obj.get_UInt32(L"Unk");
 	
-
 	if (choices & 0x2)
 	{
-		summary = "Ressurection dialog removed";
+		summary = "Resurrection dialog removed";
 	}
 	else if (choices & 0x1)
 	{
-		summary = "Ressurection dialog: Exit";
+		summary = "Resurrection dialog: Exit";
 	}
 	else
 	{
 		switch (choices)
 		{
+		case 0:
+			summary = "Resurrection dialog: Resurrect";
+			break;
 		case 4:
-			summary = "Ressurection dialog: Checkpoint";
+			summary = "Resurrection dialog: Checkpoint";
 			break;
 		case 8:
-			summary = "Ressurection dialog: Town";
+			summary = "Resurrection dialog: Town";
 			break;
 		case 0xc:
-			summary = "Ressurection dialog: Town or Checkpoint";
+			summary = "Resurrection dialog: Town + Checkpoint";
 			break;
 		default:
-			summary = "Ressurection dialog: Error";
+			summary = "Resurrection dialog: Unknown options 0x"+QString::number(choices,16);
 			break;
 		}
 	}
@@ -1410,7 +1415,7 @@ void exileSniffer::action_SRV_YOU_DIED(UIDecodedPkt& obj, QString *analysis)
 	if (!analysis)
 	{
 		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = summary + " [0x"+QString::number(unk1, 16)+"]";
+		listentry.summary = summary + " Arg: 0x"+QString::number(unk1, 16);
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
@@ -2148,7 +2153,7 @@ void exileSniffer::action_CLI_SWAPPED_WEAPONS(UIDecodedPkt& obj, QString *analys
 	if (!analysis)
 	{
 		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player swapped weapons slot "+QString::number(arg,10);
+		listentry.summary = "Swapped to weapon slot "+QString::number(arg,10);
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
