@@ -184,78 +184,135 @@ void gameDataStore::fill_gamedata_lists()
 		}
 		return;
 	}
-
-	rapidjson::Value& monsterVarietyIndexDoc = jsondoc.FindMember("MonsterVarietiesIndex")->value;
-	rapidjson::Value::ConstValueIterator recordsIt = monsterVarietyIndexDoc.Begin();
-	for (; recordsIt != monsterVarietyIndexDoc.End(); recordsIt++)
+	rapidjson::Value::ConstValueIterator recordsIt;
+	rapidjson::Value::MemberIterator docIt = jsondoc.FindMember("MonsterVarietiesIndex");
+	if (docIt != jsondoc.MemberEnd())
 	{
-		monsterVarieties.push_back(recordsIt->GetString());
+		auto &varietiesDoc = docIt->value;
+		recordsIt = varietiesDoc.Begin();
+		for (; recordsIt != varietiesDoc.End(); recordsIt++)
+		{
+			monsterVarieties.push_back(recordsIt->GetString());
+		}
 	}
 
-	rapidjson::Value& statIndexDoc = jsondoc.FindMember("StatIndexes")->value;
-	recordsIt = statIndexDoc.Begin();
-	for (; recordsIt != statIndexDoc.End(); recordsIt++)
+	docIt = jsondoc.FindMember("StatIndexes");
+	if (docIt != jsondoc.MemberEnd())
 	{
-		statDescriptions.push_back(recordsIt->GetString());
+		auto &statIndexDoc = docIt->value;
+		recordsIt = statIndexDoc.Begin();
+		for (; recordsIt != statIndexDoc.End(); recordsIt++)
+		{
+			statDescriptions.push_back(recordsIt->GetString());
+		}
 	}
 
-	rapidjson::Value& buffDefsDoc = jsondoc.FindMember("BuffDefinitions")->value;
-	recordsIt = buffDefsDoc.Begin();
-	for (; recordsIt != buffDefsDoc.End(); recordsIt++)
+	docIt = jsondoc.FindMember("BuffDefinitions");
+	if (docIt != jsondoc.MemberEnd())
 	{
-		auto &entry = recordsIt[0];
-		std::pair<std::string, byte> name_statCount;
-		name_statCount.first = entry[0].GetString();
-		name_statCount.second = entry[1].GetUint();
-		buffDefinitions_names_statCounts.push_back(name_statCount);
+		auto &buffDefsDoc = docIt->value;
+		recordsIt = buffDefsDoc.Begin();
+		for (; recordsIt != buffDefsDoc.End(); recordsIt++)
+		{
+			auto &entry = recordsIt[0];
+			std::pair<std::string, byte> name_statCount;
+			name_statCount.first = entry[0].GetString();
+			name_statCount.second = entry[1].GetUint();
+			buffDefinitions_names_statCounts.push_back(name_statCount);
+		}
 	}
 
-	rapidjson::Value& recovBufsDoc = jsondoc.FindMember("RecoveryBuffs")->value;
-	recordsIt = recovBufsDoc.Begin();
-	for (; recordsIt != recovBufsDoc.End(); recordsIt++)
+	docIt = jsondoc.FindMember("RecoveryBuffs");
+	if (docIt != jsondoc.MemberEnd())
 	{
-		unsigned int buffRow = recordsIt->GetUint();
-		recoveryBuffs.push_back(buffRow);
+		auto &recovBufsDoc = docIt->value;
+		recordsIt = recovBufsDoc.Begin();
+		for (; recordsIt != recovBufsDoc.End(); recordsIt++)
+		{
+			unsigned int buffRow = recordsIt->GetUint();
+			recoveryBuffs.push_back(buffRow);
+		}
 	}
 
-	rapidjson::Value& buffVisDoc = jsondoc.FindMember("BuffVisuals")->value;
-	recordsIt = buffVisDoc.Begin();
-	for (; recordsIt != buffVisDoc.End(); recordsIt++)
+	docIt = jsondoc.FindMember("BuffVisuals");
+	if (docIt != jsondoc.MemberEnd())
 	{
-		buffVisuals.push_back(recordsIt->GetString());
+		auto &buffVisDoc = docIt->value;
+		recordsIt = buffVisDoc.Begin();
+		for (; recordsIt != buffVisDoc.End(); recordsIt++)
+		{
+			buffVisuals.push_back(recordsIt->GetString());
+		}
 	}
 
-	rapidjson::Value& itemVisDoc = jsondoc.FindMember("ItemVisuals")->value;
-	rapidjson::Value::ConstMemberIterator mapIt = itemVisDoc.MemberBegin();
-	for (; mapIt != itemVisDoc.MemberEnd(); mapIt++)
+	docIt = jsondoc.FindMember("ItemVisuals");
+	if (docIt != jsondoc.MemberEnd())
 	{
-		int ref = std::stoi(mapIt->name.GetString());
-		itemVisuals[ref] = mapIt->value.GetString();
+		auto &itemVisDoc = docIt->value;
+		rapidjson::Value::ConstMemberIterator mapIt = itemVisDoc.MemberBegin();
+		for (; mapIt != itemVisDoc.MemberEnd(); mapIt++)
+		{
+			//uint ref = mapIt->name.GetUint(); //need to wait for pypoe update
+			uint ref = std::stoi(mapIt->name.GetString());
+			itemVisuals[ref] = mapIt->value.GetString();
+		}
 	}
 
-	rapidjson::Value& monsterVarietyDoc = jsondoc.FindMember("MonsterVarietiesHashes")->value;
-	genericHashesLoad(monsterVarietyDoc, monsterHashes);
+	docIt = jsondoc.FindMember("Prophecies");
+	if (docIt != jsondoc.MemberEnd())
+	{
+		auto &prophDoc = docIt->value;
+		rapidjson::Value::ConstMemberIterator prophIt = prophDoc.MemberBegin();
+		for (; prophIt != prophDoc.MemberEnd(); prophIt++)
+		{
+			uint ref = prophIt->name.GetUint();
+			prophecies[ref] = prophIt->value.GetString();
+		}
+	}
 
-	rapidjson::Value& areaCodesDoc = jsondoc.FindMember("AreaCodes")->value;
-	genericHashesLoad(areaCodesDoc, areaCodes);
+	docIt = jsondoc.FindMember("Hideouts");
+	if (docIt != jsondoc.MemberEnd())
+	{
+		auto &hideoutDoc = docIt->value; 
+		rapidjson::Value::ConstMemberIterator hideIt = hideoutDoc.MemberBegin();
+		for (; hideIt != hideoutDoc.MemberEnd(); hideIt++)
+		{
+			uint ref = hideIt->name.GetUint();
+			hideouts[ref] = hideIt->value.GetString();
+		}
+	}
 
-	rapidjson::Value& objectRegisterDoc = jsondoc.FindMember("ObjRegisterHashes")->value;
-	genericHashesLoad(objectRegisterDoc, gameObjHashes);
+	docIt = jsondoc.FindMember("MonsterVarietiesHashes");
+	if (docIt != jsondoc.MemberEnd())
+		genericHashesLoad(docIt->value, monsterHashes);
 
-	rapidjson::Value& chestsDoc = jsondoc.FindMember("ChestHashes")->value;
-	genericHashesLoad(chestsDoc, chestHashes);
+	docIt = jsondoc.FindMember("AreaCodes");
+	if (docIt != jsondoc.MemberEnd())
+		genericHashesLoad(docIt->value, areaCodes);
 
-	rapidjson::Value& petsDoc = jsondoc.FindMember("PetHashes")->value;
-	genericHashesLoad(petsDoc, petHashes);
+	docIt = jsondoc.FindMember("ObjRegisterHashes");
+	if (docIt != jsondoc.MemberEnd())
+		genericHashesLoad(docIt->value, gameObjHashes);
 
-	rapidjson::Value& charactersDoc = jsondoc.FindMember("CharacterHashes")->value;
-	genericHashesLoad(charactersDoc, characterHashes);
+	docIt = jsondoc.FindMember("ChestHashes");
+	if (docIt != jsondoc.MemberEnd())
+		genericHashesLoad(docIt->value, chestHashes);
 
-	rapidjson::Value& npcsDoc = jsondoc.FindMember("NPCHashes")->value;
-	genericHashesLoad(npcsDoc, NPCHashes);
+	docIt = jsondoc.FindMember("PetHashes");
+	if (docIt != jsondoc.MemberEnd())
+		genericHashesLoad(docIt->value, petHashes);
 
-	rapidjson::Value& itemsDoc = jsondoc.FindMember("ItemHashes")->value;
-	genericHashesLoad(itemsDoc, itemHashes);
+	docIt = jsondoc.FindMember("CharacterHashes");
+	if (docIt != jsondoc.MemberEnd())
+		genericHashesLoad(docIt->value, characterHashes);
+
+	docIt = jsondoc.FindMember("NPCHashes");
+	if (docIt != jsondoc.MemberEnd())
+		genericHashesLoad(docIt->value, NPCHashes);
+	
+	docIt = jsondoc.FindMember("ItemHashes");
+	if (docIt != jsondoc.MemberEnd())
+		genericHashesLoad(docIt->value, itemHashes);
 
 
 

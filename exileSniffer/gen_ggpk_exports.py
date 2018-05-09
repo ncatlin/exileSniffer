@@ -137,7 +137,7 @@ def load_item_visuals(ggpkfile):
 
     rit = getDatIterator(ggpkobj, "ItemVisualIdentity.dat")
     for i in rit:
-        ref = i['UnknownUniqueInt']
+        ref = int(i['UnknownUniqueInt'])
         resultDict[ref] = i['Id']
     return resultDict
     
@@ -212,7 +212,31 @@ def load_objregister(ggpkfile):
         
     return hashes
 
-#def load_hideouts()
+def load_prophecies():
+    print("Loading prophecies")
+    result = {}
+
+    rit = getDatIterator(ggpkobj, "Prophecies.dat")
+
+    for i in rit:
+        reference = int(i['UnknownUnique'])
+        result[reference] = i['Id']
+
+    return result
+    
+def load_hideouts():
+    print("Loading hideouts")
+    result = {}
+
+    rit = getDatIterator(ggpkobj, "Hideouts.dat")
+
+    for i in rit:
+        reference = int(i['Unknown9'])
+        result[reference] = i['Id']
+
+    return result
+    
+    
 
 def savefile(resultdict, targetfilename):
     
@@ -257,6 +281,8 @@ if __name__ == "__main__":
     resultdict['StatIndexes'] = load_stats(ggpkobj)
     resultdict['BuffDefinitions'], resultdict['RecoveryBuffs'] = load_buf_defs(ggpkobj)
     resultdict['BuffVisuals'] = load_buf_visuals(ggpkobj)
+    resultdict['Prophecies'] = load_prophecies(ggpkobj)
+    resultdict['Hideouts'] = load_hideouts(ggpkobj)
     
     
 

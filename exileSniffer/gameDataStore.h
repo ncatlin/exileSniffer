@@ -24,6 +24,8 @@ public:
 	std::map <unsigned long, std::string> itemHashes;
 	std::map <unsigned long, std::string> itemVisuals;
 	std::map <unsigned long, std::string> areaCodes;
+	std::map <unsigned int, std::string> prophecies;
+	std::map <unsigned int, std::string> hideouts;
 
 	std::map <unsigned short, std::string> UIPaneIDs;
 

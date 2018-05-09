@@ -525,6 +525,8 @@ public:
         decodedRawHex->setObjectName(QStringLiteral("decodedRawHex"));
         QFont font8;
         font8.setFamily(QStringLiteral("Courier New"));
+        font8.setBold(false);
+        font8.setWeight(50);
         decodedRawHex->setFont(font8);
         decodedRawHex->setReadOnly(true);
 
@@ -572,7 +574,9 @@ public:
 
         ptASCIIPane = new QTextEdit(rawDecryptTab);
         ptASCIIPane->setObjectName(QStringLiteral("ptASCIIPane"));
-        ptASCIIPane->setFont(font8);
+        QFont font10;
+        font10.setFamily(QStringLiteral("Courier New"));
+        ptASCIIPane->setFont(font10);
         ptASCIIPane->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
         ptASCIIPane->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
@@ -713,10 +717,10 @@ public:
         groupBox_2 = new QGroupBox(logSettings);
         groupBox_2->setObjectName(QStringLiteral("groupBox_2"));
         groupBox_2->setMaximumSize(QSize(16777215, 115));
-        QFont font10;
-        font10.setFamily(QStringLiteral("MS Shell Dlg 2"));
-        font10.setPointSize(10);
-        groupBox_2->setFont(font10);
+        QFont font11;
+        font11.setFamily(QStringLiteral("MS Shell Dlg 2"));
+        font11.setPointSize(10);
+        groupBox_2->setFont(font11);
         gridLayout_4 = new QGridLayout(groupBox_2);
         gridLayout_4->setSpacing(6);
         gridLayout_4->setContentsMargins(11, 11, 11, 11);
@@ -813,9 +817,9 @@ public:
         groupBox_4 = new QGroupBox(utilsTab);
         groupBox_4->setObjectName(QStringLiteral("groupBox_4"));
         groupBox_4->setMaximumSize(QSize(16777215, 135));
-        QFont font11;
-        font11.setPointSize(9);
-        groupBox_4->setFont(font11);
+        QFont font12;
+        font12.setPointSize(9);
+        groupBox_4->setFont(font12);
         formLayout_4 = new QFormLayout(groupBox_4);
         formLayout_4->setSpacing(6);
         formLayout_4->setContentsMargins(11, 11, 11, 11);
@@ -847,13 +851,13 @@ public:
 
         order1hashres = new QLabel(groupBox_4);
         order1hashres->setObjectName(QStringLiteral("order1hashres"));
-        order1hashres->setFont(font11);
+        order1hashres->setFont(font12);
 
         formLayout_4->setWidget(2, QFormLayout::FieldRole, order1hashres);
 
         order2hashres = new QLabel(groupBox_4);
         order2hashres->setObjectName(QStringLiteral("order2hashres"));
-        order2hashres->setFont(font11);
+        order2hashres->setFont(font12);
 
         formLayout_4->setWidget(3, QFormLayout::FieldRole, order2hashres);
 
@@ -888,7 +892,7 @@ public:
         QObject::connect(maxRawLinesEdit, SIGNAL(returnPressed()), exileSniffer, SLOT(maxRawLinesSet()));
         QObject::connect(decodedAutoscrollCheck, SIGNAL(toggled(bool)), exileSniffer, SLOT(toggleDecodedAutoScroll(bool)));
 
-        processTabs->setCurrentIndex(2);
+        processTabs->setCurrentIndex(1);
         decrypt_details_stack->setCurrentIndex(1);
         decodedDetailsTab->setCurrentIndex(1);
         settingsChoiceList->setCurrentRow(0);
@@ -927,6 +931,7 @@ public:
         QTableWidgetItem *___qtablewidgetitem3 = decodedListTable->horizontalHeaderItem(3);
         ___qtablewidgetitem3->setText(QApplication::translate("exileSniffer", "Summary", Q_NULLPTR));
         decodedDetailsTab->setTabText(decodedDetailsTab->indexOf(decodeAnalysisTab), QApplication::translate("exileSniffer", "Analysis", Q_NULLPTR));
+        decodedRawHex->setPlainText(QString());
         decodedDetailsTab->setTabText(decodedDetailsTab->indexOf(decodeRawTab), QApplication::translate("exileSniffer", "Raw", Q_NULLPTR));
         processTabs->setTabText(processTabs->indexOf(decodeTab), QApplication::translate("exileSniffer", "Decoding", Q_NULLPTR));
         ptHexPane->setHtml(QApplication::translate("exileSniffer", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
