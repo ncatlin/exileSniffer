@@ -251,6 +251,8 @@ class exileSniffer : public QMainWindow
 		void action_SRV_EVENTSLIST(UIDecodedPkt&, QString*);
 
 		void action_CLI_SKILLPANE_ACTION(UIDecodedPkt&, QString*);
+		void action_SRV_ACHIEVEMENT_1(UIDecodedPkt&, QString*);
+		void action_SRV_ACHIEVEMENT_2(UIDecodedPkt&, QString*);
 
 		void action_SRV_SKILLPANE_DATA(UIDecodedPkt&, QString*);
 		void action_SRV_UNK_POSITION_LIST(UIDecodedPkt&, QString*);

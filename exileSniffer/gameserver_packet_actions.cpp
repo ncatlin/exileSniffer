@@ -166,8 +166,8 @@ void exileSniffer::init_gamePkt_Actioners()
 	//96
 	//97
 	gamePktActioners[CLI_SKILLPANE_ACTION] = &exileSniffer::action_CLI_SKILLPANE_ACTION;
-	//99
-	//9a
+	gamePktActioners[SRV_ACHIEVEMENT_1] = &exileSniffer::action_SRV_ACHIEVEMENT_1;
+	gamePktActioners[SRV_ACHIEVEMENT_2] = &exileSniffer::action_SRV_ACHIEVEMENT_2;
 	gamePktActioners[SRV_SKILLPANE_DATA] = &exileSniffer::action_SRV_SKILLPANE_DATA;
 	gamePktActioners[SRV_UNK_POSITION_LIST] = &exileSniffer::action_SRV_UNK_POSITION_LIST;
 	//9d
@@ -875,16 +875,18 @@ void exileSniffer::action_SRV_AREA_INFO(UIDecodedPkt& obj, QString *analysis)
 
 
 	
-	plit = obj.payload.FindMember(L"PairList");
+	plit = obj.payload.FindMember(L"StatList");
 	if (plit != obj.payload.MemberEnd())
 	{
-		analysisStream << "PairList:" << std::endl;
-		WValue &blist5 = plit->value;
-		for (auto pairlistit = blist5.Begin(); pairlistit != blist5.End(); pairlistit++)
+		analysisStream << "Area Stats:" << std::endl;
+		WValue &statlist = plit->value;
+		for (auto statit = statlist.Begin(); statit != statlist.End(); statit++)
 		{
-			
-			WValue &pair = *pairlistit;
-			analysisStream << "\t0x" << pair[0].GetUint() << ", 0x" << pair[1].GetUint() << std::endl;
+			WValue &pair = *statit;
+			DWORD statIndex = pair[0].GetUint() - 1;
+			analysisStream << "\t" <<
+					converter.from_bytes(ggpk.statDescriptions.at(statIndex))
+					<< ": " << pair[1].GetInt() << std::endl;
 		}
 		analysisStream << std::endl;
 	}
@@ -2326,6 +2328,47 @@ void exileSniffer::action_CLI_SKILLPANE_ACTION(UIDecodedPkt& obj, QString *analy
 	}
 }
 
+void exileSniffer::action_CLI_SKILLPANE_ACTION(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+	if (!analysis)
+	{
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = "Player(You) used skillpane";
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
+void exileSniffer::action_SRV_ACHIEVEMENT_1(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+
+	UINT32 arg = obj.get_UInt32(L"Arg");
+
+	if (!analysis)
+	{
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = "Achievement_1 arg: 0x" + QString::number(arg,16);
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
+void exileSniffer::action_SRV_ACHIEVEMENT_2(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+
+	UINT32 arg = obj.get_UInt32(L"Arg");
+
+	if (!analysis)
+	{
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = "Achievement_2 arg: 0x" + QString::number(arg, 16);
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
 
 void exileSniffer::action_SRV_SKILLPANE_DATA(UIDecodedPkt& obj, QString *analysis)
 {
