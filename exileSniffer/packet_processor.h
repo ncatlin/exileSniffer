@@ -158,6 +158,7 @@ private:
 	void deserialise_SRV_UNK_0x6c(UIDecodedPkt *);
 	void deserialise_SRV_CREATE_ITEM(UIDecodedPkt *);
 	void deserialise_SRV_SLOT_ITEMSLIST(UIDecodedPkt *);
+	void deserialise_SRV_INVENTORY_SET_REMOVE(UIDecodedPkt *);
 	void deserialise_UNK_MESSAGE_0x70(UIDecodedPkt *);
 	void deserialise_CLI_UNK_0x71(UIDecodedPkt *);
 	void deserialise_SRV_UNK_0x72(UIDecodedPkt *);
@@ -209,6 +210,8 @@ private:
 	void deserialise_CLI_MOUSE_RELEASE(UIDecodedPkt *);
 
 	void deserialise_CLI_OPEN_WORLD_SCREEN(UIDecodedPkt *);
+
+	void deserialise_SRV_UNK_0xE4(UIDecodedPkt *);
 
 	void deserialise_SRV_UNK_0xE6(UIDecodedPkt *);
 

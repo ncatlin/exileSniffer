@@ -124,7 +124,7 @@ void exileSniffer::init_gamePkt_Actioners()
 	gamePktActioners[SRV_UNK_0x6c] = &exileSniffer::action_SRV_UNK_0x6c;
 	gamePktActioners[SRV_CREATE_ITEM] = &exileSniffer::action_SRV_CREATE_ITEM;
 	gamePktActioners[SRV_SLOT_ITEMSLIST] = &exileSniffer::action_SRV_SLOT_ITEMSLIST;
-	//6f
+	gamePktActioners[SRV_INVENTORY_SET_REMOVE] = &exileSniffer::action_SRV_INVENTORY_SET_REMOVE;
 	gamePktActioners[UNK_MESSAGE_0x70] = &exileSniffer::action_UNK_MESSAGE_0x70;
 	gamePktActioners[CLI_UNK_0x71] = &exileSniffer::action_CLI_UNK_0x71;
 	gamePktActioners[SRV_UNK_0x72] = &exileSniffer::action_SRV_UNK_0x72;
@@ -239,7 +239,7 @@ void exileSniffer::init_gamePkt_Actioners()
 	//e1
 	//e2
 	//e3
-	//e4
+	gamePktActioners[SRV_UNK_0xE4] = &exileSniffer::action_SRV_UNK_0xE4;
 	//e5
 	gamePktActioners[SRV_UNK_0xE6] = &exileSniffer::action_SRV_UNK_0xE6;
 	//e7
@@ -2055,6 +2055,24 @@ void exileSniffer::action_SRV_SLOT_ITEMSLIST(UIDecodedPkt& obj, QString *analysi
 	*analysis = QString::fromStdWString(analysisStream.str());
 }
 
+void exileSniffer::action_SRV_INVENTORY_SET_REMOVE(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+
+	DWORD unk1 = obj.get_UInt32(L"Unk1");
+	DWORD unk2 = obj.get_UInt32(L"Unk2");
+
+	if (!analysis)
+	{
+		wstringstream summary;
+		summary << "Inventory set remove. Unk1: 0x" << std::hex << unk1 << ", Unk2: 0x"<< unk2;
+
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
 
 
 void exileSniffer::action_UNK_MESSAGE_0x70(UIDecodedPkt& obj, QString *analysis)
@@ -2743,6 +2761,24 @@ void exileSniffer::action_CLI_GUILD_CREATE(UIDecodedPkt& obj, QString *analysis)
 	{
 		UI_DECODED_LIST_ENTRY listentry(obj);
 		listentry.summary = "Player(You) created guild";
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+}
+
+void exileSniffer::action_SRV_UNK_0xE4(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+
+	UINT32 arg = obj.get_UInt32(L"Arg");
+
+	if (!analysis)
+	{
+		wstringstream summary;
+		summary << "Unk msg 0xE4. Arg: 0x" << std::hex << arg << std::dec << "("<<arg<<")";
+
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = QString::fromStdWString(summary.str());
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
