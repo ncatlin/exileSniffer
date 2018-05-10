@@ -12,6 +12,9 @@ public:
 	bool threadsafe_lookup_hash(unsigned long hash, std::string& result, std::string& category);
 
 	void generateMonsterLevelHashes(unsigned int level);
+	std::wstring getVisualEffect(unsigned int ref);
+	std::wstring getVisualIdentity(unsigned int ref);
+	std::wstring getProphecy(unsigned int ref);
 
 public:
 	std::map <unsigned long, std::string> gameObjHashes;
@@ -26,6 +29,7 @@ public:
 	std::map <unsigned long, std::string> areaCodes;
 	std::map <unsigned int, std::string> prophecies;
 	std::map <unsigned int, std::string> hideouts;
+	std::map <unsigned int, std::string> itemEffects;
 
 	std::map <unsigned short, std::string> UIPaneIDs;
 
@@ -40,6 +44,7 @@ public:
 	unsigned int lastAreaLevel = INT_MAX;
 
 private:
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
 	std::mutex myMutex;
 

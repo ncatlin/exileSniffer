@@ -3746,36 +3746,29 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 	analysisStream << "UnkBytes:" << obj.get_wstring(L"UnkBytes1") << std::endl;
 
 	WValue &prophsList = obj.payload.FindMember(L"Prophecies")->value;
-	i = 0;
-	analysisStream << "Prophecies list:" << std::hex << std::endl;
+	analysisStream << "Prophecies:" << std::hex << std::endl;
 	for (auto it = prophsList.Begin(); it != prophsList.End(); it++)
 	{
-		analysisStream << i++ << std::endl;
-		analysisStream << "\tRow: 0x " << it->FindMember(L"DatRow")->value.GetUint() << std::endl;
-		analysisStream << "\tPosition: 0x" << it->FindMember(L"Pos")->value.GetUint() << std::endl;
+		uint ref = it->FindMember(L"DatReference")->value.GetUint();
+		analysisStream << "Position: 0x" << it->FindMember(L"Pos")->value.GetUint() << std::endl;
+		analysisStream << "\tID: " << ggpk.getProphecy(ref) << std::endl;
 		analysisStream << std::endl;
 	}
 
 	WValue &wornItems = obj.payload.FindMember(L"WornItems")->value;
-	i = 0;
 	analysisStream << "Worn Items List:" << std::hex << std::endl;
 	for (auto it = wornItems.Begin(); it != wornItems.End(); it++)
 	{
-		analysisStream << i++ << std::endl;
-		UINT32 visIdentReference = it->FindMember(L"VisualIdentity")->value.GetUint();
-		auto visit = ggpk.itemVisuals.find(visIdentReference);
+		UINT32 visIdentReference1 = it->FindMember(L"VisualIdentity1")->value.GetUint();
+		UINT32 visIdentReference2 = it->FindMember(L"VisualIdentity2")->value.GetUint();
+		UINT32 visualEffect = it->FindMember(L"ItemVisualEffect")->value.GetUint();
 
-		analysisStream << "\tVisualIdentity: ";
-		if (visit != ggpk.itemVisuals.end())
-			analysisStream << converter.from_bytes(visit->second) << std::endl;
-		else
-			analysisStream << "BAD 0x" << visIdentReference << std::endl;
-
-		analysisStream << "\tUnk1: 0x"<< it->FindMember(L"Unk1")->value.GetUint() << std::endl;
-		analysisStream << "\tUnk2: 0x" << it->FindMember(L"Unk2")->value.GetUint() << std::endl;
-		analysisStream << "\tUnk3: 0x" << it->FindMember(L"Unk3")->value.GetUint() << std::endl;
-		analysisStream << "\tUnk4: 0x" << it->FindMember(L"Unk4")->value.GetUint() << std::endl;
-		analysisStream << "\tUnk5: 0x" << it->FindMember(L"Unk5")->value.GetUint() << std::endl;
+		analysisStream << "Slot: " << std::dec << it->FindMember(L"Slot")->value.GetUint() << std::endl;
+		analysisStream << "\tVisualIdentity: " << ggpk.getVisualIdentity(visIdentReference1) << std::endl;
+		analysisStream << "\tExtraVisualIdentity: " << ggpk.getVisualIdentity(visIdentReference2) << std::endl;
+		analysisStream << "\tVisualEffect: " << ggpk.getVisualEffect(visualEffect) << std::endl;
+		analysisStream << "\tUnk2: " << std::dec << it->FindMember(L"Unk2")->value.GetUint() << std::endl;
+		analysisStream << "\tUnk5: " << std::dec << it->FindMember(L"Unk5")->value.GetUint() << std::endl;
 		analysisStream << std::endl;
 	}
 
