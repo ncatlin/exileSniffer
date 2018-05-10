@@ -157,8 +157,8 @@ void packet_processor::init_gamePkt_deserialisers()
 	//96
 	//97
 	gamePktDeserialisers[CLI_SKILLPANE_ACTION] = (deserialiser)&packet_processor::deserialise_CLI_SKILLPANE_ACTION;
-	//99
-	//9a
+	gamePktDeserialisers[SRV_ACHIEVEMENT_1] = (deserialiser)&packet_processor::deserialise_SRV_ACHIEVEMENT_1;
+	gamePktDeserialisers[SRV_ACHIEVEMENT_2] = (deserialiser)&packet_processor::deserialise_SRV_ACHIEVEMENT_2;
 	gamePktDeserialisers[SRV_SKILLPANE_DATA] = (deserialiser)&packet_processor::deserialise_SRV_SKILLPANE_DATA;
 	gamePktDeserialisers[SRV_UNK_POSITION_LIST] = (deserialiser)&packet_processor::deserialise_SRV_UNK_POSITION_LIST;
 	//9d
@@ -1486,6 +1486,16 @@ void packet_processor::deserialise_CLI_SWAPPED_WEAPONS(UIDecodedPkt *uipkt)
 void packet_processor::deserialise_CLI_SKILLPANE_ACTION(UIDecodedPkt *uipkt)
 {
 	consume_add_byte(L"State", uipkt);
+}
+
+void packet_processor::deserialise_SRV_ACHIEVEMENT_1(UIDecodedPkt *uipkt)
+{
+	consume_add_word(L"Arg", uipkt);
+}
+
+void packet_processor::deserialise_SRV_ACHIEVEMENT_2(UIDecodedPkt *uipkt)
+{
+	consume_add_word(L"Arg", uipkt);
 }
 
 void packet_processor::deserialise_SRV_SKILLPANE_DATA(UIDecodedPkt *uipkt)
