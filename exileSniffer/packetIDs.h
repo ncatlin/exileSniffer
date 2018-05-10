@@ -63,20 +63,11 @@
 #define SRV_SKILL_SLOTS_LIST (CLI_SET_HOTBARSKILL+1) //2f
 #define CLI_REVIVE_CHOICE (SRV_SKILL_SLOTS_LIST+1) //30
 #define SRV_YOU_DIED (CLI_REVIVE_CHOICE+1) //"thats dark souls"
-//32  //seen when using portal scroll
+//32  //client packet seen when using portal scroll
 //33
 //34
 //35
 //36
-/*
-player dies:
-S->C UnkPkID: 0x31 size: 7 bytes
-00310c00000000
-[f1] Server sent stat update
-00f1000002080000017550010189cb010132013600000208ffffffff000000020301013600000208ffffffff0000000705010000000000
-S->C UnkPkID: 0xef size: 23 bytes
-00ef0000017300000173500081ef000000000208010132
-*/
 #define CLI_USE_BELT_SLOT 0x0037
 #define CLI_USE_ITEM 0x0038
 //39
@@ -133,8 +124,8 @@ S->C UnkPkID: 0xef size: 23 bytes
 #define SRV_UNK_0x6c 0x6c
 #define SRV_CREATE_ITEM (SRV_UNK_0x6c +1)
 #define SRV_SLOT_ITEMSLIST (SRV_CREATE_ITEM+1)
-#define CLI_UNK_0x6f //seen while selling stuff to vendor/closing window
-#define UNK_MESSAGE_0x70 0x70
+#define SRV_INVENTORY_SET_REMOVE (SRV_SLOT_ITEMSLIST+1)
+#define UNK_MESSAGE_0x70 (SRV_INVENTORY_SET_REMOVE+1)
 #define CLI_UNK_0x71 0x71
 #define SRV_UNK_0x72 0x72
 #define UNK_MESSAGE_0x73 0x73
@@ -248,7 +239,7 @@ S->C UnkPkID: 0xef size: 23 bytes
 //e1
 //e2
 //e3
-//e4
+#define SRV_UNK_0xE4 0xe4
 //e5
 #define SRV_UNK_0xE6 0xe6
 //e7

@@ -134,7 +134,6 @@ class exileSniffer : public QMainWindow
 		void action_decoded_login_packet(UIDecodedPkt& decoded);
 		
 		clientHexData * get_clientdata(DWORD pid);
-	//void insertRawText(std::string hexdump, std::string asciidump);
 		void addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPkt *obj, bool isNewEntry = true);
 		void setRowColor(int row, QColor colour);
 
@@ -237,6 +236,7 @@ class exileSniffer : public QMainWindow
 		void action_SRV_UNK_0x6c(UIDecodedPkt&, QString*);
 		void action_SRV_CREATE_ITEM(UIDecodedPkt&, QString*);
 		void action_SRV_SLOT_ITEMSLIST(UIDecodedPkt&, QString*);
+		void action_SRV_INVENTORY_SET_REMOVE(UIDecodedPkt&, QString *);
 		void action_UNK_MESSAGE_0x70(UIDecodedPkt&, QString*);
 		void action_CLI_UNK_0x71(UIDecodedPkt&, QString*);
 		void action_SRV_UNK_0x72(UIDecodedPkt&, QString*);
@@ -289,6 +289,8 @@ class exileSniffer : public QMainWindow
 		void action_CLI_MOUSE_RELEASE(UIDecodedPkt&, QString*);
 
 		void action_CLI_OPEN_WORLD_SCREEN(UIDecodedPkt&, QString*);
+
+		void action_SRV_UNK_0xE4(UIDecodedPkt&, QString*);
 
 		void action_SRV_UNK_0xE6(UIDecodedPkt&, QString*);	
 		void action_SRV_OBJ_REMOVED(UIDecodedPkt&, QString*);

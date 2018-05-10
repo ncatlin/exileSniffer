@@ -115,7 +115,7 @@ void packet_processor::init_gamePkt_deserialisers()
 	gamePktDeserialisers[SRV_UNK_0x6c] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x6c;
 	gamePktDeserialisers[SRV_CREATE_ITEM] = (deserialiser)&packet_processor::deserialise_SRV_CREATE_ITEM;
 	gamePktDeserialisers[SRV_SLOT_ITEMSLIST] = (deserialiser)&packet_processor::deserialise_SRV_SLOT_ITEMSLIST;
-	//6f
+	gamePktDeserialisers[SRV_INVENTORY_SET_REMOVE] = (deserialiser)&packet_processor::deserialise_SRV_INVENTORY_SET_REMOVE;
 	gamePktDeserialisers[UNK_MESSAGE_0x70] = (deserialiser)&packet_processor::deserialise_UNK_MESSAGE_0x70;
 	gamePktDeserialisers[CLI_UNK_0x71] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0x71;
 	gamePktDeserialisers[SRV_UNK_0x72] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x72;
@@ -230,7 +230,7 @@ void packet_processor::init_gamePkt_deserialisers()
 	//e1
 	//e2
 	//e3
-	//e4
+	gamePktDeserialisers[SRV_UNK_0xE4] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xE4;
 	//e5
 	gamePktDeserialisers[SRV_UNK_0xE6] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xE6;
 	//e7
@@ -1407,6 +1407,11 @@ void packet_processor::deserialise_SRV_SLOT_ITEMSLIST(UIDecodedPkt *uipkt)
 
 }
 
+void packet_processor::deserialise_SRV_INVENTORY_SET_REMOVE(UIDecodedPkt *uipkt)
+{
+	consume_add_byte(L"Unk1", uipkt);
+	consume_add_dword_ntoh(L"Unk2", uipkt);
+}
 
 void packet_processor::deserialise_UNK_MESSAGE_0x70(UIDecodedPkt *uipkt)
 {
@@ -1765,6 +1770,12 @@ void packet_processor::deserialise_CLI_GUILD_CREATE(UIDecodedPkt *uipkt)
 	//no data expected
 }
 
+void packet_processor::deserialise_SRV_UNK_0xE4(UIDecodedPkt *uipkt)
+{
+	consume_add_byte(L"Arg", uipkt);
+}
+
+//todo - add contents to json
 void packet_processor::deserialise_SRV_UNK_0xE6(UIDecodedPkt *uipkt)
 {
 	byte list1Len = consume_Byte();
@@ -1794,7 +1805,6 @@ void packet_processor::deserialise_SRV_UNK_0xE6(UIDecodedPkt *uipkt)
 	{
 		//items. lots of items
 	}
-
 
 	uipkt->add_byte(L"List1Len", list1Len);
 	uipkt->add_byte(L"List2Len", list2Len);
@@ -2383,7 +2393,6 @@ void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t 
 		if (bytescount)
 		{
 			std::wstring unkb1 = consume_hexblob(bytescount);
-			std::cout << "Got hexblob size " << std::dec << bytescount << std::endl;
 			WValue UnkBytes1(unkb1.c_str(), allocator);
 			uipkt->payload.AddMember(L"UnkBytes1", UnkBytes1, allocator);
 		}
@@ -2392,7 +2401,6 @@ void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t 
 	consume_add_byte(L"UnkBAfterHideout", uipkt);
 
 	byte prophecyCount = consume_Byte();
-	std::cout << "loading " << std::dec << (int) prophecyCount << " prophecies" << std::endl;
 	WValue prophecylist(rapidjson::kArrayType);
 	for (int i = 0; i < prophecyCount; i++)
 	{
@@ -2408,12 +2416,9 @@ void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t 
 	byte b2 = consume_Byte();
 	byte b3 = consume_Byte();
 
-	std::cout << "d1: " << d1 << ", b2: " << (int)b1 << ", b3: " << (int)b2 << ", b4: " << (int)b3 << std::endl;
 
 	//handle obj worn items
-
 	byte itemCount = consume_Byte();
-	std::cout << "loading " << std::dec << (int)itemCount << " visual items" << std::endl;
 	WValue wornItemVisuals(rapidjson::kArrayType);
 
 	for (int i = 0; i < itemCount; i++)
