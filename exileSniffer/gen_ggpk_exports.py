@@ -49,7 +49,7 @@ def load_world_areacodes(ggpkobj):
 
     return resultDict
 
-def load_monster_varieties(ggpkfile):
+def load_monster_varieties(ggpkobj):
     print("Loading monster varieties")
 
     resultDict = {}
@@ -62,7 +62,7 @@ def load_monster_varieties(ggpkfile):
 
     return resultDict
 
-def load_monster_varieties_index(ggpkfile):
+def load_monster_varieties_index(ggpkobj):
     print("Loading monster variety indexes")
     resultList = []
     
@@ -71,7 +71,7 @@ def load_monster_varieties_index(ggpkfile):
         resultList.append(i['Id'])
     return resultList
 
-def load_chests(ggpkfile):
+def load_chests(ggpkobj):
     print("Loading chests")
     resultDict = {}
     
@@ -83,7 +83,7 @@ def load_chests(ggpkfile):
 
     return resultDict
 
-def load_characters(ggpkfile):
+def load_characters(ggpkobj):
     print("Loading characters")
     resultDict = {}
     
@@ -95,7 +95,7 @@ def load_characters(ggpkfile):
 
     return resultDict
 
-def load_npcs(ggpkfile):
+def load_npcs(ggpkobj):
     print("Loading npcs")
     resultDict = {}
     
@@ -107,7 +107,7 @@ def load_npcs(ggpkfile):
 
     return resultDict
 
-def load_pets(ggpkfile):
+def load_pets(ggpkobj):
     print("Loading pets")
     resultDict = {}
     
@@ -119,11 +119,15 @@ def load_pets(ggpkfile):
 
     return resultDict
 
-def load_items(ggpkfile):
+def load_items(ggpkobj):
     print("Loading items")
     resultDict = {}
-    
-    rit = getDatIterator(ggpkobj, "BaseItemTypes.dat")
+
+    try:
+        rit = getDatIterator(ggpkobj, "BaseItemTypes.dat")
+    except:
+        print("Failed to load baseItemTypes.dat")
+        return resultDict
 
     for i in rit:
         objhash = murmur2.murmur2_32(i['Id'].encode('ascii'), 0)
@@ -131,8 +135,8 @@ def load_items(ggpkfile):
 
     return resultDict
 
-def load_item_visuals(ggpkfile):
-    print("Loading item visuals")
+def load_item_visuals(ggpkobj):
+    print("Loading item visual identities")
     resultDict = {}
 
     rit = getDatIterator(ggpkobj, "ItemVisualIdentity.dat")
@@ -140,9 +144,18 @@ def load_item_visuals(ggpkfile):
         ref = int(i['UnknownUniqueInt'])
         resultDict[ref] = i['Id']
     return resultDict
-    
 
-def load_stats(ggpkfile):
+def load_item_effects(ggpkobj):
+    print("Loading item visual effects")
+    resultDict = {}
+
+    rit = getDatIterator(ggpkobj, "ItemVisualEffect.dat")
+    for i in rit:
+        ref = int(i['Unknown0'])
+        resultDict[ref] = i['Id']
+    return resultDict 
+
+def load_stats(ggpkobj):
     print("Loading stats")
     resultList = []
     
@@ -153,7 +166,7 @@ def load_stats(ggpkfile):
 
     return resultList
 
-def load_buf_visuals(ggpkfile):
+def load_buf_visuals(ggpkobj):
     print("Loading buff visuals")
     resultList = []
     
@@ -164,7 +177,7 @@ def load_buf_visuals(ggpkfile):
 
     return resultList
 
-def load_buf_defs(ggpkfile):
+def load_buf_defs(ggpkobj):
     print("Loading buff definitions")
     resultList = []
     recoveryBuffs = []
@@ -212,7 +225,7 @@ def load_objregister(ggpkfile):
         
     return hashes
 
-def load_prophecies():
+def load_prophecies(ggpkobj):
     print("Loading prophecies")
     result = {}
 
@@ -224,7 +237,7 @@ def load_prophecies():
 
     return result
     
-def load_hideouts():
+def load_hideouts(ggpkobj):
     print("Loading hideouts")
     result = {}
 
@@ -247,10 +260,16 @@ def savefile(resultdict, targetfilename):
     testfd.close()
 
 
-if __name__ == "__main__":
-    #0xd7, 0xaa, 0x90, 0x65
+def getItemHashes():
+    fd = open("C:\\Users\\nia\\Documents\\Visual Studio 2017\\Projects\\exileSniffer\\exileSniffer\\itemhashes.json")
+    js = json.load(fd)
+    itemhashes = js['ItemHashes']
+    fd.close()
+    return itemhashes
     
-    st = "Metadata/Characters/Str/Str"
+
+if __name__ == "__main__":
+
     st = "Metadata/Monsters/Spiders/SpiderExplodeFastWithExperience2"
     st = "Metadata/Monsters/Skeletons/SkeletonFireLightning"
     
@@ -258,10 +277,11 @@ if __name__ == "__main__":
     st = "OneHandMace8"
     #st = "Metadata/Monsters/LeagueBestiary/SpiderPlatedBestiarySpiritBoss" #0xc0a52243
     #st = "Metadata/Monsters/Scorpion/Scorpion"
+    st = "Metadata/Pet/BabyElephant/BabyElephant"
     ascbytes = st.encode('ascii')
     print(hex(murmur2.murmur2_32(ascbytes, 0)))
     st = "HideoutBeach" 
-    #exit()
+    exit()
 
     print("Loading GGPK")
     ggpkobj = createggpkfile(poedir)
@@ -276,8 +296,9 @@ if __name__ == "__main__":
     resultdict['CharacterHashes'] = load_characters(ggpkobj)
     resultdict['NPCHashes'] = load_npcs(ggpkobj)
     resultdict['PetHashes'] = load_pets(ggpkobj)
-    resultdict['ItemHashes'] = load_items(ggpkobj)
+    resultdict['ItemHashes'] = getItemHashes()#load_items(ggpkobj)
     resultdict['ItemVisuals'] = load_item_visuals(ggpkobj)
+    resultdict['ItemVisualEffects'] = load_item_effects(ggpkobj)
     resultdict['StatIndexes'] = load_stats(ggpkobj)
     resultdict['BuffDefinitions'], resultdict['RecoveryBuffs'] = load_buf_defs(ggpkobj)
     resultdict['BuffVisuals'] = load_buf_visuals(ggpkobj)

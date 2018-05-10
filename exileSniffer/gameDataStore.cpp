@@ -258,6 +258,19 @@ void gameDataStore::fill_gamedata_lists()
 		}
 	}
 
+	docIt = jsondoc.FindMember("ItemVisualEffects");
+	if (docIt != jsondoc.MemberEnd())
+	{
+		auto &itemEffectsDoc = docIt->value;
+		rapidjson::Value::ConstMemberIterator effectIt = itemEffectsDoc.MemberBegin();
+		for (; effectIt != itemEffectsDoc.MemberEnd(); effectIt++)
+		{
+			//uint ref = effectIt->name.GetInt();
+			uint ref = std::stoi(effectIt->name.GetString());
+			itemEffects[ref] = effectIt->value.GetString();
+		}
+	}
+
 	docIt = jsondoc.FindMember("Prophecies");
 	if (docIt != jsondoc.MemberEnd())
 	{
@@ -265,7 +278,7 @@ void gameDataStore::fill_gamedata_lists()
 		rapidjson::Value::ConstMemberIterator prophIt = prophDoc.MemberBegin();
 		for (; prophIt != prophDoc.MemberEnd(); prophIt++)
 		{
-			uint ref = prophIt->name.GetUint();
+			uint ref = std::stoi(prophIt->name.GetString());
 			prophecies[ref] = prophIt->value.GetString();
 		}
 	}
@@ -277,7 +290,7 @@ void gameDataStore::fill_gamedata_lists()
 		rapidjson::Value::ConstMemberIterator hideIt = hideoutDoc.MemberBegin();
 		for (; hideIt != hideoutDoc.MemberEnd(); hideIt++)
 		{
-			uint ref = hideIt->name.GetUint();
+			uint ref = std::stoi(hideIt->name.GetString());
 			hideouts[ref] = hideIt->value.GetString();
 		}
 	}
@@ -383,4 +396,50 @@ void gameDataStore::generateMonsterLevelHashes(unsigned int level)
 
 	lastAreaLevel = level;
 	hashedMonsterLevels.push_back(level);
+}
+
+std::wstring gameDataStore::getVisualIdentity(unsigned int ref)
+{
+	std::wstringstream result;
+
+	if (ref == 0) return L"None";
+
+	auto it = itemVisuals.find(ref);
+	if (it != itemVisuals.end())
+		result << converter.from_bytes(it->second);
+	else
+		result << L"[Unknown 0x" << std::hex << ref << "]";
+
+	return result.str();
+}
+
+std::wstring gameDataStore::getVisualEffect(unsigned int ref)
+{
+	std::wstringstream result;
+
+	if (ref == 0) return L"None";
+
+	auto it = itemEffects.find(ref);
+	if (it != itemEffects.end())
+		result << converter.from_bytes(it->second);
+	else
+		result << L"[Unknown 0x" << std::hex << ref << "]";
+
+	return result.str();
+}
+
+
+std::wstring gameDataStore::getProphecy(unsigned int ref)
+{
+	std::wstringstream result;
+
+	if (ref == 0) return L"None";
+
+	auto it = prophecies.find(ref);
+	if (it != prophecies.end())
+		result << converter.from_bytes(it->second);
+	else
+		result << L"[Unknown 0x" << std::hex << ref << "]";
+
+	return result.str();
 }

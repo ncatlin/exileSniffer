@@ -2337,13 +2337,24 @@ void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t 
 	}
 	uipkt->payload.AddMember(L"UnkList", unklist, allocator);
 
-	consume_add_word(L"HideoutCode", uipkt);
+	ushort hideoutcode = consume_WORD();
+	std::cout << "huideoutcode " << std::hex << hideoutcode << std::endl;
+	uipkt->add_word(L"HideoutCode", hideoutcode);
+	if (hideoutcode != 0)
+	{
+		consume_add_byte(L"UnkBHideout", uipkt);
 
-	byte bytescount = consume_Byte();
-	std::wstring unkb1 = consume_hexblob(bytescount);
-	std::cout << "Got hexblob size " << unkb1.size() << std::endl;
-	WValue UnkBytes1(unkb1.c_str(), allocator);
-	uipkt->payload.AddMember(L"UnkBytes1", UnkBytes1, allocator);
+		byte bytescount = consume_Byte();
+		if (bytescount)
+		{
+			std::wstring unkb1 = consume_hexblob(bytescount);
+			std::cout << "Got hexblob size " << std::dec << bytescount << std::endl;
+			WValue UnkBytes1(unkb1.c_str(), allocator);
+			uipkt->payload.AddMember(L"UnkBytes1", UnkBytes1, allocator);
+		}
+	}
+
+	consume_add_byte(L"UnkBAfterHideout", uipkt);
 
 	byte prophecyCount = consume_Byte();
 	std::cout << "loading " << std::dec << (int) prophecyCount << " prophecies" << std::endl;
@@ -2351,7 +2362,7 @@ void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t 
 	for (int i = 0; i < prophecyCount; i++)
 	{
 		WValue prophecy(rapidjson::kObjectType);
-		prophecy.AddMember(L"DatRow", ntohs(consume_WORD()), allocator);
+		prophecy.AddMember(L"DatReference", consume_WORD(), allocator);
 		prophecy.AddMember(L"Pos", consume_Byte(), allocator);
 		prophecylist.PushBack(prophecy, allocator);
 	}
@@ -2373,12 +2384,15 @@ void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t 
 	for (int i = 0; i < itemCount; i++)
 	{
 		WValue wornItem(rapidjson::kObjectType);
-		wornItem.AddMember(L"Unk1", consume_Byte(), allocator);
+		wornItem.AddMember(L"Slot", consume_Byte(), allocator);
+		//not seen any difference changing this either
 		wornItem.AddMember(L"Unk2", consume_Byte(), allocator);
 
-		wornItem.AddMember(L"VisualIdentity", consume_WORD(), allocator);
-		wornItem.AddMember(L"Unk3", consume_WORD(), allocator);
-		wornItem.AddMember(L"Unk4", consume_WORD(), allocator);
+		wornItem.AddMember(L"VisualIdentity1", consume_WORD(), allocator);
+		wornItem.AddMember(L"VisualIdentity2", consume_WORD(), allocator);
+		//unknown0 in itemvisualeffect.dat
+		wornItem.AddMember(L"ItemVisualEffect", consume_WORD(), allocator);
+		//not seen any difference when 1/0 on identical item
 		wornItem.AddMember(L"Unk5", consume_Byte(), allocator);
 		wornItemVisuals.PushBack(wornItem, allocator);
 	}
@@ -2387,6 +2401,28 @@ void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t 
 	//other sec - animation?
 	consume_add_word(L"UnkX1", uipkt);
 	consume_add_byte(L"UnkX2", uipkt);
+
+	//if [something] > 0: 
+	//get another byte (animation related)
+
+	//this section may depend on class or something else  1408EE715
+	consume_add_word(L"UnkX2", uipkt);
+
+	//skills. horridly big function but worth it to see peoples loadouts
+	//expect to see: gem types, gem levels/stats/corruptions, links, passives, microtransactions 
+
+	UINT32 skillflags = consume_WORD();
+	uipkt->add_word(L"SkillFlags", skillflags);
+
+	if (skillflags & 0x40)
+		consume_add_word(L"Skill0x40", uipkt);
+	else if (skillflags & 0x20)
+	{
+		//lots of stuff
+	}
+
+	//even more stuff oh no
+	//aintnobodygottimeforthat.jpg
 
 	//C: Restore index to start of next packet
 	restore_buffer();

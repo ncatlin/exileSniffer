@@ -658,6 +658,9 @@ std::string serverString(streamType server, string IP)
 
 void exileSniffer::insertRawText(std::string hexdump, std::string asciidump)
 {
+	//todo: see if this is wrecking performance
+	//suspect the max block thing is culprit
+	//change to update only when visible
 	int oldScrollPos = ui.ptHexPane->verticalScrollBar()->sliderPosition();
 
 	QTextCursor userCursor = ui.ptHexPane->textCursor();
