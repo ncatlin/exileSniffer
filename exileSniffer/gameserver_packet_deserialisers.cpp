@@ -83,7 +83,7 @@ void packet_processor::init_gamePkt_deserialisers()
 	//4c
 	//4d
 	//4e
-	//4f
+	gamePktDeserialisers[SRV_LIST_PORTALS] = (deserialiser)&packet_processor::deserialise_SRV_LIST_PORTALS;
 	gamePktDeserialisers[CLI_SEND_PARTY_INVITE] = (deserialiser)&packet_processor::deserialise_CLI_SEND_PARTY_INVITE;
 	//51
 	gamePktDeserialisers[CLI_TRY_JOIN_PARTY] = (deserialiser)&packet_processor::deserialise_CLI_TRY_JOIN_PARTY;
@@ -128,7 +128,7 @@ void packet_processor::init_gamePkt_deserialisers()
 	//79
 	//7a
 	//7b
-	//7c
+	gamePktDeserialisers[CLI_ACTIVATE_MAP] = (deserialiser)&packet_processor::deserialise_CLI_ACTIVATE_MAP;
 	//7d
 	//7e
 	gamePktDeserialisers[CLI_SWAPPED_WEAPONS] = (deserialiser)&packet_processor::deserialise_CLI_SWAPPED_WEAPONS;
@@ -497,11 +497,8 @@ void packet_processor::deserialise_SRV_SERVER_MESSAGE(UIDecodedPkt *uipkt)
 	consume_add_dword_ntoh(L"Unk4", uipkt);
 
 	WValue blobs = get_pairs_strings_blob(uipkt);
-	std::cout << "pre1" << std::endl;
 	uipkt->payload.AddMember(L"PairList", blobs.FindMember(L"Pairs")->value, allocator);
-	std::cout << "pre2" << std::endl;
 	uipkt->payload.AddMember(L"StringList", blobs.FindMember(L"Strings")->value, allocator);
-	std::cout << "pre3" << std::endl;
 	/*
 	//welcome to coast
 	00 0B
@@ -997,7 +994,7 @@ void packet_processor::deserialise_CLI_UNK_0x2c(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_CLI_SELECT_MAPTRAVEL(UIDecodedPkt *uipkt)
 {
-	consume_add_dword_ntoh(L"AreaChosen", uipkt);
+	consume_add_dword_ntoh(L"AreaCode", uipkt);
 	consume_add_dword_ntoh(L"Arg2", uipkt);
 	consume_add_byte(L"Arg3", uipkt);
 }
@@ -1078,6 +1075,29 @@ void packet_processor::deserialise_SRV_OPEN_UI_PANE(UIDecodedPkt *uipkt)
 {
 	consume_add_byte(L"PaneID", uipkt);
 	consume_add_dword_ntoh(L"Arg", uipkt);
+}
+
+void packet_processor::deserialise_SRV_LIST_PORTALS(UIDecodedPkt *uipkt)
+{
+	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+
+	WValue portalList(rapidjson::kArrayType);
+
+	byte portalCount = consume_Byte();
+	for (int i = 0; i < portalCount; i++)
+	{
+		WValue portalDetails(rapidjson::kObjectType);
+		portalDetails.AddMember(L"ID", (UINT32)ntohl(consume_DWORD()), allocator);
+		portalDetails.AddMember(L"Unk1", (UINT32)ntohl(consume_DWORD()), allocator);
+
+		consume_add_lenprefix_string(L"String", portalDetails, allocator);
+
+		portalDetails.AddMember(L"Unk2", consume_Byte(), allocator);
+
+		portalList.PushBack(portalDetails, allocator);
+	}
+
+	uipkt->payload.AddMember(L"PortalList", portalList, allocator);
 }
 
 void packet_processor::deserialise_CLI_SEND_PARTY_INVITE(UIDecodedPkt *uipkt)
@@ -1451,6 +1471,11 @@ void packet_processor::deserialise_SRV_UNK_0x75(UIDecodedPkt *uipkt)
 		std::cout << "consu b" << std::endl;
 		consume_add_byte(L"Unk_cond_b", uipkt);
 	}
+}
+
+void packet_processor::deserialise_CLI_ACTIVATE_MAP(UIDecodedPkt *uipkt)
+{
+	//no data expected
 }
 
 void packet_processor::deserialise_CLI_SWAPPED_WEAPONS(UIDecodedPkt *uipkt)
@@ -2441,8 +2466,6 @@ void packet_processor::deserialise_SRV_ADD_OBJECT(UIDecodedPkt *uipkt)
 	unsigned short objBlobDataLen = ntohs(consume_WORD());
 	uipkt->add_word(L"DataLen", objBlobDataLen);
 
-
-
 	/*
 	add_obj is easy to deserialise but difficult to parse
 	deserialise it cleanly and rewind the index to attempt parsing
@@ -2460,12 +2483,13 @@ void packet_processor::deserialise_SRV_ADD_OBJECT(UIDecodedPkt *uipkt)
 
 	if (hashCategory == "Character")
 		SRV_ADD_OBJ_decode_character(uipkt, objBlobDataLen);
-	//object
-	//npc
+	//else object
+	//else npc, etc
 	
 }
 
-//same as 0x135 but no hash DWORD
+//same as 0x135 to deserialise but no hash DWORD
+//this would be really interesting to decode - probably shares lots of code with 135 too
 void packet_processor::deserialise_SRV_UPDATE_OBJECT(UIDecodedPkt *uipkt)
 {
 	consume_add_dword_ntoh(L"ID1", uipkt);
@@ -2474,9 +2498,7 @@ void packet_processor::deserialise_SRV_UPDATE_OBJECT(UIDecodedPkt *uipkt)
 	
 	unsigned short dataLen = ntohs(consume_WORD());
 	uipkt->add_word(L"DataLen", dataLen);
-	//byte arrayIndex = consume_Byte();
-	//ushort controlBits = consume_WORD();
-	consume_blob(dataLen); //todo
+	consume_blob(dataLen); //todo!
 }
 
 void packet_processor::deserialise_SRV_IDNOTIFY_0x137(UIDecodedPkt *uipkt)

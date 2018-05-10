@@ -42,6 +42,7 @@ public:
 	}
 
 	bool empty() { return q.empty(); }
+	size_t size() { return q.size();  }
 
 private:
 	QQueue<T> q;

@@ -226,6 +226,7 @@ void packet_capture_thread::main_loop()
 packet_capture_thread::packet_capture_thread(SafeQueue<UI_MESSAGE *>* uiq, 
 	SafeQueue<GAMEPACKET > *gameP, SafeQueue<GAMEPACKET > *loginP)
 {
+	InitializeCriticalSection(&streamDataCritsec);
 	uiMsgQueue = uiq;
 	gameQueue = gameP;
 	loginQueue = loginP;
@@ -234,6 +235,7 @@ packet_capture_thread::packet_capture_thread(SafeQueue<UI_MESSAGE *>* uiq,
 
 packet_capture_thread::~packet_capture_thread()
 {
+	
 }
 
 
