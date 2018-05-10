@@ -101,8 +101,8 @@ S->C UnkPkID: 0xef size: 23 bytes
 //4c
 #define SRV_UNK_0x4d  //seen when buying from vendor
 //4e
-//4f
-#define CLI_SEND_PARTY_INVITE 0x50
+#define SRV_LIST_PORTALS 0x4f
+#define CLI_SEND_PARTY_INVITE (SRV_LIST_PORTALS+1) //0x50
 //51
 #define CLI_TRY_JOIN_PARTY 0x52
 #define CLI_DISBAND_PUBLIC_PARTY (CLI_TRY_JOIN_PARTY+1) //0x53
@@ -146,7 +146,7 @@ S->C UnkPkID: 0xef size: 23 bytes
 //79
 //7a
 //7b
-//7c
+#define CLI_ACTIVATE_MAP 0x7c //todo no data
 //7d
 //7e
 #define CLI_SWAPPED_WEAPONS 0x7f

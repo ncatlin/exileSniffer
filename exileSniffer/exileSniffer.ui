@@ -21,7 +21,7 @@
        <enum>QTabWidget::North</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="interceptionTab">
        <attribute name="title">
@@ -133,7 +133,7 @@
                 <property name="currentIndex">
                  <number>1</number>
                 </property>
-                <widget class="QWidget" name="noDecryptStack" native="true">
+                <widget class="QWidget" name="noDecryptStack">
                  <layout class="QVBoxLayout" name="verticalLayout_9">
                   <item>
                    <widget class="QLabel" name="decryptionStatusText">
@@ -583,7 +583,7 @@ FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD</string>
               <property name="currentIndex">
                <number>1</number>
               </property>
-              <widget class="QWidget" name="decodeAnalysisTab" native="true">
+              <widget class="QWidget" name="decodeAnalysisTab">
                <attribute name="title">
                 <string>Analysis</string>
                </attribute>
@@ -648,8 +648,7 @@ FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD</string>
                    <bool>true</bool>
                   </property>
                   <property name="plainText">
-                   <string>
-</string>
+                   <string/>
                   </property>
                  </widget>
                 </item>
@@ -674,279 +673,6 @@ FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD</string>
            </item>
           </layout>
          </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="rawDecryptTab">
-       <attribute name="title">
-        <string>Raw Plaintext</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0">
-        <property name="spacing">
-         <number>2</number>
-        </property>
-        <item>
-         <layout class="QHBoxLayout" name="textPaneFrame" stretch="5,3">
-          <property name="spacing">
-           <number>1</number>
-          </property>
-          <item>
-           <widget class="QTextEdit" name="ptHexPane">
-            <property name="font">
-             <font>
-              <family>Courier New</family>
-              <pointsize>8</pointsize>
-             </font>
-            </property>
-            <property name="verticalScrollBarPolicy">
-             <enum>Qt::ScrollBarAlwaysOn</enum>
-            </property>
-            <property name="lineWrapMode">
-             <enum>QTextEdit::NoWrap</enum>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-            <property name="html">
-             <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Courier New'; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="textInteractionFlags">
-             <set>Qt::TextSelectableByMouse</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QTextEdit" name="ptASCIIPane">
-            <property name="font">
-             <font>
-              <family>Courier New</family>
-             </font>
-            </property>
-            <property name="verticalScrollBarPolicy">
-             <enum>Qt::ScrollBarAlwaysOn</enum>
-            </property>
-            <property name="sizeAdjustPolicy">
-             <enum>QAbstractScrollArea::AdjustToContents</enum>
-            </property>
-            <property name="html">
-             <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Courier New'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="rawControls">
-          <item>
-           <widget class="QFrame" name="bytesPerRowFrame">
-            <property name="maximumSize">
-             <size>
-              <width>183</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
-            </property>
-            <layout class="QFormLayout" name="formLayout_5">
-             <property name="verticalSpacing">
-              <number>0</number>
-             </property>
-             <property name="leftMargin">
-              <number>6</number>
-             </property>
-             <property name="topMargin">
-              <number>6</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item row="0" column="0">
-              <widget class="QLabel" name="bytesRowLael">
-               <property name="maximumSize">
-                <size>
-                 <width>86</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Bytes Per Row:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QComboBox" name="bytesRowCombo">
-               <property name="maximumSize">
-                <size>
-                 <width>60</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="editable">
-                <bool>true</bool>
-               </property>
-               <item>
-                <property name="text">
-                 <string>16</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>32</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>48</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>64</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QFrame" name="horizontalFrame_3">
-            <property name="maximumSize">
-             <size>
-              <width>150</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <layout class="QFormLayout" name="formLayout">
-             <property name="verticalSpacing">
-              <number>0</number>
-             </property>
-             <property name="leftMargin">
-              <number>3</number>
-             </property>
-             <property name="topMargin">
-              <number>6</number>
-             </property>
-             <property name="rightMargin">
-              <number>4</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_7">
-               <property name="maximumSize">
-                <size>
-                 <width>60</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Max lines:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QLineEdit" name="maxRawLinesEdit">
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>11</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>79</width>
-                 <height>22</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>10000</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="rawLinewrapCheck">
-            <property name="maximumSize">
-             <size>
-              <width>100</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Line Wrap</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="rawAutoScrollCheck">
-            <property name="maximumSize">
-             <size>
-              <width>76</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>AutoScroll</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QFrame" name="frame">
-            <property name="maximumSize">
-             <size>
-              <width>259</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout">
-             <item>
-              <widget class="QLabel" name="filterLabel">
-               <property name="maximumSize">
-                <size>
-                 <width>500</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>0 Packets Captured</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-         </layout>
         </item>
        </layout>
       </widget>
@@ -1277,54 +1003,6 @@ p, li { white-space: pre-wrap; }
  </resources>
  <connections>
   <connection>
-   <sender>bytesRowCombo</sender>
-   <signal>activated(QString)</signal>
-   <receiver>exileSniffer</receiver>
-   <slot>rawBytesRowChanged(QString)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>277</x>
-     <y>607</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>413</x>
-     <y>336</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>rawLinewrapCheck</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>exileSniffer</receiver>
-   <slot>toggleRawLineWrap(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>382</x>
-     <y>608</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>413</x>
-     <y>336</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>rawAutoScrollCheck</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>exileSniffer</receiver>
-   <slot>toggleRawAutoScroll(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>448</x>
-     <y>608</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>413</x>
-     <y>336</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>decodedListTable</sender>
    <signal>clicked(QModelIndex)</signal>
    <receiver>exileSniffer</receiver>
@@ -1333,22 +1011,6 @@ p, li { white-space: pre-wrap; }
     <hint type="sourcelabel">
      <x>412</x>
      <y>207</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>413</x>
-     <y>336</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>decodedListTable</sender>
-   <signal>cellPressed(int,int)</signal>
-   <receiver>exileSniffer</receiver>
-   <slot>decodedCellActivated(int,int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>412</x>
-     <y>247</y>
     </hint>
     <hint type="destinationlabel">
      <x>413</x>
@@ -1405,14 +1067,14 @@ p, li { white-space: pre-wrap; }
    </hints>
   </connection>
   <connection>
-   <sender>decodedFiltersBtn</sender>
-   <signal>clicked()</signal>
+   <sender>decodedListTable</sender>
+   <signal>cellPressed(int,int)</signal>
    <receiver>exileSniffer</receiver>
-   <slot>showRawFiltersDLG()</slot>
+   <slot>decodedCellActivated(int,int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>753</x>
-     <y>66</y>
+     <x>412</x>
+     <y>247</y>
     </hint>
     <hint type="destinationlabel">
      <x>413</x>
@@ -1437,14 +1099,14 @@ p, li { white-space: pre-wrap; }
    </hints>
   </connection>
   <connection>
-   <sender>maxRawLinesEdit</sender>
-   <signal>returnPressed()</signal>
+   <sender>decodedAutoscrollCheck</sender>
+   <signal>toggled(bool)</signal>
    <receiver>exileSniffer</receiver>
-   <slot>maxRawLinesSet()</slot>
+   <slot>toggleDecodedAutoScroll(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>306</x>
-     <y>612</y>
+     <x>221</x>
+     <y>66</y>
     </hint>
     <hint type="destinationlabel">
      <x>413</x>
@@ -1453,13 +1115,13 @@ p, li { white-space: pre-wrap; }
    </hints>
   </connection>
   <connection>
-   <sender>decodedAutoscrollCheck</sender>
-   <signal>toggled(bool)</signal>
+   <sender>decodedFiltersBtn</sender>
+   <signal>clicked()</signal>
    <receiver>exileSniffer</receiver>
-   <slot>toggleDecodedAutoScroll(bool)</slot>
+   <slot>showRawFiltersDLG()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>221</x>
+     <x>753</x>
      <y>66</y>
     </hint>
     <hint type="destinationlabel">

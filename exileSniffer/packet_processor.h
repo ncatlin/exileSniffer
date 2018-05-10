@@ -133,6 +133,7 @@ private:
 
 	void deserialise_SRV_OPEN_UI_PANE(UIDecodedPkt *);
 
+	void deserialise_SRV_LIST_PORTALS(UIDecodedPkt *);
 	void deserialise_CLI_SEND_PARTY_INVITE(UIDecodedPkt *);
 
 	void deserialise_CLI_TRY_JOIN_PARTY(UIDecodedPkt *);
@@ -164,6 +165,7 @@ private:
 	void deserialise_CLI_SET_STATUS_MESSAGE(UIDecodedPkt *);
 	void deserialise_SRV_UNK_0x75(UIDecodedPkt *);
 
+	void deserialise_CLI_ACTIVATE_MAP(UIDecodedPkt *);
 	void deserialise_CLI_SWAPPED_WEAPONS(UIDecodedPkt *);
 
 	void deserialise_CLI_SKILLPANE_ACTION(UIDecodedPkt *);

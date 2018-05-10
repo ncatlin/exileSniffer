@@ -14,7 +14,6 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QCheckBox>
-#include <QtWidgets/QComboBox>
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QFrame>
 #include <QtWidgets/QGridLayout>
@@ -33,7 +32,6 @@
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QTableWidget>
-#include <QtWidgets/QTextEdit>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 #include "statuswidget.h"
@@ -103,25 +101,6 @@ public:
     QHBoxLayout *horizontalLayout_11;
     QPlainTextEdit *decodedRawHex;
     QPlainTextEdit *decodedRawText;
-    QWidget *rawDecryptTab;
-    QVBoxLayout *verticalLayout_2;
-    QHBoxLayout *textPaneFrame;
-    QTextEdit *ptHexPane;
-    QTextEdit *ptASCIIPane;
-    QHBoxLayout *rawControls;
-    QFrame *bytesPerRowFrame;
-    QFormLayout *formLayout_5;
-    QLabel *bytesRowLael;
-    QComboBox *bytesRowCombo;
-    QFrame *horizontalFrame_3;
-    QFormLayout *formLayout;
-    QLabel *label_7;
-    QLineEdit *maxRawLinesEdit;
-    QCheckBox *rawLinewrapCheck;
-    QCheckBox *rawAutoScrollCheck;
-    QFrame *frame;
-    QHBoxLayout *horizontalLayout;
-    QLabel *filterLabel;
     QWidget *metaLogTab;
     QGridLayout *gridLayout_2;
     QPlainTextEdit *metaLog;
@@ -550,134 +529,6 @@ public:
         gridLayout_3->addWidget(decodeDisplayFrame, 0, 0, 1, 1);
 
         processTabs->addTab(decodeTab, QString());
-        rawDecryptTab = new QWidget();
-        rawDecryptTab->setObjectName(QStringLiteral("rawDecryptTab"));
-        verticalLayout_2 = new QVBoxLayout(rawDecryptTab);
-        verticalLayout_2->setSpacing(2);
-        verticalLayout_2->setContentsMargins(11, 11, 11, 11);
-        verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
-        textPaneFrame = new QHBoxLayout();
-        textPaneFrame->setSpacing(1);
-        textPaneFrame->setObjectName(QStringLiteral("textPaneFrame"));
-        ptHexPane = new QTextEdit(rawDecryptTab);
-        ptHexPane->setObjectName(QStringLiteral("ptHexPane"));
-        QFont font9;
-        font9.setFamily(QStringLiteral("Courier New"));
-        font9.setPointSize(8);
-        ptHexPane->setFont(font9);
-        ptHexPane->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-        ptHexPane->setLineWrapMode(QTextEdit::NoWrap);
-        ptHexPane->setReadOnly(true);
-        ptHexPane->setTextInteractionFlags(Qt::TextSelectableByMouse);
-
-        textPaneFrame->addWidget(ptHexPane);
-
-        ptASCIIPane = new QTextEdit(rawDecryptTab);
-        ptASCIIPane->setObjectName(QStringLiteral("ptASCIIPane"));
-        QFont font10;
-        font10.setFamily(QStringLiteral("Courier New"));
-        ptASCIIPane->setFont(font10);
-        ptASCIIPane->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-        ptASCIIPane->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
-
-        textPaneFrame->addWidget(ptASCIIPane);
-
-        textPaneFrame->setStretch(0, 5);
-        textPaneFrame->setStretch(1, 3);
-
-        verticalLayout_2->addLayout(textPaneFrame);
-
-        rawControls = new QHBoxLayout();
-        rawControls->setSpacing(6);
-        rawControls->setObjectName(QStringLiteral("rawControls"));
-        bytesPerRowFrame = new QFrame(rawDecryptTab);
-        bytesPerRowFrame->setObjectName(QStringLiteral("bytesPerRowFrame"));
-        bytesPerRowFrame->setMaximumSize(QSize(183, 16777215));
-        bytesPerRowFrame->setFrameShape(QFrame::StyledPanel);
-        bytesPerRowFrame->setFrameShadow(QFrame::Raised);
-        formLayout_5 = new QFormLayout(bytesPerRowFrame);
-        formLayout_5->setSpacing(6);
-        formLayout_5->setContentsMargins(11, 11, 11, 11);
-        formLayout_5->setObjectName(QStringLiteral("formLayout_5"));
-        formLayout_5->setVerticalSpacing(0);
-        formLayout_5->setContentsMargins(6, 6, 0, 0);
-        bytesRowLael = new QLabel(bytesPerRowFrame);
-        bytesRowLael->setObjectName(QStringLiteral("bytesRowLael"));
-        bytesRowLael->setMaximumSize(QSize(86, 16777215));
-
-        formLayout_5->setWidget(0, QFormLayout::LabelRole, bytesRowLael);
-
-        bytesRowCombo = new QComboBox(bytesPerRowFrame);
-        bytesRowCombo->setObjectName(QStringLiteral("bytesRowCombo"));
-        bytesRowCombo->setMaximumSize(QSize(60, 16777215));
-        bytesRowCombo->setEditable(true);
-
-        formLayout_5->setWidget(0, QFormLayout::FieldRole, bytesRowCombo);
-
-
-        rawControls->addWidget(bytesPerRowFrame);
-
-        horizontalFrame_3 = new QFrame(rawDecryptTab);
-        horizontalFrame_3->setObjectName(QStringLiteral("horizontalFrame_3"));
-        horizontalFrame_3->setMaximumSize(QSize(150, 16777215));
-        formLayout = new QFormLayout(horizontalFrame_3);
-        formLayout->setSpacing(6);
-        formLayout->setContentsMargins(11, 11, 11, 11);
-        formLayout->setObjectName(QStringLiteral("formLayout"));
-        formLayout->setVerticalSpacing(0);
-        formLayout->setContentsMargins(3, 6, 4, 0);
-        label_7 = new QLabel(horizontalFrame_3);
-        label_7->setObjectName(QStringLiteral("label_7"));
-        label_7->setMaximumSize(QSize(60, 16777215));
-
-        formLayout->setWidget(0, QFormLayout::LabelRole, label_7);
-
-        maxRawLinesEdit = new QLineEdit(horizontalFrame_3);
-        maxRawLinesEdit->setObjectName(QStringLiteral("maxRawLinesEdit"));
-        maxRawLinesEdit->setMinimumSize(QSize(0, 11));
-        maxRawLinesEdit->setMaximumSize(QSize(79, 22));
-
-        formLayout->setWidget(0, QFormLayout::FieldRole, maxRawLinesEdit);
-
-
-        rawControls->addWidget(horizontalFrame_3);
-
-        rawLinewrapCheck = new QCheckBox(rawDecryptTab);
-        rawLinewrapCheck->setObjectName(QStringLiteral("rawLinewrapCheck"));
-        rawLinewrapCheck->setMaximumSize(QSize(100, 16777215));
-        rawLinewrapCheck->setChecked(true);
-
-        rawControls->addWidget(rawLinewrapCheck);
-
-        rawAutoScrollCheck = new QCheckBox(rawDecryptTab);
-        rawAutoScrollCheck->setObjectName(QStringLiteral("rawAutoScrollCheck"));
-        rawAutoScrollCheck->setMaximumSize(QSize(76, 16777215));
-        rawAutoScrollCheck->setChecked(true);
-
-        rawControls->addWidget(rawAutoScrollCheck);
-
-        frame = new QFrame(rawDecryptTab);
-        frame->setObjectName(QStringLiteral("frame"));
-        frame->setMaximumSize(QSize(259, 16777215));
-        frame->setFrameShape(QFrame::StyledPanel);
-        frame->setFrameShadow(QFrame::Raised);
-        horizontalLayout = new QHBoxLayout(frame);
-        horizontalLayout->setSpacing(6);
-        horizontalLayout->setContentsMargins(11, 11, 11, 11);
-        horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
-        filterLabel = new QLabel(frame);
-        filterLabel->setObjectName(QStringLiteral("filterLabel"));
-        filterLabel->setMaximumSize(QSize(500, 16777215));
-
-        horizontalLayout->addWidget(filterLabel);
-
-
-        rawControls->addWidget(frame);
-
-
-        verticalLayout_2->addLayout(rawControls);
-
-        processTabs->addTab(rawDecryptTab, QString());
         metaLogTab = new QWidget();
         metaLogTab->setObjectName(QStringLiteral("metaLogTab"));
         gridLayout_2 = new QGridLayout(metaLogTab);
@@ -717,10 +568,10 @@ public:
         groupBox_2 = new QGroupBox(logSettings);
         groupBox_2->setObjectName(QStringLiteral("groupBox_2"));
         groupBox_2->setMaximumSize(QSize(16777215, 115));
-        QFont font11;
-        font11.setFamily(QStringLiteral("MS Shell Dlg 2"));
-        font11.setPointSize(10);
-        groupBox_2->setFont(font11);
+        QFont font9;
+        font9.setFamily(QStringLiteral("MS Shell Dlg 2"));
+        font9.setPointSize(10);
+        groupBox_2->setFont(font9);
         gridLayout_4 = new QGridLayout(groupBox_2);
         gridLayout_4->setSpacing(6);
         gridLayout_4->setContentsMargins(11, 11, 11, 11);
@@ -817,9 +668,9 @@ public:
         groupBox_4 = new QGroupBox(utilsTab);
         groupBox_4->setObjectName(QStringLiteral("groupBox_4"));
         groupBox_4->setMaximumSize(QSize(16777215, 135));
-        QFont font12;
-        font12.setPointSize(9);
-        groupBox_4->setFont(font12);
+        QFont font10;
+        font10.setPointSize(9);
+        groupBox_4->setFont(font10);
         formLayout_4 = new QFormLayout(groupBox_4);
         formLayout_4->setSpacing(6);
         formLayout_4->setContentsMargins(11, 11, 11, 11);
@@ -851,13 +702,13 @@ public:
 
         order1hashres = new QLabel(groupBox_4);
         order1hashres->setObjectName(QStringLiteral("order1hashres"));
-        order1hashres->setFont(font12);
+        order1hashres->setFont(font10);
 
         formLayout_4->setWidget(2, QFormLayout::FieldRole, order1hashres);
 
         order2hashres = new QLabel(groupBox_4);
         order2hashres->setObjectName(QStringLiteral("order2hashres"));
-        order2hashres->setFont(font12);
+        order2hashres->setFont(font10);
 
         formLayout_4->setWidget(3, QFormLayout::FieldRole, order2hashres);
 
@@ -879,20 +730,16 @@ public:
         exileSniffer->setStatusBar(statusBar);
 
         retranslateUi(exileSniffer);
-        QObject::connect(bytesRowCombo, SIGNAL(activated(QString)), exileSniffer, SLOT(rawBytesRowChanged(QString)));
-        QObject::connect(rawLinewrapCheck, SIGNAL(toggled(bool)), exileSniffer, SLOT(toggleRawLineWrap(bool)));
-        QObject::connect(rawAutoScrollCheck, SIGNAL(toggled(bool)), exileSniffer, SLOT(toggleRawAutoScroll(bool)));
         QObject::connect(decodedListTable, SIGNAL(clicked(QModelIndex)), exileSniffer, SLOT(decodedListClicked()));
-        QObject::connect(decodedListTable, SIGNAL(cellPressed(int,int)), exileSniffer, SLOT(decodedCellActivated(int,int)));
         QObject::connect(decodedListTable, SIGNAL(customContextMenuRequested(QPoint)), exileSniffer, SLOT(decodedTableMenuRequest(QPoint)));
         QObject::connect(stopDecryptBtn, SIGNAL(clicked()), exileSniffer, SLOT(stopDecrypting()));
         QObject::connect(settingsChoiceList, SIGNAL(itemSelectionChanged()), exileSniffer, SLOT(settingsSelectionChanged()));
-        QObject::connect(decodedFiltersBtn, SIGNAL(clicked()), exileSniffer, SLOT(showRawFiltersDLG()));
+        QObject::connect(decodedListTable, SIGNAL(cellPressed(int,int)), exileSniffer, SLOT(decodedCellActivated(int,int)));
         QObject::connect(hashUtilInputText, SIGNAL(textChanged(QString)), exileSniffer, SLOT(hashUtilInput()));
-        QObject::connect(maxRawLinesEdit, SIGNAL(returnPressed()), exileSniffer, SLOT(maxRawLinesSet()));
         QObject::connect(decodedAutoscrollCheck, SIGNAL(toggled(bool)), exileSniffer, SLOT(toggleDecodedAutoScroll(bool)));
+        QObject::connect(decodedFiltersBtn, SIGNAL(clicked()), exileSniffer, SLOT(showRawFiltersDLG()));
 
-        processTabs->setCurrentIndex(1);
+        processTabs->setCurrentIndex(2);
         decrypt_details_stack->setCurrentIndex(1);
         decodedDetailsTab->setCurrentIndex(1);
         settingsChoiceList->setCurrentRow(0);
@@ -934,30 +781,6 @@ public:
         decodedRawHex->setPlainText(QString());
         decodedDetailsTab->setTabText(decodedDetailsTab->indexOf(decodeRawTab), QApplication::translate("exileSniffer", "Raw", Q_NULLPTR));
         processTabs->setTabText(processTabs->indexOf(decodeTab), QApplication::translate("exileSniffer", "Decoding", Q_NULLPTR));
-        ptHexPane->setHtml(QApplication::translate("exileSniffer", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:'Courier New'; font-size:8pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>", Q_NULLPTR));
-        ptASCIIPane->setHtml(QApplication::translate("exileSniffer", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:'Courier New'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>", Q_NULLPTR));
-        bytesRowLael->setText(QApplication::translate("exileSniffer", "Bytes Per Row:", Q_NULLPTR));
-        bytesRowCombo->clear();
-        bytesRowCombo->insertItems(0, QStringList()
-         << QApplication::translate("exileSniffer", "16", Q_NULLPTR)
-         << QApplication::translate("exileSniffer", "32", Q_NULLPTR)
-         << QApplication::translate("exileSniffer", "48", Q_NULLPTR)
-         << QApplication::translate("exileSniffer", "64", Q_NULLPTR)
-        );
-        label_7->setText(QApplication::translate("exileSniffer", "Max lines:", Q_NULLPTR));
-        maxRawLinesEdit->setText(QApplication::translate("exileSniffer", "10000", Q_NULLPTR));
-        rawLinewrapCheck->setText(QApplication::translate("exileSniffer", "Line Wrap", Q_NULLPTR));
-        rawAutoScrollCheck->setText(QApplication::translate("exileSniffer", "AutoScroll", Q_NULLPTR));
-        filterLabel->setText(QApplication::translate("exileSniffer", "0 Packets Captured", Q_NULLPTR));
-        processTabs->setTabText(processTabs->indexOf(rawDecryptTab), QApplication::translate("exileSniffer", "Raw Plaintext", Q_NULLPTR));
         processTabs->setTabText(processTabs->indexOf(metaLogTab), QApplication::translate("exileSniffer", "Log", Q_NULLPTR));
 
         const bool __sortingEnabled = settingsChoiceList->isSortingEnabled();

@@ -92,9 +92,6 @@ class exileSniffer : public QMainWindow
 		void showRawFiltersDLG() { filterFormObj.isHidden() ? filterFormObj.show() : filterFormObj.hide(); }
 		void refreshFilters();
 
-		void rawBytesRowChanged(QString arg);
-		void toggleRawLineWrap(bool state);
-		void toggleRawAutoScroll(bool state);
 		void toggleDecodedAutoScroll(bool enabled);
 		void decodedListClicked();
 		void decodedCellActivated(int, int);
@@ -105,12 +102,10 @@ class exileSniffer : public QMainWindow
 		void resumeScanningEvent();
 		void settingsSelectionChanged(); 
 		void hashUtilInput();
-		void maxRawLinesSet();
 
 	private:
 		void setup_settings_tab();
 		void save_settings();
-		void setup_raw_stream_tab();
 		void setup_decoded_messages_tab();
 		void setup_decryption_tab();
 		void setLabelActive(QLabel *lab, bool state);
@@ -122,7 +117,7 @@ class exileSniffer : public QMainWindow
 		void handle_stream_event(UI_STREAMEVENT_MSG *streamNote);
 		void handle_client_event(UI_CLIENTEVENT_MSG *cliEvtMsg);
 		void output_hex_to_file(UI_RAWHEX_PKT *pkt, std::ofstream& file);
-		void output_hex_to_pane(UI_RAWHEX_PKT *pkt);
+		//void output_hex_to_pane(UI_RAWHEX_PKT *pkt);
 
 		void init_gamePkt_Actioners();
 		void init_loginPkt_Actioners();
@@ -139,13 +134,11 @@ class exileSniffer : public QMainWindow
 		void action_decoded_login_packet(UIDecodedPkt& decoded);
 		
 		clientHexData * get_clientdata(DWORD pid);
-		void reprintRawHex();
-		void insertRawText(std::string hexdump, std::string asciidump);
+	//void insertRawText(std::string hexdump, std::string asciidump);
 		void addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPkt *obj, bool isNewEntry = true);
 		void setRowColor(int row, QColor colour);
 
 		bool packet_passes_decoded_filter(ushort msgID);
-		void updateRawFilterLabel();
 		void updateDecodedFilterLabel();
 
 		QString stringify_eventslist(WValue &eventlist);
@@ -219,6 +212,7 @@ class exileSniffer : public QMainWindow
 
 		void action_SRV_OPEN_UI_PANE(UIDecodedPkt&, QString*);
 
+		void action_SRV_LIST_PORTALS(UIDecodedPkt&, QString*);
 		void action_CLI_SEND_PARTY_INVITE(UIDecodedPkt&, QString*);
 
 		void action_CLI_TRY_JOIN_PARTY(UIDecodedPkt&, QString*);
@@ -250,6 +244,7 @@ class exileSniffer : public QMainWindow
 		void action_CLI_SET_STATUS_MESSAGE(UIDecodedPkt&, QString*);
 		void action_SRV_UNK_0x75(UIDecodedPkt&, QString*);
 
+		void action_CLI_ACTIVATE_MAP(UIDecodedPkt&, QString*);
 		void action_CLI_SWAPPED_WEAPONS(UIDecodedPkt&, QString*);
 
 		void action_SRV_PVP_MATCHLIST(UIDecodedPkt&, QString*);

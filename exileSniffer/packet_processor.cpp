@@ -3,8 +3,14 @@
 #include "packetIDs.h"
 #include "utilities.h"
 #include "inventory.h"
-#pragma comment(lib, "N:\\code\\POEcode\\poeSRE\\clientX\\packages\\cryptopp.v140.5.6.5.2\\lib\\native\\v140\\windesktop\\msvcstl\\x64\\Debug\\md\\cryptopp.lib")
 
+//#pragma comment(lib, "N:\\code\\POEcode\\poeSRE\\clientX\\packages\\cryptopp.v140.5.6.5.2\\lib\\native\\v140\\windesktop\\msvcstl\\x64\\Debug\\md\\cryptopp.lib")
+#ifdef DEBUG
+#pragma comment(lib, "C:\\devel\\libs\\crypp\\x64\\Output\\Debug\\cryptlib.lib")
+#else
+#pragma comment(lib, "C:\\devel\\libs\\crypp\\x64\\Output\\Release\\cryptlib.lib")
+#endif
+//#pragma comment(lib, "C:\\devel\\libs\\crypp\\x64\\DLL_Output\\Release\\cryptlib.lib")
 /*
 void packet_processor::handle_packet_from_patchserver(byte* data, unsigned int dataLen)
 {
@@ -444,7 +450,10 @@ bool packet_processor::handle_game_data(GAMEPACKET &pkt)
 		return false;
 
 	if (currentStreamObj->workingSendKey == NULL && pendingGameserverKeys.empty())
+	{
+		UIaddLogMsg("Warning: Null send key with no pending gameserver keys. Pressed play too early?", 0, uiMsgQueue);
 		return false;
+	}
 
 	currentMsgIncoming = pkt.incoming;
 

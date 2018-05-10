@@ -17,8 +17,10 @@ exileSniffer::exileSniffer(QWidget *parent)
 	ui.setupUi(this);
 
 	setup_settings_tab();
-	setup_raw_stream_tab();
 	setup_decoded_messages_tab();
+
+	rawFiltersFormUI.setupUi(&filterFormObj);
+	filterFormObj.setUI(&rawFiltersFormUI);
 	initFilters();
 
 	init_loginPkt_Actioners();
@@ -110,39 +112,17 @@ bool exileSniffer::eventFilter(QObject *obj, QEvent *event)
 			ui.decodedAutoscrollCheck->setChecked(false);
 			ui.statusBar->showMessage("Manual scrolling detected: AutoScroll disabled", 6000);
 		}
-
+		/*
 		if (obj == ui.ptHexPane && ui.rawAutoScrollCheck->isChecked())
 		{
 			ui.rawAutoScrollCheck->setChecked(false);
 			ui.statusBar->showMessage("Manual scrolling detected: AutoScroll disabled", 6000);
 		}
+		*/
 
 	}
 	event->ignore();
 	return false;
-}
-
-void exileSniffer::setup_raw_stream_tab()
-{
-	rawFiltersFormUI.setupUi(&filterFormObj);
-	filterFormObj.setUI(&rawFiltersFormUI);
-
-	toggleRawLineWrap(ui.rawLinewrapCheck->isChecked());
-
-	uint maxlines = settings->value("MaxRawLines", 10000).toUInt();
-	ui.ptHexPane->document()->setMaximumBlockCount(maxlines);
-	ui.ptASCIIPane->document()->setMaximumBlockCount(maxlines);
-
-	//link the scrollbars, hide one
-	connect(ui.ptHexPane->verticalScrollBar(), SIGNAL(valueChanged(int)),
-		ui.ptASCIIPane->verticalScrollBar(), SLOT(setValue(int)));
-	connect(ui.ptASCIIPane->verticalScrollBar(), SIGNAL(valueChanged(int)),
-		ui.ptHexPane->verticalScrollBar(), SLOT(setValue(int)));
-	ui.ptHexPane->verticalScrollBar()->hide();
-
-	//catch scroll wheel movement to disable autoscroll
-	ui.ptHexPane->installEventFilter(this);
-	ui.ptASCIIPane->installEventFilter(this);
 }
 
 //full clear and reload of displayed packets
@@ -229,7 +209,11 @@ void exileSniffer::read_UI_Q()
 
 		float secondsElapsed = ((float)clock() - startTicks) / CLOCKS_PER_SEC;
 		if (secondsElapsed > 0.15) //todo: season to taste
+		{
+			std::cout << "Warning: " << secondsElapsed << " seconds elapsed with q size " 
+				<< uiMsgQueue.size() << " remain"<<std::endl;
 			break;
+		}
 	}
 }
 
@@ -656,27 +640,6 @@ std::string serverString(streamType server, string IP)
 	}
 }
 
-void exileSniffer::insertRawText(std::string hexdump, std::string asciidump)
-{
-	//todo: see if this is wrecking performance
-	//suspect the max block thing is culprit
-	//change to update only when visible
-	int oldScrollPos = ui.ptHexPane->verticalScrollBar()->sliderPosition();
-
-	QTextCursor userCursor = ui.ptHexPane->textCursor();
-	ui.ptHexPane->moveCursor(QTextCursor::MoveOperation::End);
-	ui.ptHexPane->append(QString::fromStdString(hexdump));
-	ui.ptHexPane->setTextCursor(userCursor);
-
-	userCursor = ui.ptASCIIPane->textCursor();
-	ui.ptASCIIPane->moveCursor(QTextCursor::MoveOperation::End);
-	ui.ptASCIIPane->append(QString::fromStdString(asciidump));
-	ui.ptASCIIPane->setTextCursor(userCursor);
-
-	if(!ui.rawAutoScrollCheck->isChecked())
-		ui.ptASCIIPane->verticalScrollBar()->setSliderPosition(oldScrollPos);
-}
-
 void exileSniffer::output_hex_to_file(UI_RAWHEX_PKT *pkt, std::ofstream& file)
 {
 	if (!file.is_open()) return;
@@ -736,7 +699,7 @@ void exileSniffer::output_hex_to_file(UI_RAWHEX_PKT *pkt, std::ofstream& file)
 
 	file << hexdumpstring << std::endl;
 }
-
+/*
 //todo: bold first two bytes, may need to add a 'continuationpacket' field
 void exileSniffer::output_hex_to_pane(UI_RAWHEX_PKT *pkt)
 {
@@ -786,6 +749,7 @@ void exileSniffer::output_hex_to_pane(UI_RAWHEX_PKT *pkt)
 	std::string hexdumpstring = hexdump.str();
 	insertRawText(hexdumpstring, asciidump.str());
 }
+*/
 
 bool exileSniffer::packet_passes_decoded_filter(ushort msgID)
 {
@@ -831,7 +795,7 @@ void exileSniffer::handle_raw_packet_data(UI_RAWHEX_PKT *pkt)
 		return;
 	}
 
-	output_hex_to_pane(pkt);
+	//output_hex_to_pane(pkt);
 	output_hex_to_file(pkt, client->get_unfiltered_hexlog());
 	++rawCount_Recorded_Filtered.first;
 
@@ -841,10 +805,9 @@ void exileSniffer::handle_raw_packet_data(UI_RAWHEX_PKT *pkt)
 		++rawCount_Recorded_Filtered.second;
 
 	client->rawHexPackets.push_back(pkt);
-	updateRawFilterLabel();
 }
 
-
+/*
 void exileSniffer::rawBytesRowChanged(QString arg)
 {
 	//check the entry is all digits
@@ -856,7 +819,8 @@ void exileSniffer::rawBytesRowChanged(QString arg)
 
 	reprintRawHex();
 }
-
+*/
+/*
 //todo: delete this when reworked hex
 void exileSniffer::reprintRawHex()
 {
@@ -881,16 +845,7 @@ void exileSniffer::reprintRawHex()
 			++rawCount_Recorded_Filtered.second;
 	}
 	updateRawFilterLabel();
-}
-
-void exileSniffer::updateRawFilterLabel()
-{
-	std::stringstream filterLabTxt;
-	filterLabTxt << std::dec << rawCount_Recorded_Filtered.first << " Packets Recorded";
-	if (rawCount_Recorded_Filtered.second)
-		filterLabTxt << " / " << rawCount_Recorded_Filtered.second << " Filtered";
-	ui.filterLabel->setText(QString::fromStdString(filterLabTxt.str()));
-}
+}*/
 
 void exileSniffer::updateDecodedFilterLabel()
 {
@@ -904,45 +859,16 @@ void exileSniffer::updateDecodedFilterLabel()
 	ui.decodedDisplayedLabel->setText(QString::fromStdString(filterLabTxt.str()));
 }
 
-void exileSniffer::toggleRawLineWrap(bool wrap)
-{
-	if (wrap)
-	{
-		ui.ptHexPane->setLineWrapMode(QTextEdit::LineWrapMode::WidgetWidth);
-		ui.ptASCIIPane->setLineWrapMode(QTextEdit::LineWrapMode::WidgetWidth);
-	}
-	else
-	{
-		ui.ptHexPane->setLineWrapMode(QTextEdit::LineWrapMode::NoWrap);
-		ui.ptASCIIPane->setLineWrapMode(QTextEdit::LineWrapMode::NoWrap);
-	}
-
-}
-
 void exileSniffer::toggleDecodedAutoScroll(bool enabled)
 {
 	if (enabled)
 	{
 		ui.decodedListTable->scrollToBottom();
-		ui.rawAutoScrollCheck->installEventFilter(this);
+		ui.decodedAutoscrollCheck->installEventFilter(this);
 	}
 	else
 	{
-		ui.rawAutoScrollCheck->removeEventFilter(this);
-	}
-}
-
-void exileSniffer::toggleRawAutoScroll(bool enabled)
-{
-	if (enabled)
-	{
-		ui.ptASCIIPane->moveCursor(QTextCursor::MoveOperation::End);
-		ui.ptHexPane->moveCursor(QTextCursor::MoveOperation::End);
-		ui.rawAutoScrollCheck->installEventFilter(this);
-	}
-	else
-	{
-		ui.rawAutoScrollCheck->removeEventFilter(this);
+		ui.decodedAutoscrollCheck->removeEventFilter(this);
 	}
 }
 
@@ -1158,27 +1084,6 @@ void exileSniffer::hashUtilInput()
 	else
 		ui.order2hashres->setText("Not found");
 }
-
-void exileSniffer::maxRawLinesSet()
-{
-	QString valString = ui.maxRawLinesEdit->text();
-	uint value = valString.toUInt();
-	if (value < 1) { 
-		value = ui.ptHexPane->document()->maximumBlockCount();
-		ui.maxRawLinesEdit->setText(QString::number(value));
-		return; 
-	}
-	
-	//make sure the user sees what we think the number is (in case of bad text->int)
-	ui.maxRawLinesEdit->setText(QString::number(value));
-
-	ui.ptASCIIPane->document()->setMaximumBlockCount(value);
-	ui.ptHexPane->document()->setMaximumBlockCount(value);
-
-	settings->setValue("MaxRawLines", value);
-	settings->sync();
-}
-
 
 QString UI_DECODED_LIST_ENTRY::sender()
 {
