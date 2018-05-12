@@ -132,7 +132,6 @@ void json_pipe_thread::main_loop()
 		}
 	}
 
-
 	ded = true;
 }
 

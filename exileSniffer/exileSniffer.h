@@ -108,6 +108,8 @@ class exileSniffer : public QMainWindow
 		void settingsSelectionChanged(); 
 		void hashUtilInput();
 		void updateSettings(); 
+		void doLogSetDir();
+		void doLogOpenDir();
 
 	private:
 
