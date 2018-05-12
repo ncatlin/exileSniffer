@@ -32,6 +32,7 @@ void json_pipe_thread::setPipePath(QString pipename)
 void json_pipe_thread::main_loop()
 {
 	
+	DWORD ignored;
 
 	while (running)
 	{
@@ -60,7 +61,7 @@ void json_pipe_thread::main_loop()
 		while (1)
 		{
 			WaitForSingleObject(JSONpipe, 400);
-			DWORD ignored;
+		
 			fConnected = GetOverlappedResult(JSONpipe, &oOverlap, &ignored, false);
 				break;
 			if (fConnected || !running)
@@ -89,7 +90,8 @@ void json_pipe_thread::main_loop()
 				if (entryQ.empty())
 				{
 					Sleep(100);
-					connected = WriteFile(JSONpipe, 0, 0, 0, 0);
+					char awful[] = "Use overlapped pls";
+					connected = WriteFile(JSONpipe, awful, 0, &ignored, 0);
 					if (!connected)
 					{
 						CloseHandle(JSONpipe);

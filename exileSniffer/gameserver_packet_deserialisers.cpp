@@ -445,17 +445,28 @@ void packet_processor::deserialise_SRV_CHAT_MESSAGE(UIDecodedPkt *uipkt)
 
 
 	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
 	WValue itemArray(rapidjson::kArrayType);
 	for (int i = 0; i < itemCount; i++)
 	{
-		WValue itemObj(rapidjson::kObjectType);
-		itemObj.AddMember(L"ChatIndex", WValue((UINT32)consume_DWORD()), allocator);
 		ushort modsLen = ntohs(consume_WORD());
 		DWORD hash = consume_DWORD();
-		itemObj.AddMember(L"ItemHash", WValue((UINT32)hash), allocator);
+
+		std::string hashResult, hashCategory;
+		ggpk->lookup_hash(hash, hashResult, hashCategory);
+		std::wstring itemString = converter.from_bytes(hashResult);
+		std::wstring categoryString = converter.from_bytes(hashCategory);
 		consume_blob(modsLen - sizeof(hash));
+
+
+		WValue itemObj(rapidjson::kObjectType);
+		itemObj.AddMember(L"ChatIndex", WValue((UINT32)consume_DWORD()), allocator);
+		itemObj.AddMember(L"ItemHash", WValue((UINT32)hash), allocator);
+		itemObj.AddMember(L"ItemType", WValue(itemString.c_str(), allocator), allocator);
+
 		itemArray.PushBack(itemObj, allocator);
+
 	}
 	uipkt->payload->AddMember(L"ItemList", itemArray, allocator);
 }
@@ -1381,6 +1392,7 @@ void packet_processor::deserialise_SRV_SLOT_ITEMSLIST(UIDecodedPkt *uipkt)
 	uipkt->add_dword(L"Count", itemCount);
 
 	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
 	WValue itemArray(rapidjson::kArrayType);
 	for (int i = 0; i < itemCount; i++)
@@ -1396,6 +1408,14 @@ void packet_processor::deserialise_SRV_SLOT_ITEMSLIST(UIDecodedPkt *uipkt)
 		itemObj.AddMember(L"ItemHash", WValue((UINT32)hash), allocator);
 		//skip item data for now, apart from the hash so we at least know item type
 		consume_blob(modsLen - sizeof(hash));
+
+		std::string hashResult, hashCategory;
+		ggpk->lookup_hash(hash, hashResult, hashCategory);
+		std::wstring itemString = converter.from_bytes(hashResult);
+		std::wstring categoryString = converter.from_bytes(hashCategory);
+
+		itemObj.AddMember(L"ItemType", WValue(itemString.c_str(), allocator), allocator);
+
 
 
 		itemArray.PushBack(itemObj, allocator);
@@ -2433,10 +2453,11 @@ void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t 
 	for (int i = 0; i < prophecyCount; i++)
 	{
 		UINT32 ref = consume_WORD();
-		WValue prophecy(rapidjson::kObjectType);
-		prophecy.AddMember(L"DatReference", consume_WORD(), allocator);
-		prophecy.AddMember(L"Pos", consume_Byte(), allocator);
 		std::wstring prophecyName = ggpk->getProphecy(ref);
+
+		WValue prophecy(rapidjson::kObjectType);
+		prophecy.AddMember(L"DatReference", ref, allocator);
+		prophecy.AddMember(L"Pos", consume_Byte(), allocator);
 		prophecy.AddMember(L"ProphecyName", WValue(prophecyName.c_str(), allocator), allocator);
 		prophecylist.PushBack(prophecy, allocator);
 	}
@@ -2465,13 +2486,13 @@ void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t 
 		std::wstring visIdentName2 = ggpk->getVisualIdentity(visIdentReference2);
 		std::wstring visEffectName = ggpk->getVisualEffect(visualEffect);
 
-		wornItem.AddMember(L"VisualIdentity1", consume_WORD(), allocator);
+		wornItem.AddMember(L"VisualIdentity1", visIdentReference1, allocator);
 		wornItem.AddMember(L"VisualIdentity1Name", WValue(visIdentName1.c_str(), allocator), allocator);
-		wornItem.AddMember(L"VisualIdentity2", consume_WORD(), allocator);
+		wornItem.AddMember(L"VisualIdentity2", visIdentReference2, allocator);
 		wornItem.AddMember(L"VisualIdentity2Name", WValue(visIdentName2.c_str(), allocator), allocator);
-		//unknown0 in itemvisualeffect.dat
-		wornItem.AddMember(L"ItemVisualEffect", consume_WORD(), allocator);
+		wornItem.AddMember(L"ItemVisualEffect", visualEffect, allocator);
 		wornItem.AddMember(L"ItemVisualEffectName", WValue(visEffectName.c_str(), allocator), allocator);
+
 		//not seen any difference when 1/0 on identical item
 		wornItem.AddMember(L"Unk5", consume_Byte(), allocator);
 		wornItemVisuals.PushBack(wornItem, allocator);
