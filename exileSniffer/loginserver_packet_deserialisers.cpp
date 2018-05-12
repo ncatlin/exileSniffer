@@ -11,7 +11,7 @@ void packet_processor::init_loginPkt_deserialisers()
 	loginPktDeserialisers[LOGIN_CLI_RESYNC] = (deserialiser)&packet_processor::deserialise_LOGIN_CLI_RESYNC;
 	loginPktDeserialisers[LOGIN_CLI_CHANGE_PASSWORD] = (deserialiser)&packet_processor::deserialise_LOGIN_CLI_CHANGE_PASSWORD;
 	loginPktDeserialisers[LOGIN_CLI_DELETE_CHARACTER] = (deserialiser)&packet_processor::deserialise_LOGIN_CLI_DELETE_CHARACTER;
-	loginPktDeserialisers[LOGIN_CLI_CHARACTER_SELECTED_SELECTED] = (deserialiser)&packet_processor::deserialise_LOGIN_CLI_CHARACTER_SELECTED;
+	loginPktDeserialisers[LOGIN_CLI_CHARACTER_SELECTED] = (deserialiser)&packet_processor::deserialise_LOGIN_CLI_CHARACTER_SELECTED;
 	loginPktDeserialisers[LOGIN_SRV_NOTIFY_GAMESERVER] = (deserialiser)&packet_processor::deserialise_LOGIN_SRV_NOTIFY_GAMESERVER;
 	loginPktDeserialisers[LOGIN_CLI_CREATED_CHARACTER] = (deserialiser)&packet_processor::deserialise_LOGIN_CLI_CREATED_CHARACTER;
 	loginPktDeserialisers[LOGIN_SRV_CHAR_LIST] = (deserialiser)&packet_processor::deserialise_LOGIN_SRV_CHAR_LIST;
@@ -34,7 +34,7 @@ void packet_processor::deserialise_LOGIN_EPHERMERAL_PUBKEY(UIDecodedPkt *uipkt)
 
 	std::wstring keyhex = consume_hexblob(keylen);
 	WValue keyVal(keyhex.c_str(), keyhex.length(), uipkt->jsn.GetAllocator());
-	uipkt->payload.AddMember(L"EphermeralKey", keyVal, uipkt->jsn.GetAllocator());
+	uipkt->payload->AddMember(L"EphermeralKey", keyVal, uipkt->jsn.GetAllocator());
 
 	DWORD siglen = ntohs(consume_WORD());
 	uipkt->add_word(L"SignatureSize", siglen);
@@ -43,7 +43,7 @@ void packet_processor::deserialise_LOGIN_EPHERMERAL_PUBKEY(UIDecodedPkt *uipkt)
 	{
 		std::wstring sighex = consume_hexblob(siglen);
 		WValue sigVal(sighex.c_str(), sighex.length(), uipkt->jsn.GetAllocator());
-		uipkt->payload.AddMember(L"Signature", sigVal, uipkt->jsn.GetAllocator());
+		uipkt->payload->AddMember(L"Signature", sigVal, uipkt->jsn.GetAllocator());
 	}
 }
 
@@ -58,7 +58,7 @@ void packet_processor::deserialise_LOGIN_CLI_AUTH_DATA(UIDecodedPkt *uipkt)
 
 	std::wstring exeHashHex = consume_hexblob(32);
 	WValue hashval1(exeHashHex.c_str(), exeHashHex.length(), uipkt->jsn.GetAllocator());
-	uipkt->payload.AddMember(L"ClientEXEHash", hashval1, uipkt->jsn.GetAllocator());
+	uipkt->payload->AddMember(L"ClientEXEHash", hashval1, uipkt->jsn.GetAllocator());
 
 	std::wstring creds = consume_hexblob(32);
 	//nothing good can come from deserialising this, keeping it in logs, passing to feed readers etc
@@ -67,7 +67,7 @@ void packet_processor::deserialise_LOGIN_CLI_AUTH_DATA(UIDecodedPkt *uipkt)
 
 	std::wstring MAChex = consume_hexblob(32);
 	WValue MACval(MAChex.c_str(), MAChex.length(), uipkt->jsn.GetAllocator());
-	uipkt->payload.AddMember(L"MACHash", MACval, uipkt->jsn.GetAllocator());
+	uipkt->payload->AddMember(L"MACHash", MACval, uipkt->jsn.GetAllocator());
 
 	consume_add_byte(L"SavedFlag1", uipkt);
 	consume_add_byte(L"SavedFlag2", uipkt);
@@ -115,7 +115,7 @@ void packet_processor::deserialise_LOGIN_SRV_CHAR_LIST(UIDecodedPkt *uipkt)
 		charList.PushBack(characterObj, allocator);
 	}
 
-	uipkt->payload.AddMember(L"CharacterList", charList, allocator);
+	uipkt->payload->AddMember(L"CharacterList", charList, allocator);
 
 	consume_add_dword_ntoh(L"End1", uipkt);
 	consume_add_byte(L"End2", uipkt);
@@ -161,7 +161,7 @@ void packet_processor::deserialise_LOGIN_SRV_NOTIFY_GAMESERVER(UIDecodedPkt *uip
 		blobObj.AddMember(L"RemainingHex", remainingVal, uipkt->jsn.GetAllocator());
 		blobList.PushBack(blobObj, allocator);
 	}
-	uipkt->payload.AddMember(L"ServerBlobs", blobList, allocator);
+	uipkt->payload->AddMember(L"ServerBlobs", blobList, allocator);
 
 	KEYDATA *key1A = new KEYDATA;
 	KEYDATA *key1B = new KEYDATA;
@@ -210,10 +210,10 @@ void packet_processor::deserialise_LOGIN_SRV_NOTIFY_GAMESERVER(UIDecodedPkt *uip
 void packet_processor::deserialise_LOGIN_CLI_CREATED_CHARACTER(UIDecodedPkt *uipkt)
 {
 	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
-	consume_add_lenprefix_string(L"Name", uipkt->payload, allocator);
-	consume_add_lenprefix_string(L"League", uipkt->payload, allocator);
+	consume_add_lenprefix_string(L"Name", *(uipkt->payload), allocator);
+	consume_add_lenprefix_string(L"League", *(uipkt->payload), allocator);
 	consume_add_qword(L"Unk1", uipkt);
-	consume_add_lenprefix_string(L"Class", uipkt->payload, allocator);
+	consume_add_lenprefix_string(L"Class", *(uipkt->payload), allocator);
 
 	consume_blob(remainingDecrypted);
 }

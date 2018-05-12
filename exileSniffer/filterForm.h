@@ -2,6 +2,7 @@
 
 #include "ui_rawfilterform.h"
 #include "qwidget.h"
+#include "uiMsg.h"
 
 
 #define FILTER_SECTION_ID 0
@@ -25,9 +26,9 @@ class filterForm : public QWidget
 public:
 		filterForm(QWidget *parent = 0);
 		~filterForm() {};
-		void setUI(Ui::rawFilterForm *ptr) { ui = ptr; }	
+		void setUI(Ui::rawFilterForm *ptr, SafeQueue<UI_MESSAGE *> *msgq) { ui = ptr; uiMsgQueue = msgq; }
 		
-		void populateFiltersList();
+		void populateFiltersList(rapidjson::GenericValue<rapidjson::UTF8<>> &msgInfo);
 		void populatePresetsList();
 		bool isDisplayed(ushort pktID);
 
@@ -50,7 +51,7 @@ public Q_SLOTS:
 private:
 
 	void add_filter_category(unsigned short pktid, QString description, 
-		int fromServer, eDisplayState initialState = eDisplayState::displayed);
+		bool incoming, eDisplayState initialState = eDisplayState::displayed);
 	void setRowColor(int tablerow, QColor colour); 
 	void setFilterRowState(int row, eDisplayState newState);
 	void setPktIDFilterState(ushort pktID, eDisplayState newState);
@@ -60,6 +61,7 @@ private:
 	
 
 	Ui::rawFilterForm *ui = NULL;
+	SafeQueue<UI_MESSAGE *> *uiMsgQueue = NULL;
 
 	std::map<unsigned short, eDisplayState> filterStates;
 	std::map<unsigned short, QTableWidgetItem *> filterTableItems;
@@ -76,7 +78,7 @@ public:
 	void setHex(int num) {
 		customHex = true;
 		this->setData(Qt::ItemDataRole::UserRole, num);
-		this->setText("0x" + QString::number(num, 16));
+		this->setText("0x" + QString::number(num, 16) + "/" + QString::number(num, 10));
 	}
 	bool operator <(const QTableWidgetItem &other) const
 	{

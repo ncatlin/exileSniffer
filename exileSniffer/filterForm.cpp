@@ -13,7 +13,7 @@ filterForm::filterForm(QWidget *parent)
 }
 
 void filterForm::add_filter_category(unsigned short pktid, QString description, 
-	int fromServer, eDisplayState initialState)
+	bool incoming, eDisplayState initialState)
 {
 	unsigned int rowIndex = ui->filterTable->rowCount();
 	ui->filterTable->setRowCount(rowIndex + 1);
@@ -27,7 +27,7 @@ void filterForm::add_filter_category(unsigned short pktid, QString description,
 	ui->filterTable->setItem(rowIndex, FILTER_SECTION_FUNCTION, descriptionItem);
 
 	QTableWidgetItem *senderItem = new QTableWidgetItem();
-	if (fromServer == ePktDirection::incoming)
+	if (incoming)
 		senderItem->setData(Qt::DisplayRole, "Server");
 	else
 		senderItem->setData(Qt::DisplayRole, "Client");
@@ -55,7 +55,7 @@ bool filterForm::isDisplayed(ushort pktID)
 	return (it->second == eDisplayState::displayed);
 }
 
-void filterForm::populateFiltersList() 
+void filterForm::populateFiltersList(rapidjson::GenericValue<rapidjson::UTF8<>> &msgInfo)
 {
 	ui->filterTable->horizontalHeader()->setSectionResizeMode(FILTER_SECTION_FUNCTION, QHeaderView::Stretch);
 	ui->filterTable->horizontalHeader()->resizeSection(FILTER_SECTION_ID, 60);
@@ -66,311 +66,23 @@ void filterForm::populateFiltersList()
 	filterTableItems.clear();
 	filterStates.clear();
 
+	if (!msgInfo.IsArray())
+	{
+		UIaddLogMsg("Cannot load filters due to failed messageTypes.json load", 0, uiMsgQueue);
+		return;
+	}
+
 	//add_filter_category(SRV_PKT_ENCAPSULATED, "Should not be shown", true);
-	add_filter_category(CLI_CHAT_MSG_ITEMS, "Sent chat message + item links", ePktDirection::outgoing);
-	//7?
-	add_filter_category(CLI_CHAT_MESSAGE, "Sent chat message", ePktDirection::outgoing);
-	add_filter_category(CLI_CHAT_COMMAND, "Sent chat command", ePktDirection::outgoing);
-	add_filter_category(SRV_CHAT_MESSAGE, "Chat message received", ePktDirection::incoming);
-	add_filter_category(SRV_SERVER_MESSAGE, "Message from server", ePktDirection::incoming);
-	add_filter_category(CLI_LOGGED_OUT, "Client logged out", ePktDirection::outgoing);
-	add_filter_category(CLI_PING_CHALLENGE, "Client HNC", ePktDirection::outgoing);
-	add_filter_category(SRV_PING_RESPONSE, "Server HNC", ePktDirection::incoming);
-	add_filter_category(SRV_AREA_INFO, "Area Info", ePktDirection::incoming);
-	//0x10
-	//0x11
-	add_filter_category(SRV_PRELOAD_MONSTER_LIST, "Area preload list", ePktDirection::incoming);
-	add_filter_category(SRV_UNK_0x13, "Unknown", ePktDirection::incoming);
-	add_filter_category(SRV_PLAYER_ITEMS, "Container items list", ePktDirection::incoming);
-	add_filter_category(CLI_CLICKED_GROUND_ITEM, "Player clicked world object", ePktDirection::outgoing);
-	add_filter_category(CLI_ACTION_PREDICTIVE, "Player action (predictive mode)", ePktDirection::outgoing);
-	add_filter_category(SRV_TRANSFER_INSTANCE, "Instance change notification", ePktDirection::incoming);
-	add_filter_category(SRV_INSTANCE_SERVER_DATA, "Instance server data", ePktDirection::incoming);
-	add_filter_category(CLI_PICKUP_ITEM, "Player picked item up", ePktDirection::outgoing);
-	//0x1a
-	add_filter_category(CLI_PLACE_ITEM, "Player placed item down", ePktDirection::outgoing);
-	//1c
-	add_filter_category(CLI_REMOVE_SOCKET, "Player removed item from socket", ePktDirection::outgoing);
-	add_filter_category(CLI_INSERT_SOCKET, "Player placed item into socket", ePktDirection::outgoing);
-	add_filter_category(CLI_LEVEL_SKILLGEM, "Player levelled skill gem", ePktDirection::outgoing);
-	add_filter_category(CLI_UNK_0x20, "Unknown", ePktDirection::outgoing);
-	add_filter_category(CLI_SKILLPOINT_CHANGE, "Player changed passive skill", ePktDirection::outgoing);
-	//22
-	//23
-	add_filter_category(CLI_CHOSE_ASCENDANCY, "Player selected ascendency", ePktDirection::outgoing);
-	//25
-	//26
-	//27
-	//28
-	//29
-	//2a
-	add_filter_category(CLI_CANCEL_BUF, "Player cancelled buff", ePktDirection::outgoing);
-	add_filter_category(CLI_UNK_0x2c, "Unknown", ePktDirection::outgoing);
-	//2d
-	add_filter_category(CLI_SET_HOTBARSKILL, "Player set hotbar skill", ePktDirection::outgoing);
-	add_filter_category(SRV_SKILL_SLOTS_LIST, "Server listed hotbar skills", ePktDirection::incoming);
-	//30
-	//31
-	//32
-	//33
-	//34
-	//35
-	//36
-	add_filter_category(CLI_USE_BELT_SLOT, "Player activated belt slot", ePktDirection::outgoing);
-	add_filter_category(CLI_USE_ITEM, "Player used item", ePktDirection::outgoing);
-	//39
-	//3a
-	//3b
-	//3c
-	//3d
-	//3e
-	add_filter_category(SRV_OPEN_UI_PANE, "Server opened UI pane", ePktDirection::incoming);
-	//40
-	add_filter_category(CLI_UNK_0x41, "Unknown", ePktDirection::outgoing);
-	//42
-	//43
-	//44
-	//45
-	add_filter_category(CLI_SELECT_NPC_DIALOG, "Player selected dialog option", ePktDirection::outgoing);
-	add_filter_category(SRV_SHOW_NPC_DIALOG, "Server sent dialog to show", ePktDirection::incoming);
-	add_filter_category(CLI_CLOSE_NPC_DIALOG, "Player closed dialog", ePktDirection::outgoing);
-	//49
-	//4a
-	//4b
-	//4c
-	//4d
-	//4e
-	//4f
-	add_filter_category(CLI_CLOSE_NPC_DIALOG, "Player sent party invite", ePktDirection::outgoing);
-	//51
-	add_filter_category(CLI_TRY_JOIN_PARTY, "Player joined party", ePktDirection::outgoing);
-	add_filter_category(CLI_DISBAND_PUBLIC_PARTY, "Player left party", ePktDirection::outgoing);
-	//54
-	add_filter_category(CLI_CREATE_PUBLICPARTY, "Player listed public party", ePktDirection::outgoing);
-	add_filter_category(CLI_UNK_x56, "Unknown", ePktDirection::outgoing);
-	add_filter_category(CLI_GET_PARTY_DETAILS, "Requested details of party", ePktDirection::outgoing);
-	add_filter_category(SRV_FRIENDSLIST, "Server sent friends data", ePktDirection::incoming);
-	//59
-	add_filter_category(SRV_PARTY_DETAILS, "Server sent party details", ePktDirection::incoming);
-	add_filter_category(SRV_PARTY_ENDED, "Party ended", ePktDirection::incoming);
-	//5c
-	add_filter_category(CLI_REQUEST_PUBLICPARTIES, "Client requested list of public parties", ePktDirection::outgoing);
-	add_filter_category(SRV_PUBLIC_PARTY_LIST, "List of public parties", ePktDirection::incoming);
-	//5f
-	//60
-	//61
-	//62
-	add_filter_category(CLI_MOVE_ITEM_PANE, "Player placed item in pane", ePktDirection::outgoing);
-	//64
-	//65
-	//66
-	//67
-	//68
-	//69
-	//6a
-	//6b
-	//6c
-	add_filter_category(SRV_CREATE_ITEM, "New item", ePktDirection::incoming);
-	add_filter_category(SRV_SLOT_ITEMSLIST, "List of items in container", ePktDirection::incoming);
-	//6f
-	add_filter_category(UNK_MESSAGE_0x70, "Unknown", ePktDirection::incoming);
-	//71
-	//72
-	add_filter_category(UNK_MESSAGE_0x73, "Unknown", ePktDirection::incoming);
-	add_filter_category(CLI_SET_STATUS_MESSAGE, "Player set status message", ePktDirection::outgoing);
-	//75
-	//76
-	//77
-	//78
-	//79
-	//7a
-	//7b
-	//7c
-	//7d
-	//7e
-	add_filter_category(CLI_SWAPPED_WEAPONS, "Player swapped weaponset", ePktDirection::outgoing);
-	//80
-	//81
-	//82
-	//83
-	//84
-	//85
-	//86
-	//87
-	//88
-	//89
-	//8a
-	//8b
-	//8c
-	//8d
-	//8e
-	//define 0x8f seen when leaving duel queue
-	//define 0x90 seen when leaving duel queue
-	add_filter_category(SRV_PVP_MATCHLIST, "PVP Match list", ePktDirection::incoming);
-	add_filter_category(SRV_EVENTSLIST, "Events List", ePktDirection::incoming);
-	//93
-	//94
-	//95
-	//96
-	//97
-	add_filter_category(CLI_SKILLPANE_ACTION, "Opened/closed skill tree", ePktDirection::outgoing);
-	//99
-	//9a
-	add_filter_category(SRV_SKILLPANE_DATA, "Skill tree data", ePktDirection::incoming);
-	//9c
-	//9d
-	//9e
-	add_filter_category(CLI_MICROTRANSACTION_SHOP_ACTION, "Opened microtransaction shop", ePktDirection::outgoing);
-	//a0
-	add_filter_category(SRV_MICROTRANSACTION_SHOP_DETAILS, "Micro-transaction shop data", ePktDirection::incoming);
-	//a2
-	add_filter_category(SRV_UNK_A3, "Unknown", ePktDirection::incoming);
-	add_filter_category(SRV_CHAT_CHANNEL_ID, "Chat channel membership", ePktDirection::incoming);
-	//a5
-	//a6
-	//a7
-	//a8
-	//a9
-	//aa
-	//ab
-	//ac
-	add_filter_category(CLI_GUILD_CREATE, "Created guild", ePktDirection::outgoing);
-	//ae
-	//af
-	//b0
-	//b1
-	//b2
-	//b3
-	//b4
-	//b5
-	//b6
-	//b7
-	//b8
-	//b9
-	//ba
-	//bc
-	//bd
-	//be
-	//bf
-	add_filter_category(CLI_EXIT_TO_CHARSCREEN, "Client exit 1", ePktDirection::outgoing);
-	add_filter_category(SRV_LOGINSRV_CRYPT, "Client exit 2", ePktDirection::outgoing);
-	add_filter_category(CLI_DUEL_CHALLENGE, "Player sent duel challenge", ePktDirection::outgoing);
-	add_filter_category(SRV_DUEL_RESPONSE, "Received response to duel challenge", ePktDirection::incoming);
-	add_filter_category(SRV_DUEL_CHALLENGE, "Received duel challenge", ePktDirection::incoming);
-	//c5
-	//c6
-	add_filter_category(CLI_UNK_0xC7, "Unknown", ePktDirection::outgoing);
-	//c8
-	//c9
-	add_filter_category(SRV_UNK_0xCA, "Unknown", ePktDirection::incoming);
-	//cb
-	//cd
-	add_filter_category(CLI_VISIT_HIDEOUT, "Visit hideout", ePktDirection::outgoing);
-	//cf
-	//d0
-	//d1
-	//d2
-	//d3
-	//d4
-	add_filter_category(SRV_EVENTSLIST, "Unknown", ePktDirection::incoming);
-	//d6
-	//d7
-	add_filter_category(CLI_USED_SKILL, "Player used skill (lockstep)", ePktDirection::outgoing);
-	add_filter_category(CLI_CLICK_OBJ, "Player clicked object (lockstep)", ePktDirection::outgoing);
-	add_filter_category(CLI_MOUSE_HELD, "Player held button (lockstep)", ePktDirection::outgoing);
-	//db
-	add_filter_category(CLI_MOUSE_RELEASE, "Player released skill (lockstep)", ePktDirection::outgoing);
-	//dd
-	//de
-	//df
-	add_filter_category(CLI_OPEN_WORLD_SCREEN, "Player opened/closed world pane", ePktDirection::outgoing);
-	//e1
-	//e2
-	//e3
-	//e4
-	//e5
-	add_filter_category(SRV_UNK_0xE6, "Unknown", ePktDirection::incoming);
-	//e7
-	//e8
-	add_filter_category(SRV_OBJ_REMOVED, "Object removed", ePktDirection::incoming);
-	add_filter_category(SRV_MOBILE_START_SKILL, "Object initiated skill", ePktDirection::incoming);
-	add_filter_category(SRV_MOBILE_FINISH_SKILL, "Object activated skill", ePktDirection::incoming);
-	//ec
-	//ed
-	add_filter_category(SRV_MOBILE_UNK_0xee, "Unknown", ePktDirection::incoming);
-	add_filter_category(SRV_MOBILE_UNK_0xef, "Unknown", ePktDirection::incoming);
-	add_filter_category(SRV_MOBILE_UPDATE_HMS, "Object health/mana/shield update", ePktDirection::incoming);
-	add_filter_category(SRV_STAT_CHANGED, "Object stats update", ePktDirection::incoming);
-	add_filter_category(SRV_UNK_0xf2, "Unknown", ePktDirection::incoming);
-	add_filter_category(SRV_UNK_0xf3, "Unknown", ePktDirection::incoming);
-	//f4
-	//f5
-	//f6
-	//f7
-	//f8
-	//f9
-	add_filter_category(SRV_START_EFFECT, "Object effect started", ePktDirection::incoming);
-	add_filter_category(SRV_END_EFFECT, "Object effect ended", ePktDirection::incoming);
-	//fc
-	//fd
-	//fe
-	//ff
-	//100
-	//101
-	//102
-	//103
-	//104
-	//105
-	//106
-	//107
-	//108
-	//109
-	//10a
-	//10b
-	//10c
-	//10d
-	add_filter_category(CLI_REQUEST_PLAYERID, "Unk playerID request", ePktDirection::outgoing);
-	add_filter_category(SRV_NOTIFY_PLAYERID, "Unk playerID response", ePktDirection::incoming);
-	//0x110 - player pressed add new stash tab +?
-	add_filter_category(SRV_UNKNOWN_0x111, "Unknown", ePktDirection::incoming);
-	//112
-	//113
-	//114
-	//115
-	//116
-	//117
-	add_filter_category(SRV_UNKNOWN_0x118, "Unknown", ePktDirection::incoming);
-	//119
-	//11a
-	//11b
-	add_filter_category(CLI_OPTOUT_TUTORIALS, "Unk player setting change", ePktDirection::outgoing);
-	//11d
-	//11e
-	//11f
-	//120
-	//121
-	//122
-	//123
-	//124
-	//125
-	//126
-	//127
-	//128
-	//129
-	//12a
-	//12b
-	//12c
-	//12d
-	//12e
-	add_filter_category(SRV_SHOW_ENTERING_MSG, "Entering area message", ePktDirection::incoming);
-	//130
-	//131
-	add_filter_category(SRV_HEARTBEAT, "Server heartbeat", ePktDirection::incoming);
-	//133
-	//134
-	add_filter_category(SRV_ADD_OBJECT, "Object added", ePktDirection::incoming);
-	add_filter_category(SRV_UPDATE_OBJECT, "Object updated", ePktDirection::incoming);
-	add_filter_category(SRV_IDNOTIFY_0x137, "Unknown ObjID", ePktDirection::incoming);
+	rapidjson::Value::ConstValueIterator it = msgInfo.Begin();
+	for (; it != msgInfo.End(); it++)
+	{
+		UINT32 msgid = it->FindMember("ID")->value.GetUint();
+
+		QString description = it->FindMember("Description")->value.GetString();
+		bool incoming = it->FindMember("Inbound")->value.GetBool();
+
+		add_filter_category(msgid, description, incoming);
+	}
 }
 
 
@@ -378,7 +90,7 @@ void filterForm::populateFiltersList()
 void filterForm::buildBuiltinPresets()
 {
 	ushort numMsgs = ui->filterTable->rowCount();
-	assert(numMsgs > 0);
+	if (numMsgs < 0) return;
 
 	PRESET_LIST allPkts;
 
@@ -392,9 +104,9 @@ void filterForm::buildBuiltinPresets()
 	PRESET_LIST mostPkts(allPkts);
 
 	//for remaining lists we remove the noisiest messages
-	ERASE_FROM_VECTOR(mostPkts.IDs, CLI_PING_CHALLENGE);
-	ERASE_FROM_VECTOR(mostPkts.IDs, CLI_PING_CHALLENGE);
-	ERASE_FROM_VECTOR(mostPkts.IDs, SRV_PING_RESPONSE);
+	ERASE_FROM_VECTOR(mostPkts.IDs, CLI_HNC);
+	ERASE_FROM_VECTOR(mostPkts.IDs, CLI_HNC);
+	ERASE_FROM_VECTOR(mostPkts.IDs, SRV_HNC);
 	ERASE_FROM_VECTOR(mostPkts.IDs, SRV_HEARTBEAT);
 
 	mostPkts.name = "Most";

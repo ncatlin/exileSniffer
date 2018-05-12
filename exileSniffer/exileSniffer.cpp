@@ -10,17 +10,20 @@ This is the UI thread - try not to hang it
 #include "qtextedit.h"
 #include "packetIDs.h"
 #include <fstream>
+#include "rapidjson\filereadstream.h"
 
 exileSniffer::exileSniffer(QWidget *parent)
 	: QMainWindow(parent)
 {
 	ui.setupUi(this);
 
+	load_messagetypes_json();
+
 	setup_settings_tab();
 	setup_decoded_messages_tab();
 
 	rawFiltersFormUI.setupUi(&filterFormObj);
-	filterFormObj.setUI(&rawFiltersFormUI);
+	filterFormObj.setUI(&rawFiltersFormUI, &uiMsgQueue);
 	initFilters();
 
 	init_loginPkt_Actioners();
@@ -29,6 +32,46 @@ exileSniffer::exileSniffer(QWidget *parent)
 	start_threads();
 
 	setup_decryption_tab();
+}
+
+bool exileSniffer::load_messagetypes_json()
+{
+	FILE* fp = fopen("messageTypes.json", "rb"); // non-Windows use "r"
+	if (!fp)
+	{
+		UIaddLogMsg("Failed to open messageTypes.json", 0, &uiMsgQueue);
+		return false;
+	}
+
+	char readBuffer[65536];
+	rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
+	messageTypes.ParseStream(is);
+	fclose(fp);
+
+	for (auto it = messageTypes.MemberBegin(); it != messageTypes.MemberEnd(); it++)
+		std::cout << it->name.GetString() << std::endl;
+
+	if (messageTypes.FindMember("Login") != messageTypes.MemberEnd())
+	{
+		loginMessageTypes = &messageTypes.FindMember("Login")->value;
+	}
+	else
+	{
+		UIaddLogMsg("Error: No Login packet dict in messageTypes.json", 0, &uiMsgQueue);
+		return false;
+	}
+
+	if (messageTypes.FindMember("Game") != messageTypes.MemberEnd())
+	{
+		gameMessageTypes = &messageTypes.FindMember("Game")->value;
+	}
+	else
+	{
+		UIaddLogMsg("Error: No Game packet dict in messageTypes.json", 0, &uiMsgQueue);
+		return false;
+	}
+
+	return true;
 }
 
 void exileSniffer::setLabelActive(QLabel *lab, bool state)
@@ -139,7 +182,7 @@ void exileSniffer::refreshFilters()
 	refreshingFilters = true;
 	for (auto it = decodedListEntries.begin(); it != decodedListEntries.end(); it++)
 	{
-		if (packet_passes_decoded_filter(it->second->messageID))
+		if (packet_passes_decoded_filter(it->second->getMessageID()))
 		{
 			addDecodedListEntry(it->first, it->second, false);
 		}
@@ -150,7 +193,7 @@ void exileSniffer::refreshFilters()
 
 void exileSniffer::initFilters()
 {
-	filterFormObj.populateFiltersList();
+	filterFormObj.populateFiltersList(*gameMessageTypes);
 	filterFormObj.populatePresetsList();
 
 	connect(&filterFormObj, SIGNAL(applyFilters()), this, SLOT(refreshFilters()));
@@ -910,7 +953,7 @@ void exileSniffer::decodedCellActivated(int row, int col)
 		else
 			actionerList = &loginPktActioners;
 
-		auto it = actionerList->find(obj->messageID);
+		auto it = actionerList->find(obj->getMessageID());
 		if (it != actionerList->end())
 		{
 			exileSniffer::actionFunc f = it->second;
@@ -927,8 +970,8 @@ void exileSniffer::decodedCellActivated(int row, int col)
 		else
 		{
 			stringstream err;
-			err << "ERROR! no action setup for displayed pkt id 0x" << std::hex << obj->messageID;
-			add_metalog_update(QString::fromStdString(err.str()), obj->clientProcessID());
+			err << "ERROR! no action setup for displayed pkt id 0x" << std::hex << obj->getMessageID();
+			add_metalog_update(QString::fromStdString(err.str()), obj->getClientProcessID());
 		}
 	}
 
@@ -1057,7 +1100,7 @@ void exileSniffer::decodedTableMenuRequest(QPoint pos)
 	QTableWidgetItem *rowitem = ui.decodedListTable->item(rowsSelected.front().row(), 0);
 	UIDecodedPkt* obj = (UIDecodedPkt*)rowitem->data(Qt::UserRole).value<UIDecodedPkt*>();
 
-	QString labeltext = "Filter PktID 0x" + QString::number(obj->messageID, 16);
+	QString labeltext = "Filter PktID 0x" + QString::number(obj->getMessageID(), 16);
 	action2.setText(labeltext);
 	contextMenu.addAction(&action2);
 	contextMenu.exec(mapToGlobal(pos));

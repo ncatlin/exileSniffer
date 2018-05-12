@@ -36,12 +36,12 @@ class UI_DECODED_LIST_ENTRY
 	public:
 		UI_DECODED_LIST_ENTRY(UIDecodedPkt& pktobj) {
 			msTime = pktobj.time_processed_ms();
-			pktID = pktobj.messageID;
+			pktID = pktobj.getMessageID();
 			flags = pktobj.streamFlags;
 			failedDecode = pktobj.decodeError();
 			originalbuf = pktobj.originalbuf;
 			bufferOffsets = pktobj.bufferOffsets;
-			streamID = pktobj.streamID();
+			streamID = pktobj.getStreamID();
 		}
 
 		QString dayMonTime() { return QString::fromStdWString(epochms_to_timestring(msTime)); }
@@ -109,6 +109,8 @@ class exileSniffer : public QMainWindow
 		void updateSettings(); 
 
 	private:
+
+		bool load_messagetypes_json();
 		void setup_settings_tab();
 		void save_settings();
 		void setup_decoded_messages_tab();
@@ -175,13 +177,13 @@ class exileSniffer : public QMainWindow
 		void action_SRV_CHAT_MESSAGE(UIDecodedPkt&, QString*);
 		void action_SRV_SERVER_MESSAGE(UIDecodedPkt&, QString*);
 		void action_CLI_LOGGED_OUT(UIDecodedPkt&, QString*);
-		void action_CLI_PING_CHALLENGE(UIDecodedPkt&, QString*);
-		void action_SRV_PING_RESPONSE(UIDecodedPkt&, QString*);
+		void action_CLI_HNC(UIDecodedPkt&, QString*);
+		void action_SRV_HNC(UIDecodedPkt&, QString*);
 		void action_SRV_AREA_INFO(UIDecodedPkt&, QString*);
 
 		void action_SRV_PRELOAD_MONSTER_LIST(UIDecodedPkt&, QString*);
 		void action_SRV_UNK_0x13(UIDecodedPkt&, QString *);
-		void action_SRV_PLAYER_ITEMS(UIDecodedPkt&, QString*);
+		void action_SRV_ITEMS_LIST(UIDecodedPkt&, QString*);
 		void action_CLI_CLICKED_GROUND_ITEM(UIDecodedPkt&, QString*);
 		void action_CLI_ACTION_PREDICTIVE(UIDecodedPkt&, QString*);
 		void action_SRV_TRANSFER_INSTANCE(UIDecodedPkt& obj, QString *analysis);
@@ -324,7 +326,7 @@ class exileSniffer : public QMainWindow
 		
 		void action_SRV_UNK_0x108(UIDecodedPkt&, QString*);
 
-		void action_CLI_REQUEST_PLAYERID(UIDecodedPkt&, QString *);
+		void action_CLI_FINISHED_LOADING(UIDecodedPkt&, QString *);
 		void action_SRV_NOTIFY_PLAYERID(UIDecodedPkt&, QString *);
 
 		void action_SRV_UNKNOWN_0x111(UIDecodedPkt&, QString*);
@@ -374,6 +376,9 @@ class exileSniffer : public QMainWindow
 		bool activeDecryption = false;
 
 private:
+	rapidjson::Document messageTypes;
+	rapidjson::GenericValue<rapidjson::UTF8<>> *loginMessageTypes = NULL;
+	rapidjson::GenericValue<rapidjson::UTF8<>> *gameMessageTypes = NULL;
 	gameDataStore ggpk;
 	
 private:

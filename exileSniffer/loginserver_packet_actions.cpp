@@ -12,7 +12,7 @@ void exileSniffer::init_loginPkt_Actioners()
 	loginPktActioners[LOGIN_CLI_RESYNC] = &exileSniffer::action_LOGIN_CLI_RESYNC;
 	loginPktActioners[LOGIN_CLI_CHANGE_PASSWORD] = &exileSniffer::action_LOGIN_CLI_CHANGE_PASSWORD;
 	loginPktActioners[LOGIN_CLI_DELETE_CHARACTER] = &exileSniffer::action_LOGIN_CLI_DELETE_CHARACTER;
-	loginPktActioners[LOGIN_CLI_CHARACTER_SELECTED_SELECTED] = &exileSniffer::action_LOGIN_CLI_CHARACTER_SELECTED;
+	loginPktActioners[LOGIN_CLI_CHARACTER_SELECTED] = &exileSniffer::action_LOGIN_CLI_CHARACTER_SELECTED;
 	loginPktActioners[LOGIN_SRV_NOTIFY_GAMESERVER] = &exileSniffer::action_LOGIN_SRV_NOTIFY_GAMESERVER;
 	loginPktActioners[LOGIN_CLI_CREATED_CHARACTER] = &exileSniffer::action_LOGIN_CLI_CREATED_CHARACTER;
 	loginPktActioners[LOGIN_SRV_CHAR_LIST] = &exileSniffer::action_LOGIN_SRV_CHAR_LIST;
@@ -24,7 +24,7 @@ void exileSniffer::init_loginPkt_Actioners()
 
 void exileSniffer::action_decoded_login_packet(UIDecodedPkt& decoded)
 {
-	auto it = loginPktActioners.find(decoded.messageID);
+	auto it = loginPktActioners.find(decoded.getMessageID());
 	if (it != loginPktActioners.end())
 	{
 		exileSniffer::actionFunc f = it->second;
@@ -36,8 +36,8 @@ void exileSniffer::action_decoded_login_packet(UIDecodedPkt& decoded)
 	else
 	{
 		stringstream err;
-		err << "ERROR! no action setup for known login msg id 0x" << std::hex << decoded.messageID;
-		add_metalog_update(QString::fromStdString(err.str()), decoded.clientProcessID());
+		err << "ERROR! no action setup for known login msg id 0x" << std::hex << decoded.getMessageID();
+		add_metalog_update(QString::fromStdString(err.str()), decoded.getClientProcessID());
 	}
 
 }
@@ -189,10 +189,10 @@ void exileSniffer::action_LOGIN_SRV_CHAR_LIST(UIDecodedPkt& obj, QString *analys
 {
 	obj.toggle_payload_operations(true);
 
-	auto it = obj.payload.FindMember(L"CharacterList");
-	if (it == obj.payload.MemberEnd())
+	auto it = obj.payload->FindMember(L"CharacterList");
+	if (it == obj.payload->MemberEnd())
 	{
-		add_metalog_update("Warning: No CharacterList found in payload of LOGIN_SRV_CHAR_LIST", obj.clientProcessID());
+		add_metalog_update("Warning: No CharacterList found in payload of LOGIN_SRV_CHAR_LIST", obj.getClientProcessID());
 		return;
 	}
 
@@ -305,10 +305,10 @@ void exileSniffer::action_LOGIN_SRV_NOTIFY_GAMESERVER(UIDecodedPkt& obj, QString
 	UINT32 areaCode = obj.get_UInt32(L"AreaCode");
 	UINT32 connID = obj.get_UInt32(L"ConnectionID");
 
-	auto gbit = obj.payload.FindMember(L"ServerBlobs");
-	if (gbit == obj.payload.MemberEnd())
+	auto gbit = obj.payload->FindMember(L"ServerBlobs");
+	if (gbit == obj.payload->MemberEnd())
 	{
-		add_metalog_update("Warning: No ServerBlobs found in payload of LOGIN_SRV_NOTIFY_GAMESERVER", obj.clientProcessID());
+		add_metalog_update("Warning: No ServerBlobs found in payload of LOGIN_SRV_NOTIFY_GAMESERVER", obj.getClientProcessID());
 		UI_DECODED_LIST_ENTRY listentry(obj);
 		listentry.summary = "Gameserver connection information [BAD]";
 		addDecodedListEntry(listentry, &obj);
@@ -385,7 +385,7 @@ void exileSniffer::action_LOGIN_SRV_LEAGUE_LIST(UIDecodedPkt& obj, QString *anal
 {
 	obj.toggle_payload_operations(true);
 
-	auto evntIt = obj.payload.FindMember(L"EventList");
+	auto evntIt = obj.payload->FindMember(L"EventList");
 	WValue &blobList = evntIt->value;
 	unsigned short blobListSize = blobList.Size();
 

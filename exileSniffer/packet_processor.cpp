@@ -147,7 +147,7 @@ void packet_processor::handle_packet_from_loginserver(vector<byte> &nwkData, lon
 		ui_decodedpkt->setBuffer(decryptedBuffer);
 		ui_decodedpkt->setStartOffset(0);
 		ui_decodedpkt->setEndOffset(dataLen);
-		ui_decodedpkt->messageID = LOGIN_EPHERMERAL_PUBKEY;
+		ui_decodedpkt->setMessageID(LOGIN_EPHERMERAL_PUBKEY);
 		ui_decodedpkt->toggle_payload_operations(true);
 
 		decryptedIndex = 2;
@@ -294,7 +294,7 @@ void packet_processor::handle_packet_to_loginserver(vector<byte> &nwkData, long 
 		ui_decodedpkt->setBuffer(decryptedBuffer);
 		ui_decodedpkt->setStartOffset(0);
 		ui_decodedpkt->setEndOffset(dataLen);
-		ui_decodedpkt->messageID = LOGIN_EPHERMERAL_PUBKEY;
+		ui_decodedpkt->setMessageID(LOGIN_EPHERMERAL_PUBKEY);
 		ui_decodedpkt->toggle_payload_operations(true);
 		deserialisedPkts.push_back(ui_decodedpkt);
 
@@ -395,7 +395,7 @@ void packet_processor::handle_packet_to_loginserver(vector<byte> &nwkData, long 
 		ui_decodedpkt->setBuffer(decryptedBuffer);
 		ui_decodedpkt->setStartOffset(0);
 		ui_decodedpkt->setEndOffset(dataLen);
-		ui_decodedpkt->messageID = firstPktID;
+		ui_decodedpkt->setMessageID(firstPktID);
 		ui_decodedpkt->toggle_payload_operations(true);
 		deserialisedPkts.push_back(ui_decodedpkt);
 
@@ -498,7 +498,7 @@ void packet_processor::deserialise_packets_from_decrypted(streamType streamServe
 
 		deserialisedPkts.push_back(ui_decodedpkt);
 		ui_decodedpkt->setStartOffset(decryptedIndex - 2);
-		ui_decodedpkt->messageID = pktIDWord;
+		ui_decodedpkt->setMessageID(pktIDWord);
 		ui_decodedpkt->toggle_payload_operations(true);
 
 		if (sanityCheckPacketID(pktIDWord) && errorFlag == eNoErr)

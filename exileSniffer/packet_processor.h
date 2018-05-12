@@ -93,13 +93,13 @@ private:
 	void deserialise_SRV_CHAT_MESSAGE(UIDecodedPkt *);
 	void deserialise_SRV_SERVER_MESSAGE(UIDecodedPkt *);
 	void deserialise_CLI_LOGGED_OUT(UIDecodedPkt *);
-	void deserialise_CLI_PING_CHALLENGE(UIDecodedPkt *);
-	void deserialise_SRV_PING_RESPONSE(UIDecodedPkt *);		
+	void deserialise_CLI_HNC(UIDecodedPkt *);
+	void deserialise_SRV_HNC(UIDecodedPkt *);		
 	void deserialise_SRV_AREA_INFO(UIDecodedPkt*);
 
 	void deserialise_SRV_PRELOAD_MONSTER_LIST(UIDecodedPkt*);
 	void deserialise_SRV_UNK_0x13(UIDecodedPkt *);
-	void deserialise_SRV_PLAYER_ITEMS(UIDecodedPkt*);
+	void deserialise_SRV_ITEMS_LIST(UIDecodedPkt*);
 	void deserialise_CLI_CLICKED_GROUND_ITEM(UIDecodedPkt *);
 	void deserialise_CLI_ACTION_PREDICTIVE(UIDecodedPkt *);
 	void deserialise_SRV_TRANSFER_INSTANCE(UIDecodedPkt *);
@@ -242,7 +242,7 @@ private:
 
 	void deserialise_SRV_UNKNOWN_0x108(UIDecodedPkt *);
 
-	void deserialise_CLI_REQUEST_PLAYERID(UIDecodedPkt *);
+	void deserialise_CLI_FINISHED_LOADING(UIDecodedPkt *);
 	void deserialise_SRV_NOTIFY_PLAYERID(UIDecodedPkt *);
 	void deserialise_SRV_UNKNOWN_0x111(UIDecodedPkt *);
 	void deserialise_SRV_UNKNOWN_0x118(UIDecodedPkt *);
