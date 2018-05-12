@@ -4,13 +4,12 @@
 #include "utilities.h"
 #include "inventory.h"
 
-//#pragma comment(lib, "N:\\code\\POEcode\\poeSRE\\clientX\\packages\\cryptopp.v140.5.6.5.2\\lib\\native\\v140\\windesktop\\msvcstl\\x64\\Debug\\md\\cryptopp.lib")
 #ifdef DEBUG
 #pragma comment(lib, "C:\\devel\\libs\\crypp\\x64\\Output\\Debug\\cryptlib.lib")
 #else
 #pragma comment(lib, "C:\\devel\\libs\\crypp\\x64\\Output\\Release\\cryptlib.lib")
 #endif
-//#pragma comment(lib, "C:\\devel\\libs\\crypp\\x64\\DLL_Output\\Release\\cryptlib.lib")
+
 /*
 void packet_processor::handle_packet_from_patchserver(byte* data, unsigned int dataLen)
 {
@@ -171,12 +170,11 @@ void packet_processor::handle_packet_from_loginserver(vector<byte> &nwkData, lon
 		{
 			KEYDATA *keyCandidate = keyGrabber->getUnusedMemoryKey(currentMsgStreamID, true);
 			if (!keyCandidate) {
-				std::cout << "no unused memkey in from login!" << std::endl;
+				UIaddLogMsg("Warning: No unused key from login!", 0, uiMsgQueue);
 				Sleep(1200);
 				continue;
 			}
 
-			if (keyCandidate->used) std::cout << "assert 3" << std::endl;
 			assert(!keyCandidate->used);
 
 			currentStreamObj->recvSalsa.SetKeyWithIV((const byte *)keyCandidate->salsakey,
@@ -342,7 +340,6 @@ void packet_processor::handle_packet_to_loginserver(vector<byte> &nwkData, long 
 				continue;
 			}
 
-			if (keyCandidate->used) std::cout << "assert 4" << std::endl;
 			assert(!keyCandidate->used);
 
 			currentStreamObj->sendSalsa.SetKeyWithIV((byte *)keyCandidate->salsakey,
@@ -526,19 +523,6 @@ void packet_processor::deserialise_packets_from_decrypted(streamType streamServe
 						ui_decodedpkt->setAbandoned();
 					}
 				}
-			}
-			else
-			{
-				std::cout << "Unhandled Hex Payload msgID <gamesrv in> 0x" << std::hex << pktIDWord << std::endl;
-				for (int i = 0; i < dataLen; ++i)
-				{
-					byte item = decryptedBuffer->at(i);
-					std::cout << std::setw(2) << (int)item;
-					if (i % 16 == 0) std::cout << std::endl;
-				}
-				std::cout << std::endl;
-
-				errorFlag = eDecodingErr::ePktIDUnimplemented;
 			}
 		}
 		

@@ -29,14 +29,6 @@ void json_pipe_thread::setPipePath(QString pipename)
 	CloseHandle(JSONpipe); //what could go wrong
 }
 
-DWORD json_pipe_thread::connectedReaders()
-{
-	DWORD result = 0;
-	bool res = GetNamedPipeHandleStateA(JSONpipe, 0, &result, NULL, NULL, NULL, NULL);
-	std::cout <<res<<","<<GetLastError()<< " conreads " << result << std::endl;
-	return result;
-}
-
 void json_pipe_thread::main_loop()
 {
 	
@@ -56,7 +48,7 @@ void json_pipe_thread::main_loop()
 		if (JSONpipe == INVALID_HANDLE_VALUE)
 		{
 			std::stringstream err;
-			err << "CreateNamedPipe "<<pipepath.toStdString() << " error "<< GetLastError();
+			err << "CreateNamedPipe " << pipepath.toStdString() << " error " << GetLastError();
 			UIaddLogMsg(err.str(), 0, uiMsgQueue);
 			running = false; 
 			break;
@@ -67,9 +59,9 @@ void json_pipe_thread::main_loop()
 		bool fConnected;
 		while (1)
 		{
-			WaitForSingleObject(JSONpipe, 200);
-			DWORD mush2;
-			fConnected = GetOverlappedResult(JSONpipe, &oOverlap, &mush2, false);
+			WaitForSingleObject(JSONpipe, 400);
+			DWORD ignored;
+			fConnected = GetOverlappedResult(JSONpipe, &oOverlap, &ignored, false);
 				break;
 			if (fConnected || !running)
 				break;
@@ -93,10 +85,21 @@ void json_pipe_thread::main_loop()
 						pendingIO = false;
 					}
 				}
-				std::wstring doc = entryQ.waitItem();
-				doc.append(L"\r");
 
-				bool writeDone = false;
+				if (entryQ.empty())
+				{
+					Sleep(100);
+					connected = WriteFile(JSONpipe, 0, 0, 0, 0);
+					if (!connected)
+					{
+						CloseHandle(JSONpipe);
+						break;
+					}
+
+					continue;
+				}
+				std::wstring doc = entryQ.waitItem();
+				doc.append(L"\r"); //needed to make it a discrete pipe message
 
 				DWORD writtenBytes = 0;
 				DWORD byteSize = doc.size() * sizeof(wchar_t);
@@ -114,6 +117,8 @@ void json_pipe_thread::main_loop()
 						UIaddLogMsg("JSON Subscriber Disconnected", 0, uiMsgQueue);
 						connected = false;
 						CloseHandle(JSONpipe);
+						while (!entryQ.empty())
+							entryQ.pop();
 					}
 				}
 			}
@@ -124,6 +129,8 @@ void json_pipe_thread::main_loop()
 			CloseHandle(JSONpipe);
 		}
 	}
+
+
 	ded = true;
 }
 
@@ -131,14 +138,11 @@ void json_pipe_thread::main_loop()
 
 void json_pipe_thread::sendPacket(rapidjson::GenericDocument<rapidjson::UTF16<>> &doc)
 {
+	if (!connected) return;
 	rapidjson::GenericStringBuffer<rapidjson::UTF16<>> buffer;
 	rapidjson::Writer<rapidjson::GenericStringBuffer<rapidjson::UTF16<>>, rapidjson::UTF16<>> writer(buffer);
 	doc.Accept(writer);
 
 	std::wstring resultstring = buffer.GetString();
-
-	if (connected)
-	{
-		entryQ.addItem(resultstring);
-	}
+	entryQ.addItem(resultstring);
 }

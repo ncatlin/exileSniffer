@@ -56,7 +56,6 @@ std::ofstream& clientHexData::get_unfiltered_hexlog()
 {
 	if (unfilteredLogfile.is_open() || !logUnfiltered)
 		return unfilteredLogfile;
-	std::cout << "openunfi" << std::endl;
 	
 	unfilteredLogfile = std::ofstream(get_logpath(false),
 		std::ofstream::out | std::ofstream::app);

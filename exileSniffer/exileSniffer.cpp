@@ -48,9 +48,6 @@ bool exileSniffer::load_messagetypes_json()
 	messageTypes.ParseStream(is);
 	fclose(fp);
 
-	for (auto it = messageTypes.MemberBegin(); it != messageTypes.MemberEnd(); it++)
-		std::cout << it->name.GetString() << std::endl;
-
 	if (messageTypes.FindMember("Login") != messageTypes.MemberEnd())
 	{
 		loginMessageTypes = &messageTypes.FindMember("Login")->value;
@@ -267,8 +264,6 @@ void exileSniffer::read_UI_Q()
 		float secondsElapsed = ((float)clock() - startTicks) / CLOCKS_PER_SEC;
 		if (secondsElapsed > 0.15) //todo: season to taste
 		{
-			std::cout << "Warning: " << secondsElapsed << " seconds elapsed with q size " 
-				<< uiMsgQueue.size() << " remain"<<std::endl;
 			break;
 		}
 	}
@@ -574,7 +569,6 @@ void exileSniffer::action_UI_Msg(UI_MESSAGE *msg)
 			deleteAfterUse = false; //archived
 			UIDecodedPkt &uiDecodedMsg = *((UIDecodedPkt *)msg);
 
-			pipeThread->sendPacket(uiDecodedMsg.jsn);
 
 			if(!uiDecodedMsg.decodeError())
 				action_decoded_packet(uiDecodedMsg); 
@@ -585,6 +579,9 @@ void exileSniffer::action_UI_Msg(UI_MESSAGE *msg)
 				else
 					action_undecoded_packet(uiDecodedMsg);
 			}
+
+			//important: this should happen after action_decoded_packet as it adds analysis details
+			pipeThread->sendPacket(uiDecodedMsg.jsn);
 			break;
 		}
 

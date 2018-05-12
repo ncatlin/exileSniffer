@@ -433,7 +433,7 @@ void exileSniffer::action_undecoded_packet(UIDecodedPkt& obj)
 		sizeAfterID = obj.originalbuf->size();
 
 	wstringstream summary;
-	summary << "Undecoded packet or multipacket blob (~ "
+	summary << "Undecoded packet or poorly decoded previous packet (~ "
 		<< std::dec << sizeAfterID << " byte";
 	summary << ((sizeAfterID == 1) ? ")" : "s)");
 
@@ -515,14 +515,24 @@ void exileSniffer::action_SRV_PKT_ENCAPSULATED(UIDecodedPkt& obj, QString *analy
 void exileSniffer::action_CLI_CHAT_MSG_ITEMS(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
+
+	DWORD itemID = obj.get_UInt32(L"ItemID");
+
 	if (!analysis)
 	{
 		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player(You) sent chat message with with linked items";
+		listentry.summary = "Player(You) sent chat message with with linked item ";
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
 	
+	wstringstream analysisStream;
+	analysisStream << std::dec;
+	analysisStream << "Index: " << obj.get_UInt32(L"Index") << std::endl;
+	analysisStream << "Container: " << slotToString(obj.get_UInt32(L"Container")) << std::endl;
+	analysisStream << "Item: " << itemID << std::endl;
+	analysisStream << "EndByte: " << obj.get_UInt32(L"EndByte") << std::endl;
+	*analysis = QString::fromStdWString(analysisStream.str());
 }
 
 void exileSniffer::action_CLI_CHAT_COMMAND(UIDecodedPkt& obj, QString *analysis)
@@ -533,14 +543,14 @@ void exileSniffer::action_CLI_CHAT_COMMAND(UIDecodedPkt& obj, QString *analysis)
 	todo - load into presupplied data blob or lookup in ggpk
 	0x04 = /remaining, 0x06=/pvp, 0x08=/oos, 0x0d=/fixmyhelmet, etc
 	*/
-	UINT32 commandsDatIndex = obj.get_UInt32(L"CommandID");
-	UINT32 unk1 = obj.get_UInt32(L"Unk1");
+	UINT32 commandsDatIndex = obj.get_UInt32(L"CommandsDatIndex");
+	UINT32 arg = obj.get_UInt32(L"Arg");
 
 	if (!analysis)
 	{
 		wstringstream summary;
-		summary << "Player(You) used command at commands.dat index: " << std::dec << commandsDatIndex <<
-			" [unkVal 0x: " << std::hex << unk1 << "]";
+		summary << "Used builtin command at commands.dat index: " << std::dec << commandsDatIndex <<
+			" [Arg 0x: " << std::hex << arg << "]";
 		UI_DECODED_LIST_ENTRY listentry(obj);
 		listentry.summary = QString::fromStdWString(summary.str());
 		addDecodedListEntry(listentry, &obj);
@@ -584,8 +594,8 @@ void exileSniffer::action_SRV_CHAT_MESSAGE(UIDecodedPkt& obj, QString *analysis)
 	{
 		
 		wstringstream summary;
-		if (devFlag)
-			summary << "{-DEV-} ";
+		//if (devFlag)
+		//	summary << "{-DEV-} ";
 		summary << "Chat <" << channel << "> " << name << "[" << tag << "]: " << text;
 
 		UI_DECODED_LIST_ENTRY listentry(obj);
@@ -603,8 +613,6 @@ void exileSniffer::action_SRV_SERVER_MESSAGE(UIDecodedPkt& obj, QString *analysi
 	UINT32 ggpkDatRow = obj.get_UInt32(L"BackendErrorsRow") - 1;
 	UINT32 devID = obj.get_UInt32(L"DevID");
 	UINT32 TextModifier = obj.get_UInt32(L"TextModifier");
-
-
 
 	if (!analysis)
 	{
@@ -752,8 +760,7 @@ void exileSniffer::action_SRV_AREA_INFO(UIDecodedPkt& obj, QString *analysis)
 	obj.toggle_payload_operations(true);
 
 	DWORD areaCode = obj.get_UInt32(L"AreaCode");
-	std::wstring areaname;
-	ggpk.lookup_areaCode(areaCode, areaname);
+	std::wstring areaname = obj.get_wstring(L"AreaName+");
 
 	auto it = obj.payload->FindMember(L"PreloadHashList");
 	if (it == obj.payload->MemberEnd())
@@ -777,7 +784,6 @@ void exileSniffer::action_SRV_AREA_INFO(UIDecodedPkt& obj, QString *analysis)
 	}
 
 	wstringstream analysisStream;
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
 	DWORD variant = obj.get_UInt32(L"AreaVariant");
 	analysisStream << "Animation preload information" << std::hex << std::endl;
@@ -809,33 +815,38 @@ void exileSniffer::action_SRV_AREA_INFO(UIDecodedPkt& obj, QString *analysis)
 	}
 
 
-	vector<std::pair<std::string, std::pair<std::string, DWORD>>> preloadVec;
+
+	vector<std::pair<std::wstring, std::pair<std::wstring, DWORD>>> preloadVec;
 	for (auto it = preloadList.Begin(); it != preloadList.End(); it++)
 	{
-		DWORD hash = it->GetUint();
-		std::string hashResult;
-		std::string hashCategory;
-		ggpk.lookup_hash(hash, hashResult, hashCategory);
+		DWORD hash = it->FindMember(L"Hash")->value.GetUint();
+		std::wstring hashResult = it->FindMember(L"Item+")->value.GetString();
+		std::wstring hashCategory = it->FindMember(L"Category+")->value.GetString();
 		preloadVec.push_back(make_pair(hashCategory, make_pair(hashResult, hash)));
 	}
 	sort(preloadVec.begin(), preloadVec.end());
 
 	analysisStream << "List of object hashes to preload" << std::endl;
 
-	std::string activeCategory = "";
+	WValue preloadHashResults(rapidjson::kArrayType);
+
+	std::wstring activeCategory = L"";
 	for (auto it = preloadVec.begin(); it != preloadVec.end(); it++)
 	{
-		std::string hashCategory = it->first;
-		std::pair<std::string, DWORD> result_hash = it->second;
+		std::wstring hashCategory = it->first;
+		std::pair<std::wstring, DWORD> result_hash = it->second;
 		if (hashCategory != activeCategory)
 		{
-			analysisStream << converter.from_bytes(hashCategory) << "s:" << std::endl;
+			activeCategory = hashCategory;
+			analysisStream << hashCategory << "s:" << std::endl;
 			activeCategory = hashCategory;
 		}
 
-		analysisStream << "\t\"" << converter.from_bytes(result_hash.first) << "\"" << std::endl;
+		analysisStream << "\t\"" << result_hash.first << "\"" << std::endl;
 	}
 	analysisStream << std::endl;
+
+
 
 	analysisStream << "Byte list 1:" << std::endl;
 	WValue &blist1 = obj.payload->FindMember(L"ByteList1")->value;
@@ -881,22 +892,20 @@ void exileSniffer::action_SRV_AREA_INFO(UIDecodedPkt& obj, QString *analysis)
 
 
 	
-	plit = obj.payload->FindMember(L"StatList");
+	plit = obj.payload->FindMember(L"MapStatsList");
 	if (plit != obj.payload->MemberEnd())
 	{
 		analysisStream << "Area Stats:" << std::endl;
 		WValue &statlist = plit->value;
 		for (auto statit = statlist.Begin(); statit != statlist.End(); statit++)
 		{
-			WValue &pair = *statit;
-			DWORD statIndex = pair[0].GetUint() - 1;
+			WValue &statdat = *statit;
 			analysisStream << "\t" <<
-					converter.from_bytes(ggpk.statDescriptions.at(statIndex))
-					<< ": " << pair[1].GetInt() << std::endl;
+					statdat[1].GetString()
+					<< ": " << statdat[2].GetInt() << std::endl;
 		}
 		analysisStream << std::endl;
 	}
-
 
 
 	*analysis = QString::fromStdWString(analysisStream.str());
@@ -915,9 +924,9 @@ void exileSniffer::action_SRV_PRELOAD_MONSTER_LIST(UIDecodedPkt& obj, QString *a
 		return;
 	}
 	
-
 	WValue &monsterList = it->value;
 	unsigned short listSize = monsterList.Size();
+
 	if (!analysis)
 	{
 		wstringstream summary;
@@ -929,7 +938,8 @@ void exileSniffer::action_SRV_PRELOAD_MONSTER_LIST(UIDecodedPkt& obj, QString *a
 		return;
 	}
 
-	std::vector<std::pair<unsigned short, unsigned short>> pairVec;
+
+	std::vector<std::pair<unsigned short, std::wstring>> pairVec;
 	for (auto it = monsterList.Begin(); it != monsterList.End(); it++)
 	{
 		auto pairArray = it->GetArray();
@@ -938,9 +948,9 @@ void exileSniffer::action_SRV_PRELOAD_MONSTER_LIST(UIDecodedPkt& obj, QString *a
 			add_metalog_update("Warning: Bad pair array in SRV_PRELOAD_MONSTER_LIST", obj.getClientProcessID());
 			return;
 		}
-		unsigned short varietyIndex = pairArray[0].GetUint();
-		unsigned short unk1 = pairArray[1].GetUint();
-		pairVec.push_back(make_pair(unk1, varietyIndex));
+		std::wstring varietyName = pairArray[1].GetString();
+		unsigned short level = pairArray[2].GetUint();
+		pairVec.push_back(make_pair(level, varietyName));
 	}
 
 	std::sort(pairVec.rbegin(), pairVec.rend());
@@ -954,25 +964,20 @@ void exileSniffer::action_SRV_PRELOAD_MONSTER_LIST(UIDecodedPkt& obj, QString *a
 	for (auto it = pairVec.begin(); it != pairVec.end(); it++)
 	{
 		unsigned short level = it->first;
-		unsigned short varietyIndex = it->second;
+		std::wstring monstername = it->second;
 
 		if (level < monsterLevel)
 		{
-			analysisStream << "Category: " << std::dec << level << std::endl;
+			analysisStream << "Level: " << std::dec << level << std::endl;
 			monsterLevel = level;
 		}
 
-		if (varietyIndex < ggpk.monsterVarieties.size())
-		{
-			//TODO: change encoding to 16 in this and generator script
-			std::wstring todo_unicode_jsondatafile = converter.from_bytes(ggpk.monsterVarieties.at(varietyIndex));
-			analysisStream << "\t"<< "0x" << std::hex << varietyIndex <<
-				": " << todo_unicode_jsondatafile <<std::endl;
-		}
-		else
-			analysisStream << std::hex << "Unknown MonsterVariety Idx: 0x" << varietyIndex << std::endl;;
+		wstring idstring;
+		analysisStream << monstername << std::endl;
+
 	}
 	*analysis = QString::fromStdWString(analysisStream.str());
+
 
 }
 
@@ -1050,7 +1055,7 @@ void exileSniffer::action_SRV_ITEMS_LIST(UIDecodedPkt& obj, QString *analysis)
 	if (!analysis)
 	{
 		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Server listing items held by Player <ID: 0x"+QString::number(objID,16)+">";
+		listentry.summary = "Server listing items held by obj ID: 0x"+QString::number(objID,16);
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
@@ -3658,6 +3663,11 @@ void exileSniffer::action_SRV_HEARTBEAT(UIDecodedPkt& obj, QString *analysis)
 	}
 }
 
+/*
+The summary is left until the end so the json readers can benefit from the analysis
+
+Analysis needs splitting into the various types of object category
+*/
 void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
@@ -3667,28 +3677,24 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 	UINT32 ID3 = obj.get_UInt32(L"ID3");
 
 	DWORD objHash = obj.get_UInt32(L"objHash");
-
 	DWORD dataLen = obj.get_UInt32(L"DataLen");
 
-
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	std::string hashResult;
-	std::string hashCategory;
-	ggpk.lookup_hash(objHash, hashResult, hashCategory);
 
-
+	std::wstring hashCategoryWS = obj.get_wstring(L"HashCategory+");
+	std::wstring hashResultWS = obj.get_wstring(L"HashResult+");
 
 	if (!analysis)
 	{
 		wstringstream summary;
-		summary << std::hex << converter.from_bytes(hashCategory) << " added ";
-		if (hashCategory == "Character")
+		summary << std::hex << hashCategoryWS << " added ";
+		if (hashCategoryWS == L"Character")
 		{
 			summary << " - " << obj.get_wstring(L"Name");
 		}
 		else
 		{
-			summary << "<" << converter.from_bytes(hashResult) <<
+			summary << "<" << hashResultWS <<
 				"> ID (0x" << ID1 << "," << ID2 << "," << ID3 << ") - " << dataLen << " bytes>";
 		}
 
@@ -3698,20 +3704,17 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 		return;
 	}
 
-
 	wstringstream analysisStream;
 
 	analysisStream << std::hex << "ID (0x" << ID1 << "," << ID2 << "," << ID3 << ")" << std::endl;
-	analysisStream << "Hash: 0x" << objHash << " - " 
-		<< converter.from_bytes(hashCategory) << "-" 
-		<< converter.from_bytes(hashResult) << std::endl;
-
+	analysisStream << "Hash: 0x" << objHash << " - " << hashCategoryWS << "-"<< hashResultWS << std::endl;
 	analysisStream << "Datalen: " << std::dec << dataLen << std::endl;
 
-	if (hashCategory != "Character")
+	if (hashCategoryWS != L"Character")
 	{
 		analysisStream << "\n !- Not character, can't decode yet -! " << std::endl;
 		*analysis = QString::fromStdWString(analysisStream.str());
+
 		return;
 	}
 
@@ -3740,10 +3743,7 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 	DWORD unkdword1 = ntohl(obj.get_UInt32(L"UnkDword1"));
 	if (unkdword1 != 0)
 	{
-		ggpk.lookup_hash(unkdword1, hashResult, hashCategory);
-		analysisStream << "Unk DWORD After Coords: 0x" << unkdword1 << " - "
-			<< converter.from_bytes(hashCategory) << "-"
-			<< converter.from_bytes(hashResult) << std::endl;
+		analysisStream << "Unk DWORD After Coords: 0x" << unkdword1 << std::endl;
 	}
 	analysisStream << "Unk byte 1: 0x" << obj.get_UInt32(L"UnkByte1") << std::endl;
 	byte controlByte1 = obj.get_UInt32(L"ControlByte1");
@@ -3778,14 +3778,12 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 	{
 		WValue &statList = it->value;
 		analysisStream << std::dec << statList.Size() << " Stats:" << std::endl;
-		std::cout << "getting stats\n" << std::endl;
 		for (auto statit = statList.Begin(); statit != statList.End(); statit++)
 		{
 			WValue &pair = *statit;
 			DWORD statIndex = pair[0].GetUint() - 1;
-			analysisStream << "\t" <<
-				converter.from_bytes(ggpk.statDescriptions.at(statIndex))
-				<< ": " << pair[1].GetInt() << std::endl;
+			std::wstring statType = pair[1].GetString();
+			analysisStream << "\t" << statType << ": " << pair[2].GetInt() << std::endl;
 		}
 	}
 	else
@@ -3808,7 +3806,6 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 	analysisStream << "[?]Unk Shield: " << obj.get_UInt32(L"ShieldUnk3") << std::endl;
 	analysisStream << "Unk Value after HMS: " << obj.get_UInt32(L"UnkDWORDEndHMS") << std::endl;
 	analysisStream << "Unk Value before buffs: " << obj.get_UInt32(L"UnkByte_PreBuffs") << std::endl;
-	
 
 	analysisStream << std::dec << std::endl;
 
@@ -3824,17 +3821,16 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 		for (auto buffit = buffList.Begin(); buffit != buffList.End(); buffit++)
 		{
 			WValue &buff = *buffit;
-			analysisStream << "Buff Slot/ID: " << buff.FindMember(L"BuffID")->value.GetUint() << std::endl;
+			uint buffID = buff.FindMember(L"BuffID")->value.GetUint();
+			analysisStream << "Buff Slot/ID: " << buffID << std::endl;
 
 			ushort defsrow = buff.FindMember(L"BuffDefinitionsRow")->value.GetUint();
-			analysisStream << "\tBuffDefinitions.dat row " << 
-				defsrow << " - \"" << converter.from_bytes(ggpk.buffDefinitions_names_statCounts.at(defsrow).first) 
-				<< "\"" << std::endl;
+			std::wstring buffname = buff.FindMember(L"Buffname")->value.GetString();
+			analysisStream << "\tBuffDefinitions.dat row " << defsrow << " - \"" <<  buffname << "\"" << std::endl;
 
 			ushort visualsrow = buff.FindMember(L"BuffVisualsRow")->value.GetUint();
-			analysisStream << "\tBuffVisuals.dat row " << 
-				visualsrow << " - \"" << converter.from_bytes(ggpk.buffVisuals.at(visualsrow)) 
-				<< "\"" << std::endl;
+			std::wstring buffvisualname = buff.FindMember(L"BuffVisualName")->value.GetString();
+			analysisStream << "\tBuffVisuals.dat row " << visualsrow << " - \"" << buffvisualname	<< "\"" << std::endl;
 
 			analysisStream << std::hex;
 			analysisStream << "\tUnkDword1 0x:" << buff.FindMember(L"UnkDword1")->value.GetUint() << std::endl;
@@ -3861,7 +3857,6 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 
 	analysisStream << "[Quest/Achievment bits] skipped" << std::endl;
 
-
 	WValue &unklist1 = obj.payload->FindMember(L"UnkList")->value;
 	analysisStream << "Unknown list:" << std::hex << std::endl;
 	int i = 0;
@@ -3873,8 +3868,8 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 		analysisStream << "\tQ3: 0x " << it->FindMember(L"Q3")->value.GetUint64() << std::endl;
 	}
 
-
-	analysisStream << "Hideout [todo lookup]: " <<obj.get_UInt32(L"HideoutCode")<< std::endl;
+	std::wstring hideoutname = obj.get_wstring(L"HideoutName");
+	analysisStream << "Hideout: " << hideoutname << std::endl;
 
 	analysisStream << "UnkBytes:" << obj.get_wstring(L"UnkBytes1") << std::endl;
 
@@ -3883,8 +3878,9 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 	for (auto it = prophsList.Begin(); it != prophsList.End(); it++)
 	{
 		uint ref = it->FindMember(L"DatReference")->value.GetUint();
+		std::wstring prophecyName = ggpk.getProphecy(ref);
 		analysisStream << "Position: 0x" << it->FindMember(L"Pos")->value.GetUint() << std::endl;
-		analysisStream << "\tID: " << ggpk.getProphecy(ref) << std::endl;
+		analysisStream << "\tID: " << prophecyName << std::endl;
 		analysisStream << std::endl;
 	}
 
@@ -3893,17 +3889,21 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 	for (auto it = wornItems.Begin(); it != wornItems.End(); it++)
 	{
 		UINT32 visIdentReference1 = it->FindMember(L"VisualIdentity1")->value.GetUint();
+		std::wstring visIdentName1 = ggpk.getVisualIdentity(visIdentReference1);
 		UINT32 visIdentReference2 = it->FindMember(L"VisualIdentity2")->value.GetUint();
+		std::wstring visIdentName2 = ggpk.getVisualIdentity(visIdentReference2);
 		UINT32 visualEffect = it->FindMember(L"ItemVisualEffect")->value.GetUint();
+		std::wstring visEffectName = ggpk.getVisualEffect(visualEffect);
 
 		analysisStream << "Slot: " << std::dec << it->FindMember(L"Slot")->value.GetUint() << std::endl;
-		analysisStream << "\tVisualIdentity: " << ggpk.getVisualIdentity(visIdentReference1) << std::endl;
-		analysisStream << "\tExtraVisualIdentity: " << ggpk.getVisualIdentity(visIdentReference2) << std::endl;
-		analysisStream << "\tVisualEffect: " << ggpk.getVisualEffect(visualEffect) << std::endl;
+		analysisStream << "\tVisualIdentity: " << visIdentName1 << std::endl;
+		analysisStream << "\tExtraVisualIdentity: " << visIdentName2 << std::endl;
+		analysisStream << "\tVisualEffect: " << visEffectName << std::endl;
 		analysisStream << "\tUnk2: " << std::dec << it->FindMember(L"Unk2")->value.GetUint() << std::endl;
 		analysisStream << "\tUnk5: " << std::dec << it->FindMember(L"Unk5")->value.GetUint() << std::endl;
 		analysisStream << std::endl;
 	}
+
 
 	*analysis = QString::fromStdWString(analysisStream.str());
 }

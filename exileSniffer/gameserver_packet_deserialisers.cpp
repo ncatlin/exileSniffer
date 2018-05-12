@@ -325,7 +325,7 @@ this function only here for completeness - it should not be used!
 */
 void packet_processor::deserialise_SRV_PKT_ENCAPSULATED(UIDecodedPkt *uipkt)
 {
-
+	//ignored - see above
 }
 
 
@@ -357,6 +357,10 @@ void packet_processor::deserialise_CLI_CHAT_MSG_ITEMS(UIDecodedPkt *uipkt)
 	header has 15 bytes per item
 
 	*/
+	consume_add_dword_ntoh(L"Index", uipkt);
+	consume_add_dword_ntoh(L"Container", uipkt);
+	consume_add_dword_ntoh(L"ItemID", uipkt);
+	consume_add_byte(L"EndByte", uipkt);
 }
 
 void packet_processor::deserialise_CLI_CHAT_MSG(UIDecodedPkt *uipkt)
@@ -365,14 +369,19 @@ void packet_processor::deserialise_CLI_CHAT_MSG(UIDecodedPkt *uipkt)
 	std::wstring msg = consumeWString(msgLenWords * 2);
 	uipkt->add_wstring(L"Message", msg);
 	consume_add_byte(L"NumLinkedItems", uipkt);
+
+	abandon_processing();
+	uipkt->add_byte(L"AbandonedProcessing", 1);
 }
 
 
 void packet_processor::deserialise_CLI_CHAT_COMMAND(UIDecodedPkt *uipkt)
 {
-	consume_add_byte(L"CommandID", uipkt);
-	consume_add_word_ntoh(L"Unk1", uipkt);
+	consume_add_byte(L"CommandsDatIndex", uipkt);
+	consume_add_word_ntoh(L"Arg", uipkt);
 
+	abandon_processing();
+	uipkt->add_byte(L"AbandonedProcessing", 1);
 	//todo: certain commands may cause extra bytes to be sent
 }
 
@@ -569,8 +578,11 @@ void packet_processor::deserialise_SRV_HNC(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_SRV_AREA_INFO(UIDecodedPkt* uipkt)
 {
-	
-	consume_add_dword_ntoh(L"AreaCode", uipkt);
+	DWORD areaCode = consume_DWORD();
+	std::wstring areaname;
+	ggpk->lookup_areaCode(areaCode, areaname);
+	uipkt->add_dword(L"AreaCode", areaCode);
+	uipkt->add_wstring(L"AreaName+", areaname);
 
 	size_t diffLenWords = ntohs(consume_WORD());
 	std::wstring msg = consumeWString(diffLenWords * 2);
@@ -601,19 +613,32 @@ void packet_processor::deserialise_SRV_AREA_INFO(UIDecodedPkt* uipkt)
 
 
 	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
-	WValue preloadHashList(rapidjson::kArrayType);
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	WValue preloadHashList(rapidjson::kArrayType); 
+	WValue preloadHashResults(rapidjson::kArrayType);
+
+	std::string hashResult;
+	std::string hashCategory;
 
 	ushort hashCount = ntohs(consume_WORD());
 	for (int i = 0; i < hashCount; i++)
 	{
-		WValue preloadhash((UINT32)ntohl(consume_DWORD()));
+		DWORD hash = ntohl(consume_DWORD());
+		ggpk->lookup_hash(hash, hashResult, hashCategory);
+		std::wstring itemString = converter.from_bytes(hashResult);
+		std::wstring categoryString = converter.from_bytes(hashCategory);
+
+		WValue preloadhash(rapidjson::kObjectType);
+		preloadhash.AddMember(L"Hash", (UINT32)hash, allocator);
+		preloadhash.AddMember(L"Item", WValue(itemString.c_str(), allocator), allocator);
+		preloadhash.AddMember(L"Category", WValue(categoryString.c_str(), allocator), allocator);
 		preloadHashList.PushBack(preloadhash, allocator);
+			
 		if (errorFlag != eNoErr) return;
 	}
 	uipkt->payload->AddMember(L"PreloadHashList", preloadHashList, allocator);
 
 	//no idea what to do with any of these values yet
-
 	ushort countl2 = ntohs(consume_WORD());
 	WValue list2(rapidjson::kArrayType);
 	for (int i = 0; i < countl2; i++)
@@ -658,68 +683,29 @@ void packet_processor::deserialise_SRV_AREA_INFO(UIDecodedPkt* uipkt)
 
 	if (control2 & 0x1) //1st bit set
 	{
-		WValue list6(rapidjson::kArrayType);
+		WValue mapstatslist(rapidjson::kArrayType);
 		DWORD paircount = customSizeByteGet();
 		for (int i = 0; i < paircount; i++)
 		{
-			WValue pair(rapidjson::kArrayType);
+			WValue statdat(rapidjson::kArrayType);
 
-			DWORD first = customSizeByteGet();
-			pair.PushBack((UINT32)first, allocator);
+			DWORD statIndex = customSizeByteGet();
+			statdat.PushBack((UINT32)statIndex, allocator);
+
+			std::wstring statname = converter.from_bytes(ggpk->statDescriptions.at(statIndex));
+			statdat.PushBack(WValue(statname.c_str(), allocator), allocator);
 
 			DWORD second = customSizeByteGet_signed();
-			pair.PushBack((UINT32)second, allocator);
+			statdat.PushBack((UINT32)second, allocator);
 
-			list6.PushBack(pair, allocator);
+			mapstatslist.PushBack(statdat, allocator);
 		}
-		uipkt->payload->AddMember(L"PairList", list6, allocator);
+		uipkt->payload->AddMember(L"MapStatsList", mapstatslist, allocator);
 	}
 }
 
 void packet_processor::deserialise_SRV_PRELOAD_MONSTER_LIST(UIDecodedPkt* uipkt)
 {
-	/*
-	00 12 
-	00 9A 
-	74 00 B3 01 07 02 A9 05 AC 05 AD 05	B3 05 B9 05 
-	BA 05 BF 05 C0 05 C1 05 C2 05 C3 05
-	C4 05 D1 05 D2 05 D3 05 D4 05 EE 05 EF 05 F0 05
-	F4 05 FE 05 08 06 12 06 1C 06 28 06 49 06 22 07
-	2C 07 32 07 33 07 45 07 4B 07 54 07 D4 07 D5 07
-	D6 07 D7 07 FA 07 70 08 73 08 D9 08 E0 08 77 0A
-	10 0B 3E 0B 47 0B 48 0B 49 0B 4A 0B 4B 0B 4C 0B
-	4D 0B 4E 0B 4F 0B 50 0B 51 0B 52 0B 53 0B 54 0B
-	83 0C 87 0C 8D 0C 96 0C 9D 0C A1 0C D1 0C D2 0C
-	D3 0C D4 0C D5 0C D6 0C D7 0C D8 0C D9 0C DA 0C
-	DB 0C DC 0C DD 0C DE 0C DF 0C E1 0C E2 0C E7 0C
-	E8 0C E9 0C EA 0C EB 0C EC 0C ED 0C EE 0C EF 0C
-	F0 0C F1 0C F2 0C F3 0C F4 0C F5 0C F6 0C F7 0C
-	F8 0C FA 0C FB 0C FC 0C 01 0D 02 0D 03 0D 04 0D
-	05 0D 06 0D 07 0D 08 0D 09 0D 0A 0D 0B 0D 0C 0D
-	0D 0D 0E 0D 0F 0D 11 0D 12 0D 13 0D 4B 0D 4C 0D
-	4D 0D 63 0D 6C 0D B6 0D BC 0D EE 0D F0 0D 32 0F
-	35 0F 47 11 4B 11 4E 11 FF 11 01 12 02 12 05 12
-	06 12 08 12 0C 12 0D 12 0E 12 18 12 1B 12 1C 12
-	1D 12 1E 12 24 12 25 12 00 00 00 00 00 00 00 00
-	00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-	00 00 00 00 00 2A 38 17 00 17 17 17 00 00 00 00
-	00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-	00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-	00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-	00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-	00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-	00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-	00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-	00 00 
-	00 0F 00 00 22 33 00 08 53 00 74 00 61 00
-	6E 00 64 00 61 00 72 00 64 00 A0 9D 5B 72 02 04
-	13 00 01 00 00 12 0B 0B 12 C1 20 E8 D3 8A 26 60
-	0C 9F 29 0D B7 4B 2A 3C 0A 1D 2B 47 8C D2 54 5B
-	0C 85 57 6D 80 32 63 83 87 90 76 0C C1 43 86 43
-	51 AA 89 43 DA 9C 8A E4 D3 9F 93 90 EC 1E A7 F2
-	77 12 CD 68 5C 01 D0 68 74 58 FA 37 7B DF 00 03
-	02 17 19 01 02 01 96 D7 01
-	*/
 	std::vector<std::pair<ushort, byte>> preloadList;
 
 	unsigned short listCount = ntohs(consume_WORD());
@@ -747,17 +733,32 @@ void packet_processor::deserialise_SRV_PRELOAD_MONSTER_LIST(UIDecodedPkt* uipkt)
 	}
 
 	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
-	WValue jsarray(rapidjson::kArrayType);
+	WValue preloadJSON(rapidjson::kArrayType);
 	for (int i = 0; i < listCount; i++)
 	{
-		WValue pairArray(rapidjson::kArrayType);
-		pairArray.PushBack(WValue(preloadList.at(i).first), allocator);
-		pairArray.PushBack(WValue(preloadList.at(i).second), allocator);
+		WValue datItem(rapidjson::kArrayType);
+		uint varietyIndex = preloadList.at(i).first;
+		uint level = preloadList.at(i).second;
+
+		std::wstring ggpkpath;
+		if (varietyIndex < ggpk->monsterVarieties.size())
+			ggpkpath = converter.from_bytes(ggpk->monsterVarieties.at(varietyIndex));
+		else
+		{
+			std::wstringstream bad;
+			bad << "Unknown monstervariety " << std::dec << varietyIndex;
+			ggpkpath = bad.str();
+		}
+
+		datItem.PushBack(WValue(varietyIndex), allocator);
+		datItem.PushBack(WValue(ggpkpath.c_str(), allocator), allocator);
+		datItem.PushBack(WValue(level), allocator);
 		
-		jsarray.PushBack(pairArray, allocator);
+		preloadJSON.PushBack(datItem, allocator);
 	}
-	uipkt->payload->AddMember(L"PreloadList", jsarray, allocator);
+	uipkt->payload->AddMember(L"PreloadList", preloadJSON, allocator);
 }
 
 void packet_processor::deserialise_UNK_13_A5_LIST(UIDecodedPkt * uipkt)
@@ -822,15 +823,11 @@ void packet_processor::deserialise_SRV_ITEMS_LIST(UIDecodedPkt* uipkt)
 	consume_add_dword_ntoh(L"ObjID", uipkt);
 }
 
-
-
-
 void packet_processor::deserialise_CLI_LOGGED_OUT(UIDecodedPkt *uipkt)
 {
 	UInotifyStreamState(currentMsgStreamID, eStreamEnded, uiMsgQueue);
 	consume_add_byte(L"Arg", uipkt);
 }
-
 
 void packet_processor::deserialise_CLI_CLICKED_GROUND_ITEM(UIDecodedPkt *uipkt)
 {
@@ -839,8 +836,6 @@ void packet_processor::deserialise_CLI_CLICKED_GROUND_ITEM(UIDecodedPkt *uipkt)
 	consume_add_word_ntoh(L"Sequence", uipkt);
 	consume_add_byte(L"Modifier", uipkt);
 }
-
-
 
 void packet_processor::deserialise_CLI_ACTION_PREDICTIVE(UIDecodedPkt *uipkt)
 {
@@ -851,12 +846,10 @@ void packet_processor::deserialise_CLI_ACTION_PREDICTIVE(UIDecodedPkt *uipkt)
 	consume_add_byte(L"Modifier", uipkt);
 }
 
-
 void packet_processor::deserialise_SRV_TRANSFER_INSTANCE(UIDecodedPkt *uipkt)
 {
 	consume_add_word_ntoh(L"Arg", uipkt);
 }
-
 
 void packet_processor::deserialise_SRV_INSTANCE_SERVER_DATA(UIDecodedPkt *uipkt)
 {
@@ -870,10 +863,6 @@ void packet_processor::deserialise_SRV_INSTANCE_SERVER_DATA(UIDecodedPkt *uipkt)
 	consume_add_word_ntoh(L"Port", uipkt);
 	consume_add_dword_ntoh(L"IP", uipkt);
 
-	std::cout << "Got area transition - next conn id is 0x" << std::hex << nextConnectionID << std::endl;
-	//std::cout << std::hex << "[" << pktId << "] New game server data. AREA TRANSITION" << std::endl;
-	//std::cout << "\tGameserver: " << serverIP.str() << ":" << std::dec << port << std::hex << std::endl;
-
 	consume_blob(20);
 
 
@@ -884,9 +873,9 @@ void packet_processor::deserialise_SRV_INSTANCE_SERVER_DATA(UIDecodedPkt *uipkt)
 	memcpy(key1B->salsakey, decryptedBuffer->data() + decryptedIndex, 32);
 	consume_blob(32);
 
-	if (key1A->salsakey[0] == 0 && key1A->salsakey[3] == 0 && key1A->salsakey[7])
+	if (key1A->salsakey[0] == 0 && key1A->salsakey[3] == 0 && key1A->salsakey[7] == 0)
 	{
-		std::cout << "Discarding bad key in area transition" << std::endl;
+		UIaddLogMsg("Discarding bad key in area transition", key1A->sourceProcess, uiMsgQueue);
 		consume_blob(32);
 		return; //probably an old zero-ed out key
 	}
@@ -1322,6 +1311,16 @@ void packet_processor::deserialise_item(UIDecodedPkt *uipkt, WValue& container)
 	ushort modsLen = ntohs(consume_WORD());
 	DWORD hash = consume_DWORD();
 	container.AddMember(L"ItemHash", WValue((UINT32)hash), allocator);
+
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	std::string itemname, category;
+	ggpk->lookup_hash(hash, itemname, category);
+	std::wstring itemWName = converter.from_bytes(itemname);
+	std::wstring categoryWstring = converter.from_bytes(category);
+
+	container.AddMember(L"ItemName", WValue(itemWName.c_str(), allocator), allocator);
+	container.AddMember(L"Category", WValue(categoryWstring.c_str(), allocator), allocator);
+
 	//skip item data for now, apart from the hash so we at least know item type
 	consume_blob(modsLen - sizeof(hash));
 
@@ -1451,29 +1450,21 @@ void packet_processor::deserialise_CLI_SET_STATUS_MESSAGE(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_SRV_UNK_0x75(UIDecodedPkt *uipkt)
 {
-	std::cout << "ff" << std::endl;
 	consume_add_dword_ntoh(L"Unk1", uipkt);
-	std::cout << "ff" << std::endl;
 	consume_add_dword_ntoh(L"Unk2", uipkt);
-	std::cout << "ff" << std::endl;
 	consume_add_dword_ntoh(L"Unk3", uipkt);
-	std::cout << "ff" << std::endl;
 	consume_add_dword_ntoh(L"Unk4", uipkt);
-	std::cout << "ff" << std::endl;
 	consume_add_dword_ntoh(L"Unk5", uipkt);
-	std::cout << "ff" << std::endl;
 
 	byte controlByte = consume_Byte();
 	uipkt->add_byte(L"Flags", controlByte);
 
 	if (!(controlByte & 0x8))
 	{
-		std::cout << "consu 1" << std::endl;
 		consume_add_word_ntoh(L"Unk_cond_a", uipkt);
 	}
 	if (controlByte & 0x10)
 	{
-		std::cout << "consu b" << std::endl;
 		consume_add_byte(L"Unk_cond_b", uipkt);
 	}
 }
@@ -2228,12 +2219,13 @@ void packet_processor::deserialise_SRV_SHOW_ENTERING_MSG(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_SRV_HEARTBEAT(UIDecodedPkt *uipkt)
 {
-	//nothing
+	//no data expected
 }
 
 void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t objBlobDataLen)
 {
 	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
 	//rewind back to start of blob
 	rewind_buffer(objBlobDataLen);
@@ -2292,13 +2284,20 @@ void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t 
 	byte statcount = customSizeByteGet();
 	for (int i = 0; i < statcount; i++)
 	{
-		DWORD first = customSizeByteGet();
-		INT32 second = customSizeByteGet_signed();
+		DWORD statIndex = customSizeByteGet();
+		INT32 statValue = customSizeByteGet_signed();
 
-		WValue pair(rapidjson::kArrayType);
-		pair.PushBack((UINT32)first, allocator);
-		pair.PushBack((INT32)second, allocator);
-		statlist.PushBack(pair, allocator);
+		std::wstring statname;
+		if (statIndex < ggpk->statDescriptions.size())
+			statname = converter.from_bytes(ggpk->statDescriptions.at(statIndex));
+		else
+			statname = L"Unknown Stat";
+
+		WValue statdat(rapidjson::kArrayType);
+		statdat.PushBack((UINT32)statIndex, allocator);
+		statdat.PushBack(WValue(statname.c_str(), allocator), allocator);
+		statdat.PushBack((INT32)statValue, allocator);
+		statlist.PushBack(statdat, allocator);
 	}
 	uipkt->payload->AddMember(L"StatList", statlist, allocator);
 
@@ -2333,8 +2332,27 @@ void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t 
 	{
 		WValue buffObj(rapidjson::kObjectType);
 		buffObj.AddMember(L"BuffID", consume_WORD(), allocator);
-		buffObj.AddMember(L"BuffDefinitionsRow", consume_WORD(), allocator);
-		buffObj.AddMember(L"BuffVisualsRow", consume_WORD(), allocator);
+
+		uint buffDefsRow = consume_WORD();
+		buffObj.AddMember(L"BuffDefinitionsRow", buffDefsRow, allocator);
+
+		uint buffVisualsRow = consume_WORD();
+		buffObj.AddMember(L"BuffVisualsRow", buffVisualsRow, allocator);
+
+		std::wstring buffname;
+		if (buffDefsRow < ggpk->buffDefinitions_names_statCounts.size())
+			buffname = converter.from_bytes(ggpk->buffDefinitions_names_statCounts.at(buffDefsRow).first);
+		else
+			buffname = L"Unknown buff definition";
+		buffObj.AddMember(L"Buffname", WValue(buffname.c_str(), allocator), allocator);
+
+		std::wstring buffvisualname;
+		if (buffVisualsRow < ggpk->buffVisuals.size())
+			buffvisualname = converter.from_bytes(ggpk->buffDefinitions_names_statCounts.at(buffDefsRow).first);
+		else
+			buffvisualname = L"Unknown buff visual";
+		buffObj.AddMember(L"BuffVisualName", WValue(buffvisualname.c_str(), allocator), allocator);
+
 		buffObj.AddMember(L"UnkDword1", (UINT32)consume_DWORD(), allocator);
 		buffObj.AddMember(L"UnkShort2", consume_WORD(), allocator);
 		buffObj.AddMember(L"UnkDword3", (UINT32)consume_DWORD(), allocator);
@@ -2384,8 +2402,17 @@ void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t 
 
 	ushort hideoutcode = consume_WORD();
 	uipkt->add_word(L"HideoutCode", hideoutcode);
+
+	std::wstring hideoutname;
+	auto it = ggpk->hideouts.find(hideoutcode);
+	if (it != ggpk->hideouts.end())
+		hideoutname = converter.from_bytes(it->second);
+	else
+		hideoutname = L"Unknown Hideout";
+
 	if (hideoutcode != 0)
 	{
+		uipkt->add_wstring(L"HideoutName", hideoutname);
 		consume_add_byte(L"UnkBHideout", uipkt);
 
 		byte bytescount = consume_Byte();
@@ -2396,6 +2423,8 @@ void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t 
 			uipkt->payload->AddMember(L"UnkBytes1", UnkBytes1, allocator);
 		}
 	}
+	else
+		uipkt->add_wstring(L"HideoutName", L"None");
 
 	consume_add_byte(L"UnkBAfterHideout", uipkt);
 
@@ -2403,9 +2432,12 @@ void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t 
 	WValue prophecylist(rapidjson::kArrayType);
 	for (int i = 0; i < prophecyCount; i++)
 	{
+		UINT32 ref = consume_WORD();
 		WValue prophecy(rapidjson::kObjectType);
 		prophecy.AddMember(L"DatReference", consume_WORD(), allocator);
 		prophecy.AddMember(L"Pos", consume_Byte(), allocator);
+		std::wstring prophecyName = ggpk->getProphecy(ref);
+		prophecy.AddMember(L"ProphecyName", WValue(prophecyName.c_str(), allocator), allocator);
 		prophecylist.PushBack(prophecy, allocator);
 	}
 	uipkt->payload->AddMember(L"Prophecies", prophecylist, allocator);
@@ -2414,7 +2446,6 @@ void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t 
 	byte b1 = consume_Byte();
 	byte b2 = consume_Byte();
 	byte b3 = consume_Byte();
-
 
 	//handle obj worn items
 	byte itemCount = consume_Byte();
@@ -2427,10 +2458,20 @@ void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t 
 		//not seen any difference changing this either
 		wornItem.AddMember(L"Unk2", consume_Byte(), allocator);
 
+		UINT32 visIdentReference1 = consume_WORD();
+		UINT32 visIdentReference2 = consume_WORD();
+		UINT32 visualEffect = consume_WORD();
+		std::wstring visIdentName1 = ggpk->getVisualIdentity(visIdentReference1);
+		std::wstring visIdentName2 = ggpk->getVisualIdentity(visIdentReference2);
+		std::wstring visEffectName = ggpk->getVisualEffect(visualEffect);
+
 		wornItem.AddMember(L"VisualIdentity1", consume_WORD(), allocator);
+		wornItem.AddMember(L"VisualIdentity1Name", WValue(visIdentName1.c_str(), allocator), allocator);
 		wornItem.AddMember(L"VisualIdentity2", consume_WORD(), allocator);
+		wornItem.AddMember(L"VisualIdentity2Name", WValue(visIdentName2.c_str(), allocator), allocator);
 		//unknown0 in itemvisualeffect.dat
 		wornItem.AddMember(L"ItemVisualEffect", consume_WORD(), allocator);
+		wornItem.AddMember(L"ItemVisualEffectName", WValue(visEffectName.c_str(), allocator), allocator);
 		//not seen any difference when 1/0 on identical item
 		wornItem.AddMember(L"Unk5", consume_Byte(), allocator);
 		wornItemVisuals.PushBack(wornItem, allocator);
@@ -2491,9 +2532,14 @@ void packet_processor::deserialise_SRV_ADD_OBJECT(UIDecodedPkt *uipkt)
 
 	if (errorFlag != eNoErr) return;
 
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+
 	std::string hashResult;
 	std::string hashCategory;
 	ggpk->lookup_hash(objMurmurHash, hashResult, hashCategory);
+
+	uipkt->add_wstring(L"HashCategory", converter.from_bytes(hashCategory));
+	uipkt->add_wstring(L"HashResult", converter.from_bytes(hashResult));
 
 	if (hashCategory == "Character")
 		SRV_ADD_OBJ_decode_character(uipkt, objBlobDataLen);
