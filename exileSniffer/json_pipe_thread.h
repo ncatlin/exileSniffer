@@ -12,7 +12,6 @@ public:
 
 	void sendPacket(rapidjson::GenericDocument<rapidjson::UTF16<> > &doc);
 	void setPipePath(QString pipename);
-	DWORD connectedReaders();
 	void close();
 
 	bool running = true;
