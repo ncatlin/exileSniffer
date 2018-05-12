@@ -54,6 +54,7 @@ bool exileSniffer::load_messagetypes_json()
 	if (messageTypes.FindMember("Login") != messageTypes.MemberEnd())
 	{
 		loginMessageTypes = &messageTypes.FindMember("Login")->value;
+		UIDecodedPkt::loginMessageTypes = loginMessageTypes;
 	}
 	else
 	{
@@ -64,6 +65,7 @@ bool exileSniffer::load_messagetypes_json()
 	if (messageTypes.FindMember("Game") != messageTypes.MemberEnd())
 	{
 		gameMessageTypes = &messageTypes.FindMember("Game")->value;
+		UIDecodedPkt::gameMessageTypes = gameMessageTypes;
 	}
 	else
 	{
@@ -630,6 +632,7 @@ void exileSniffer::add_metalog_update(QString msg, DWORD pid)
 	ss << "]: " << msg.toStdString() << std::endl;
 
 	ui.metaLog->appendPlainText(QString::fromStdString(ss.str()));
+	ui.processTabs->setTabText(2, "Log (" + QString::number(++metalogEntries) + ")");
 }
 
 void exileSniffer::handle_client_event(UI_CLIENTEVENT_MSG *cliEvtMsg)
@@ -948,7 +951,7 @@ void exileSniffer::decodedCellActivated(int row, int col)
 	if (!obj->decodeError())
 	{
 		map<unsigned short, actionFunc>* actionerList;
-		if (obj->streamFlags & PKTBIT_GAMESERVER)
+		if (obj->getStreamType() == eGame)
 			actionerList = &gamePktActioners;
 		else
 			actionerList = &loginPktActioners;
@@ -991,7 +994,7 @@ void exileSniffer::decodedCellActivated(int row, int col)
 	else
 		msgSize = obj->bufferOffsets.second - obj->bufferOffsets.first;
 
-	std::wstring serverName = (obj->streamFlags & PKTBIT_GAMESERVER) ? L"GameServer" : L"LoginServer";
+	std::wstring serverName = (obj->getStreamType() == eGame) ? L"GameServer" : L"LoginServer";
 	size_t bufStart = obj->bufferOffsets.first;
 	long long pktTime = obj->time_processed_ms();
 
@@ -1002,7 +1005,7 @@ void exileSniffer::decodedCellActivated(int row, int col)
 	hexdump << epochms_to_timestring(pktTime);
 	hexdump << " (start +" << msToQStringSeconds(startMSSinceEpoch, pktTime).toStdWString() << "s)" << std::endl;
 
-	if (obj->streamFlags & PKTBIT_INBOUND)
+	if (obj->isIncoming())
 		hexdump << serverName << " -> PlayerClient";
 	else
 		hexdump << "PlayerClient -> " << serverName;

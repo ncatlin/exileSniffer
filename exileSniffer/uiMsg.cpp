@@ -4,6 +4,10 @@
 #include "rapidjson\stringbuffer.h"
 #include "rapidjson\writer.h"
 
+//used to add packet name data when sending to json feed subscribers
+rapidjson::GenericValue<rapidjson::UTF8<>> *UIDecodedPkt::loginMessageTypes = NULL;
+rapidjson::GenericValue<rapidjson::UTF8<>> *UIDecodedPkt::gameMessageTypes = NULL;
+
 
 void UIaddLogMsg(QString msg, DWORD clientPID, SafeQueue<UI_MESSAGE *> *uiMsgQueue)
 {
@@ -117,12 +121,10 @@ void UI_RAWHEX_PKT::setData(vector<byte> *source)
 
 	if (source->size() < 2) return;
 
-
 	startBytes = ntohs(getUshort(source->data()));
-
 }
 
-UIDecodedPkt::UIDecodedPkt(DWORD processID, streamType streamServer,int nwkStream, byte isIncoming, long long timeSeen)
+UIDecodedPkt::UIDecodedPkt(DWORD processID, streamType streamServerType,int nwkStream, bool isIncoming, long long timeSeen)
 {
 	jsn.SetObject();
 
@@ -133,33 +135,32 @@ UIDecodedPkt::UIDecodedPkt(DWORD processID, streamType streamServer,int nwkStrea
 	PID = processID;
 	jsn.AddMember(L"ProcessID", (UINT32)processID, jsn.GetAllocator());
 
-	isIncoming = (streamFlags & PKTBIT_INBOUND);
-	streamFlags |= isIncoming;
-	
-	if ((streamFlags & PKTBIT_INBOUND) != 0)
+	incoming = isIncoming;
+	if (incoming)
+	{
 		jsn.AddMember(L"Direction", L"Inbound", jsn.GetAllocator());
+	}
 	else
+	{
 		jsn.AddMember(L"Direction", L"Outbound", jsn.GetAllocator());
+	}
 
+	streamServer = streamServerType;
 	switch (streamServer) 
 	{
 	case streamType::eGame:
-		streamFlags |= PKTBIT_GAMESERVER;
 		jsn.AddMember(L"Stream", L"Game", jsn.GetAllocator());
 		break;
 	case streamType::eLogin:
-		streamFlags |= PKTBIT_LOGINSERVER;
 		jsn.AddMember(L"Stream", L"Login", jsn.GetAllocator());
 		break;
 	case streamType::ePatch:
-		streamFlags |= PKTBIT_PATCHSERVER;
 		jsn.AddMember(L"Stream", L"Patch", jsn.GetAllocator());
 		break;
 	}
 
 	nwkstreamID = nwkStream;
 	mstime = timeSeen;
-
 }
 
 void UIDecodedPkt::add_dword(std::wstring name, DWORD dwordfield)
@@ -266,10 +267,47 @@ std::wstring UIDecodedPkt::get_wstring(std::wstring name)
 	return L"<ERROR>";
 }
 
-
-void UIDecodedPkt::setMessageID(ushort msgID)
+//set the message id
+//we also have the metadata set as well as the json packet list so
+//also do some validation to find inconsistencies between them
+void UIDecodedPkt::set_validate_MessageID(ushort msgID, SafeQueue<UI_MESSAGE *> *uiMsgQueue)
 {
 	messageID = msgID;
 	jsn.AddMember(L"MsgID", (UINT32)msgID, jsn.GetAllocator());
-	jsn.AddMember(L"MsgID", (UINT32)msgID, jsn.GetAllocator());
+
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+
+	rapidjson::GenericValue<rapidjson::UTF8<>> *typelist;
+
+	if (streamServer == eLogin && msgID < loginMessageTypes->Size())
+	{
+		typelist = loginMessageTypes;
+	}
+	else if(streamServer == eGame && msgID < gameMessageTypes->Size())
+	{
+		typelist = gameMessageTypes;
+	}
+	else
+	{
+		jsn.AddMember(L"MsgType", L"BAD_MESSAGE_TYPE", jsn.GetAllocator());
+		return;
+	}
+
+	rapidjson::Value &msgInfo = (*typelist)[msgID];
+	std::string msgNameString = msgInfo.FindMember("Name")->value.GetString();
+	std::wstring msgNameWString = converter.from_bytes(msgNameString);
+	WValue namestringVal(msgNameWString.c_str(), jsn.GetAllocator());
+	jsn.AddMember(L"MsgType", namestringVal, jsn.GetAllocator());
+
+	bool expectedIncoming = msgInfo.FindMember("Inbound")->value.GetBool();
+	if (expectedIncoming != this->incoming)
+	{
+		if (msgInfo.FindMember("Bidirectional") == msgInfo.MemberEnd())
+		{
+			std::stringstream msg;
+			msg << "Message inconsistency in messageTypes listing for msg ID 0x" << std::hex << msgID;
+			msg << ". Expected Incoming == " << expectedIncoming << " but incoming == " << this->incoming << std::endl;
+			UIaddLogMsg(msg.str(), this->getClientProcessID(), uiMsgQueue);
+		}
+	}
 }

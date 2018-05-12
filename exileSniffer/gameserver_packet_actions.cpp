@@ -441,9 +441,9 @@ void exileSniffer::action_undecoded_packet(UIDecodedPkt& obj)
 
 void exileSniffer::action_decoded_packet(UIDecodedPkt& decoded)
 {
-	if (decoded.streamFlags & PKTBIT_GAMESERVER)
+	if (decoded.getStreamType() == eGame)
 		action_decoded_game_packet(decoded);
-	else if (decoded.streamFlags & PKTBIT_LOGINSERVER)
+	else if (decoded.getStreamType() == eLogin)
 		action_decoded_login_packet(decoded);
 }
 

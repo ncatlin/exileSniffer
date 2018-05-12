@@ -88,13 +88,8 @@ void json_pipe_thread::main_loop()
 				if (pendingIO)
 				{
 					DWORD mush3;
-					if (!GetOverlappedResult(JSONpipe, &oOverlap, &mush3, true))
+					if (GetOverlappedResult(JSONpipe, &oOverlap, &mush3, true))
 					{
-						std::cout << "Get overlap failed." << std::endl;
-					}
-					else
-					{
-						std::cout << "fin writing " << mush3 << " bytes" << std::endl;
 						pendingIO = false;
 					}
 				}
@@ -106,12 +101,7 @@ void json_pipe_thread::main_loop()
 				DWORD writtenBytes = 0;
 				DWORD byteSize = doc.size() * sizeof(wchar_t);
 				bool done = WriteFile(JSONpipe, doc.c_str(), byteSize, &writtenBytes, false);
-				if (done && (writtenBytes == byteSize))
-				{
-					std::cout << "done write " << writtenBytes << " bytes of len "
-						<< doc.length() << " size " << doc.size() << std::endl;
-				}
-				else
+				if (!done || (writtenBytes != byteSize))
 				{
 					DWORD err = GetLastError();
 					if (err == ERROR_IO_PENDING)

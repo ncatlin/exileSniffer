@@ -37,7 +37,6 @@ class UI_DECODED_LIST_ENTRY
 		UI_DECODED_LIST_ENTRY(UIDecodedPkt& pktobj) {
 			msTime = pktobj.time_processed_ms();
 			pktID = pktobj.getMessageID();
-			flags = pktobj.streamFlags;
 			failedDecode = pktobj.decodeError();
 			originalbuf = pktobj.originalbuf;
 			bufferOffsets = pktobj.bufferOffsets;
@@ -350,6 +349,7 @@ class exileSniffer : public QMainWindow
 		bool doLogging = true, doPipe = true;
 		QString pipeName;
 		QDir logDir;
+		unsigned int metalogEntries = 0;
 
 		std::pair <unsigned long, unsigned long> rawCount_Recorded_Filtered;
 		std::pair <int, int> decodedCount_Displayed_Filtered;	 //table row index is int
