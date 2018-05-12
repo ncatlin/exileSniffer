@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "json_pipe_thread.h"
 #include "uiMsg.h"
+#include "rapidjson\writer.h"
+#include "rapidjson\stringbuffer.h"
 
 json_pipe_thread::json_pipe_thread(SafeQueue<UI_MESSAGE *>* uiq, QString pipename)
 {
@@ -53,7 +55,11 @@ void json_pipe_thread::main_loop()
 
 		if (JSONpipe == INVALID_HANDLE_VALUE)
 		{
-			std::cout << "Gaisefkmsefdj " << std::dec << GetLastError() << std::endl;
+			std::stringstream err;
+			err << "CreateNamedPipe "<<pipepath.toStdString() << " error "<< GetLastError();
+			UIaddLogMsg(err.str(), 0, uiMsgQueue);
+			running = false; 
+			break;
 		}
 
 		ConnectNamedPipe(JSONpipe, &oOverlap);
@@ -94,7 +100,6 @@ void json_pipe_thread::main_loop()
 				}
 				std::wstring doc = entryQ.waitItem();
 				doc.append(L"\r");
-				std::wcout << "Writing " << doc << ", " << doc.length() << std::endl;
 
 				bool writeDone = false;
 
@@ -121,8 +126,6 @@ void json_pipe_thread::main_loop()
 						CloseHandle(JSONpipe);
 					}
 				}
-
-				
 			}
 		}
 		else
@@ -130,15 +133,12 @@ void json_pipe_thread::main_loop()
 			connected = false;
 			CloseHandle(JSONpipe);
 		}
-
 	}
 	ded = true;
 }
 
 
-#include "rapidjson\prettywriter.h"
-#include "rapidjson\ostreamwrapper.h"
-#include "rapidjson\stringbuffer.h"
+
 void json_pipe_thread::sendPacket(rapidjson::GenericDocument<rapidjson::UTF16<>> &doc)
 {
 	rapidjson::GenericStringBuffer<rapidjson::UTF16<>> buffer;
@@ -147,11 +147,8 @@ void json_pipe_thread::sendPacket(rapidjson::GenericDocument<rapidjson::UTF16<>>
 
 	std::wstring resultstring = buffer.GetString();
 
-	
 	if (connected)
 	{
-		std::cout << " Adding item to q size now " << entryQ.size() << std::endl;
 		entryQ.addItem(resultstring);
 	}
-	else std::cout << "ignoring" << std::endl;
 }

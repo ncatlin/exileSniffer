@@ -26,14 +26,14 @@ void exileSniffer::init_gamePkt_Actioners()
 	gamePktActioners[SRV_CHAT_MESSAGE] = &exileSniffer::action_SRV_CHAT_MESSAGE;
 	gamePktActioners[SRV_SERVER_MESSAGE] = &exileSniffer::action_SRV_SERVER_MESSAGE;
 	gamePktActioners[CLI_LOGGED_OUT] = &exileSniffer::action_CLI_LOGGED_OUT;
-	gamePktActioners[CLI_PING_CHALLENGE] = &exileSniffer::action_CLI_PING_CHALLENGE;
-	gamePktActioners[SRV_PING_RESPONSE] = &exileSniffer::action_SRV_PING_RESPONSE;
+	gamePktActioners[CLI_HNC] = &exileSniffer::action_CLI_HNC;
+	gamePktActioners[SRV_HNC] = &exileSniffer::action_SRV_HNC;
 	gamePktActioners[SRV_AREA_INFO] = &exileSniffer::action_SRV_AREA_INFO;
 	//10?
 	//11?
 	gamePktActioners[SRV_PRELOAD_MONSTER_LIST] = &exileSniffer::action_SRV_PRELOAD_MONSTER_LIST;
 	gamePktActioners[SRV_UNK_0x13] = &exileSniffer::action_SRV_UNK_0x13;
-	gamePktActioners[SRV_PLAYER_ITEMS] = &exileSniffer::action_SRV_PLAYER_ITEMS;
+	gamePktActioners[SRV_ITEMS_LIST] = &exileSniffer::action_SRV_ITEMS_LIST;
 	gamePktActioners[CLI_CLICKED_GROUND_ITEM] = &exileSniffer::action_CLI_CLICKED_GROUND_ITEM;
 	gamePktActioners[CLI_ACTION_PREDICTIVE] = &exileSniffer::action_CLI_ACTION_PREDICTIVE;
 	gamePktActioners[SRV_TRANSFER_INSTANCE] = &exileSniffer::action_SRV_TRANSFER_INSTANCE;
@@ -281,7 +281,7 @@ void exileSniffer::init_gamePkt_Actioners()
 	//10b
 	//10c
 	//10d
-	gamePktActioners[CLI_REQUEST_PLAYERID] = &exileSniffer::action_CLI_REQUEST_PLAYERID;
+	gamePktActioners[CLI_FINISHED_LOADING] = &exileSniffer::action_CLI_FINISHED_LOADING;
 	gamePktActioners[SRV_NOTIFY_PLAYERID] = &exileSniffer::action_SRV_NOTIFY_PLAYERID;
 	//0x110 - player pressed add new stash tab +?
 	gamePktActioners[SRV_UNKNOWN_0x111] = &exileSniffer::action_SRV_UNKNOWN_0x111;
@@ -449,14 +449,14 @@ void exileSniffer::action_decoded_packet(UIDecodedPkt& decoded)
 
 void exileSniffer::action_decoded_game_packet(UIDecodedPkt& decoded)
 {
-	if (!packet_passes_decoded_filter(decoded.messageID))
+	if (!packet_passes_decoded_filter(decoded.getMessageID()))
 	{
 		++decodedCount_Displayed_Filtered.second;
 		updateDecodedFilterLabel();
 		return;
 	}
 
-	auto it = gamePktActioners.find(decoded.messageID);
+	auto it = gamePktActioners.find(decoded.getMessageID());
 	if (it != gamePktActioners.end())
 	{
 		exileSniffer::actionFunc f = it->second;
@@ -468,8 +468,8 @@ void exileSniffer::action_decoded_game_packet(UIDecodedPkt& decoded)
 	else
 	{
 		stringstream err;
-		err << "ERROR! no action setup for known game msg id 0x" << std::hex << decoded.messageID;
-		add_metalog_update(QString::fromStdString(err.str()), decoded.clientProcessID());
+		err << "ERROR! no action setup for known game msg id 0x" << std::hex << decoded.getMessageID();
+		add_metalog_update(QString::fromStdString(err.str()), decoded.getClientProcessID());
 	}
 
 }
@@ -635,7 +635,7 @@ void exileSniffer::action_SRV_SERVER_MESSAGE(UIDecodedPkt& obj, QString *analysi
 	analysisStream << "Modifier: " <<TextModifier << std::endl;
 	analysisStream << "UnkDWORD: " << obj.get_UInt32(L"Unk4") << std::endl;
 
-	WValue &preloadList = obj.payload.FindMember(L"PairList")->value;
+	WValue &preloadList = obj.payload->FindMember(L"PairList")->value;
 	if (preloadList.Size() == 0)
 		analysisStream << "No argument pairs supplied" << std::endl;
 	else
@@ -653,7 +653,7 @@ void exileSniffer::action_SRV_SERVER_MESSAGE(UIDecodedPkt& obj, QString *analysi
 
 	analysisStream << std::endl;
 
-	auto stringlist = obj.payload.FindMember(L"StringList");
+	auto stringlist = obj.payload->FindMember(L"StringList");
 	if (stringlist->value.Size() == 0)
 		analysisStream << "No strings supplied" << std::endl;
 	else
@@ -710,7 +710,7 @@ void exileSniffer::action_CLI_CHAT_MSG(UIDecodedPkt& obj, QString *analysis)
 	*/
 }
 
-void exileSniffer::action_CLI_PING_CHALLENGE(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_CLI_HNC(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
@@ -725,7 +725,7 @@ void exileSniffer::action_CLI_PING_CHALLENGE(UIDecodedPkt& obj, QString *analysi
 	}
 }
 
-void exileSniffer::action_SRV_PING_RESPONSE(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_HNC(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
@@ -749,10 +749,10 @@ void exileSniffer::action_SRV_AREA_INFO(UIDecodedPkt& obj, QString *analysis)
 	std::wstring areaname;
 	ggpk.lookup_areaCode(areaCode, areaname);
 
-	auto it = obj.payload.FindMember(L"PreloadHashList");
-	if (it == obj.payload.MemberEnd())
+	auto it = obj.payload->FindMember(L"PreloadHashList");
+	if (it == obj.payload->MemberEnd())
 	{
-		add_metalog_update("Warning: No list found in payload of SRV_AREA_INFO", obj.clientProcessID());
+		add_metalog_update("Warning: No list found in payload of SRV_AREA_INFO", obj.getClientProcessID());
 		return;
 	}
 	WValue &preloadList = it->value;
@@ -786,8 +786,8 @@ void exileSniffer::action_SRV_AREA_INFO(UIDecodedPkt& obj, QString *analysis)
 		" C: 0x" << obj.get_UInt32(L"Unk3") <<
 		" D: 0x" << obj.get_UInt32(L"Unk4") << std::endl << std::endl;
 
-	it = obj.payload.FindMember(L"Unk5_b4_1");
-	if (it != obj.payload.MemberEnd())
+	it = obj.payload->FindMember(L"Unk5_b4_1");
+	if (it != obj.payload->MemberEnd())
 	{
 		analysisStream << "Control bit 4 set. Data:" << std::endl;
 		analysisStream << "\t1: 0x" << obj.get_UInt32(L"Unk5_b4_1") << std::endl;
@@ -795,8 +795,8 @@ void exileSniffer::action_SRV_AREA_INFO(UIDecodedPkt& obj, QString *analysis)
 		analysisStream << "\t3: 0x" << obj.get_UInt32(L"Unk5_b4_3") << std::endl << std::endl;
 	}
 
-	it = obj.payload.FindMember(L"Unk5_b5_1");
-	if (it != obj.payload.MemberEnd())
+	it = obj.payload->FindMember(L"Unk5_b5_1");
+	if (it != obj.payload->MemberEnd())
 	{
 		analysisStream << "Control bit 5 set. Data:" << std::endl;
 		analysisStream << "\t1: 0x" << obj.get_UInt32(L"Unk5_b5_1") << std::endl << std::endl;
@@ -832,7 +832,7 @@ void exileSniffer::action_SRV_AREA_INFO(UIDecodedPkt& obj, QString *analysis)
 	analysisStream << std::endl;
 
 	analysisStream << "Byte list 1:" << std::endl;
-	WValue &blist1 = obj.payload.FindMember(L"ByteList1")->value;
+	WValue &blist1 = obj.payload->FindMember(L"ByteList1")->value;
 	for (auto it = blist1.Begin(); it != blist1.End(); it++)
 	{
 		analysisStream << "\t0x" << it->GetUint() << ", ";
@@ -840,7 +840,7 @@ void exileSniffer::action_SRV_AREA_INFO(UIDecodedPkt& obj, QString *analysis)
 	analysisStream << std::endl << std::endl;
 
 	analysisStream << "Byte list 2:" << std::endl;
-	WValue &blist2 = obj.payload.FindMember(L"ByteList2")->value;
+	WValue &blist2 = obj.payload->FindMember(L"ByteList2")->value;
 	for (auto it = blist2.Begin(); it != blist2.End(); it++)
 	{
 		analysisStream << "\t0x" << it->GetUint() << ", ";
@@ -848,8 +848,8 @@ void exileSniffer::action_SRV_AREA_INFO(UIDecodedPkt& obj, QString *analysis)
 	analysisStream << std::endl << std::endl;
 
 
-	auto plit = obj.payload.FindMember(L"ByteList4");
-	if (plit != obj.payload.MemberEnd())
+	auto plit = obj.payload->FindMember(L"ByteList4");
+	if (plit != obj.payload->MemberEnd())
 	{
 		analysisStream << "Byte list 4:" << std::endl;
 		WValue &blist4 = plit->value;
@@ -861,8 +861,8 @@ void exileSniffer::action_SRV_AREA_INFO(UIDecodedPkt& obj, QString *analysis)
 	}
 
 	
-	plit = obj.payload.FindMember(L"ByteList5");
-	if (plit != obj.payload.MemberEnd())
+	plit = obj.payload->FindMember(L"ByteList5");
+	if (plit != obj.payload->MemberEnd())
 	{
 		analysisStream << "Byte list 5:" << std::endl;
 		WValue &blist5 = plit->value;
@@ -875,8 +875,8 @@ void exileSniffer::action_SRV_AREA_INFO(UIDecodedPkt& obj, QString *analysis)
 
 
 	
-	plit = obj.payload.FindMember(L"StatList");
-	if (plit != obj.payload.MemberEnd())
+	plit = obj.payload->FindMember(L"StatList");
+	if (plit != obj.payload->MemberEnd())
 	{
 		analysisStream << "Area Stats:" << std::endl;
 		WValue &statlist = plit->value;
@@ -902,10 +902,10 @@ void exileSniffer::action_SRV_PRELOAD_MONSTER_LIST(UIDecodedPkt& obj, QString *a
 
 	obj.toggle_payload_operations(true);
 
-	auto it = obj.payload.FindMember(L"PreloadList");
-	if (it == obj.payload.MemberEnd())
+	auto it = obj.payload->FindMember(L"PreloadList");
+	if (it == obj.payload->MemberEnd())
 	{
-		add_metalog_update("Warning: No list found in payload of SRV_PRELOAD_MONSTER_LIST", obj.clientProcessID());
+		add_metalog_update("Warning: No list found in payload of SRV_PRELOAD_MONSTER_LIST", obj.getClientProcessID());
 		return;
 	}
 	
@@ -929,7 +929,7 @@ void exileSniffer::action_SRV_PRELOAD_MONSTER_LIST(UIDecodedPkt& obj, QString *a
 		auto pairArray = it->GetArray();
 		if (pairArray.Size() != 2)
 		{
-			add_metalog_update("Warning: Bad pair array in SRV_PRELOAD_MONSTER_LIST", obj.clientProcessID());
+			add_metalog_update("Warning: Bad pair array in SRV_PRELOAD_MONSTER_LIST", obj.getClientProcessID());
 			return;
 		}
 		unsigned short varietyIndex = pairArray[0].GetUint();
@@ -974,13 +974,13 @@ void exileSniffer::action_SRV_UNK_0x13(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
-	WValue &bloblist = obj.payload.FindMember(L"BlobList")->value;
+	WValue &bloblist = obj.payload->FindMember(L"BlobList")->value;
 	size_t listSize = bloblist.Size();
 
 
-	std::wstring endString = obj.payload.FindMember(L"EndString")->value.GetString();
-	DWORD endShort = obj.payload.FindMember(L"EndShort")->value.GetUint();
-	DWORD endDWORD = obj.payload.FindMember(L"EndDWORD")->value.GetUint();
+	std::wstring endString = obj.payload->FindMember(L"EndString")->value.GetString();
+	DWORD endShort = obj.payload->FindMember(L"EndShort")->value.GetUint();
+	DWORD endDWORD = obj.payload->FindMember(L"EndDWORD")->value.GetUint();
 
 
 	if (!analysis)
@@ -1035,7 +1035,7 @@ void exileSniffer::action_SRV_UNK_0x13(UIDecodedPkt& obj, QString *analysis)
 	*analysis = QString::fromStdWString(analysisStream.str());
 }
 
-void exileSniffer::action_SRV_PLAYER_ITEMS(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_ITEMS_LIST(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
@@ -1556,7 +1556,7 @@ void exileSniffer::action_SRV_LIST_PORTALS(UIDecodedPkt& obj, QString* analysis)
 {
 	obj.toggle_payload_operations(true);
 
-	WValue &portallist = obj.payload.FindMember(L"PortalList")->value;
+	WValue &portallist = obj.payload->FindMember(L"PortalList")->value;
 	size_t listSize = portallist.Size();
 
 	if (!analysis)
@@ -1712,8 +1712,8 @@ void exileSniffer::action_SRV_FRIENDSLIST(UIDecodedPkt& obj, QString *analysis)
 	analysisStream << "String1: " << obj.get_wstring(L"Name") << std::endl;
 	analysisStream << "String2: " << obj.get_wstring(L"String2") << std::endl;
 
-	auto it = obj.payload.FindMember(L"0_QWord");
-	if (it != obj.payload.MemberEnd())
+	auto it = obj.payload->FindMember(L"0_QWord");
+	if (it != obj.payload->MemberEnd())
 	{
 		analysisStream << "QWord1: " <<std::hex<< it->value.GetUint64() << std::endl;
 	}
@@ -1890,7 +1890,7 @@ void exileSniffer::action_SRV_UNK_0x6c(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
-	WValue &bloblist = obj.payload.FindMember(L"UnkList")->value;
+	WValue &bloblist = obj.payload->FindMember(L"UnkList")->value;
 	size_t listSize = bloblist.Size();
 
 	if (!analysis)
@@ -1946,14 +1946,14 @@ void exileSniffer::action_SRV_CREATE_ITEM(UIDecodedPkt& obj, QString *analysis)
 
 	analysisStream << "List1: " << std::endl;
 
-	WValue& list1 = obj.payload.FindMember(L"List1")->value;
+	WValue& list1 = obj.payload->FindMember(L"List1")->value;
 	for (auto it = list1.Begin(); it != list1.End(); it++)
 	{
 		analysisStream << "\t0x" << it->GetUint() << std::endl;
 	}
 
 	analysisStream << "ItemList: " << std::endl;
-	WValue& itemList = obj.payload.FindMember(L"ItemList")->value;
+	WValue& itemList = obj.payload->FindMember(L"ItemList")->value;
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 	analysisStream << "\nItem List (Location):Name (Hash) ServerID" << std::endl;
 
@@ -2007,10 +2007,10 @@ void exileSniffer::action_SRV_SLOT_ITEMSLIST(UIDecodedPkt& obj, QString *analysi
 		return;
 	}
 
-	auto it = obj.payload.FindMember(L"ItemList");
-	if (it == obj.payload.MemberEnd())
+	auto it = obj.payload->FindMember(L"ItemList");
+	if (it == obj.payload->MemberEnd())
 	{
-		add_metalog_update("Warning: No itemlist found in payload of action_SRV_SLOT_ITEMSLIST", obj.clientProcessID());
+		add_metalog_update("Warning: No itemlist found in payload of action_SRV_SLOT_ITEMSLIST", obj.getClientProcessID());
 		return;
 	}
 	WValue &itemList = it->value;
@@ -2303,7 +2303,7 @@ void exileSniffer::action_SRV_PVP_MATCHLIST(UIDecodedPkt& obj, QString *analysis
 {
 	obj.toggle_payload_operations(true);
 
-	WValue &eventlist = obj.payload.FindMember(L"EventList")->value;
+	WValue &eventlist = obj.payload->FindMember(L"EventList")->value;
 	size_t listSize = eventlist.Size();
 
 	if (!analysis)
@@ -2321,7 +2321,7 @@ void exileSniffer::action_SRV_EVENTSLIST(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
-	WValue &eventlist = obj.payload.FindMember(L"EventList")->value;
+	WValue &eventlist = obj.payload->FindMember(L"EventList")->value;
 	size_t listSize = eventlist.Size();
 
 	if (!analysis)
@@ -2396,7 +2396,7 @@ void exileSniffer::action_SRV_UNK_POSITION_LIST(UIDecodedPkt& obj, QString *anal
 	obj.toggle_payload_operations(true);
 
 
-	auto it = obj.payload.FindMember(L"CoordArray");
+	auto it = obj.payload->FindMember(L"CoordArray");
 	WValue &itemList = it->value;
 
 	unsigned short listSize = itemList.Size();
@@ -2471,7 +2471,7 @@ void exileSniffer::action_SRV_UNK_A5(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
-	WValue &bloblist = obj.payload.FindMember(L"BlobList")->value;
+	WValue &bloblist = obj.payload->FindMember(L"BlobList")->value;
 	size_t listSize = bloblist.Size();
 
 	if (!analysis)
@@ -2557,10 +2557,10 @@ void exileSniffer::action_SRV_UNK_0xCA(UIDecodedPkt& obj, QString *analysis)
 	UINT32 unk1 = obj.get_UInt32(L"UnkWord1"); 
 	UINT32 unk2 = obj.get_UInt32(L"UnkByte2");
 	
-	auto it = obj.payload.FindMember(L"ItemArray");
-	if (it == obj.payload.MemberEnd())
+	auto it = obj.payload->FindMember(L"ItemArray");
+	if (it == obj.payload->MemberEnd())
 	{
-		add_metalog_update("Warning: No itemlist found in payload of action_SRV_UNK_0xCA", obj.clientProcessID());
+		add_metalog_update("Warning: No itemlist found in payload of action_SRV_UNK_0xCA", obj.getClientProcessID());
 		return;
 	}
 	WValue &itemList = it->value;
@@ -2586,7 +2586,7 @@ void exileSniffer::action_SRV_EVENTSLIST_2(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
-	WValue &eventlist = obj.payload.FindMember(L"EventList")->value;
+	WValue &eventlist = obj.payload->FindMember(L"EventList")->value;
 	size_t listSize = eventlist.Size();
 
 	if (!analysis)
@@ -2720,7 +2720,7 @@ void exileSniffer::action_SRV_GUILD_MEMBER_LIST(UIDecodedPkt& obj, QString *anal
 
 	UINT64 time = obj.get_UInt64(L"Time1");
 
-	WValue& memberlist = obj.payload.FindMember(L"MemberList")->value;
+	WValue& memberlist = obj.payload->FindMember(L"MemberList")->value;
 
 	if (!analysis)
 	{
@@ -2834,7 +2834,7 @@ void exileSniffer::action_SRV_LOGINSRV_CRYPT(UIDecodedPkt& obj, QString *analysi
 	analysisStream << "Unk1: 0x" << std::hex << obj.get_UInt32(L"Unk1") << std::endl;
 
 	analysisStream << "Data [byte][port][ip][zeros?]:" << std::endl;
-	WValue &bloblist = obj.payload.FindMember(L"BlobList")->value;
+	WValue &bloblist = obj.payload->FindMember(L"BlobList")->value;
 	for (auto listit = bloblist.Begin(); listit != bloblist.End(); listit++)
 	{
 		analysisStream << listit->GetString() << std::endl;
@@ -3129,8 +3129,8 @@ void exileSniffer::action_SRV_STAT_CHANGED(UIDecodedPkt& obj, QString *analysis)
 	UINT32 ID3 = obj.get_UInt32(L"ID3");
 
 	size_t listSize = 0;
-	auto plit = obj.payload.FindMember(L"PairList");
-	if (plit != obj.payload.MemberEnd())
+	auto plit = obj.payload->FindMember(L"PairList");
+	if (plit != obj.payload->MemberEnd())
 	{
 		listSize = plit->value.Size();
 	}
@@ -3150,7 +3150,7 @@ void exileSniffer::action_SRV_STAT_CHANGED(UIDecodedPkt& obj, QString *analysis)
 	wstringstream analysisStream;
 	analysisStream << "Stat change for object ID (0x" << std::hex << ID1 << ", 0x" << ID2 << ", 0x" << ID3 << ")" << std::endl;
 
-	if (plit != obj.payload.MemberEnd())
+	if (plit != obj.payload->MemberEnd())
 	{
 
 		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
@@ -3327,13 +3327,13 @@ void exileSniffer::action_SRV_START_BUFF(UIDecodedPkt& obj, QString *analysis) /
 	analysisStream << "Index into buffDefinitions.dat: " <<std::dec<< buffDefinitionsRow << std::endl;
 	analysisStream << "Other args: 0x" << UnkDWord3 << ", Potion 0x" << PotionSlot << std::endl;
 
-	auto it = obj.payload.FindMember(L"BufVisualsRow");
-	if (it != obj.payload.MemberEnd())
+	auto it = obj.payload->FindMember(L"BufVisualsRow");
+	if (it != obj.payload->MemberEnd())
 	{
 		analysisStream << "Buff Visuals row " << std::dec << it->value.GetUint() << std::endl;
 	}
 
-	WValue &statkeylist = obj.payload.FindMember(L"StatList")->value;
+	WValue &statkeylist = obj.payload->FindMember(L"StatList")->value;
 
 	analysisStream << std::dec << "Statkey assignment list:" << std::endl;
 
@@ -3466,7 +3466,7 @@ void exileSniffer::action_SRV_UNK_0x108(UIDecodedPkt& obj, QString *analysis)
 	*analysis = QString::fromStdWString(analysisss.str());
 }
 
-void exileSniffer::action_CLI_REQUEST_PLAYERID(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_CLI_FINISHED_LOADING(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 	if (!analysis)
@@ -3713,8 +3713,8 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 	DWORD coord1 = obj.get_UInt32(L"Coord1");
 	DWORD coord2 = obj.get_UInt32(L"Coord2");
 
-	auto it = obj.payload.FindMember(L"List1");
-	if (it != obj.payload.MemberEnd())
+	auto it = obj.payload->FindMember(L"List1");
+	if (it != obj.payload->MemberEnd())
 	{
 		WValue &list1 = it->value;
 		analysisStream << std::dec << list1.Size() << std::hex << " List1:" << std::endl;
@@ -3767,8 +3767,8 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 
 	analysisStream << std::endl;
 
-	it = obj.payload.FindMember(L"StatList");
-	if (it != obj.payload.MemberEnd())
+	it = obj.payload->FindMember(L"StatList");
+	if (it != obj.payload->MemberEnd())
 	{
 		WValue &statList = it->value;
 		analysisStream << std::dec << statList.Size() << " Stats:" << std::endl;
@@ -3806,8 +3806,8 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 
 	analysisStream << std::dec << std::endl;
 
-	it = obj.payload.FindMember(L"BuffList");
-	if (it != obj.payload.MemberEnd())
+	it = obj.payload->FindMember(L"BuffList");
+	if (it != obj.payload->MemberEnd())
 	{
 		WValue &buffList = it->value;
 		if (buffList.Size() == 1)
@@ -3856,7 +3856,7 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 	analysisStream << "[Quest/Achievment bits] skipped" << std::endl;
 
 
-	WValue &unklist1 = obj.payload.FindMember(L"UnkList")->value;
+	WValue &unklist1 = obj.payload->FindMember(L"UnkList")->value;
 	analysisStream << "Unknown list:" << std::hex << std::endl;
 	int i = 0;
 	for (auto it = unklist1.Begin(); it != unklist1.End(); it++)
@@ -3872,7 +3872,7 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 
 	analysisStream << "UnkBytes:" << obj.get_wstring(L"UnkBytes1") << std::endl;
 
-	WValue &prophsList = obj.payload.FindMember(L"Prophecies")->value;
+	WValue &prophsList = obj.payload->FindMember(L"Prophecies")->value;
 	analysisStream << "Prophecies:" << std::hex << std::endl;
 	for (auto it = prophsList.Begin(); it != prophsList.End(); it++)
 	{
@@ -3882,7 +3882,7 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 		analysisStream << std::endl;
 	}
 
-	WValue &wornItems = obj.payload.FindMember(L"WornItems")->value;
+	WValue &wornItems = obj.payload->FindMember(L"WornItems")->value;
 	analysisStream << "Worn Items List:" << std::hex << std::endl;
 	for (auto it = wornItems.Begin(); it != wornItems.End(); it++)
 	{

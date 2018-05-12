@@ -52,7 +52,7 @@ public:
     {
         if (rawFilterForm->objectName().isEmpty())
             rawFilterForm->setObjectName(QStringLiteral("rawFilterForm"));
-        rawFilterForm->resize(585, 434);
+        rawFilterForm->resize(665, 434);
         rawFilterForm->setContextMenuPolicy(Qt::CustomContextMenu);
         rawFilterForm->setToolTipDuration(0);
         verticalLayout = new QVBoxLayout(rawFilterForm);

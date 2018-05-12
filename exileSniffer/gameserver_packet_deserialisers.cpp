@@ -17,14 +17,14 @@ void packet_processor::init_gamePkt_deserialisers()
 	gamePktDeserialisers[SRV_CHAT_MESSAGE] = (deserialiser)&packet_processor::deserialise_SRV_CHAT_MESSAGE;
 	gamePktDeserialisers[SRV_SERVER_MESSAGE] = (deserialiser)&packet_processor::deserialise_SRV_SERVER_MESSAGE;
 	gamePktDeserialisers[CLI_LOGGED_OUT] = (deserialiser)&packet_processor::deserialise_CLI_LOGGED_OUT;
-	gamePktDeserialisers[CLI_PING_CHALLENGE] = (deserialiser)&packet_processor::deserialise_CLI_PING_CHALLENGE;
-	gamePktDeserialisers[SRV_PING_RESPONSE] = (deserialiser)&packet_processor::deserialise_SRV_PING_RESPONSE;
+	gamePktDeserialisers[CLI_HNC] = (deserialiser)&packet_processor::deserialise_CLI_HNC;
+	gamePktDeserialisers[SRV_HNC] = (deserialiser)&packet_processor::deserialise_SRV_HNC;
 	gamePktDeserialisers[SRV_AREA_INFO] = (deserialiser)&packet_processor::deserialise_SRV_AREA_INFO;
 	//10?
 	//11?
 	gamePktDeserialisers[SRV_PRELOAD_MONSTER_LIST] = (deserialiser)&packet_processor::deserialise_SRV_PRELOAD_MONSTER_LIST;
 	gamePktDeserialisers[SRV_UNK_0x13] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x13;
-	gamePktDeserialisers[SRV_PLAYER_ITEMS] = (deserialiser)&packet_processor::deserialise_SRV_PLAYER_ITEMS;
+	gamePktDeserialisers[SRV_ITEMS_LIST] = (deserialiser)&packet_processor::deserialise_SRV_ITEMS_LIST;
 	gamePktDeserialisers[CLI_CLICKED_GROUND_ITEM] = (deserialiser)&packet_processor::deserialise_CLI_CLICKED_GROUND_ITEM;
 	gamePktDeserialisers[CLI_ACTION_PREDICTIVE] = (deserialiser)&packet_processor::deserialise_CLI_ACTION_PREDICTIVE;
 	gamePktDeserialisers[SRV_TRANSFER_INSTANCE] = (deserialiser)&packet_processor::deserialise_SRV_TRANSFER_INSTANCE;
@@ -272,7 +272,7 @@ void packet_processor::init_gamePkt_deserialisers()
 	//10b
 	//10c
 	//10d
-	gamePktDeserialisers[CLI_REQUEST_PLAYERID] = (deserialiser)&packet_processor::deserialise_CLI_REQUEST_PLAYERID;
+	gamePktDeserialisers[CLI_FINISHED_LOADING] = (deserialiser)&packet_processor::deserialise_CLI_FINISHED_LOADING;
 	gamePktDeserialisers[SRV_NOTIFY_PLAYERID] = (deserialiser)&packet_processor::deserialise_SRV_NOTIFY_PLAYERID;
 	//0x110 - player pressed add new stash tab +?
 	gamePktDeserialisers[SRV_UNKNOWN_0x111] = (deserialiser)&packet_processor::deserialise_SRV_UNKNOWN_0x111;
@@ -448,7 +448,7 @@ void packet_processor::deserialise_SRV_CHAT_MESSAGE(UIDecodedPkt *uipkt)
 		consume_blob(modsLen - sizeof(hash));
 		itemArray.PushBack(itemObj, allocator);
 	}
-	uipkt->payload.AddMember(L"ItemList", itemArray, allocator);
+	uipkt->payload->AddMember(L"ItemList", itemArray, allocator);
 }
 
 //0xb, 0xca, 
@@ -497,8 +497,8 @@ void packet_processor::deserialise_SRV_SERVER_MESSAGE(UIDecodedPkt *uipkt)
 	consume_add_dword_ntoh(L"Unk4", uipkt);
 
 	WValue blobs = get_pairs_strings_blob(uipkt);
-	uipkt->payload.AddMember(L"PairList", blobs.FindMember(L"Pairs")->value, allocator);
-	uipkt->payload.AddMember(L"StringList", blobs.FindMember(L"Strings")->value, allocator);
+	uipkt->payload->AddMember(L"PairList", blobs.FindMember(L"Pairs")->value, allocator);
+	uipkt->payload->AddMember(L"StringList", blobs.FindMember(L"Strings")->value, allocator);
 	/*
 	//welcome to coast
 	00 0B
@@ -557,12 +557,12 @@ void packet_processor::deserialise_SRV_SERVER_MESSAGE(UIDecodedPkt *uipkt)
 }
 
 
-void packet_processor::deserialise_CLI_PING_CHALLENGE(UIDecodedPkt *uipkt)
+void packet_processor::deserialise_CLI_HNC(UIDecodedPkt *uipkt)
 {
 	consume_add_dword_ntoh(L"Challenge", uipkt);
 }
 
-void packet_processor::deserialise_SRV_PING_RESPONSE(UIDecodedPkt *uipkt)
+void packet_processor::deserialise_SRV_HNC(UIDecodedPkt *uipkt)
 {
 	consume_add_dword_ntoh(L"Response", uipkt);
 }
@@ -610,7 +610,7 @@ void packet_processor::deserialise_SRV_AREA_INFO(UIDecodedPkt* uipkt)
 		preloadHashList.PushBack(preloadhash, allocator);
 		if (errorFlag != eNoErr) return;
 	}
-	uipkt->payload.AddMember(L"PreloadHashList", preloadHashList, allocator);
+	uipkt->payload->AddMember(L"PreloadHashList", preloadHashList, allocator);
 
 	//no idea what to do with any of these values yet
 
@@ -621,7 +621,7 @@ void packet_processor::deserialise_SRV_AREA_INFO(UIDecodedPkt* uipkt)
 		byte b = consume_Byte(); //todo
 		list2.PushBack(b, allocator);
 	}
-	uipkt->payload.AddMember(L"ByteList1", list2, allocator);
+	uipkt->payload->AddMember(L"ByteList1", list2, allocator);
 
 	byte countl3 = consume_Byte(); 
 	WValue list3(rapidjson::kArrayType);
@@ -630,7 +630,7 @@ void packet_processor::deserialise_SRV_AREA_INFO(UIDecodedPkt* uipkt)
 		byte b = consume_Byte(); //todo
 		list3.PushBack(b, allocator);
 	}
-	uipkt->payload.AddMember(L"ByteList2", list3, allocator);
+	uipkt->payload->AddMember(L"ByteList2", list3, allocator);
 
 	if (control2 & 0x2) //2nd bit set
 	{
@@ -641,7 +641,7 @@ void packet_processor::deserialise_SRV_AREA_INFO(UIDecodedPkt* uipkt)
 			byte b = consume_Byte(); //todo
 			list4.PushBack(b, allocator);
 		}
-		uipkt->payload.AddMember(L"ByteList4", list4, allocator);
+		uipkt->payload->AddMember(L"ByteList4", list4, allocator);
 	}
 
 	if (control2 & 0x4) //3rd bit set
@@ -653,7 +653,7 @@ void packet_processor::deserialise_SRV_AREA_INFO(UIDecodedPkt* uipkt)
 			byte b = consume_Byte(); //todo
 			list5.PushBack(b, allocator);
 		}
-		uipkt->payload.AddMember(L"ByteList5", list5, allocator);
+		uipkt->payload->AddMember(L"ByteList5", list5, allocator);
 	}
 
 	if (control2 & 0x1) //1st bit set
@@ -672,7 +672,7 @@ void packet_processor::deserialise_SRV_AREA_INFO(UIDecodedPkt* uipkt)
 
 			list6.PushBack(pair, allocator);
 		}
-		uipkt->payload.AddMember(L"PairList", list6, allocator);
+		uipkt->payload->AddMember(L"PairList", list6, allocator);
 	}
 }
 
@@ -757,7 +757,7 @@ void packet_processor::deserialise_SRV_PRELOAD_MONSTER_LIST(UIDecodedPkt* uipkt)
 		
 		jsarray.PushBack(pairArray, allocator);
 	}
-	uipkt->payload.AddMember(L"PreloadList", jsarray, allocator);
+	uipkt->payload->AddMember(L"PreloadList", jsarray, allocator);
 }
 
 void packet_processor::deserialise_UNK_13_A5_LIST(UIDecodedPkt * uipkt)
@@ -799,7 +799,7 @@ void packet_processor::deserialise_UNK_13_A5_LIST(UIDecodedPkt * uipkt)
 		blobArray.PushBack(blobobj, allocator);
 	}
 
-	uipkt->payload.AddMember(L"BlobList", blobArray, allocator);
+	uipkt->payload->AddMember(L"BlobList", blobArray, allocator);
 }
 
 void packet_processor::deserialise_SRV_UNK_0x13(UIDecodedPkt * uipkt)
@@ -811,13 +811,13 @@ void packet_processor::deserialise_SRV_UNK_0x13(UIDecodedPkt * uipkt)
 	ushort endstringlen_words = ntohs(consume_WORD());
 	wstring endstr = consumeWString(endstringlen_words * 2);
 	WValue endstring(endstr.c_str(), allocator);
-	uipkt->payload.AddMember(L"EndString", endstring, allocator);
+	uipkt->payload->AddMember(L"EndString", endstring, allocator);
 	consume_add_word_ntoh(L"EndShort", uipkt);
 	consume_add_dword_ntoh(L"EndDWORD", uipkt);
 
 }
 
-void packet_processor::deserialise_SRV_PLAYER_ITEMS(UIDecodedPkt* uipkt)
+void packet_processor::deserialise_SRV_ITEMS_LIST(UIDecodedPkt* uipkt)
 {
 	consume_add_dword_ntoh(L"ObjID", uipkt);
 }
@@ -896,7 +896,7 @@ void packet_processor::deserialise_SRV_INSTANCE_SERVER_DATA(UIDecodedPkt *uipkt)
 	memcpy(key1B->IV, decryptedBuffer->data() + decryptedIndex, 8);
 	consume_blob(16);
 
-	key1A->sourceProcess = key1B->sourceProcess = uipkt->clientProcessID();
+	key1A->sourceProcess = key1B->sourceProcess = uipkt->getClientProcessID();
 	key1A->foundAddress = key1B->foundAddress = SENT_BY_SERVER;
 	pendingGameserverKeys[nextConnectionID] = make_pair(key1A, key1B);
 }
@@ -1097,7 +1097,7 @@ void packet_processor::deserialise_SRV_LIST_PORTALS(UIDecodedPkt *uipkt)
 		portalList.PushBack(portalDetails, allocator);
 	}
 
-	uipkt->payload.AddMember(L"PortalList", portalList, allocator);
+	uipkt->payload->AddMember(L"PortalList", portalList, allocator);
 }
 
 void packet_processor::deserialise_CLI_SEND_PARTY_INVITE(UIDecodedPkt *uipkt)
@@ -1142,8 +1142,8 @@ void packet_processor::deserialise_SRV_FRIENDSLIST(UIDecodedPkt *uipkt)
 {
 	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
 
-	consume_add_lenprefix_string(L"Name", uipkt->payload, allocator);
-	consume_add_lenprefix_string(L"String2", uipkt->payload, allocator);
+	consume_add_lenprefix_string(L"Name", *(uipkt->payload), allocator);
+	consume_add_lenprefix_string(L"String2", *(uipkt->payload), allocator);
 
 	byte controlByte = consume_Byte();
 
@@ -1153,12 +1153,12 @@ void packet_processor::deserialise_SRV_FRIENDSLIST(UIDecodedPkt *uipkt)
 	}
 	else
 	{
-		consume_add_lenprefix_string(L"String3", uipkt->payload, allocator);
+		consume_add_lenprefix_string(L"String3", *(uipkt->payload), allocator);
 		consume_add_dword_ntoh(L"1_Unk1", uipkt);
 		consume_add_byte(L"1_Unk2", uipkt);
 		consume_add_dword_ntoh(L"1_Unk3", uipkt);
 		consume_add_byte(L"1_Unk4", uipkt);
-		consume_add_lenprefix_string(L"String4", uipkt->payload, allocator);
+		consume_add_lenprefix_string(L"String4", *(uipkt->payload), allocator);
 		consume_add_byte(L"1_Unk5", uipkt);
 		consume_add_byte(L"1_Unk6", uipkt);
 		consume_add_byte(L"1_Unk7", uipkt);
@@ -1254,7 +1254,7 @@ void packet_processor::deserialise_SRV_PUBLIC_PARTY_LIST(UIDecodedPkt *uipkt)
 		partyArray.PushBack(partyDetails, allocator);
 	}
 
-	uipkt->payload.AddMember(L"PartyList", partyArray, allocator);
+	uipkt->payload->AddMember(L"PartyList", partyArray, allocator);
 }
 
 void packet_processor::deserialise_CLI_MOVE_ITEM_PANE(UIDecodedPkt *uipkt)
@@ -1276,7 +1276,7 @@ void packet_processor::deserialise_SRV_UNK_0x67(UIDecodedPkt *uipkt)
 	consume_add_dword_ntoh(L"Unk2", uipkt);
 	consume_add_dword_ntoh(L"Unk3", uipkt);
 	consume_add_dword(L"Unk4", uipkt);
-	consume_add_lenprefix_string(L"UnkString", uipkt->payload, uipkt->jsn.GetAllocator());
+	consume_add_lenprefix_string(L"UnkString", *(uipkt->payload), uipkt->jsn.GetAllocator());
 	consume_add_dword_ntoh(L"Unk5", uipkt);
 }
 
@@ -1307,7 +1307,7 @@ void packet_processor::deserialise_SRV_UNK_0x6c(UIDecodedPkt *uipkt)
 
 		entryArray.PushBack(entry, allocator);
 	}
-	uipkt->payload.AddMember(L"UnkList", entryArray, allocator);
+	uipkt->payload->AddMember(L"UnkList", entryArray, allocator);
 }
 
 
@@ -1343,7 +1343,7 @@ void packet_processor::deserialise_SRV_CREATE_ITEM(UIDecodedPkt *uipkt)
 	WValue list1(rapidjson::kArrayType);
 	for (int i = 0; i < listsize; i++)
 		list1.PushBack((UINT32)ntohl(consume_DWORD()), allocator);
-	uipkt->payload.AddMember(L"List1", list1, allocator);
+	uipkt->payload->AddMember(L"List1", list1, allocator);
 
 	WValue itemlist(rapidjson::kArrayType);
 	DWORD listsize2 = ntohl(consume_DWORD());
@@ -1353,7 +1353,7 @@ void packet_processor::deserialise_SRV_CREATE_ITEM(UIDecodedPkt *uipkt)
 		deserialise_item(uipkt, item); //todo
 		itemlist.PushBack(item, allocator);
 	}
-	uipkt->payload.AddMember(L"ItemList", itemlist, allocator);
+	uipkt->payload->AddMember(L"ItemList", itemlist, allocator);
 
 	byte nextbyte = consume_Byte();
 	uipkt->add_byte(L"LastFlag", nextbyte);
@@ -1401,7 +1401,7 @@ void packet_processor::deserialise_SRV_SLOT_ITEMSLIST(UIDecodedPkt *uipkt)
 
 		itemArray.PushBack(itemObj, allocator);
 	}
-	uipkt->payload.AddMember(L"ItemList", itemArray, allocator);
+	uipkt->payload->AddMember(L"ItemList", itemArray, allocator);
 
 	consume_add_word_ntoh(L"FinalUnk", uipkt);
 
@@ -1438,8 +1438,8 @@ void packet_processor::deserialise_UNK_MESSAGE_0x73(UIDecodedPkt *uipkt)
 	consume_add_dword(L"Data1", uipkt); //todo - this is not fixed at 4, its just what ive seen it as
 
 	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
-	consume_add_lenprefix_string(L"String1", uipkt->payload, allocator);
-	consume_add_lenprefix_string(L"String2", uipkt->payload, allocator);
+	consume_add_lenprefix_string(L"String1", *(uipkt->payload), allocator);
+	consume_add_lenprefix_string(L"String2", *(uipkt->payload), allocator);
 }
 
 void packet_processor::deserialise_CLI_SET_STATUS_MESSAGE(UIDecodedPkt *uipkt)
@@ -1530,7 +1530,7 @@ void packet_processor::deserialise_SRV_UNK_POSITION_LIST(UIDecodedPkt *uipkt)
 		posArray.PushBack(eventObj, allocator);
 	}
 
-	uipkt->payload.AddMember(L"CoordArray", posArray, allocator);
+	uipkt->payload->AddMember(L"CoordArray", posArray, allocator);
 }
 
 void packet_processor::deserialise_SRV_PVP_MATCHLIST(UIDecodedPkt *uipkt)
@@ -1571,7 +1571,7 @@ void packet_processor::deserialise_SRV_EVENTSLIST(UIDecodedPkt *uipkt)
 		eventArray.PushBack(eventObj, allocator);
 	}
 
-	uipkt->payload.AddMember(L"EventList", eventArray, allocator);
+	uipkt->payload->AddMember(L"EventList", eventArray, allocator);
 }
 
 
@@ -1628,7 +1628,7 @@ void packet_processor::deserialise_SRV_LOGINSRV_CRYPT(UIDecodedPkt *uipkt)
 		WValue blobval(blobstring.c_str(), allocator);
 		serverList.PushBack(blobval, allocator);
 	}
-	uipkt->payload.AddMember(L"ServerList", serverList, allocator);
+	uipkt->payload->AddMember(L"ServerList", serverList, allocator);
 }
 void packet_processor::deserialise_CLI_DUEL_CHALLENGE(UIDecodedPkt *uipkt)
 {
@@ -1679,7 +1679,7 @@ void packet_processor::deserialise_SRV_UNK_0xCA(UIDecodedPkt *uipkt)
 		itemArray.PushBack(item, allocator);
 	}
 
-	uipkt->payload.AddMember(L"ItemArray", itemArray, allocator);
+	uipkt->payload->AddMember(L"ItemArray", itemArray, allocator);
 }
 
 
@@ -1707,7 +1707,7 @@ void packet_processor::deserialise_SRV_EVENTSLIST_2(UIDecodedPkt *uipkt)
 		eventArray.PushBack(eventObj, allocator);
 	}
 
-	uipkt->payload.AddMember(L"EventList", eventArray, allocator);
+	uipkt->payload->AddMember(L"EventList", eventArray, allocator);
 }
 
 
@@ -1745,9 +1745,9 @@ void packet_processor::deserialise_CLI_OPEN_WORLD_SCREEN(UIDecodedPkt *uipkt)
 void packet_processor::deserialise_SRV_GUILD_MEMBER_LIST(UIDecodedPkt *uipkt)
 {
 	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
-	consume_add_lenprefix_string(L"String1", uipkt->payload, allocator);
-	consume_add_lenprefix_string(L"String2", uipkt->payload, allocator);
-	consume_add_lenprefix_string(L"String3", uipkt->payload, allocator);
+	consume_add_lenprefix_string(L"String1", *(uipkt->payload), allocator);
+	consume_add_lenprefix_string(L"String2", *(uipkt->payload), allocator);
+	consume_add_lenprefix_string(L"String3", *(uipkt->payload), allocator);
 	consume_add_qword(L"Time1", uipkt);
 
 	UINT32 membercount = ntohs(consume_WORD());
@@ -1762,7 +1762,7 @@ void packet_processor::deserialise_SRV_GUILD_MEMBER_LIST(UIDecodedPkt *uipkt)
 		memberlist.PushBack(member, allocator);
 	}
 
-	uipkt->payload.AddMember(L"MemberList", memberlist, allocator);
+	uipkt->payload->AddMember(L"MemberList", memberlist, allocator);
 }
 
 void packet_processor::deserialise_CLI_GUILD_CREATE(UIDecodedPkt *uipkt)
@@ -1956,7 +1956,7 @@ void packet_processor::deserialise_SRV_STAT_CHANGED(UIDecodedPkt *uipkt)
 
 		pairlist.PushBack(pair, allocator);
 	}
-	uipkt->payload.AddMember(L"PairList", pairlist, allocator);
+	uipkt->payload->AddMember(L"PairList", pairlist, allocator);
 }
 
 void packet_processor::deserialise_SRV_UNK_0xf2(UIDecodedPkt *uipkt)
@@ -2078,7 +2078,7 @@ void packet_processor::deserialise_SRV_START_EFFECT(UIDecodedPkt *uipkt)
 		}
 	}
 
-	uipkt->payload.AddMember(L"StatList", statList, allocator);
+	uipkt->payload->AddMember(L"StatList", statList, allocator);
 	
 }
 
@@ -2130,7 +2130,7 @@ void packet_processor::deserialise_SRV_UNKNOWN_0x108(UIDecodedPkt *uipkt)
 	consume_add_byte(L"Unk3", uipkt);
 }
 
-void packet_processor::deserialise_CLI_REQUEST_PLAYERID(UIDecodedPkt *)
+void packet_processor::deserialise_CLI_FINISHED_LOADING(UIDecodedPkt *)
 {
 	//nothing expected
 }
@@ -2250,7 +2250,7 @@ void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t 
 		pair.PushBack((UINT32)unknum2, allocator);
 		list1.PushBack(pair, allocator);
 	}
-	uipkt->payload.AddMember(L"List1", list1, allocator);
+	uipkt->payload->AddMember(L"List1", list1, allocator);
 
 	uipkt->add_dword(L"Coord1", consume_DWORD());
 	uipkt->add_dword(L"Coord2", consume_DWORD());
@@ -2300,7 +2300,7 @@ void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t 
 		pair.PushBack((INT32)second, allocator);
 		statlist.PushBack(pair, allocator);
 	}
-	uipkt->payload.AddMember(L"StatList", statlist, allocator);
+	uipkt->payload->AddMember(L"StatList", statlist, allocator);
 
 	uipkt->add_dword(L"CurrentHealth", (consume_DWORD()));
 	uipkt->add_dword(L"ReservedHealth", (consume_DWORD()));
@@ -2346,7 +2346,7 @@ void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t 
 		buffObj.AddMember(L"UnkByte9", consume_Byte(), allocator);
 		bufflist.PushBack(buffObj, allocator);
 	}
-	uipkt->payload.AddMember(L"BuffList", bufflist, allocator);
+	uipkt->payload->AddMember(L"BuffList", bufflist, allocator);
 
 	ushort nameLen = ntohs(consume_WORD());
 
@@ -2380,7 +2380,7 @@ void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t 
 		unkobj.AddMember(L"Q3", (UINT64)consume_QWORD(), allocator);
 		unklist.PushBack(unkobj, allocator);
 	}
-	uipkt->payload.AddMember(L"UnkList", unklist, allocator);
+	uipkt->payload->AddMember(L"UnkList", unklist, allocator);
 
 	ushort hideoutcode = consume_WORD();
 	std::cout << "huideoutcode " << std::hex << hideoutcode << std::endl;
@@ -2394,7 +2394,7 @@ void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t 
 		{
 			std::wstring unkb1 = consume_hexblob(bytescount);
 			WValue UnkBytes1(unkb1.c_str(), allocator);
-			uipkt->payload.AddMember(L"UnkBytes1", UnkBytes1, allocator);
+			uipkt->payload->AddMember(L"UnkBytes1", UnkBytes1, allocator);
 		}
 	}
 
@@ -2409,7 +2409,7 @@ void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t 
 		prophecy.AddMember(L"Pos", consume_Byte(), allocator);
 		prophecylist.PushBack(prophecy, allocator);
 	}
-	uipkt->payload.AddMember(L"Prophecies", prophecylist, allocator);
+	uipkt->payload->AddMember(L"Prophecies", prophecylist, allocator);
 
 	DWORD d1 = consume_DWORD();
 	byte b1 = consume_Byte();
@@ -2436,7 +2436,7 @@ void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t 
 		wornItem.AddMember(L"Unk5", consume_Byte(), allocator);
 		wornItemVisuals.PushBack(wornItem, allocator);
 	}
-	uipkt->payload.AddMember(L"WornItems", wornItemVisuals, allocator);
+	uipkt->payload->AddMember(L"WornItems", wornItemVisuals, allocator);
 
 	//other sec - animation?
 	consume_add_word(L"UnkX1", uipkt);

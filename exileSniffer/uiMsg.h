@@ -130,20 +130,22 @@ public:
 	bool decodeError() { return failedDecode; }
 	bool wasAbandoned() { return abandoned; }
 	long long time_processed_ms() { return mstime; }
-	DWORD clientProcessID() { return PID; }
-	int streamID() { return nwkstreamID; }
+	DWORD getClientProcessID() { return PID; }
+	int getStreamID() { return nwkstreamID; }
+	ushort getMessageID() { return messageID; }
+	void setMessageID(ushort msgID);
 
 public:
-	ushort messageID;
 	int nwkstreamID;
 	byte streamFlags = 0;
 	vector<byte> *originalbuf = NULL;
 	std::pair<ushort, ushort> bufferOffsets;
 
 	rapidjson::GenericDocument<rapidjson::UTF16<> > jsn;
-	WValue& payload = jsn;
+	WValue* payload = NULL;
 
 private:
+	ushort messageID;
 	DWORD PID;
 	bool failedDecode = false;
 	bool abandoned = false;
