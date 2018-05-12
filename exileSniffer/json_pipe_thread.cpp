@@ -1,0 +1,157 @@
+#include "stdafx.h"
+#include "json_pipe_thread.h"
+#include "uiMsg.h"
+
+json_pipe_thread::json_pipe_thread(SafeQueue<UI_MESSAGE *>* uiq, QString pipename)
+{
+	uiMsgQueue = uiq;
+	pipepath = "\\\\.\\pipe\\" + pipename;
+}
+
+void json_pipe_thread::close()
+{
+	connected = false;
+	CloseHandle(JSONpipe);
+}
+
+json_pipe_thread::~json_pipe_thread()
+{
+	close();
+	running = false;
+}
+
+void json_pipe_thread::setPipePath(QString pipename)
+{
+	connected = false;
+	pipepath = "\\\\.\\pipe\\" + pipename;
+	CloseHandle(JSONpipe); //what could go wrong
+}
+
+DWORD json_pipe_thread::connectedReaders()
+{
+	DWORD result = 0;
+	bool res = GetNamedPipeHandleStateA(JSONpipe, 0, &result, NULL, NULL, NULL, NULL);
+	std::cout <<res<<","<<GetLastError()<< " conreads " << result << std::endl;
+	return result;
+}
+
+void json_pipe_thread::main_loop()
+{
+	
+
+	while (running)
+	{
+		HANDLE hEvent;
+		hEvent = CreateEvent(0, true, true, 0);
+		OVERLAPPED oOverlap;
+		oOverlap.hEvent = hEvent;
+		JSONpipe = CreateNamedPipeA(pipepath.toStdString().c_str(),
+			PIPE_ACCESS_OUTBOUND | FILE_FLAG_OVERLAPPED,
+			PIPE_TYPE_MESSAGE,
+			5,
+			4024 * 1024, 4024 * 1024, 10, 0);
+
+		if (JSONpipe == INVALID_HANDLE_VALUE)
+		{
+			std::cout << "Gaisefkmsefdj " << std::dec << GetLastError() << std::endl;
+		}
+
+		ConnectNamedPipe(JSONpipe, &oOverlap);
+
+		bool fConnected;
+		while (1)
+		{
+			WaitForSingleObject(JSONpipe, 200);
+			DWORD mush2;
+			fConnected = GetOverlappedResult(JSONpipe, &oOverlap, &mush2, false);
+				break;
+			if (fConnected || !running)
+				break;
+		}
+
+		if (!running)
+			break;
+
+		if (fConnected)
+		{
+			UIaddLogMsg("JSON Subscriber Connected", 0, uiMsgQueue);
+			connected = true;
+			bool pendingIO = false;
+			while (connected && running)
+			{
+				if (pendingIO)
+				{
+					DWORD mush3;
+					if (!GetOverlappedResult(JSONpipe, &oOverlap, &mush3, true))
+					{
+						std::cout << "Get overlap failed." << std::endl;
+					}
+					else
+					{
+						std::cout << "fin writing " << mush3 << " bytes" << std::endl;
+						pendingIO = false;
+					}
+				}
+				std::wstring doc = entryQ.waitItem();
+				doc.append(L"\r");
+				std::wcout << "Writing " << doc << ", " << doc.length() << std::endl;
+
+				bool writeDone = false;
+
+				DWORD writtenBytes = 0;
+				DWORD byteSize = doc.size() * sizeof(wchar_t);
+				bool done = WriteFile(JSONpipe, doc.c_str(), byteSize, &writtenBytes, false);
+				if (done && (writtenBytes == byteSize))
+				{
+					std::cout << "done write " << writtenBytes << " bytes of len "
+						<< doc.length() << " size " << doc.size() << std::endl;
+				}
+				else
+				{
+					DWORD err = GetLastError();
+					if (err == ERROR_IO_PENDING)
+					{
+						pendingIO = true;
+						continue;
+					}
+					else
+					{
+						UIaddLogMsg("JSON Subscriber Disconnected", 0, uiMsgQueue);
+						connected = false;
+						CloseHandle(JSONpipe);
+					}
+				}
+
+				
+			}
+		}
+		else
+		{
+			connected = false;
+			CloseHandle(JSONpipe);
+		}
+
+	}
+	ded = true;
+}
+
+
+#include "rapidjson\prettywriter.h"
+#include "rapidjson\ostreamwrapper.h"
+#include "rapidjson\stringbuffer.h"
+void json_pipe_thread::sendPacket(rapidjson::GenericDocument<rapidjson::UTF16<>> &doc)
+{
+	rapidjson::GenericStringBuffer<rapidjson::UTF16<>> buffer;
+	rapidjson::Writer<rapidjson::GenericStringBuffer<rapidjson::UTF16<>>, rapidjson::UTF16<>> writer(buffer);
+	doc.Accept(writer);
+
+	std::wstring resultstring = buffer.GetString();
+
+	
+	if (connected)
+	{
+		std::cout << " Adding item to q size now " << entryQ.size() << std::endl;
+		entryQ.addItem(resultstring);
+	}
+	else std::cout << "ignoring" << std::endl;
+}

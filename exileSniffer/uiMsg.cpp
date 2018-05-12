@@ -133,26 +133,30 @@ UIDecodedPkt::UIDecodedPkt(DWORD processID, streamType streamServer,int nwkStrea
 	PID = processID;
 	add_dword(L"processID", processID);
 
-
+	isIncoming = (streamFlags & PKTBIT_INBOUND);
 	streamFlags |= isIncoming;
+	WValue incomingFlag;
+	incomingFlag.SetBool((streamFlags & PKTBIT_INBOUND) != 0);
+	payload.AddMember(L"Inbound", incomingFlag, jsn.GetAllocator());
+
 
 	switch (streamServer) 
 	{
 	case streamType::eGame:
 		streamFlags |= PKTBIT_GAMESERVER;
+		add_wstring(L"Stream", L"Game");
 		break;
 	case streamType::eLogin:
 		streamFlags |= PKTBIT_LOGINSERVER;
+		add_wstring(L"Stream", L"Login");
 		break;
 	case streamType::ePatch:
 		streamFlags |= PKTBIT_PATCHSERVER;
+		add_wstring(L"Stream", L"Patch");
 		break;
 	}
 
-	add_byte(L"Flags", streamFlags);
 	nwkstreamID = nwkStream;
-
-	isIncoming = (streamFlags & PKTBIT_INBOUND);
 	mstime = timeSeen;
 
 }

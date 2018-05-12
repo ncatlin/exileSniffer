@@ -39,6 +39,7 @@ public:
 	STREAM_NETWORK_DATA *get_stream_data(int streamID);
 	void stop_sniffing();
 
+	bool running = true;
 	bool ded = false;
 private:
 

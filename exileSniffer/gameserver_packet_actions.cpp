@@ -2277,17 +2277,20 @@ QString exileSniffer::stringify_eventslist_2(WValue &eventlist)
 {
 	wstringstream analysisStream;
 
+	
+
 	for (auto it = eventlist.Begin(); it != eventlist.End(); it++)
 	{
 		analysisStream << "Name: " << it->FindMember(L"Name")->value.GetString() << std::endl;
 		analysisStream << "Label1: " << it->FindMember(L"Label1")->value.GetString() << std::endl;
 		analysisStream << "Label2: " << it->FindMember(L"Label2")->value.GetString() << std::endl;
-
+		analysisStream << std::dec;
 		analysisStream << "StartTime: " << it->FindMember(L"StartTime")->value.GetUint64() << std::endl;
 		analysisStream << "RegisterTime: " << it->FindMember(L"RegisterTime")->value.GetUint64() << std::endl;
 		analysisStream << "Time3: " << it->FindMember(L"Unk5_64")->value.GetUint64() << std::endl;
-		analysisStream << "x7: " << it->FindMember(L"Unk6")->value.GetUint() << std::endl;
-		analysisStream << "x8: " << it->FindMember(L"Unk7")->value.GetUint() << std::endl;
+		analysisStream << std::hex;
+		analysisStream << "Unk6: 0x" << it->FindMember(L"Unk6")->value.GetUint() << std::endl;
+		analysisStream << "Unk7: 0x" << it->FindMember(L"Unk7")->value.GetUint() << std::endl;
 
 		analysisStream << std::endl;
 	}
@@ -2340,19 +2343,7 @@ void exileSniffer::action_CLI_SKILLPANE_ACTION(UIDecodedPkt& obj, QString *analy
 	if (!analysis)
 	{
 		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player(You) used skillpane";
-		addDecodedListEntry(listentry, &obj);
-		return;
-	}
-}
-
-void exileSniffer::action_CLI_SKILLPANE_ACTION(UIDecodedPkt& obj, QString *analysis)
-{
-	obj.toggle_payload_operations(true);
-	if (!analysis)
-	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player(You) used skillpane";
+		listentry.summary = "Used skillpane";
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}

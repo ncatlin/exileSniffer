@@ -90,6 +90,9 @@
     <ClCompile Include="statusWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="json_pipe_thread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -132,6 +135,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MurmurHash2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="json_pipe_thread.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

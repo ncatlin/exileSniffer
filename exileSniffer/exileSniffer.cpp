@@ -31,8 +31,6 @@ exileSniffer::exileSniffer(QWidget *parent)
 	setup_decryption_tab();
 }
 
-
-
 void exileSniffer::setLabelActive(QLabel *lab, bool state)
 {
 	if (state)
@@ -79,13 +77,17 @@ void exileSniffer::setup_settings_tab()
 	settings->setValue("PipeEnabled", doPipe);
 	ui.pipeFeedEnableCheck->setChecked(doPipe);
 
-	QString pipename = settings->value("PipeName", "fff2").toString();
+	QString pipename = settings->value("PipeName", "ExilePipe").toString();
 	settings->setValue("PipeName", pipename);
 	ui.namedPipeChosenName->setText(pipename);
 
+	settings->sync();
+}
 
-
-
+void exileSniffer::updateSettings()
+{
+	QString pipename = ui.namedPipeChosenName->text();
+	settings->setValue("PipeName", pipename);
 	settings->sync();
 }
 
@@ -197,6 +199,16 @@ void exileSniffer::start_threads()
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SLOT(read_UI_Q()));
 	timer->start(10);
+
+	bool usepipe = settings->value("PipeEnabled").toBool();
+	if (usepipe)
+	{
+		QString pipename = settings->value("PipeName").toString();
+
+		pipeThread = new json_pipe_thread(&uiMsgQueue, pipename);
+		std::thread pipeThreadInstance(&json_pipe_thread::ThreadEntry, pipeThread);
+		pipeThreadInstance.detach();
+	}
 }
 
 void exileSniffer::read_UI_Q()
@@ -517,6 +529,8 @@ void exileSniffer::action_UI_Msg(UI_MESSAGE *msg)
 			deleteAfterUse = false; //archived
 			UIDecodedPkt &uiDecodedMsg = *((UIDecodedPkt *)msg);
 
+			pipeThread->sendPacket(uiDecodedMsg.jsn);
+
 			if(!uiDecodedMsg.decodeError())
 				action_decoded_packet(uiDecodedMsg); 
 			else
@@ -670,7 +684,7 @@ void exileSniffer::output_hex_to_file(UI_RAWHEX_PKT *pkt, std::ofstream& file)
 		else
 			mixeddump << " 00";
 
-		if ((i + 1) % UIhexPacketsPerRow == 0)
+		if ((i + 1) % 16 == 0)
 		{
 			mixeddump << std::endl << "  ";
 		}
@@ -687,7 +701,7 @@ void exileSniffer::output_hex_to_file(UI_RAWHEX_PKT *pkt, std::ofstream& file)
 		else
 			mixeddump << '.';//replace unprintable with dots
 
-		if ((i + 1) % UIhexPacketsPerRow == 0)
+		if ((i + 1) % 16 == 0)
 		{
 			mixeddump << std::endl << "   ";
 		}
@@ -967,7 +981,7 @@ void exileSniffer::decodedCellActivated(int row, int col)
 			hexdump << " 00";
 
 		int nextIndex = i + 1;
-		if ((nextIndex % UIhexPacketsPerRow == 0) && nextIndex < msgSize)
+		if ((nextIndex % 16 == 0) && nextIndex < msgSize)
 		{
 			hexdump << std::endl;
 			hexdump << " ";
@@ -991,7 +1005,7 @@ void exileSniffer::decodedCellActivated(int row, int col)
 			asciiDump << '.';//replace unprintable with dots
 		
 		int nextIndex = i + 1;
-		if ((nextIndex % UIhexPacketsPerRow == 0) && nextIndex < msgSize)
+		if ((nextIndex % 16 == 0) && nextIndex < msgSize)
 		{
 			asciiDump << std::endl;
 			asciiDump << " " << std::setw(3) << (i + 1) << ": ";
