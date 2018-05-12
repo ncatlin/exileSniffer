@@ -3681,8 +3681,8 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
-	std::wstring hashCategoryWS = obj.get_wstring(L"HashCategory+");
-	std::wstring hashResultWS = obj.get_wstring(L"HashResult+");
+	std::wstring hashCategoryWS = obj.get_wstring(L"HashCategory");
+	std::wstring hashResultWS = obj.get_wstring(L"HashResult");
 
 	if (!analysis)
 	{
