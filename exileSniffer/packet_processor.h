@@ -111,12 +111,12 @@ private:
 	void deserialise_CLI_INSERT_SOCKET(UIDecodedPkt *);
 
 	void deserialise_CLI_LEVEL_SKILLGEM(UIDecodedPkt *);
-	void deserialise_CLI_UNK_0x20(UIDecodedPkt *);
+	void deserialise_SRV_UNK_0x20(UIDecodedPkt *);
 	void deserialise_CLI_SKILLPOINT_CHANGE(UIDecodedPkt *); 
 	void deserialise_CLI_CHOSE_ASCENDANCY(UIDecodedPkt *);
 
 	void deserialise_CLI_CANCEL_BUF(UIDecodedPkt *);
-	void deserialise_CLI_UNK_0x2c(UIDecodedPkt *);
+	void deserialise_SRV_UNK_0x2c(UIDecodedPkt *);
 	void deserialise_CLI_SELECT_MAPTRAVEL(UIDecodedPkt *);
 	void deserialise_CLI_SET_HOTBARSKILL(UIDecodedPkt *);
 	void deserialise_SRV_SKILL_SLOTS_LIST(UIDecodedPkt *);
@@ -159,10 +159,10 @@ private:
 	void deserialise_SRV_CREATE_ITEM(UIDecodedPkt *);
 	void deserialise_SRV_SLOT_ITEMSLIST(UIDecodedPkt *);
 	void deserialise_SRV_INVENTORY_SET_REMOVE(UIDecodedPkt *);
-	void deserialise_UNK_MESSAGE_0x70(UIDecodedPkt *);
+	void deserialise_SRV_UNK_0x70(UIDecodedPkt *);
 	void deserialise_CLI_UNK_0x71(UIDecodedPkt *);
 	void deserialise_SRV_UNK_0x72(UIDecodedPkt *);
-	void deserialise_UNK_MESSAGE_0x73(UIDecodedPkt *);
+	void deserialise_SRV_UNK_0x73(UIDecodedPkt *);
 	void deserialise_CLI_SET_STATUS_MESSAGE(UIDecodedPkt *);
 	void deserialise_SRV_UNK_0x75(UIDecodedPkt *);
 
@@ -181,7 +181,7 @@ private:
 
 	void deserialise_CLI_MICROTRANSACTION_SHOP_ACTION(UIDecodedPkt *);
 	void deserialise_SRV_MICROTRANSACTION_SHOP_DETAILS(UIDecodedPkt *);
-	void deserialise_SRV_UNK_A3(UIDecodedPkt *);
+	void deserialise_CLI_UNK_A3(UIDecodedPkt *);
 	void deserialise_SRV_CHAT_CHANNEL_ID(UIDecodedPkt *);
 
 	void deserialise_SRV_UNK_A5(UIDecodedPkt *);
@@ -261,7 +261,7 @@ private:
 	void deserialise_SRV_UPDATE_OBJECT(UIDecodedPkt *uipkt);
 	void deserialise_SRV_IDNOTIFY_0x137(UIDecodedPkt *uipkt);
 	
-	void deserialise_packets_from_decrypted(streamType, byte directionBit, long long timeSeen);
+	void deserialise_packets_from_decrypted(streamType, bool incoming, long long timeSeen);
 
 	UINT8 consume_Byte();   
 	UINT16 consume_WORD();  

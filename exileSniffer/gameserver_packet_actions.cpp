@@ -45,7 +45,7 @@ void exileSniffer::init_gamePkt_Actioners()
 	gamePktActioners[CLI_REMOVE_SOCKET] = &exileSniffer::action_CLI_REMOVE_SOCKET;
 	gamePktActioners[CLI_INSERT_SOCKET] = &exileSniffer::action_CLI_INSERT_SOCKET;
 	gamePktActioners[CLI_LEVEL_SKILLGEM] = &exileSniffer::action_CLI_LEVEL_SKILLGEM;
-	gamePktActioners[CLI_UNK_0x20] = &exileSniffer::action_CLI_UNK_0x20;
+	gamePktActioners[SRV_UNK_0x20] = &exileSniffer::action_SRV_UNK_0x20;
 	gamePktActioners[CLI_SKILLPOINT_CHANGE] = &exileSniffer::action_CLI_SKILLPOINT_CHANGE;
 	//22
 	//23
@@ -57,7 +57,7 @@ void exileSniffer::init_gamePkt_Actioners()
 	//29
 	//2a
 	gamePktActioners[CLI_CANCEL_BUF] = &exileSniffer::action_CLI_CANCEL_BUF;
-	gamePktActioners[CLI_UNK_0x2c] = &exileSniffer::action_CLI_UNK_0x2c;
+	gamePktActioners[SRV_UNK_0x2c] = &exileSniffer::action_SRV_UNK_0x2c;
 	gamePktActioners[CLI_SELECT_MAPTRAVEL] = &exileSniffer::action_CLI_SELECT_MAPTRAVEL;
 	gamePktActioners[CLI_SET_HOTBARSKILL] = &exileSniffer::action_CLI_SET_HOTBARSKILL;
 	gamePktActioners[SRV_SKILL_SLOTS_LIST] = &exileSniffer::action_SRV_SKILL_SLOTS_LIST;
@@ -125,10 +125,10 @@ void exileSniffer::init_gamePkt_Actioners()
 	gamePktActioners[SRV_CREATE_ITEM] = &exileSniffer::action_SRV_CREATE_ITEM;
 	gamePktActioners[SRV_SLOT_ITEMSLIST] = &exileSniffer::action_SRV_SLOT_ITEMSLIST;
 	gamePktActioners[SRV_INVENTORY_SET_REMOVE] = &exileSniffer::action_SRV_INVENTORY_SET_REMOVE;
-	gamePktActioners[UNK_MESSAGE_0x70] = &exileSniffer::action_UNK_MESSAGE_0x70;
+	gamePktActioners[SRV_UNK_0x70] = &exileSniffer::action_SRV_UNK_0x70;
 	gamePktActioners[CLI_UNK_0x71] = &exileSniffer::action_CLI_UNK_0x71;
 	gamePktActioners[SRV_UNK_0x72] = &exileSniffer::action_SRV_UNK_0x72;
-	gamePktActioners[UNK_MESSAGE_0x73] = &exileSniffer::action_UNK_MESSAGE_0x73;
+	gamePktActioners[SRV_UNK_0x73] = &exileSniffer::action_SRV_UNK_0x73;
 	gamePktActioners[CLI_SET_STATUS_MESSAGE] = &exileSniffer::action_CLI_SET_STATUS_MESSAGE;
 	gamePktActioners[SRV_UNK_0x75] = &exileSniffer::action_SRV_UNK_0x75;
 	//76
@@ -176,7 +176,7 @@ void exileSniffer::init_gamePkt_Actioners()
 	//a0
 	gamePktActioners[SRV_MICROTRANSACTION_SHOP_DETAILS] = &exileSniffer::action_SRV_MICROTRANSACTION_SHOP_DETAILS;
 	//a2
-	gamePktActioners[SRV_UNK_A3] = &exileSniffer::action_SRV_UNK_A3;
+	gamePktActioners[CLI_UNK_A3] = &exileSniffer::action_CLI_UNK_A3;
 	gamePktActioners[SRV_CHAT_CHANNEL_ID] = &exileSniffer::action_SRV_CHAT_CHANNEL_ID;
 	gamePktActioners[SRV_UNK_A5] = &exileSniffer::action_SRV_UNK_A5;
 	//a6
@@ -356,8 +356,8 @@ void exileSniffer::addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPk
 	QTableWidgetItem *sender = new QTableWidgetItem(entry.sender());
 	ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_SENDER, sender);
 
-	QTableWidgetItem *pktID = new QTableWidgetItem(entry.hexPktID());
-	ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_MSGID, pktID);
+	QTableWidgetItem *pktIDItem = new QTableWidgetItem(entry.hexPktID());
+	ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_MSGID, pktIDItem);
 
 	if (entry.badDecode())
 	{
@@ -367,6 +367,8 @@ void exileSniffer::addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPk
 		ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_SUMMARY, summary);
 
 		setRowColor(rowIndex, QColor(255, 150, 150, 255));
+		ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_MSGID, pktIDItem);
+
 		return;
 	}
 
@@ -378,31 +380,35 @@ void exileSniffer::addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPk
 		ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_SUMMARY, summary);
 
 		setRowColor(rowIndex, QColor(255, 175, 175, 255));
+		ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_MSGID, pktIDItem);
 		return;
 	}
 
 	QTableWidgetItem *summary = new QTableWidgetItem(entry.summary);
 	ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_SUMMARY, summary);
 
-	byte flags = entry.pktFlags();
-	bool incoming = ((flags & PKTBIT_INBOUND) != 0);
 
-	if (flags & PKTBIT_GAMESERVER)
+	streamType streamServer = obj->getStreamType();
+	ushort msgid = obj->getMessageID();
+
+	if (streamServer == eGame)
 	{
-		if (incoming)
+		if (obj->isIncoming())
 			setRowColor(rowIndex, Qt::white);
 		else
-			setRowColor(rowIndex, QColor(235, 235, 235, 255));
+			setRowColor(rowIndex, QColor(235, 235, 235, 255)); //grey
 	}
 	else
 	{
-		if (flags & PKTBIT_LOGINSERVER)
+		if (streamServer == eLogin)
 		{
-			if (incoming)
-				setRowColor(rowIndex, QColor(255, 255, 230, 255));
+			if (obj->isIncoming())
+				setRowColor(rowIndex, QColor(255, 255, 230, 255));  //yellowy
 			else
-				setRowColor(rowIndex, QColor(255, 255, 200, 255));			
+				setRowColor(rowIndex, QColor(255, 255, 200, 255));	//dark yellowy	
 		}
+		else
+			setRowColor(rowIndex, Qt::red);
 		//else if (flags & PKTBIT_PATCHSERVER)
 		//	setRowColor(rowIndex, QColor(153, 217, 234, 255));
 	}
@@ -1216,13 +1222,13 @@ void exileSniffer::action_CLI_LEVEL_SKILLGEM(UIDecodedPkt& obj, QString *analysi
 	}
 }
 
-void exileSniffer::action_CLI_UNK_0x20(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_UNK_0x20(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
 		std::wstringstream summary;
-		summary << "unk packet 0x20 (skill maybe)";
+		summary << "Unknown packet 0x20 (skill maybe)";
 		//summary << "Unknown social/account name " << obj.get_wstring(L"Name") << std::hex;
 		//summary << "  -  Other data: 0x" << obj.get_UInt32(L"Unk1") << ", 0x" << obj.get_UInt32(L"Unk2")
 		//	<< ", 0x" << obj.get_UInt32(L"Unk3") << ", 0x" << obj.get_UInt32(L"Unk4");
@@ -1278,7 +1284,7 @@ void exileSniffer::action_CLI_CANCEL_BUF(UIDecodedPkt& obj, QString *analysis)
 	}
 }
 
-void exileSniffer::action_CLI_UNK_0x2c(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_UNK_0x2c(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 	if (!analysis)
@@ -2075,7 +2081,7 @@ void exileSniffer::action_SRV_INVENTORY_SET_REMOVE(UIDecodedPkt& obj, QString *a
 }
 
 
-void exileSniffer::action_UNK_MESSAGE_0x70(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_UNK_0x70(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
@@ -2131,7 +2137,7 @@ void exileSniffer::action_SRV_UNK_0x72(UIDecodedPkt& obj, QString *analysis)
 	}
 }
 
-void exileSniffer::action_UNK_MESSAGE_0x73(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_UNK_0x73(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
@@ -2455,13 +2461,13 @@ void exileSniffer::action_SRV_MICROTRANSACTION_SHOP_DETAILS(UIDecodedPkt& obj, Q
 	}
 }
 
-void exileSniffer::action_SRV_UNK_A3(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_CLI_UNK_A3(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
 		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Unk message A3 from server";
+		listentry.summary = "Unk message A3 from client";
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
