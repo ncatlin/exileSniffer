@@ -5,6 +5,7 @@
 
 #include "packet_capture_thread.h"
 #include "key_grabber_thread.h"
+#include "json_pipe_thread.h"
 #include "packet_processor.h"
 #include "uiMsg.h"
 #include "clientData.h"
@@ -79,10 +80,13 @@ class exileSniffer : public QMainWindow
 	public:
 		exileSniffer(QWidget *parent = Q_NULLPTR);
 		~exileSniffer() {
+			//todo - vector + loop
+			pipeThread->close();
 			if (packetProcessor) packetProcessor->running = false;
 			if (packetSniffer) packetSniffer->stop_sniffing();
 			if (keyGrabber) keyGrabber->running = false;
-			while (!keyGrabber->ded || !packetProcessor->ded || !packetSniffer->ded)
+			if (pipeThread) pipeThread->running = false;
+			while (!keyGrabber->ded || !packetProcessor->ded || !packetSniffer->ded || !pipeThread->ded)
 				Sleep(6);
 		}
 	
@@ -102,6 +106,7 @@ class exileSniffer : public QMainWindow
 		void resumeScanningEvent();
 		void settingsSelectionChanged(); 
 		void hashUtilInput();
+		void updateSettings(); 
 
 	private:
 		void setup_settings_tab();
@@ -350,8 +355,6 @@ class exileSniffer : public QMainWindow
 		bool refreshingFilters = false;
 		
 
-		unsigned short UIhexPacketsPerRow = 16;
-
 		SafeQueue<UI_MESSAGE *> uiMsgQueue; //read by ui thread, written by all others
 		SafeQueue<GAMEPACKET > gamePktQueue, loginPktQueue;
 		map<DWORD, clientHexData *> clients;
@@ -377,5 +380,6 @@ private:
 	packet_capture_thread* packetSniffer;
 	key_grabber_thread* keyGrabber;
 	packet_processor* packetProcessor;
+	json_pipe_thread* pipeThread;
 };
 

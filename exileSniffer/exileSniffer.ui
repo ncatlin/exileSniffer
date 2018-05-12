@@ -21,7 +21,7 @@
        <enum>QTabWidget::North</enum>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="interceptionTab">
        <attribute name="title">
@@ -723,7 +723,7 @@ FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD</string>
         <item>
          <widget class="QStackedWidget" name="settingsStack">
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="logSettings">
            <layout class="QVBoxLayout" name="verticalLayout">
@@ -1130,6 +1130,22 @@ FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD</string>
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>namedPipeChosenName</sender>
+   <signal>returnPressed()</signal>
+   <receiver>exileSniffer</receiver>
+   <slot>updateSettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>533</x>
+     <y>333</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>413</x>
+     <y>336</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>showRawFiltersDLG()</slot>
@@ -1145,5 +1161,6 @@ FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD</string>
   <slot>hashUtilInput()</slot>
   <slot>maxRawLinesSet()</slot>
   <slot>toggleDecodedAutoScroll(bool)</slot>
+  <slot>updateSettings()</slot>
  </slots>
 </ui>

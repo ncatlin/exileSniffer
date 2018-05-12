@@ -738,12 +738,13 @@ public:
         QObject::connect(hashUtilInputText, SIGNAL(textChanged(QString)), exileSniffer, SLOT(hashUtilInput()));
         QObject::connect(decodedAutoscrollCheck, SIGNAL(toggled(bool)), exileSniffer, SLOT(toggleDecodedAutoScroll(bool)));
         QObject::connect(decodedFiltersBtn, SIGNAL(clicked()), exileSniffer, SLOT(showRawFiltersDLG()));
+        QObject::connect(namedPipeChosenName, SIGNAL(returnPressed()), exileSniffer, SLOT(updateSettings()));
 
-        processTabs->setCurrentIndex(2);
+        processTabs->setCurrentIndex(3);
         decrypt_details_stack->setCurrentIndex(1);
         decodedDetailsTab->setCurrentIndex(1);
         settingsChoiceList->setCurrentRow(0);
-        settingsStack->setCurrentIndex(0);
+        settingsStack->setCurrentIndex(1);
 
 
         QMetaObject::connectSlotsByName(exileSniffer);
