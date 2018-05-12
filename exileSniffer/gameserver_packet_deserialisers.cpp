@@ -2383,7 +2383,6 @@ void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t 
 	uipkt->payload->AddMember(L"UnkList", unklist, allocator);
 
 	ushort hideoutcode = consume_WORD();
-	std::cout << "huideoutcode " << std::hex << hideoutcode << std::endl;
 	uipkt->add_word(L"HideoutCode", hideoutcode);
 	if (hideoutcode != 0)
 	{

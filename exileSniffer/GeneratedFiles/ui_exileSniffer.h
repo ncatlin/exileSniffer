@@ -740,7 +740,7 @@ public:
         QObject::connect(decodedFiltersBtn, SIGNAL(clicked()), exileSniffer, SLOT(showRawFiltersDLG()));
         QObject::connect(namedPipeChosenName, SIGNAL(returnPressed()), exileSniffer, SLOT(updateSettings()));
 
-        processTabs->setCurrentIndex(3);
+        processTabs->setCurrentIndex(0);
         decrypt_details_stack->setCurrentIndex(1);
         decodedDetailsTab->setCurrentIndex(1);
         settingsChoiceList->setCurrentRow(0);

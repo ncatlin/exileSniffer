@@ -83,7 +83,7 @@ void exileSniffer::action_LOGIN_EPHERMERAL_PUBKEY(UIDecodedPkt& obj, QString *an
 	wstringstream analysisStream;
 
 	analysisStream << std::dec << keyLen << " byte ";
-	analysisStream << ((obj.streamFlags & PKTBIT_INBOUND) ? "Server" : "Client");
+	analysisStream << obj.isIncoming() ? "Server" : "Client";
 
 	analysisStream << " ephermeral Diffie-Hellman public key: " << std::endl;
 	analysisStream << "" << key << std::endl;

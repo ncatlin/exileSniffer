@@ -106,7 +106,7 @@ public:
 class UIDecodedPkt : public UI_MESSAGE
 {
 public:
-	UIDecodedPkt(DWORD processID, streamType streamServer,int nwkStream, byte isIncoming, long long timeSeen);
+	UIDecodedPkt(DWORD processID, streamType streamServerType,int nwkStream, bool isIncoming, long long timeSeen);
 	void toggle_payload_operations(bool state) { payloadOperations = state; }
 
 	void add_dword(std::wstring name, DWORD dwordfield);
@@ -114,9 +114,7 @@ public:
 	void add_byte(std::wstring name, byte bytefield);
 	void add_wstring(std::wstring name, std::wstring stringfield);
 	void add_array(std::wstring name, WValue value);
-	//auto getAllocator() { return jsn.GetAllocator(); }
 	rapidjson::GenericDocument<rapidjson::UTF16<> >& getJSON() {	return jsn;	}
-	//WValue& payload() { return jsn.FindMember(L"Payload")->value; }
 
 	std::wstring get_wstring(std::wstring name);
 	UINT32 get_UInt32(std::wstring name);
@@ -133,11 +131,15 @@ public:
 	DWORD getClientProcessID() { return PID; }
 	int getStreamID() { return nwkstreamID; }
 	ushort getMessageID() { return messageID; }
-	void setMessageID(ushort msgID);
+	void set_validate_MessageID(ushort msgID, SafeQueue<UI_MESSAGE *> *uiMsgQueue);
+	streamType getStreamType() { return streamServer; }
+	bool isIncoming() { return incoming; }
+
+	static rapidjson::GenericValue<rapidjson::UTF8<>> *loginMessageTypes;
+	static rapidjson::GenericValue<rapidjson::UTF8<>> *gameMessageTypes;
 
 public:
 	int nwkstreamID;
-	byte streamFlags = 0;
 	vector<byte> *originalbuf = NULL;
 	std::pair<ushort, ushort> bufferOffsets;
 
@@ -147,6 +149,8 @@ public:
 private:
 	ushort messageID;
 	DWORD PID;
+	streamType streamServer;
+	bool incoming;
 	bool failedDecode = false;
 	bool abandoned = false;
 	bool payloadOperations = false;
