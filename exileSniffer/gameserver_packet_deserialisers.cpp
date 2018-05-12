@@ -36,7 +36,7 @@ void packet_processor::init_gamePkt_deserialisers()
 	gamePktDeserialisers[CLI_REMOVE_SOCKET] = (deserialiser)&packet_processor::deserialise_CLI_REMOVE_SOCKET;
 	gamePktDeserialisers[CLI_INSERT_SOCKET] = (deserialiser)&packet_processor::deserialise_CLI_INSERT_SOCKET;
 	gamePktDeserialisers[CLI_LEVEL_SKILLGEM] = (deserialiser)&packet_processor::deserialise_CLI_LEVEL_SKILLGEM;
-	gamePktDeserialisers[CLI_UNK_0x20] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0x20;
+	gamePktDeserialisers[SRV_UNK_0x20] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x20;
 	gamePktDeserialisers[CLI_SKILLPOINT_CHANGE] = (deserialiser)&packet_processor::deserialise_CLI_SKILLPOINT_CHANGE;
 	//22
 	//23
@@ -48,7 +48,7 @@ void packet_processor::init_gamePkt_deserialisers()
 	//29
 	//2a
 	gamePktDeserialisers[CLI_CANCEL_BUF] = (deserialiser)&packet_processor::deserialise_CLI_CANCEL_BUF;
-	gamePktDeserialisers[CLI_UNK_0x2c] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0x2c;
+	gamePktDeserialisers[SRV_UNK_0x2c] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x2c;
 	gamePktDeserialisers[CLI_SELECT_MAPTRAVEL] = (deserialiser)&packet_processor::deserialise_CLI_SELECT_MAPTRAVEL;
 	gamePktDeserialisers[CLI_SET_HOTBARSKILL] = (deserialiser)&packet_processor::deserialise_CLI_SET_HOTBARSKILL;
 	gamePktDeserialisers[SRV_SKILL_SLOTS_LIST] = (deserialiser)&packet_processor::deserialise_SRV_SKILL_SLOTS_LIST;
@@ -116,10 +116,10 @@ void packet_processor::init_gamePkt_deserialisers()
 	gamePktDeserialisers[SRV_CREATE_ITEM] = (deserialiser)&packet_processor::deserialise_SRV_CREATE_ITEM;
 	gamePktDeserialisers[SRV_SLOT_ITEMSLIST] = (deserialiser)&packet_processor::deserialise_SRV_SLOT_ITEMSLIST;
 	gamePktDeserialisers[SRV_INVENTORY_SET_REMOVE] = (deserialiser)&packet_processor::deserialise_SRV_INVENTORY_SET_REMOVE;
-	gamePktDeserialisers[UNK_MESSAGE_0x70] = (deserialiser)&packet_processor::deserialise_UNK_MESSAGE_0x70;
+	gamePktDeserialisers[SRV_UNK_0x70] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x70;
 	gamePktDeserialisers[CLI_UNK_0x71] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0x71;
 	gamePktDeserialisers[SRV_UNK_0x72] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x72;
-	gamePktDeserialisers[UNK_MESSAGE_0x73] = (deserialiser)&packet_processor::deserialise_UNK_MESSAGE_0x73;
+	gamePktDeserialisers[SRV_UNK_0x73] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x73;
 	gamePktDeserialisers[CLI_SET_STATUS_MESSAGE] = (deserialiser)&packet_processor::deserialise_CLI_SET_STATUS_MESSAGE;
 	gamePktDeserialisers[SRV_UNK_0x75] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x75;
 	//76
@@ -167,7 +167,7 @@ void packet_processor::init_gamePkt_deserialisers()
 	//a0
 	gamePktDeserialisers[SRV_MICROTRANSACTION_SHOP_DETAILS] = (deserialiser)&packet_processor::deserialise_SRV_MICROTRANSACTION_SHOP_DETAILS;
 	//a2
-	gamePktDeserialisers[SRV_UNK_A3] = (deserialiser)&packet_processor::deserialise_SRV_UNK_A3;
+	gamePktDeserialisers[CLI_UNK_A3] = (deserialiser)&packet_processor::deserialise_CLI_UNK_A3;
 	gamePktDeserialisers[SRV_CHAT_CHANNEL_ID] = (deserialiser)&packet_processor::deserialise_SRV_CHAT_CHANNEL_ID;
 	gamePktDeserialisers[SRV_UNK_A5] = (deserialiser)&packet_processor::deserialise_SRV_UNK_A5;
 	//a6
@@ -945,7 +945,7 @@ void packet_processor::deserialise_CLI_LEVEL_SKILLGEM(UIDecodedPkt *uipkt)
 	consume_add_dword_ntoh(L"Slot", uipkt);
 }
 
-void packet_processor::deserialise_CLI_UNK_0x20(UIDecodedPkt *uipkt)
+void packet_processor::deserialise_SRV_UNK_0x20(UIDecodedPkt *uipkt)
 {
 	//todo 
 	unsigned short itemCount = ntohs(consume_WORD());
@@ -979,7 +979,7 @@ void packet_processor::deserialise_CLI_CANCEL_BUF(UIDecodedPkt *uipkt)
 }
 
 //todo
-void packet_processor::deserialise_CLI_UNK_0x2c(UIDecodedPkt *uipkt)
+void packet_processor::deserialise_SRV_UNK_0x2c(UIDecodedPkt *uipkt)
 {
 	//todo 
 	unsigned short itemCount = 4; //comes from a member variable, dunno where it's set yet
@@ -1413,7 +1413,7 @@ void packet_processor::deserialise_SRV_INVENTORY_SET_REMOVE(UIDecodedPkt *uipkt)
 	consume_add_dword_ntoh(L"Unk2", uipkt);
 }
 
-void packet_processor::deserialise_UNK_MESSAGE_0x70(UIDecodedPkt *uipkt)
+void packet_processor::deserialise_SRV_UNK_0x70(UIDecodedPkt *uipkt)
 {
 	consume_add_dword_ntoh(L"Arg", uipkt);
 }
@@ -1433,7 +1433,7 @@ void packet_processor::deserialise_SRV_UNK_0x72(UIDecodedPkt *uipkt)
 	consume_add_byte(L"Unk3", uipkt);
 }
 
-void packet_processor::deserialise_UNK_MESSAGE_0x73(UIDecodedPkt *uipkt)
+void packet_processor::deserialise_SRV_UNK_0x73(UIDecodedPkt *uipkt)
 {
 	consume_add_dword(L"Data1", uipkt); //todo - this is not fixed at 4, its just what ive seen it as
 
@@ -1587,7 +1587,7 @@ void packet_processor::deserialise_SRV_MICROTRANSACTION_SHOP_DETAILS(UIDecodedPk
 	consume_add_dword_ntoh(L"State", uipkt);
 }
 
-void packet_processor::deserialise_SRV_UNK_A3(UIDecodedPkt *uipkt)
+void packet_processor::deserialise_CLI_UNK_A3(UIDecodedPkt *uipkt)
 {
 	consume_add_byte(L"fff", uipkt);
 	consume_add_dword_ntoh(L"fff3", uipkt);

@@ -41,6 +41,8 @@ class UI_DECODED_LIST_ENTRY
 			originalbuf = pktobj.originalbuf;
 			bufferOffsets = pktobj.bufferOffsets;
 			streamID = pktobj.getStreamID();
+			streamServer = pktobj.getStreamType();
+			incoming = pktobj.isIncoming();
 		}
 
 		QString dayMonTime() { return QString::fromStdWString(epochms_to_timestring(msTime)); }
@@ -48,7 +50,6 @@ class UI_DECODED_LIST_ENTRY
 		QString hexPktID() { return "0x" + QString::number(pktID, 16); }
 		QString decPktID() { return QString::number(pktID); }
 		QString sender();
-		byte pktFlags() { return flags; }
 		bool badDecode() { return failedDecode; }
 		std::pair<vector<byte> *, ushort> bytesBuf() {
 			return make_pair(originalbuf + bufferOffsets.first, 
@@ -62,10 +63,11 @@ class UI_DECODED_LIST_ENTRY
 
 	private:
 		bool failedDecode;
-		byte flags;
 		long long msTime;
 		unsigned short pktID;
 		int streamID;
+		bool incoming;
+		streamType streamServer;
 		vector<byte> *originalbuf;
 		std::pair <ushort, ushort> bufferOffsets;
 };
@@ -194,13 +196,13 @@ class exileSniffer : public QMainWindow
 		void action_CLI_INSERT_SOCKET(UIDecodedPkt&, QString*);
 
 		void action_CLI_LEVEL_SKILLGEM(UIDecodedPkt&, QString*);
-		void action_CLI_UNK_0x20(UIDecodedPkt&, QString*);
+		void action_SRV_UNK_0x20(UIDecodedPkt&, QString*);
 		void action_CLI_SKILLPOINT_CHANGE(UIDecodedPkt&, QString*);
 
 		void action_CLI_CHOSE_ASCENDANCY(UIDecodedPkt&, QString*);
 
 		void action_CLI_CANCEL_BUF(UIDecodedPkt&, QString*);
-		void action_CLI_UNK_0x2c(UIDecodedPkt&, QString*);
+		void action_SRV_UNK_0x2c(UIDecodedPkt&, QString*);
 		void action_CLI_SELECT_MAPTRAVEL(UIDecodedPkt&, QString*);
 		void action_CLI_SET_HOTBARSKILL(UIDecodedPkt&, QString*);
 		void action_SRV_SKILL_SLOTS_LIST(UIDecodedPkt&, QString*);
@@ -243,10 +245,10 @@ class exileSniffer : public QMainWindow
 		void action_SRV_CREATE_ITEM(UIDecodedPkt&, QString*);
 		void action_SRV_SLOT_ITEMSLIST(UIDecodedPkt&, QString*);
 		void action_SRV_INVENTORY_SET_REMOVE(UIDecodedPkt&, QString *);
-		void action_UNK_MESSAGE_0x70(UIDecodedPkt&, QString*);
+		void action_SRV_UNK_0x70(UIDecodedPkt&, QString*);
 		void action_CLI_UNK_0x71(UIDecodedPkt&, QString*);
 		void action_SRV_UNK_0x72(UIDecodedPkt&, QString*);
-		void action_UNK_MESSAGE_0x73(UIDecodedPkt&, QString*);
+		void action_SRV_UNK_0x73(UIDecodedPkt&, QString*);
 		void action_CLI_SET_STATUS_MESSAGE(UIDecodedPkt&, QString*);
 		void action_SRV_UNK_0x75(UIDecodedPkt&, QString*);
 
@@ -265,7 +267,7 @@ class exileSniffer : public QMainWindow
 
 		void action_CLI_MICROTRANSACTION_SHOP_ACTION(UIDecodedPkt&, QString*);
 		void action_SRV_MICROTRANSACTION_SHOP_DETAILS(UIDecodedPkt&, QString*);
-		void action_SRV_UNK_A3(UIDecodedPkt&, QString*);
+		void action_CLI_UNK_A3(UIDecodedPkt&, QString*);
 
 		void action_SRV_CHAT_CHANNEL_ID(UIDecodedPkt&, QString*);
 

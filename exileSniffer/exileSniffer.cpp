@@ -1147,8 +1147,8 @@ void exileSniffer::hashUtilInput()
 
 QString UI_DECODED_LIST_ENTRY::sender()
 {
-	if (flags & PKTBIT_OUTBOUND) return "[" + QString::number(streamID) + "] Client";
-	if (flags & PKTBIT_GAMESERVER) return "[" + QString::number(streamID) + "] GameServer";
-	if (flags & PKTBIT_LOGINSERVER) return "[" + QString::number(streamID) + "] LoginServer";
-	return "ErrorB";
+	if (!incoming) return "[" + QString::number(streamID) + "] Client";
+	if (streamServer == eGame) return "[" + QString::number(streamID) + "] GameServer";
+	if (streamServer == eLogin) return "[" + QString::number(streamID) + "] LoginServer";
+	return "sender() Error";
 }

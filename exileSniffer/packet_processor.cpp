@@ -141,7 +141,7 @@ void packet_processor::handle_packet_from_loginserver(vector<byte> &nwkData, lon
 		hexmsg->setData(decryptedBuffer);
 		uiMsgQueue->addItem(hexmsg);
 
-		UIDecodedPkt *ui_decodedpkt = new UIDecodedPkt(0, eLogin, currentMsgStreamID, PKTBIT_INBOUND, timems);
+		UIDecodedPkt *ui_decodedpkt = new UIDecodedPkt(0, eLogin, currentMsgStreamID, true, timems);
 
 		deserialisedPkts.push_back(ui_decodedpkt);
 		ui_decodedpkt->setBuffer(decryptedBuffer);
@@ -246,7 +246,7 @@ void packet_processor::handle_packet_from_loginserver(vector<byte> &nwkData, lon
 	remainingDecrypted = dataLen;
 	decryptedIndex = 0;
 
-	deserialise_packets_from_decrypted(eLogin, PKTBIT_INBOUND, timems);
+	deserialise_packets_from_decrypted(eLogin, true, timems);
 }
 
 void packet_processor::sendIterationToUI(CryptoPP::Salsa20::Encryption sobj, bool send)
@@ -290,7 +290,7 @@ void packet_processor::handle_packet_to_loginserver(vector<byte> &nwkData, long 
 		msg->setData(decryptedBuffer);
 		uiMsgQueue->addItem(msg);
 
-		UIDecodedPkt *ui_decodedpkt = new UIDecodedPkt(0, eLogin, currentMsgStreamID, PKTBIT_OUTBOUND, timems);
+		UIDecodedPkt *ui_decodedpkt = new UIDecodedPkt(0, eLogin, currentMsgStreamID, false, timems);
 		ui_decodedpkt->setBuffer(decryptedBuffer);
 		ui_decodedpkt->setStartOffset(0);
 		ui_decodedpkt->setEndOffset(dataLen);
@@ -390,7 +390,7 @@ void packet_processor::handle_packet_to_loginserver(vector<byte> &nwkData, long 
 
 
 		
-		UIDecodedPkt *ui_decodedpkt = new UIDecodedPkt(0, eLogin, currentMsgStreamID, PKTBIT_OUTBOUND, timems);
+		UIDecodedPkt *ui_decodedpkt = new UIDecodedPkt(0, eLogin, currentMsgStreamID, false, timems);
 
 		ui_decodedpkt->setBuffer(decryptedBuffer);
 		ui_decodedpkt->setStartOffset(0);
@@ -419,7 +419,7 @@ void packet_processor::handle_packet_to_loginserver(vector<byte> &nwkData, long 
 	remainingDecrypted = dataLen;
 	decryptedIndex = 0;
 
-	deserialise_packets_from_decrypted(eLogin, PKTBIT_OUTBOUND, timems);
+	deserialise_packets_from_decrypted(eLogin, false, timems);
 }
 
 void packet_processor::handle_login_data(GAMEPACKET &pkt)
@@ -486,7 +486,7 @@ bool packet_processor::sanityCheckPacketID(unsigned short pktID)
 }
 
 
-void packet_processor::deserialise_packets_from_decrypted(streamType streamServer, byte directionBit, long long timeSeen)
+void packet_processor::deserialise_packets_from_decrypted(streamType streamServer, bool incoming, long long timeSeen)
 {
 	unsigned int dataLen = remainingDecrypted;
 	while (remainingDecrypted > 0)
@@ -494,7 +494,7 @@ void packet_processor::deserialise_packets_from_decrypted(streamType streamServe
 		unsigned short pktIDWord = ntohs(consume_WORD());
 		DWORD sourceProcess = currentStreamObj->workingSendKey->sourceProcess;
 		UIDecodedPkt *ui_decodedpkt = new UIDecodedPkt(sourceProcess,	
-			streamServer, currentMsgStreamID, directionBit, timeSeen);
+			streamServer, currentMsgStreamID, incoming, timeSeen);
 
 		deserialisedPkts.push_back(ui_decodedpkt);
 		ui_decodedpkt->setStartOffset(decryptedIndex - 2);
@@ -655,7 +655,7 @@ void packet_processor::handle_packet_to_gameserver(vector<byte> &nwkData, long l
 	decryptedIndex = 0;
 	errorFlag = eNoErr;
 
-	deserialise_packets_from_decrypted(eGame, PKTBIT_OUTBOUND, timems);
+	deserialise_packets_from_decrypted(eGame, false, timems);
 
 }
 
@@ -696,7 +696,7 @@ void packet_processor::handle_packet_from_gameserver(vector<byte> &nwkData, long
 
 	remainingDecrypted = dataLen;
 
-	deserialise_packets_from_decrypted(eGame, PKTBIT_INBOUND, timems);
+	deserialise_packets_from_decrypted(eGame, true, timems);
 }
 
 

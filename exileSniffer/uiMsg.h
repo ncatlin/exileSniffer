@@ -2,12 +2,6 @@
 #include "safequeue.h"
 #include "utilities.h"
 
-#define PKTBIT_OUTBOUND 0x1
-#define PKTBIT_INBOUND 0x2
-#define PKTBIT_LOGINSERVER 0x4
-#define PKTBIT_GAMESERVER 0x8
-#define PKTBIT_PATCHSERVER 0x10
-
 enum streamType { eLogin = 'L', eGame = 'G', ePatch = 'P', eNone = 0 };
 
 typedef rapidjson::GenericValue<rapidjson::UTF16<> > WValue;
