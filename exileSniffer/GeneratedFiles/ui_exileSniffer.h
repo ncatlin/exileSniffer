@@ -123,8 +123,8 @@ public:
     QLineEdit *namedPipeChosenName;
     QLabel *label_8;
     QLabel *label_9;
-    QLabel *namedPipePathResult;
     QCheckBox *pipeFeedEnableCheck;
+    QLineEdit *namedPipePathResult;
     QWidget *utilsTab;
     QVBoxLayout *verticalLayout_6;
     QGroupBox *groupBox_4;
@@ -621,13 +621,21 @@ public:
         verticalLayout_5->setObjectName(QStringLiteral("verticalLayout_5"));
         groupBox = new QGroupBox(feedSettings);
         groupBox->setObjectName(QStringLiteral("groupBox"));
-        groupBox->setMaximumSize(QSize(16777215, 115));
+        groupBox->setMaximumSize(QSize(400, 128));
+        QFont font10;
+        font10.setPointSize(10);
+        groupBox->setFont(font10);
         formLayout_3 = new QFormLayout(groupBox);
         formLayout_3->setSpacing(6);
         formLayout_3->setContentsMargins(11, 11, 11, 11);
         formLayout_3->setObjectName(QStringLiteral("formLayout_3"));
         namedPipeChosenName = new QLineEdit(groupBox);
         namedPipeChosenName->setObjectName(QStringLiteral("namedPipeChosenName"));
+        namedPipeChosenName->setMaximumSize(QSize(300, 16777215));
+        QFont font11;
+        font11.setFamily(QStringLiteral("Calibri Light"));
+        font11.setPointSize(12);
+        namedPipeChosenName->setFont(font11);
 
         formLayout_3->setWidget(1, QFormLayout::FieldRole, namedPipeChosenName);
 
@@ -641,15 +649,21 @@ public:
 
         formLayout_3->setWidget(2, QFormLayout::LabelRole, label_9);
 
-        namedPipePathResult = new QLabel(groupBox);
-        namedPipePathResult->setObjectName(QStringLiteral("namedPipePathResult"));
-
-        formLayout_3->setWidget(2, QFormLayout::FieldRole, namedPipePathResult);
-
         pipeFeedEnableCheck = new QCheckBox(groupBox);
         pipeFeedEnableCheck->setObjectName(QStringLiteral("pipeFeedEnableCheck"));
 
         formLayout_3->setWidget(0, QFormLayout::FieldRole, pipeFeedEnableCheck);
+
+        namedPipePathResult = new QLineEdit(groupBox);
+        namedPipePathResult->setObjectName(QStringLiteral("namedPipePathResult"));
+        namedPipePathResult->setMaximumSize(QSize(300, 16777215));
+        QFont font12;
+        font12.setFamily(QStringLiteral("Calibri"));
+        font12.setPointSize(12);
+        namedPipePathResult->setFont(font12);
+        namedPipePathResult->setReadOnly(true);
+
+        formLayout_3->setWidget(2, QFormLayout::FieldRole, namedPipePathResult);
 
 
         verticalLayout_5->addWidget(groupBox);
@@ -668,9 +682,9 @@ public:
         groupBox_4 = new QGroupBox(utilsTab);
         groupBox_4->setObjectName(QStringLiteral("groupBox_4"));
         groupBox_4->setMaximumSize(QSize(16777215, 135));
-        QFont font10;
-        font10.setPointSize(9);
-        groupBox_4->setFont(font10);
+        QFont font13;
+        font13.setPointSize(9);
+        groupBox_4->setFont(font13);
         formLayout_4 = new QFormLayout(groupBox_4);
         formLayout_4->setSpacing(6);
         formLayout_4->setContentsMargins(11, 11, 11, 11);
@@ -702,13 +716,13 @@ public:
 
         order1hashres = new QLabel(groupBox_4);
         order1hashres->setObjectName(QStringLiteral("order1hashres"));
-        order1hashres->setFont(font10);
+        order1hashres->setFont(font13);
 
         formLayout_4->setWidget(2, QFormLayout::FieldRole, order1hashres);
 
         order2hashres = new QLabel(groupBox_4);
         order2hashres->setObjectName(QStringLiteral("order2hashres"));
-        order2hashres->setFont(font10);
+        order2hashres->setFont(font13);
 
         formLayout_4->setWidget(3, QFormLayout::FieldRole, order2hashres);
 
@@ -739,8 +753,10 @@ public:
         QObject::connect(decodedAutoscrollCheck, SIGNAL(toggled(bool)), exileSniffer, SLOT(toggleDecodedAutoScroll(bool)));
         QObject::connect(decodedFiltersBtn, SIGNAL(clicked()), exileSniffer, SLOT(showRawFiltersDLG()));
         QObject::connect(namedPipeChosenName, SIGNAL(returnPressed()), exileSniffer, SLOT(updateSettings()));
+        QObject::connect(logSetDirBtn, SIGNAL(clicked()), exileSniffer, SLOT(doLogSetDir()));
+        QObject::connect(logsOpenDirBtn, SIGNAL(clicked()), exileSniffer, SLOT(doLogOpenDir()));
 
-        processTabs->setCurrentIndex(0);
+        processTabs->setCurrentIndex(3);
         decrypt_details_stack->setCurrentIndex(1);
         decodedDetailsTab->setCurrentIndex(1);
         settingsChoiceList->setCurrentRow(0);
@@ -795,12 +811,12 @@ public:
         groupBox_2->setTitle(QApplication::translate("exileSniffer", "Packet Hexdumps Directory", Q_NULLPTR));
         logsEnabledCheck->setText(QApplication::translate("exileSniffer", "Logging Enabled", Q_NULLPTR));
         logsOpenDirBtn->setText(QApplication::translate("exileSniffer", "Open", Q_NULLPTR));
-        logSetDirBtn->setText(QApplication::translate("exileSniffer", "{}", Q_NULLPTR));
+        logSetDirBtn->setText(QApplication::translate("exileSniffer", "Choose", Q_NULLPTR));
         groupBox->setTitle(QApplication::translate("exileSniffer", "Named Pipe (Decoded Packets - JSON)", Q_NULLPTR));
         label_8->setText(QApplication::translate("exileSniffer", "Name:", Q_NULLPTR));
-        label_9->setText(QApplication::translate("exileSniffer", "Path:", Q_NULLPTR));
-        namedPipePathResult->setText(QApplication::translate("exileSniffer", "TextLabel", Q_NULLPTR));
+        label_9->setText(QApplication::translate("exileSniffer", "Current Path:", Q_NULLPTR));
         pipeFeedEnableCheck->setText(QApplication::translate("exileSniffer", "Enabled", Q_NULLPTR));
+        namedPipePathResult->setText(QApplication::translate("exileSniffer", "fffffffffff", Q_NULLPTR));
         processTabs->setTabText(processTabs->indexOf(settingsTab), QApplication::translate("exileSniffer", "Settings", Q_NULLPTR));
         groupBox_4->setTitle(QApplication::translate("exileSniffer", "Hash Lookup", Q_NULLPTR));
         label_10->setText(QApplication::translate("exileSniffer", "Input Hex:", Q_NULLPTR));

@@ -114,6 +114,8 @@ void exileSniffer::setup_settings_tab()
 	}
 	ui.logDirLine->setText(logdir.absolutePath());
 	logDir = logdir.absolutePath();
+	ui.logSetDirBtn->setIcon(style()->standardIcon(QStyle::SP_DirHomeIcon));
+	ui.logsOpenDirBtn->setIcon(style()->standardIcon(QStyle::SP_ComputerIcon));
 
 	doPipe = settings->value("PipeEnabled", true).toBool();
 	settings->setValue("PipeEnabled", doPipe);
@@ -122,6 +124,7 @@ void exileSniffer::setup_settings_tab()
 	QString pipename = settings->value("PipeName", "ExilePipe").toString();
 	settings->setValue("PipeName", pipename);
 	ui.namedPipeChosenName->setText(pipename);
+	ui.namedPipePathResult->setText("\\\\.\\pipe\\" + pipename);
 
 	settings->sync();
 }
@@ -130,6 +133,13 @@ void exileSniffer::updateSettings()
 {
 	QString pipename = ui.namedPipeChosenName->text();
 	settings->setValue("PipeName", pipename);
+
+	QString logdir = ui.logDirLine->text();
+	if (QDir(logdir).exists())
+		settings->setValue("LogDir", logdir);
+
+	ui.namedPipePathResult->setText("\\\\.\\pipe\\" + pipename);
+
 	settings->sync();
 }
 
@@ -156,14 +166,6 @@ bool exileSniffer::eventFilter(QObject *obj, QEvent *event)
 			ui.decodedAutoscrollCheck->setChecked(false);
 			ui.statusBar->showMessage("Manual scrolling detected: AutoScroll disabled", 6000);
 		}
-		/*
-		if (obj == ui.ptHexPane && ui.rawAutoScrollCheck->isChecked())
-		{
-			ui.rawAutoScrollCheck->setChecked(false);
-			ui.statusBar->showMessage("Manual scrolling detected: AutoScroll disabled", 6000);
-		}
-		*/
-
 	}
 	event->ignore();
 	return false;
@@ -1148,4 +1150,29 @@ QString UI_DECODED_LIST_ENTRY::sender()
 	if (streamServer == eGame) return "[" + QString::number(streamID) + "] GameServer";
 	if (streamServer == eLogin) return "[" + QString::number(streamID) + "] LoginServer";
 	return "sender() Error";
+}
+
+void exileSniffer::doLogSetDir()
+{
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
+		"",
+		QFileDialog::ShowDirsOnly
+		| QFileDialog::DontResolveSymlinks);
+
+	QDir newdir(dir);
+	if (newdir.exists())
+		ui.logDirLine->setText(dir);
+	updateSettings();
+}
+
+void exileSniffer::doLogOpenDir()
+{
+	QDir dir(ui.logDirLine->text());
+	if (dir.exists())
+	{
+		//doesnt work (error 2/3)
+		//QUrl fileurl(ui.logDirLine->text(), QUrl::TolerantMode);
+		//QDesktopServices::openUrl(dir.path());
+		ShellExecute(NULL, L"explore", dir.path().toStdWString().c_str(), NULL, NULL, SW_SHOWNORMAL);
+	}
 }

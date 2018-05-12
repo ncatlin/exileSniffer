@@ -21,7 +21,7 @@
        <enum>QTabWidget::North</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="interceptionTab">
        <attribute name="title">
@@ -810,7 +810,7 @@ FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD</string>
                   </size>
                  </property>
                  <property name="text">
-                  <string>{}</string>
+                  <string>Choose</string>
                  </property>
                 </widget>
                </item>
@@ -825,16 +825,34 @@ FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD</string>
              <widget class="QGroupBox" name="groupBox">
               <property name="maximumSize">
                <size>
-                <width>16777215</width>
-                <height>115</height>
+                <width>400</width>
+                <height>128</height>
                </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
               </property>
               <property name="title">
                <string>Named Pipe (Decoded Packets - JSON)</string>
               </property>
               <layout class="QFormLayout" name="formLayout_3">
                <item row="1" column="1">
-                <widget class="QLineEdit" name="namedPipeChosenName"/>
+                <widget class="QLineEdit" name="namedPipeChosenName">
+                 <property name="maximumSize">
+                  <size>
+                   <width>300</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>Calibri Light</family>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                </widget>
                </item>
                <item row="1" column="0">
                 <widget class="QLabel" name="label_8">
@@ -846,14 +864,7 @@ FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD</string>
                <item row="2" column="0">
                 <widget class="QLabel" name="label_9">
                  <property name="text">
-                  <string>Path:</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="1">
-                <widget class="QLabel" name="namedPipePathResult">
-                 <property name="text">
-                  <string>TextLabel</string>
+                  <string>Current Path:</string>
                  </property>
                 </widget>
                </item>
@@ -861,6 +872,28 @@ FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD</string>
                 <widget class="QCheckBox" name="pipeFeedEnableCheck">
                  <property name="text">
                   <string>Enabled</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QLineEdit" name="namedPipePathResult">
+                 <property name="maximumSize">
+                  <size>
+                   <width>300</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>Calibri</family>
+                   <pointsize>12</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>fffffffffff</string>
+                 </property>
+                 <property name="readOnly">
+                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
@@ -1146,6 +1179,38 @@ FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD</string>
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>logSetDirBtn</sender>
+   <signal>clicked()</signal>
+   <receiver>exileSniffer</receiver>
+   <slot>doLogSetDir()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>738</x>
+     <y>361</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>413</x>
+     <y>336</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>logsOpenDirBtn</sender>
+   <signal>clicked()</signal>
+   <receiver>exileSniffer</receiver>
+   <slot>doLogOpenDir()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>738</x>
+     <y>323</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>413</x>
+     <y>336</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>showRawFiltersDLG()</slot>
@@ -1162,5 +1227,7 @@ FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD</string>
   <slot>maxRawLinesSet()</slot>
   <slot>toggleDecodedAutoScroll(bool)</slot>
   <slot>updateSettings()</slot>
+  <slot>doLogSetDir()</slot>
+  <slot>doLogOpenDir()</slot>
  </slots>
 </ui>
