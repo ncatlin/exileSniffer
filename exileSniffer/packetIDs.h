@@ -55,21 +55,21 @@
 //27
 //28
 //29
-//2a   //client merge item stack?
-#define CLI_CANCEL_BUF 0x2b
+#define CLI_MERGE_STACK 0x2a
+#define CLI_CANCEL_BUF (CLI_MERGE_STACK+1)
 #define SRV_UNK_0x2c (CLI_CANCEL_BUF + 1)
 #define CLI_SELECT_MAPTRAVEL (SRV_UNK_0x2c + 1) //2d
 #define CLI_SET_HOTBARSKILL (CLI_SELECT_MAPTRAVEL +1) //2e
 #define SRV_SKILL_SLOTS_LIST (CLI_SET_HOTBARSKILL+1) //2f
 #define CLI_REVIVE_CHOICE (SRV_SKILL_SLOTS_LIST+1) //30
-#define SRV_YOU_DIED (CLI_REVIVE_CHOICE+1) //"thats dark souls"
-//32  //client packet seen when using portal scroll
+#define SRV_YOU_DIED (CLI_REVIVE_CHOICE+1) //"thats dark souls" 0x31
+#define CLI_ACTIVATE_ITEM (SRV_YOU_DIED + 1) //0x32
 //33
 //34
 //35
 //36
 #define CLI_USE_BELT_SLOT 0x0037
-#define CLI_USE_ITEM 0x0038
+#define CLI_USE_ITEM_ON_ITEM (CLI_USE_BELT_SLOT+1) //0x38
 //39
 //3a
 //3b
@@ -77,15 +77,15 @@
 //3d
 //3e
 #define SRV_OPEN_UI_PANE 0x3f
-#define CLI_UNK_0x40 //client split item stack
+#define CLI_SPLIT_STACK (SRV_OPEN_UI_PANE+1)
 #define CLI_UNK_0x41 0x41
 //42
 //43
 //44
 //45
 #define CLI_SELECT_NPC_DIALOG 0x46 
-#define SRV_SHOW_NPC_DIALOG 0x47 
-#define CLI_CLOSE_NPC_DIALOG 0x48 
+#define SRV_SHOW_NPC_DIALOG (CLI_SELECT_NPC_DIALOG+1)
+#define CLI_CLOSE_NPC_DIALOG (SRV_SHOW_NPC_DIALOG+1)
 //49
 #define CLI_UNK_0x4a  //seen when buying from vendor
 //4b
@@ -126,9 +126,9 @@
 #define SRV_SLOT_ITEMSLIST (SRV_CREATE_ITEM+1)
 #define SRV_INVENTORY_SET_REMOVE (SRV_SLOT_ITEMSLIST+1)
 #define SRV_UNK_0x70 (SRV_INVENTORY_SET_REMOVE+1)
-#define CLI_UNK_0x71 0x71
-#define SRV_UNK_0x72 0x72
-#define SRV_UNK_0x73 0x73
+#define CLI_SELECT_STASHTAB 0x71
+#define SRV_STASHTAB_DATA (CLI_SELECT_STASHTAB+1)
+#define SRV_UNK_0x73 (SRV_STASHTAB_DATA+1)
 #define CLI_SET_STATUS_MESSAGE 0x74
 #define SRV_UNK_0x75 0x75
 //76
@@ -154,7 +154,7 @@
 //8a
 //8b
 //8c
-//8d
+#define SRV_INVENTORY_FULL 0x8d
 //8e
 //define 0x8f seen when leaving duel queue
 //define 0x90 seen when leaving duel queue
@@ -248,8 +248,8 @@
 #define SRV_OBJ_REMOVED 0xe9 
 #define SRV_MOBILE_START_SKILL 0xea
 #define SRV_MOBILE_FINISH_SKILL 0xeb
-//ec
-//ed
+#define SRV_MOVE_CHANNELLED 0xec
+#define SRV_END_CHANNELLED 0xed
 #define SRV_MOBILE_UNK_0xee 0xee
 #define SRV_MOBILE_UNK_0xef 0xef
 #define SRV_MOBILE_UPDATE_HMS 0xf0

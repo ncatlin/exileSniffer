@@ -21,7 +21,7 @@
        <enum>QTabWidget::North</enum>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="interceptionTab">
        <attribute name="title">
@@ -644,6 +644,9 @@ FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD</string>
                     <bold>false</bold>
                    </font>
                   </property>
+                  <property name="styleSheet">
+                   <string notr="true">background: rgb(245, 245, 245)</string>
+                  </property>
                   <property name="readOnly">
                    <bool>true</bool>
                   </property>
@@ -660,6 +663,9 @@ FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD</string>
                     <weight>50</weight>
                     <bold>false</bold>
                    </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">background: rgb(245, 245, 245)</string>
                   </property>
                   <property name="readOnly">
                    <bool>true</bool>

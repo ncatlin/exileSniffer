@@ -32,6 +32,8 @@ public:
 		void populatePresetsList();
 		bool isDisplayed(ushort pktID);
 
+		void setFilterRowState(int row, eDisplayState newState);
+
 signals:
 	void applyFilters();
 
@@ -53,7 +55,6 @@ private:
 	void add_filter_category(unsigned short pktid, QString description, 
 		bool incoming, eDisplayState initialState = eDisplayState::displayed);
 	void setRowColor(int tablerow, QColor colour); 
-	void setFilterRowState(int row, eDisplayState newState);
 	void setPktIDFilterState(ushort pktID, eDisplayState newState);
 	PRESET_LIST load_saved_preset(QString groupname);
 	void activateBuiltInPresetList(int index); 

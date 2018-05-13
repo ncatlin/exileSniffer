@@ -507,6 +507,7 @@ public:
         font8.setBold(false);
         font8.setWeight(50);
         decodedRawHex->setFont(font8);
+        decodedRawHex->setStyleSheet(QStringLiteral("background: rgb(245, 245, 245)"));
         decodedRawHex->setReadOnly(true);
 
         horizontalLayout_11->addWidget(decodedRawHex);
@@ -514,6 +515,7 @@ public:
         decodedRawText = new QPlainTextEdit(decodeRawTab);
         decodedRawText->setObjectName(QStringLiteral("decodedRawText"));
         decodedRawText->setFont(font8);
+        decodedRawText->setStyleSheet(QStringLiteral("background: rgb(245, 245, 245)"));
         decodedRawText->setReadOnly(true);
 
         horizontalLayout_11->addWidget(decodedRawText);
@@ -756,7 +758,7 @@ public:
         QObject::connect(logSetDirBtn, SIGNAL(clicked()), exileSniffer, SLOT(doLogSetDir()));
         QObject::connect(logsOpenDirBtn, SIGNAL(clicked()), exileSniffer, SLOT(doLogOpenDir()));
 
-        processTabs->setCurrentIndex(3);
+        processTabs->setCurrentIndex(1);
         decrypt_details_stack->setCurrentIndex(1);
         decodedDetailsTab->setCurrentIndex(1);
         settingsChoiceList->setCurrentRow(0);

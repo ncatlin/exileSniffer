@@ -115,6 +115,7 @@ private:
 	void deserialise_CLI_SKILLPOINT_CHANGE(UIDecodedPkt *); 
 	void deserialise_CLI_CHOSE_ASCENDANCY(UIDecodedPkt *);
 
+	void deserialise_CLI_MERGE_STACK(UIDecodedPkt *);
 	void deserialise_CLI_CANCEL_BUF(UIDecodedPkt *);
 	void deserialise_SRV_UNK_0x2c(UIDecodedPkt *);
 	void deserialise_CLI_SELECT_MAPTRAVEL(UIDecodedPkt *);
@@ -122,9 +123,10 @@ private:
 	void deserialise_SRV_SKILL_SLOTS_LIST(UIDecodedPkt *);
 	void deserialise_CLI_REVIVE_CHOICE(UIDecodedPkt*);
 	void deserialise_SRV_YOU_DIED(UIDecodedPkt*);
+	void deserialise_CLI_ACTIVATE_ITEM(UIDecodedPkt*);
 
 	void deserialise_CLI_USE_BELT_SLOT(UIDecodedPkt *);
-	void deserialise_CLI_USE_ITEM(UIDecodedPkt *);
+	void deserialise_CLI_USE_ITEM_ON_ITEM(UIDecodedPkt *);
 	void deserialise_CLI_UNK_0x41(UIDecodedPkt *);
 
 	void deserialise_CLI_SELECT_NPC_DIALOG(UIDecodedPkt *uipkt);
@@ -132,7 +134,7 @@ private:
 	void deserialise_CLI_CLOSE_NPC_DIALOG(UIDecodedPkt *uipkt);
 
 	void deserialise_SRV_OPEN_UI_PANE(UIDecodedPkt *);
-
+	void deserialise_CLI_SPLIT_STACK(UIDecodedPkt *);
 	void deserialise_SRV_LIST_PORTALS(UIDecodedPkt *);
 	void deserialise_CLI_SEND_PARTY_INVITE(UIDecodedPkt *);
 
@@ -160,8 +162,8 @@ private:
 	void deserialise_SRV_SLOT_ITEMSLIST(UIDecodedPkt *);
 	void deserialise_SRV_INVENTORY_SET_REMOVE(UIDecodedPkt *);
 	void deserialise_SRV_UNK_0x70(UIDecodedPkt *);
-	void deserialise_CLI_UNK_0x71(UIDecodedPkt *);
-	void deserialise_SRV_UNK_0x72(UIDecodedPkt *);
+	void deserialise_CLI_SELECT_STASHTAB(UIDecodedPkt *);
+	void deserialise_SRV_STASHTAB_DATA(UIDecodedPkt *);
 	void deserialise_SRV_UNK_0x73(UIDecodedPkt *);
 	void deserialise_CLI_SET_STATUS_MESSAGE(UIDecodedPkt *);
 	void deserialise_SRV_UNK_0x75(UIDecodedPkt *);
@@ -169,15 +171,17 @@ private:
 	void deserialise_CLI_ACTIVATE_MAP(UIDecodedPkt *);
 	void deserialise_CLI_SWAPPED_WEAPONS(UIDecodedPkt *);
 
+	void deserialise_SRV_INVENTORY_FULL(UIDecodedPkt*);
+
+	void deserialise_SRV_PVP_MATCHLIST(UIDecodedPkt *uipkt);
+	void deserialise_SRV_EVENTSLIST(UIDecodedPkt *uipkt);
+
 	void deserialise_CLI_SKILLPANE_ACTION(UIDecodedPkt *);
 	void deserialise_SRV_ACHIEVEMENT_1(UIDecodedPkt *);
 	void deserialise_SRV_ACHIEVEMENT_2(UIDecodedPkt *);
 
 	void deserialise_SRV_SKILLPANE_DATA(UIDecodedPkt *);
 	void deserialise_SRV_UNK_POSITION_LIST(UIDecodedPkt *);
-	
-	void deserialise_SRV_PVP_MATCHLIST(UIDecodedPkt *uipkt);
-	void deserialise_SRV_EVENTSLIST(UIDecodedPkt *uipkt);
 
 	void deserialise_CLI_MICROTRANSACTION_SHOP_ACTION(UIDecodedPkt *);
 	void deserialise_SRV_MICROTRANSACTION_SHOP_DETAILS(UIDecodedPkt *);
@@ -218,7 +222,8 @@ private:
 	void deserialise_SRV_OBJ_REMOVED(UIDecodedPkt *);
 	void deserialise_SRV_MOBILE_START_SKILL(UIDecodedPkt *);
 	void deserialise_SRV_MOBILE_FINISH_SKILL(UIDecodedPkt *);
-
+	void deserialise_SRV_MOVE_CHANNELLED(UIDecodedPkt *);
+	void deserialise_SRV_END_CHANNELLED(UIDecodedPkt *);
 	void deserialise_SRV_MOBILE_UNK_0xee(UIDecodedPkt *);
 	void deserialise_SRV_MOBILE_UNK_0xef(UIDecodedPkt *);
 
