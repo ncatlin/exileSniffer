@@ -391,7 +391,6 @@ void gameDataStore::generateMonsterLevelHashes(unsigned int level)
 		std::string hashedString;
 		unsigned long hash = levelAdjustedHash(targ, level, hashedString);
 		levelAdjustedMonsterHashes[hash] = index;
-		//std::cout << "Ad hash of " << hashedString << std::endl;
 	}
 
 	lastAreaLevel = level;

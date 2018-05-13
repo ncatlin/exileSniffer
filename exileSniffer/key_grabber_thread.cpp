@@ -323,7 +323,7 @@ bool key_grabber_thread::openClientHandle(GAMECLIENTINFO *gameClient)
 	}
 
 	//an initial test for queryability
-	if (!VirtualQueryEx(gameClient->processhandle, p, &info, sizeof(info)) == sizeof(info))
+	if (!(VirtualQueryEx(gameClient->processhandle, p, &info, sizeof(info)) == sizeof(info)))
 	{
 		UIaddLogMsg("VirtualQueryEx of target process failed", gameClient->pid, uiMsgQueue);
 		return false;

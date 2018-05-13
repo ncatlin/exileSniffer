@@ -264,12 +264,12 @@
 //f9
 #define SRV_START_EFFECT 0xfa
 #define SRV_END_EFFECT 0xfb
-//fc
+//fc  some sort of moving item/trap. seen in crypt ascendency area
 //fd
 //fe
 #define SRV_EVENT_TRIGGERED 0xff
 //100
-//101
+//101 failed door unlock? fail opening door in crypt ascendency area
 //102
 //103
 //104

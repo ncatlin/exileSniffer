@@ -867,46 +867,6 @@ void exileSniffer::handle_raw_packet_data(UI_RAWHEX_PKT *pkt)
 	client->rawHexPackets.push_back(pkt);
 }
 
-/*
-void exileSniffer::rawBytesRowChanged(QString arg)
-{
-	//check the entry is all digits
-	QRegExp re("\\d*");  
-	if (!re.exactMatch(arg))
-		return;
-
-	UIhexPacketsPerRow = arg.toInt();
-
-	reprintRawHex();
-}
-*/
-/*
-//todo: delete this when reworked hex
-void exileSniffer::reprintRawHex()
-{
-	std::cout << "reprinting raw" << std::endl;
-	ui.ptHexPane->clear();
-	ui.ptASCIIPane->clear();
-
-	clientHexData * client = get_clientdata(packetProcessor->getLatestDecryptProcess());
-	if (!client)
-		client = clients.begin()->second;
-	vector <UI_RAWHEX_PKT *> pkts = client->rawHexPackets;
-
-	rawCount_Recorded_Filtered.second = 0;
-
-	for (auto pktIt = pkts.begin(); pktIt != pkts.end(); pktIt++)
-	{
-		UI_RAWHEX_PKT *pkt = *pktIt;
-
-		if (packet_passes_decoded_filter(pkt->startBytes))
-			output_hex_to_pane(pkt);
-		else
-			++rawCount_Recorded_Filtered.second;
-	}
-	updateRawFilterLabel();
-}*/
-
 void exileSniffer::updateDecodedFilterLabel()
 {
 	if (refreshingFilters)

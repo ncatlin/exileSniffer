@@ -193,7 +193,7 @@ void packet_processor::deserialise_LOGIN_SRV_NOTIFY_GAMESERVER(UIDecodedPkt *uip
 
 	if (key1A->salsakey[0] == 0 && key1A->salsakey[3] == 0 && key1A->salsakey[7])
 	{
-		std::cout << "Discarding bad key in play response" << std::endl;
+		UIaddLogMsg("Bad key in play response", key1A->sourceProcess, uiMsgQueue);
 		return;
 	}
 
