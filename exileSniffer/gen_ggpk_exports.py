@@ -9,8 +9,18 @@ from PyPoE.poe.file import dat
 from PyPoE.poe.file.specification import load
 from PyPoE.poe.file.ggpk import GGPKFile
 
+'''
+This requires the PyPoE library to be installed and working
 
-poedir = "F:\\poe\\Grinding Gear Games\\Path of Exile\\"
+https://github.com/OmegaK2/PyPoE
+
+Put the path of your POE directory below.
+You may want to specify a location for the resulting ggpk_exports.json too.
+'''
+poedir = "C:\\Program Files\\Grinding Gear Games\\Path of Exile\\"
+targetfile = "ggpk_exports.json"
+
+
 
 
 
@@ -307,7 +317,7 @@ if __name__ == "__main__":
     
     
 
-    savefile(resultdict, "C:\\Users\\nia\\Documents\\Visual Studio 2017\\Projects\\exileSniffer\\exileSniffer\\ggpk_exports.json")
+    savefile(resultdict, targetFile)
     print("Done")
     
 
