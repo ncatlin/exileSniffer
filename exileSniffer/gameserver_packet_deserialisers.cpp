@@ -1187,54 +1187,47 @@ void packet_processor::deserialise_SRV_FRIENDSLIST(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_SRV_PARTY_DETAILS(UIDecodedPkt *uipkt)
 {
-	/*
-	//invited directly
-	00 5A 
-	00 10 50 00 --partyid
-	00 00 -namelen
-	01 
-	01 
-	02 
-	00 05 
-		44 00 6F 00 72 00 65 00 65 00 --doree
-	02 
-	00 09 
-	  77 00 61 00 6E 00  67 00 6C 00 65 00 73 00 37 00 37 00 --wangles77
-	00 
+	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
 
-	//from public list
-	00 5A 
-	00 10 28 2D --partyid
-	00 08 -namelen
-		43 00 61 00 6D 00 70 00	61 00 69 00 67 00 6E 00 --campaign
-	FF 
-	01 
-	01 
-	00 09 
-		50 00 75 00 72 00 65 00 62 00 72 00 61 00 76 00 6F 00 --purebravo
-	02
-
-	//also got 'friend' to go with it
-	00 58 00 09 50 00 75 00 72 00 65 00 62 00 72 00
-	61 00 76 00 6F 00 00 00 01 00 09 50 00 75 00 72
-	00 65 00 62 00 72 00 61 00 76 00 6F 00 00 00 00
-	07 01 00 00 00 07 00 00 08 53 00 74 00 61 00 6E
-	00 64 00 61 00 72 00 64 00 02 00 00
-   */
 	consume_add_dword_ntoh(L"ID", uipkt);
 
-	unsigned short namelen = ntohs(consume_WORD());
-	uipkt->add_wstring(L"Description", consumeWString(namelen * 2));
+	consume_add_lenprefix_string(L"Description", *(uipkt->payload), uipkt->jsn.GetAllocator());
 
 	consume_add_byte(L"Unk1", uipkt);
 	consume_add_byte(L"Unk2", uipkt);
-	consume_add_byte(L"Unk3", uipkt);
+	byte playerCount = consume_Byte();
 
-	namelen = ntohs(consume_WORD());
-	uipkt->add_wstring(L"Account", consumeWString(namelen * 2));
+	WValue playerList(rapidjson::kArrayType);
+	for (int i = 0; i < playerCount; i++)
+	{
 
+		WValue playerListing(rapidjson::kObjectType);
+		consume_add_lenprefix_string(L"Name", playerListing, allocator);
 
-	consume_add_word_ntoh(L"Unk4", uipkt);
+		byte statusByte = consume_Byte();
+		std::wstring statusText;
+		switch (statusByte) {
+		case 0:
+			statusText = L"Pending";
+			break;
+		case 1:
+			statusText = L"Member";
+			break;
+		case 2:
+			statusText = L"Leader";
+			break;
+		default:
+			statusText = L"Unknown";
+			break;
+		}
+
+		playerListing.AddMember(L"StatusByte", statusByte, allocator);
+		playerListing.AddMember(L"StatusText", WValue(statusText.c_str(), allocator), allocator);
+		playerList.PushBack(playerListing, allocator);
+	}
+
+	uipkt->payload->AddMember(L"MemberList", playerList, allocator);
+
 }
 
 void packet_processor::deserialise_SRV_PARTY_ENDED(UIDecodedPkt *uipkt)
@@ -1973,10 +1966,10 @@ void packet_processor::deserialise_SRV_MOBILE_UPDATE_HMS(UIDecodedPkt *uipkt)
 				0x00, 0x00, 0x01, 0x07, //objid
 				0x00, 0x00, 0x00, 0x00,	//possibly the obj that caused it?
 				0x00, 0x00, //???
-				0x00, 0x00,	0x00, 0x36, //amount
+				0x00, 0x00,	0x00, 0x36, //NewValue
 				0x00, 0x00, 0x00, 0x00, //???
-				0x01, //0 life/1 mana/2 shield
-				0x00 //stat is dword?
+				0x01, 
+				0x00 
 	*/
 
 	consume_add_dword_ntoh(L"ID1", uipkt);
@@ -1985,7 +1978,7 @@ void packet_processor::deserialise_SRV_MOBILE_UPDATE_HMS(UIDecodedPkt *uipkt)
 
 	consume_add_dword_ntoh(L"NewValue", uipkt);
 	consume_add_dword_ntoh(L"Unk3", uipkt);
-	consume_add_byte(L"Stat", uipkt);
+	consume_add_byte(L"Stat", uipkt);  //0 life/1 mana/2 shield
 	consume_add_byte(L"Unk4", uipkt); //possible more stats here
 
 }

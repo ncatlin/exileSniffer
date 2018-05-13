@@ -1841,13 +1841,38 @@ void exileSniffer::action_SRV_FRIENDSLIST(UIDecodedPkt& obj, QString *analysis)
 void exileSniffer::action_SRV_PARTY_DETAILS(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
+
+	UINT32 ID = obj.get_UInt32(L"ID");
+	std::wstring description = obj.get_wstring(L"Description");
+
+	WValue &memberlist = obj.payload->FindMember(L"MemberList")->value;
+	size_t listSize = memberlist.Size();
+
 	if (!analysis)
 	{
 		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Server sent details for public party " + obj.get_UInt32(L"ID");
+		listentry.summary = "Server sent details for public party (" + QString::number(listSize) + " members)";
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
+
+	UINT32 unk1 = obj.get_UInt32(L"Unk1");
+	UINT32 unk2 = obj.get_UInt32(L"Unk2");
+
+	std::wstringstream analysisStream;
+	analysisStream << std::hex;
+	analysisStream << "Party ID: 0x" << ID << std::endl;
+	analysisStream << "Unk byte 1: 0x" << unk1 << std::endl;
+	analysisStream << "Unk byte 2: 0x" << unk2 << std::endl;
+
+	analysisStream << std::dec << listSize << " members:" << std::endl;
+	for (auto it = memberlist.Begin(); it != memberlist.End(); it++)
+	{
+		analysisStream << "\t" << it->FindMember(L"Name")->value.GetString();
+		analysisStream << " (" << it->FindMember(L"StatusText")->value.GetString() << ")"<< std::endl;
+	}
+
+	*analysis = QString::fromStdWString(analysisStream.str());
 }
 
 void exileSniffer::action_SRV_PARTY_ENDED(UIDecodedPkt& obj, QString *analysis)
@@ -3017,7 +3042,7 @@ void exileSniffer::action_SRV_OBJ_REMOVED(UIDecodedPkt& obj, QString *analysis)
 	{
 
 		wstringstream summary;
-		summary << std::hex << "Item removed: 0x" << ID;
+		summary << std::hex << "Object removed from map. ID: 0x" << ID;
 		if (receiver)
 			summary << " by 0x" << receiver;
 		if (unk2)

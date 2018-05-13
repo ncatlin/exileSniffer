@@ -136,6 +136,7 @@ public:
     QLabel *order1hashres;
     QLabel *order2hashres;
     QLabel *label_11;
+    QWidget *tab;
     QStatusBar *statusBar;
 
     void setupUi(QMainWindow *exileSniffer)
@@ -737,6 +738,9 @@ public:
         verticalLayout_6->addWidget(groupBox_4);
 
         processTabs->addTab(utilsTab, QString());
+        tab = new QWidget();
+        tab->setObjectName(QStringLiteral("tab"));
+        processTabs->addTab(tab, QString());
 
         gridLayout->addWidget(processTabs, 0, 0, 1, 1);
 
@@ -758,7 +762,7 @@ public:
         QObject::connect(logSetDirBtn, SIGNAL(clicked()), exileSniffer, SLOT(doLogSetDir()));
         QObject::connect(logsOpenDirBtn, SIGNAL(clicked()), exileSniffer, SLOT(doLogOpenDir()));
 
-        processTabs->setCurrentIndex(1);
+        processTabs->setCurrentIndex(5);
         decrypt_details_stack->setCurrentIndex(1);
         decodedDetailsTab->setCurrentIndex(1);
         settingsChoiceList->setCurrentRow(0);
@@ -828,6 +832,7 @@ public:
         order2hashres->setText(QString());
         label_11->setText(QApplication::translate("exileSniffer", "Enter a sequence of hex bytes to lookup a murmur2 hash. Only works for the GGPK strings we have catalogued.", Q_NULLPTR));
         processTabs->setTabText(processTabs->indexOf(utilsTab), QApplication::translate("exileSniffer", "Utilities", Q_NULLPTR));
+        processTabs->setTabText(processTabs->indexOf(tab), QApplication::translate("exileSniffer", "About", Q_NULLPTR));
     } // retranslateUi
 
 };

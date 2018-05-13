@@ -8,7 +8,7 @@
 #include "json_pipe_thread.h"
 #include "packet_processor.h"
 #include "uiMsg.h"
-#include "clientData.h"
+#include "clientHexData.h"
 #include "gameDataStore.h"
 
 #include "ui_exileSniffer.h"

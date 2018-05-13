@@ -132,7 +132,8 @@ void packet_processor::handle_packet_from_loginserver(vector<byte> &nwkData, lon
 		currentStreamObj->ephKeys++;
 
 		decryptedBuffer = new vector<byte>;
-		decryptedBuffer->resize(dataLen, 0);
+		decryptedBuffer->resize(dataLen, 0);		
+		std::copy(nwkData.begin(), nwkData.end(), decryptedBuffer->begin());
 		remainingDecrypted = dataLen;
 		decryptedIndex = 0;
 
@@ -280,6 +281,7 @@ void packet_processor::handle_packet_to_loginserver(vector<byte> &nwkData, long 
 
 		decryptedBuffer = new vector<byte>;
 		decryptedBuffer->resize(dataLen, 0);
+		std::copy(nwkData.begin(), nwkData.end(), decryptedBuffer->begin());
 		remainingDecrypted = dataLen;
 		decryptedIndex = 0;
 

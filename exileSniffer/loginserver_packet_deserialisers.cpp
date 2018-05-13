@@ -29,14 +29,14 @@ void packet_processor::deserialise_LOGIN_CLI_KEEP_ALIVE(UIDecodedPkt *)
 void packet_processor::deserialise_LOGIN_EPHERMERAL_PUBKEY(UIDecodedPkt *uipkt)
 {
 
-	DWORD keylen = ntohs(consume_WORD());
+	UINT32 keylen = ntohs(consume_WORD());
 	uipkt->add_word(L"KeySize", keylen);
 
 	std::wstring keyhex = consume_hexblob(keylen);
 	WValue keyVal(keyhex.c_str(), keyhex.length(), uipkt->jsn.GetAllocator());
 	uipkt->payload->AddMember(L"EphermeralKey", keyVal, uipkt->jsn.GetAllocator());
 
-	DWORD siglen = ntohs(consume_WORD());
+	UINT32 siglen = ntohs(consume_WORD());
 	uipkt->add_word(L"SignatureSize", siglen);
 
 	if (siglen)
@@ -176,9 +176,6 @@ void packet_processor::deserialise_LOGIN_SRV_NOTIFY_GAMESERVER(UIDecodedPkt *uip
 	std::wstring sendIV(cryptBlob.begin()+32, cryptBlob.begin() + 40);
 	std::wstring recvIV(cryptBlob.begin()+48, cryptBlob.begin() + 56);
 
-	
-
-	
 	DWORD *keyblob = (DWORD *)(&decryptedBuffer->at(43));
 	key1A->salsakey[0] = key1B->salsakey[0] = keyblob[0];
 	key1A->salsakey[1] = key1B->salsakey[1] = keyblob[1];

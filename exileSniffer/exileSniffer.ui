@@ -21,7 +21,7 @@
        <enum>QTabWidget::North</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>5</number>
       </property>
       <widget class="QWidget" name="interceptionTab">
        <attribute name="title">
@@ -1021,6 +1021,11 @@ FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD</string>
          </widget>
         </item>
        </layout>
+      </widget>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>About</string>
+       </attribute>
       </widget>
      </widget>
     </item>
