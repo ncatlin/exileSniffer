@@ -129,7 +129,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="base_thread.cpp" />
-    <ClCompile Include="clientData.cpp" />
+    <ClCompile Include="clientHexData.cpp" />
     <ClCompile Include="filterForm.cpp">
       <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\%(Filename).moc</OutputFile>
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
@@ -161,7 +161,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="base_thread.h" />
-    <ClInclude Include="clientData.h" />
+    <ClInclude Include="clientHexData.h" />
     <ClInclude Include="cppsemaphore.h" />
     <ClInclude Include="gameDataStore.h" />
     <ClInclude Include="inventory.h" />

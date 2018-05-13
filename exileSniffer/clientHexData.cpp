@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "clientData.h"
+#include "clientHexData.h"
 
 clientHexData::clientHexData(bool filtered, bool unfiltered, QDir filedir)
 {

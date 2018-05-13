@@ -11,6 +11,7 @@ This is the UI thread - try not to hang it
 #include "packetIDs.h"
 #include <fstream>
 #include "rapidjson\filereadstream.h"
+#include "clientHexData.h"
 
 exileSniffer::exileSniffer(QWidget *parent)
 	: QMainWindow(parent)
@@ -474,7 +475,7 @@ void exileSniffer::handle_stream_event(UI_STREAMEVENT_MSG *streamNote)
 {
 	if (streamNote->state == eStreamLoggingIn && !activeDecryption)
 	{
-		ui.decryptionStatusText->setText("Syncing decryption - don't press Play");
+		ui.decryptionStatusText->setText("Syncing decryption - don't press 'Play' yet");
 	}
 
 	if (streamNote->state == eStreamDecrypting)
