@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "json_pipe_thread.h"
-#include "uiMsg.h"
 #include "rapidjson\writer.h"
 #include "rapidjson\stringbuffer.h"
 

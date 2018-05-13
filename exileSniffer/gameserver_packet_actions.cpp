@@ -619,7 +619,7 @@ void exileSniffer::action_SRV_SERVER_MESSAGE(UIDecodedPkt& obj, QString *analysi
 {
 	obj.toggle_payload_operations(true);
 
-	//this is the row in the ggpk.dat file "BackendErrors.dat"
+	//this is the row in the ggpk->dat file "BackendErrors.dat"
 	UINT32 ggpkDatRow = obj.get_UInt32(L"BackendErrorsRow") - 1;
 	UINT32 devID = obj.get_UInt32(L"DevID");
 	UINT32 TextModifier = obj.get_UInt32(L"TextModifier");
@@ -1349,7 +1349,7 @@ void exileSniffer::action_CLI_SELECT_MAPTRAVEL(UIDecodedPkt& obj, QString *analy
 
 	DWORD areaCode = obj.get_UInt32(L"AreaCode");
 	std::wstring areaname;
-	ggpk.lookup_areaCode(areaCode, areaname);
+	ggpk->lookup_areaCode(areaCode, areaname);
 
 	DWORD unk2 = obj.get_UInt32(L"Arg2");
 	byte byte = obj.get_UInt32(L"Arg3");
@@ -1612,9 +1612,9 @@ void exileSniffer::action_SRV_OPEN_UI_PANE(UIDecodedPkt& obj, QString* analysis)
 	std::string paneName;
 	UINT32 paneID = obj.get_UInt32(L"PaneID");
 
-	auto it = ggpk.UIPaneIDs.find(paneID);
-	if (it != ggpk.UIPaneIDs.end())
-		paneName = ggpk.UIPaneIDs.at(paneID);
+	auto it = ggpk->UIPaneIDs.find(paneID);
+	if (it != ggpk->UIPaneIDs.end())
+		paneName = ggpk->UIPaneIDs.at(paneID);
 	else
 		paneName = "<Unkown Pane. Where did this happen?>";
 
@@ -2099,7 +2099,7 @@ void exileSniffer::action_SRV_CREATE_ITEM(UIDecodedPkt& obj, QString *analysis)
 		ushort posY = it->FindMember(L"Row")->value.GetUint();
 		DWORD hash = it->FindMember(L"ItemHash")->value.GetUint();
 		std::string itemname, category;
-		ggpk.lookup_hash(hash, itemname, category);
+		ggpk->lookup_hash(hash, itemname, category);
 
 		analysisStream << "   (" << std::dec << (ushort)posX << "," << (ushort)posY << "): " <<
 				converter.from_bytes(itemname) << std::hex << " (0x" << hash << ") ID: 0x" << instanceID << std::endl;
@@ -2176,7 +2176,7 @@ void exileSniffer::action_SRV_SLOT_ITEMSLIST(UIDecodedPkt& obj, QString *analysi
 			ushort posY = it->FindMember(L"PosY")->value.GetUint();
 			DWORD hash = it->FindMember(L"ItemHash")->value.GetUint();
 			std::string itemname, category;
-			ggpk.lookup_hash(hash, itemname, category);
+			ggpk->lookup_hash(hash, itemname, category);
 
 			analysisStream << "   (" << std::dec << (ushort)posX << "," << (ushort)posY << "): " <<
 				converter.from_bytes(itemname) << std::hex << " (0x" << hash << ") ID: 0x" << instanceID << std::endl;
@@ -3340,7 +3340,7 @@ void exileSniffer::action_SRV_STAT_CHANGED(UIDecodedPkt& obj, QString *analysis)
 
 			UINT32 statIndex = pair[0].GetUint() - 1;
 			analysisStream << "\t" <<
-				converter.from_bytes(ggpk.statDescriptions.at(statIndex))
+				converter.from_bytes(ggpk->statDescriptions.at(statIndex))
 				<< ": " << pair[1].GetInt() << std::endl;
 		}
 		analysisStream << std::endl;
@@ -3476,7 +3476,7 @@ void exileSniffer::action_SRV_START_BUFF(UIDecodedPkt& obj, QString *analysis) /
 
 	UINT32 buffID = obj.get_UInt32(L"BuffID");
 	UINT32 buffDefinitionsRow = obj.get_UInt32(L"BuffDefinitionsRow");
-	std::string buffname = ggpk.buffDefinitions_names_statCounts.at(buffDefinitionsRow).first;
+	std::string buffname = ggpk->buffDefinitions_names_statCounts.at(buffDefinitionsRow).first;
 	UINT32 UnkDWord3 = obj.get_UInt32(L"ID2");
 	UINT32 PotionSlot = obj.get_UInt32(L"PotionSlot");
 	UINT32 controlByte = obj.get_UInt32(L"ID2");
@@ -3724,7 +3724,7 @@ void exileSniffer::action_SRV_UNKNOWN_0x118(UIDecodedPkt& obj, QString *analysis
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 	std::string hashResult;
 	std::string hashCategory;
-	ggpk.lookup_hash(hash, hashResult, hashCategory);
+	ggpk->lookup_hash(hash, hashResult, hashCategory);
 
 	if (!analysis)
 	{
@@ -3804,7 +3804,7 @@ void exileSniffer::action_SRV_SHOW_ENTERING_MSG(UIDecodedPkt& obj, QString *anal
 
 	DWORD areaCode = obj.get_UInt32(L"AreaCode");
 	std::wstring areaname;
-	ggpk.lookup_areaCode(areaCode, areaname);
+	ggpk->lookup_areaCode(areaCode, areaname);
 
 	if (!analysis)
 	{
@@ -4043,7 +4043,7 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 	for (auto it = prophsList.Begin(); it != prophsList.End(); it++)
 	{
 		uint ref = it->FindMember(L"DatReference")->value.GetUint();
-		std::wstring prophecyName = ggpk.getProphecy(ref);
+		std::wstring prophecyName = ggpk->getProphecy(ref);
 		analysisStream << "Position: 0x" << it->FindMember(L"Pos")->value.GetUint() << std::endl;
 		analysisStream << "\tID: " << prophecyName << std::endl;
 		analysisStream << std::endl;
@@ -4054,11 +4054,11 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 	for (auto it = wornItems.Begin(); it != wornItems.End(); it++)
 	{
 		UINT32 visIdentReference1 = it->FindMember(L"VisualIdentity1")->value.GetUint();
-		std::wstring visIdentName1 = ggpk.getVisualIdentity(visIdentReference1);
+		std::wstring visIdentName1 = ggpk->getVisualIdentity(visIdentReference1);
 		UINT32 visIdentReference2 = it->FindMember(L"VisualIdentity2")->value.GetUint();
-		std::wstring visIdentName2 = ggpk.getVisualIdentity(visIdentReference2);
+		std::wstring visIdentName2 = ggpk->getVisualIdentity(visIdentReference2);
 		UINT32 visualEffect = it->FindMember(L"ItemVisualEffect")->value.GetUint();
-		std::wstring visEffectName = ggpk.getVisualEffect(visualEffect);
+		std::wstring visEffectName = ggpk->getVisualEffect(visualEffect);
 
 		analysisStream << "Slot: " << std::dec << it->FindMember(L"Slot")->value.GetUint() << std::endl;
 		analysisStream << "\tVisualIdentity: " << visIdentName1 << std::endl;

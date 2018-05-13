@@ -43,7 +43,10 @@
       <AdditionalLibraryDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateDebugInformation>
       <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Release|x64'">qtmain.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <FullProgramDatabaseFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</FullProgramDatabaseFile>
+      <FullProgramDatabaseFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</FullProgramDatabaseFile>
+      <AssemblyDebug Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</AssemblyDebug>
+      <GenerateMapFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</GenerateMapFile>
+      <MapExports Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</MapExports>
     </Link>
     <QtMoc>
       <InputFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(FullPath)</InputFile>

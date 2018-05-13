@@ -388,12 +388,12 @@ private:
 	rapidjson::Document messageTypes;
 	rapidjson::GenericValue<rapidjson::UTF8<>> *loginMessageTypes = NULL;
 	rapidjson::GenericValue<rapidjson::UTF8<>> *gameMessageTypes = NULL;
-	gameDataStore ggpk;
 	
 private:
 	packet_capture_thread* packetSniffer;
 	key_grabber_thread* keyGrabber;
 	packet_processor* packetProcessor;
 	json_pipe_thread* pipeThread;
+	gameDataStore *ggpk;
 };
 

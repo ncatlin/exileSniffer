@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "gameDataStore.h"
 #include "MurmurHash2.h"
+#include "uiMsg.h"
 
 gameDataStore::~gameDataStore()
 {
@@ -163,7 +164,9 @@ void gameDataStore::fill_gamedata_lists()
 	fopen_s(&pFile, filename.c_str(), "rb");
 	if (!pFile)
 	{
-		std::cerr << "Warning: Could not open " << filename << " for reading as ggpk data. Abandoning Load." << std::endl;
+		std::stringstream err; 
+		err << "Error: Could not open " << filename << " for reading as ggpk data. Abandoning Load.";
+		UIaddLogMsg(err.str(), 0, uiMsgQueue);
 		return;
 	}
 
@@ -176,12 +179,14 @@ void gameDataStore::fill_gamedata_lists()
 
 	if (!jsondoc.IsObject())
 	{
-		std::cerr << "Warning: Corrupt ggpk_exports file "<< filename<<". Abandoning Load." << std::endl;
+		std::stringstream err; 
+		err << "Warning: Corrupt ggpk_exports file "<< filename<<". Abandoning Load." << std::endl;
 		if (jsondoc.HasParseError())
 		{
-			std::cerr << "\t rapidjson parse error " << jsondoc.GetParseError()
+			err << "\t rapidjson parse error " << jsondoc.GetParseError()
 				<< " at offset " << jsondoc.GetErrorOffset() << std::endl;
 		}
+		UIaddLogMsg(err.str(), 0, uiMsgQueue);
 		return;
 	}
 	rapidjson::Value::ConstValueIterator recordsIt;

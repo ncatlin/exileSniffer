@@ -68,7 +68,7 @@ void filterForm::populateFiltersList(rapidjson::GenericValue<rapidjson::UTF8<>> 
 
 	if (!msgInfo.IsArray())
 	{
-		UIaddLogMsg("Cannot load filters due to failed messageTypes.json load", 0, uiMsgQueue);
+		UIaddLogMsg("Cannot load filters due to failed messageTypes.json load. Filters will not load.", 0, uiMsgQueue);
 		return;
 	}
 

@@ -18,6 +18,8 @@ exileSniffer::exileSniffer(QWidget *parent)
 {
 	ui.setupUi(this);
 
+	ggpk = new gameDataStore(&uiMsgQueue);
+
 	load_messagetypes_json();
 
 	setup_settings_tab();
@@ -108,11 +110,25 @@ void exileSniffer::setup_settings_tab()
 	settings->setValue("LoggingEnabled", doPipe);
 	ui.logsEnabledCheck->setChecked(doLogging);
 
-	QDir logdir = settings->value("LogDir", "").toString();
-	if (!logdir.exists()) {
+	QDir logdir;
+	QString logdirstring = settings->value("LogDir", "").toString();
+	UIaddLogMsg("logdirexist " + logdirstring, 0, &uiMsgQueue);
+	if (logdirstring.isEmpty())
+	{
 		logdir = QDir("Logs");
-		settings->setValue("LogDir", logdir.absolutePath());
+		UIaddLogMsg(logdir.absolutePath(), 1, &uiMsgQueue);
 	}
+	else
+	{
+		logdir = QDir(logdirstring);
+		UIaddLogMsg(logdir.absolutePath(), 2, &uiMsgQueue);
+	}
+
+	if (!logdir.exists()) {
+		logdir = QDir("Logs"); 
+		UIaddLogMsg(logdir.absolutePath(), 3, &uiMsgQueue);
+	}
+	settings->setValue("LogDir", logdir.absolutePath());
 	ui.logDirLine->setText(logdir.absolutePath());
 	logDir = logdir.absolutePath();
 	ui.logSetDirBtn->setIcon(style()->standardIcon(QStyle::SP_DirHomeIcon));
@@ -195,10 +211,13 @@ void exileSniffer::refreshFilters()
 
 void exileSniffer::initFilters()
 {
-	filterFormObj.populateFiltersList(*gameMessageTypes);
-	filterFormObj.populatePresetsList();
+	if (gameMessageTypes)
+	{
+		filterFormObj.populateFiltersList(*gameMessageTypes);
+		filterFormObj.populatePresetsList();
 
-	connect(&filterFormObj, SIGNAL(applyFilters()), this, SLOT(refreshFilters()));
+		connect(&filterFormObj, SIGNAL(applyFilters()), this, SLOT(refreshFilters()));
+	}
 }
 
 void exileSniffer::setup_decoded_messages_tab()
@@ -1092,7 +1111,7 @@ void exileSniffer::hashUtilInput()
 	std::string hashCategory;
 
 	ui.order1hash->setText("0x"+QString::number(testhash,16));
-	if (ggpk.lookup_hash(testhash, hashResult, hashCategory))
+	if (ggpk->lookup_hash(testhash, hashResult, hashCategory))
 	{
 		QString result = QString::fromStdString(hashCategory) + ": " + QString::fromStdString(hashResult);
 		ui.order1hashres->setText(result);
@@ -1101,7 +1120,7 @@ void exileSniffer::hashUtilInput()
 		ui.order1hashres->setText("Not found");
 
 	ui.order2hash->setText("0x" + QString::number(ntohl(testhash), 16));
-	if (ggpk.lookup_hash(ntohl(testhash), hashResult, hashCategory))
+	if (ggpk->lookup_hash(ntohl(testhash), hashResult, hashCategory))
 	{
 		QString result = QString::fromStdString(hashCategory) + ": " + QString::fromStdString(hashResult);
 		ui.order2hashres->setText(result);

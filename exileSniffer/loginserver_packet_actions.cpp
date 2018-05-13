@@ -319,7 +319,7 @@ void exileSniffer::action_LOGIN_SRV_NOTIFY_GAMESERVER(UIDecodedPkt& obj, QString
 	unsigned short blobListSize = blobList.Size();
 
 	std::wstring areaname;
-	ggpk.lookup_areaCode(areaCode, areaname);
+	ggpk->lookup_areaCode(areaCode, areaname);
 
 	if (!analysis)
 	{

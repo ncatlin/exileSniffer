@@ -1,8 +1,11 @@
 #pragma once
+#include "uiMsg.h"
+
 class gameDataStore
 {
 public:
-	gameDataStore() {
+	gameDataStore(SafeQueue<UI_MESSAGE *>* uiq) {
+		uiMsgQueue = uiq;
 		fill_gamedata_lists();
 	};
 	~gameDataStore();
@@ -46,7 +49,8 @@ public:
 private:
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
-	std::mutex myMutex;
+	std::mutex myMutex; 
+	SafeQueue<UI_MESSAGE *> *uiMsgQueue = NULL;
 
 	void fill_gamedata_lists();
 	void fill_UI_pane_IDs();

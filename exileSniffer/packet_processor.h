@@ -26,9 +26,9 @@ class packet_processor :
 public:
 
 	packet_processor(key_grabber_thread *keyGrabPtr, SafeQueue<UI_MESSAGE *>* uiq, 
-		SafeQueue<GAMEPACKET > *gameP, SafeQueue<GAMEPACKET > *loginP, gameDataStore& ggpkRef)
+		SafeQueue<GAMEPACKET > *gameP, SafeQueue<GAMEPACKET > *loginP, gameDataStore* ggpkRef)
 	{
-		keyGrabber = keyGrabPtr; uiMsgQueue = uiq; ggpk = &ggpkRef;
+		keyGrabber = keyGrabPtr; uiMsgQueue = uiq; ggpk = ggpkRef;
 		gameQueue = gameP; loginQueue = loginP;
 	}
 	~packet_processor() {};
