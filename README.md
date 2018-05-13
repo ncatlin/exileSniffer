@@ -1,4 +1,4 @@
-# exileSniffer
+# exileSniffer v1.0
 A protocol decryption and dissection tool for the game 'Path of Exile'
 
 It looks something like this:
