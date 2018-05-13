@@ -1077,20 +1077,25 @@ void exileSniffer::filterSelected()
 	QTableWidgetItem *rowitem = ui.decodedListTable->item(rowsSelected.front().row(), 0);
 	UIDecodedPkt* obj = (UIDecodedPkt*)rowitem->data(Qt::UserRole).value<UIDecodedPkt*>();
 
-	//todo filter
+	ushort msgid = obj->getMessageID();
+	if (msgid < rawFiltersFormUI.filterTable->rowCount())
+		filterFormObj.setFilterRowState(msgid, eDisplayState::hidden);
+
 }
 
 void exileSniffer::decodedTableMenuRequest(QPoint pos)
 {
 	QMenu contextMenu(tr("Context menu"), this);
 
+	/*
 	QAction action1("Copy Contents", this);
-	//connect(&action1, SIGNAL(triggered()), this, SLOT(copySelected()));
+	connect(&action1, SIGNAL(triggered()), this, SLOT(copySelected()));
 	contextMenu.addAction(&action1);
+	*/
 
 	//doesnt appear if nested in the if statements?
 	QAction action2("", this);
-	//connect(&action2, SIGNAL(triggered()), this, SLOT(filterSelected()));
+	connect(&action2, SIGNAL(triggered()), this, SLOT(filterSelected()));
 
 	QModelIndexList rowsSelected = ui.decodedListTable->selectionModel()->selectedRows();
 	if (rowsSelected.empty())

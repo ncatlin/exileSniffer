@@ -489,6 +489,7 @@ void packet_processor::deserialise_packets_from_decrypted(streamType streamServe
 	while (remainingDecrypted > 0)
 	{
 		unsigned short pktIDWord = ntohs(consume_WORD());
+
 		DWORD sourceProcess = currentStreamObj->workingSendKey->sourceProcess;
 		UIDecodedPkt *ui_decodedpkt = new UIDecodedPkt(sourceProcess,	
 			streamServer, currentMsgStreamID, incoming, timeSeen);
@@ -523,6 +524,10 @@ void packet_processor::deserialise_packets_from_decrypted(streamType streamServe
 						ui_decodedpkt->setAbandoned();
 					}
 				}
+			}
+			else
+			{
+				errorFlag = ePktIDUnimplemented;
 			}
 		}
 		
@@ -691,10 +696,22 @@ bool packet_processor::process_packet_loop()
 
 	while (running)
 	{
+		if (checkQueue(loginQueue, pendingPktQueue))
+		{
+			while (!pendingPktQueue.empty() && running)
+			{
+				pkt = pendingPktQueue.front();
+				handle_login_data(pkt);
+				pendingPktQueue.pop_front();
+			}
+			continue;
+		}
+
 		//highest priority - only check patch/login if game is quiet
 		if (checkQueue(gameQueue, pendingPktQueue))
 		{
 			bool done = false;
+			bool failure = false;
 			while (!pendingPktQueue.empty() && running)
 			{
 				pkt = pendingPktQueue.front();
@@ -717,28 +734,24 @@ bool packet_processor::process_packet_loop()
 						{
 							pkt = *it;
 							done = handle_game_data(pkt);
-							if (done)
+							if (!done)
+							{
+								failure = true;
 								break;
+							}
 						}
 
 						if (done)
 							pendingPktQueue.erase(it);
 					}
 				}
+				if (failure)
+					break;
 			}
 			continue;
 		}
 
-		if (checkQueue(loginQueue, pendingPktQueue))
-		{
-			while (!pendingPktQueue.empty() && running)
-			{
-				pkt = pendingPktQueue.front();
-				handle_login_data(pkt);
-				pendingPktQueue.pop_front();
-			}
-			continue;
-		}
+
 
 		/*
 		if (checkPipe(patchpipe, &pendingPktQueue))

@@ -203,6 +203,7 @@ class exileSniffer : public QMainWindow
 
 		void action_CLI_CHOSE_ASCENDANCY(UIDecodedPkt&, QString*);
 
+		void action_CLI_MERGE_STACK(UIDecodedPkt&, QString*);
 		void action_CLI_CANCEL_BUF(UIDecodedPkt&, QString*);
 		void action_SRV_UNK_0x2c(UIDecodedPkt&, QString*);
 		void action_CLI_SELECT_MAPTRAVEL(UIDecodedPkt&, QString*);
@@ -210,9 +211,10 @@ class exileSniffer : public QMainWindow
 		void action_SRV_SKILL_SLOTS_LIST(UIDecodedPkt&, QString*);
 		void action_CLI_REVIVE_CHOICE(UIDecodedPkt&, QString*);
 		void action_SRV_YOU_DIED(UIDecodedPkt&, QString*);
-
+		void action_CLI_ACTIVATE_ITEM(UIDecodedPkt&, QString*);
+		
 		void action_CLI_USE_BELT_SLOT(UIDecodedPkt&, QString*);
-		void action_CLI_USE_ITEM(UIDecodedPkt&, QString*);
+		void action_CLI_USE_ITEM_ON_ITEM(UIDecodedPkt&, QString*);
 		void action_CLI_UNK_0x41(UIDecodedPkt&, QString*);
 
 		void action_CLI_SELECT_NPC_DIALOG(UIDecodedPkt&, QString*);
@@ -220,7 +222,7 @@ class exileSniffer : public QMainWindow
 		void action_CLI_CLOSE_NPC_DIALOG(UIDecodedPkt&, QString*);
 
 		void action_SRV_OPEN_UI_PANE(UIDecodedPkt&, QString*);
-
+		void action_CLI_SPLIT_STACK(UIDecodedPkt&, QString*);
 		void action_SRV_LIST_PORTALS(UIDecodedPkt&, QString*);
 		void action_CLI_SEND_PARTY_INVITE(UIDecodedPkt&, QString*);
 
@@ -248,14 +250,16 @@ class exileSniffer : public QMainWindow
 		void action_SRV_SLOT_ITEMSLIST(UIDecodedPkt&, QString*);
 		void action_SRV_INVENTORY_SET_REMOVE(UIDecodedPkt&, QString *);
 		void action_SRV_UNK_0x70(UIDecodedPkt&, QString*);
-		void action_CLI_UNK_0x71(UIDecodedPkt&, QString*);
-		void action_SRV_UNK_0x72(UIDecodedPkt&, QString*);
+		void action_CLI_SELECT_STASHTAB(UIDecodedPkt&, QString*);
+		void action_SRV_STASHTAB_DATA(UIDecodedPkt&, QString*);
 		void action_SRV_UNK_0x73(UIDecodedPkt&, QString*);
 		void action_CLI_SET_STATUS_MESSAGE(UIDecodedPkt&, QString*);
 		void action_SRV_UNK_0x75(UIDecodedPkt&, QString*);
 
 		void action_CLI_ACTIVATE_MAP(UIDecodedPkt&, QString*);
 		void action_CLI_SWAPPED_WEAPONS(UIDecodedPkt&, QString*);
+
+		void action_SRV_INVENTORY_FULL(UIDecodedPkt&, QString*);
 
 		void action_SRV_PVP_MATCHLIST(UIDecodedPkt&, QString*);
 		void action_SRV_EVENTSLIST(UIDecodedPkt&, QString*);
@@ -309,7 +313,8 @@ class exileSniffer : public QMainWindow
 
 		void action_SRV_MOBILE_UNK_0xee(UIDecodedPkt&, QString*);
 		void action_SRV_MOBILE_UNK_0xef(UIDecodedPkt&, QString*);
-
+		void action_SRV_MOVE_CHANNELLED(UIDecodedPkt&, QString*);
+		void action_SRV_END_CHANNELLED(UIDecodedPkt&, QString*);
 		void action_SRV_MOBILE_UPDATE_HMS(UIDecodedPkt&, QString*);
 		void action_SRV_STAT_CHANGED(UIDecodedPkt&, QString*);
 		void action_SRV_UNK_0xf2(UIDecodedPkt&, QString*);

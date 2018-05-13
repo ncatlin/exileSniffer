@@ -46,7 +46,7 @@ void packet_processor::init_gamePkt_deserialisers()
 	//27
 	//28
 	//29
-	//2a
+	gamePktDeserialisers[CLI_MERGE_STACK] = (deserialiser)&packet_processor::deserialise_CLI_MERGE_STACK;
 	gamePktDeserialisers[CLI_CANCEL_BUF] = (deserialiser)&packet_processor::deserialise_CLI_CANCEL_BUF;
 	gamePktDeserialisers[SRV_UNK_0x2c] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x2c;
 	gamePktDeserialisers[CLI_SELECT_MAPTRAVEL] = (deserialiser)&packet_processor::deserialise_CLI_SELECT_MAPTRAVEL;
@@ -54,13 +54,13 @@ void packet_processor::init_gamePkt_deserialisers()
 	gamePktDeserialisers[SRV_SKILL_SLOTS_LIST] = (deserialiser)&packet_processor::deserialise_SRV_SKILL_SLOTS_LIST;
 	gamePktDeserialisers[CLI_REVIVE_CHOICE] = (deserialiser)&packet_processor::deserialise_CLI_REVIVE_CHOICE;
 	gamePktDeserialisers[SRV_YOU_DIED] = (deserialiser)&packet_processor::deserialise_SRV_YOU_DIED;
-	//32
+	gamePktDeserialisers[CLI_ACTIVATE_ITEM] = (deserialiser)&packet_processor::deserialise_CLI_ACTIVATE_ITEM;
 	//33
 	//34
 	//35
 	//36
 	gamePktDeserialisers[CLI_USE_BELT_SLOT] = (deserialiser)&packet_processor::deserialise_CLI_USE_BELT_SLOT;
-	gamePktDeserialisers[CLI_USE_ITEM] = (deserialiser)&packet_processor::deserialise_CLI_USE_ITEM;
+	gamePktDeserialisers[CLI_USE_ITEM_ON_ITEM] = (deserialiser)&packet_processor::deserialise_CLI_USE_ITEM_ON_ITEM;
 	//39
 	//3a
 	//3b
@@ -68,7 +68,7 @@ void packet_processor::init_gamePkt_deserialisers()
 	//3d
 	//3e
 	gamePktDeserialisers[SRV_OPEN_UI_PANE] = (deserialiser)&packet_processor::deserialise_SRV_OPEN_UI_PANE;
-	//40
+	gamePktDeserialisers[CLI_SPLIT_STACK] = (deserialiser)&packet_processor::deserialise_CLI_SPLIT_STACK;
 	gamePktDeserialisers[CLI_UNK_0x41] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0x41;
 	//42
 	//43
@@ -117,8 +117,8 @@ void packet_processor::init_gamePkt_deserialisers()
 	gamePktDeserialisers[SRV_SLOT_ITEMSLIST] = (deserialiser)&packet_processor::deserialise_SRV_SLOT_ITEMSLIST;
 	gamePktDeserialisers[SRV_INVENTORY_SET_REMOVE] = (deserialiser)&packet_processor::deserialise_SRV_INVENTORY_SET_REMOVE;
 	gamePktDeserialisers[SRV_UNK_0x70] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x70;
-	gamePktDeserialisers[CLI_UNK_0x71] = (deserialiser)&packet_processor::deserialise_CLI_UNK_0x71;
-	gamePktDeserialisers[SRV_UNK_0x72] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x72;
+	gamePktDeserialisers[CLI_SELECT_STASHTAB] = (deserialiser)&packet_processor::deserialise_CLI_SELECT_STASHTAB;
+	gamePktDeserialisers[SRV_STASHTAB_DATA] = (deserialiser)&packet_processor::deserialise_SRV_STASHTAB_DATA;
 	gamePktDeserialisers[SRV_UNK_0x73] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x73;
 	gamePktDeserialisers[CLI_SET_STATUS_MESSAGE] = (deserialiser)&packet_processor::deserialise_CLI_SET_STATUS_MESSAGE;
 	gamePktDeserialisers[SRV_UNK_0x75] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x75;
@@ -145,7 +145,7 @@ void packet_processor::init_gamePkt_deserialisers()
 	//8a
 	//8b
 	//8c
-	//8d
+	gamePktDeserialisers[SRV_INVENTORY_FULL] = (deserialiser)&packet_processor::deserialise_SRV_INVENTORY_FULL;
 	//8e
 	//define 0x8f seen when leaving duel queue
 	//define 0x90 seen when leaving duel queue
@@ -238,8 +238,8 @@ void packet_processor::init_gamePkt_deserialisers()
 	gamePktDeserialisers[SRV_OBJ_REMOVED] = (deserialiser)&packet_processor::deserialise_SRV_OBJ_REMOVED;
 	gamePktDeserialisers[SRV_MOBILE_START_SKILL] = (deserialiser)&packet_processor::deserialise_SRV_MOBILE_START_SKILL;
 	gamePktDeserialisers[SRV_MOBILE_FINISH_SKILL] = (deserialiser)&packet_processor::deserialise_SRV_MOBILE_FINISH_SKILL;
-	//ec
-	//ed
+	gamePktDeserialisers[SRV_MOVE_CHANNELLED] = (deserialiser)&packet_processor::deserialise_SRV_MOVE_CHANNELLED;
+	gamePktDeserialisers[SRV_END_CHANNELLED] = (deserialiser)&packet_processor::deserialise_SRV_END_CHANNELLED;
 	gamePktDeserialisers[SRV_MOBILE_UNK_0xee] = (deserialiser)&packet_processor::deserialise_SRV_MOBILE_UNK_0xee;
 	gamePktDeserialisers[SRV_MOBILE_UNK_0xef] = (deserialiser)&packet_processor::deserialise_SRV_MOBILE_UNK_0xef;
 	gamePktDeserialisers[SRV_MOBILE_UPDATE_HMS] = (deserialiser)&packet_processor::deserialise_SRV_MOBILE_UPDATE_HMS;
@@ -450,6 +450,8 @@ void packet_processor::deserialise_SRV_CHAT_MESSAGE(UIDecodedPkt *uipkt)
 	WValue itemArray(rapidjson::kArrayType);
 	for (int i = 0; i < itemCount; i++)
 	{
+		DWORD itemID = ntohs(consume_DWORD());
+
 		ushort modsLen = ntohs(consume_WORD());
 		DWORD hash = consume_DWORD();
 
@@ -461,7 +463,7 @@ void packet_processor::deserialise_SRV_CHAT_MESSAGE(UIDecodedPkt *uipkt)
 
 
 		WValue itemObj(rapidjson::kObjectType);
-		itemObj.AddMember(L"ChatIndex", WValue((UINT32)consume_DWORD()), allocator);
+		itemObj.AddMember(L"ChatIndex", WValue((UINT32)itemID), allocator);
 		itemObj.AddMember(L"ItemHash", WValue((UINT32)hash), allocator);
 		itemObj.AddMember(L"ItemType", WValue(itemString.c_str(), allocator), allocator);
 
@@ -589,11 +591,11 @@ void packet_processor::deserialise_SRV_HNC(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_SRV_AREA_INFO(UIDecodedPkt* uipkt)
 {
-	DWORD areaCode = consume_DWORD();
+	DWORD areaCode = ntohl(consume_DWORD());
 	std::wstring areaname;
 	ggpk->lookup_areaCode(areaCode, areaname);
 	uipkt->add_dword(L"AreaCode", areaCode);
-	uipkt->add_wstring(L"AreaName+", areaname);
+	uipkt->add_wstring(L"AreaName", areaname);
 
 	size_t diffLenWords = ntohs(consume_WORD());
 	std::wstring msg = consumeWString(diffLenWords * 2);
@@ -903,9 +905,10 @@ void packet_processor::deserialise_SRV_INSTANCE_SERVER_DATA(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_CLI_PICKUP_ITEM(UIDecodedPkt *uipkt)
 {
-	consume_add_dword_ntoh(L"Unk1", uipkt);
+	consume_add_word_ntoh(L"Unk1", uipkt);
+	consume_add_word_ntoh(L"Container", uipkt);
 	consume_add_dword_ntoh(L"ItemID", uipkt); //odd this is a dword. todo: check
-	consume_add_byte(L"Unk2", uipkt);
+	consume_add_byte(L"Unk", uipkt);
 }
 
 void packet_processor::deserialise_CLI_DROP_ITEM(UIDecodedPkt *uipkt)
@@ -978,10 +981,18 @@ void packet_processor::deserialise_CLI_CANCEL_BUF(UIDecodedPkt *uipkt)
 	consume_add_dword_ntoh(L"BuffID", uipkt);
 }
 
+void packet_processor::deserialise_CLI_MERGE_STACK(UIDecodedPkt *uipkt)
+{
+	//not checked what the data sizes actually are
+	consume_add_dword_ntoh(L"Unk1", uipkt);
+	consume_add_byte(L"Unk2", uipkt);
+	consume_add_dword_ntoh(L"Unk3", uipkt);
+}
+
 //todo
 void packet_processor::deserialise_SRV_UNK_0x2c(UIDecodedPkt *uipkt)
 {
-	//todo 
+
 	unsigned short itemCount = 4; //comes from a member variable, dunno where it's set yet
 	for (int i = 0; i < itemCount; i++)
 	{
@@ -1026,22 +1037,23 @@ void packet_processor::deserialise_SRV_YOU_DIED(UIDecodedPkt *uipkt)
 	consume_add_dword(L"Unk", uipkt);
 }
 
+void packet_processor::deserialise_CLI_ACTIVATE_ITEM(UIDecodedPkt *uipkt)
+{
+	consume_add_dword_ntoh(L"Unk1", uipkt);
+	consume_add_dword_ntoh(L"Item1", uipkt);
+}
+
 void packet_processor::deserialise_CLI_USE_BELT_SLOT(UIDecodedPkt *uipkt)
 {
 	consume_add_dword_ntoh(L"Slot", uipkt);
 }
 
-void packet_processor::deserialise_CLI_USE_ITEM(UIDecodedPkt *uipkt)
+void packet_processor::deserialise_CLI_USE_ITEM_ON_ITEM(UIDecodedPkt *uipkt)
 {
 	consume_add_dword_ntoh(L"Unk1", uipkt);
 	consume_add_dword_ntoh(L"Item1", uipkt);
 	consume_add_dword_ntoh(L"Unk2", uipkt);
 	consume_add_dword_ntoh(L"Item2", uipkt);
-
-	/*
-	std::cout << std::hex << "Player activated item 0x" << item1 << " on item 0x" << item2;
-	std::cout << "i1unk: 0x" << unk1 << " i2unk: 0x" << unk2 << std::endl;
-	*/
 }
 
 void packet_processor::deserialise_CLI_UNK_0x41(UIDecodedPkt *uipkt)
@@ -1075,6 +1087,14 @@ void packet_processor::deserialise_SRV_OPEN_UI_PANE(UIDecodedPkt *uipkt)
 {
 	consume_add_byte(L"PaneID", uipkt);
 	consume_add_dword_ntoh(L"Arg", uipkt);
+}
+
+void packet_processor::deserialise_CLI_SPLIT_STACK(UIDecodedPkt *uipkt)
+{
+	consume_add_dword_ntoh(L"Unk1", uipkt);
+	consume_add_dword_ntoh(L"ItemID1", uipkt);
+	consume_add_dword_ntoh(L"MouseStackSize", uipkt);
+	consume_add_byte(L"Unk2", uipkt);
 }
 
 void packet_processor::deserialise_SRV_LIST_PORTALS(UIDecodedPkt *uipkt)
@@ -1437,7 +1457,7 @@ void packet_processor::deserialise_SRV_UNK_0x70(UIDecodedPkt *uipkt)
 	consume_add_dword_ntoh(L"Arg", uipkt);
 }
 
-void packet_processor::deserialise_CLI_UNK_0x71(UIDecodedPkt *uipkt)
+void packet_processor::deserialise_CLI_SELECT_STASHTAB(UIDecodedPkt *uipkt)
 {
 	consume_add_byte(L"Unk1", uipkt);
 	consume_add_byte(L"Unk2", uipkt);
@@ -1445,7 +1465,7 @@ void packet_processor::deserialise_CLI_UNK_0x71(UIDecodedPkt *uipkt)
 }
 
 
-void packet_processor::deserialise_SRV_UNK_0x72(UIDecodedPkt *uipkt)
+void packet_processor::deserialise_SRV_STASHTAB_DATA(UIDecodedPkt *uipkt)
 {
 	consume_add_word_ntoh(L"Unk1", uipkt);
 	consume_add_dword_ntoh(L"Unk2", uipkt);
@@ -1542,6 +1562,11 @@ void packet_processor::deserialise_SRV_UNK_POSITION_LIST(UIDecodedPkt *uipkt)
 	}
 
 	uipkt->payload->AddMember(L"CoordArray", posArray, allocator);
+}
+
+void packet_processor::deserialise_SRV_INVENTORY_FULL(UIDecodedPkt *uipkt)
+{
+	//no data expected
 }
 
 void packet_processor::deserialise_SRV_PVP_MATCHLIST(UIDecodedPkt *uipkt)
@@ -1726,14 +1751,14 @@ void packet_processor::deserialise_CLI_USED_SKILL(UIDecodedPkt *uipkt)
 {
 	consume_add_dword_ntoh(L"Coord1", uipkt);
 	consume_add_dword_ntoh(L"Coord2", uipkt);
-	consume_add_word(L"SkillID", uipkt);
+	consume_add_word_ntoh(L"SkillID", uipkt);
 	consume_add_byte(L"ControlModifier", uipkt);
 }
 
 void packet_processor::deserialise_CLI_CLICK_OBJ(UIDecodedPkt *uipkt)
 {
 	consume_add_dword_ntoh(L"ObjID", uipkt);
-	consume_add_word(L"SkillID", uipkt);
+	consume_add_word_ntoh(L"SkillID", uipkt);
 	consume_add_byte(L"ControlModifier", uipkt);
 }
 
@@ -1868,6 +1893,27 @@ void packet_processor::deserialise_SRV_MOBILE_FINISH_SKILL(UIDecodedPkt *uipkt)
 	consume_add_dword_ntoh(L"ID1", uipkt);
 	consume_add_dword_ntoh(L"ID2", uipkt);
 	consume_add_word_ntoh(L"ID3", uipkt);
+}
+
+void packet_processor::deserialise_SRV_MOVE_CHANNELLED(UIDecodedPkt *uipkt)
+{
+	//10 b objid
+	consume_add_dword_ntoh(L"ID1", uipkt);
+	consume_add_dword_ntoh(L"ID2", uipkt);
+	consume_add_word_ntoh(L"ID3", uipkt);
+
+	consume_add_word_ntoh(L"Unk1", uipkt);
+	consume_add_dword_ntoh(L"Coord1", uipkt);
+	consume_add_dword_ntoh(L"Coord2", uipkt);
+}
+
+void packet_processor::deserialise_SRV_END_CHANNELLED(UIDecodedPkt *uipkt)
+{
+	consume_add_dword_ntoh(L"Unk1", uipkt);	
+	consume_add_word_ntoh(L"Unk2", uipkt);	
+	consume_add_word_ntoh(L"Unk3", uipkt);
+	consume_add_dword_ntoh(L"Unk4", uipkt);
+	consume_add_byte(L"Unk5", uipkt);
 }
 
 void packet_processor::deserialise_SRV_MOBILE_UNK_0xee(UIDecodedPkt *uipkt)
