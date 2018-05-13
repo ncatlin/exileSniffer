@@ -332,31 +332,6 @@ void packet_processor::deserialise_SRV_PKT_ENCAPSULATED(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_CLI_CHAT_MSG_ITEMS(UIDecodedPkt *uipkt)
 {
-	/*
-	used when items are linked, but replaces CLI_CHAT_MESSAGE entirely with 2+ items
-	-------
-	00 06 //pkt id
-
-	//header. expands 15 bytes for every extra item.
-	//cant see obvious link between values and item codes
-
-	00 00 00 01
-	00 00 00 01
-	00 00 04 04 00 00 08
-
-	00 06 //text len (bytes*2)
-	23 00 5f 00 61  00 61 00 61 00 5f 00  //text with 5f00 replacing items
-	02 //item count
-	00 00 00 01  //item reference
-	00 00 00 05
-	-------
-	need to understand header bytes but not a priority at the moment.
-	notes for 2+ items:
-	[header]
-
-	header has 15 bytes per item
-
-	*/
 	consume_add_dword_ntoh(L"Index", uipkt);
 	consume_add_dword_ntoh(L"Container", uipkt);
 	consume_add_dword_ntoh(L"ItemID", uipkt);
@@ -437,7 +412,7 @@ void packet_processor::deserialise_SRV_CHAT_MESSAGE(UIDecodedPkt *uipkt)
 	uipkt->add_wstring(L"Text", consumeWString(textlen * 2));
 	ushort taglen = ntohs(consume_WORD());
 	uipkt->add_wstring(L"Tag", consumeWString(taglen * 2));
-	//guesswork
+	//guesswork - injection makes a fancy dev tag appear
 	consume_add_byte(L"Dev", uipkt);
 	consume_add_byte(L"Challenges", uipkt);
 	consume_add_byte(L"Hide", uipkt);

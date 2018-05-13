@@ -367,8 +367,6 @@ void exileSniffer::addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPk
 		ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_SUMMARY, summary);
 
 		setRowColor(rowIndex, QColor(255, 150, 150, 255));
-		ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_MSGID, pktIDItem);
-
 		return;
 	}
 
@@ -380,7 +378,6 @@ void exileSniffer::addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPk
 		ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_SUMMARY, summary);
 
 		setRowColor(rowIndex, QColor(255, 175, 175, 255));
-		ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_MSGID, pktIDItem);
 		return;
 	}
 
@@ -417,6 +414,15 @@ void exileSniffer::addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPk
 void exileSniffer::action_undecoded_packet(UIDecodedPkt& obj)
 {
 	obj.toggle_payload_operations(true);
+
+	//will only work for packets in the good range. 0x9F02 is still gonna show up
+	ushort pktID = obj.getMessageID();
+	if (pktID < rawFiltersFormUI.filterTable->rowCount() && !packet_passes_decoded_filter(pktID))
+	{
+		++decodedCount_Displayed_Filtered.second;
+		updateDecodedFilterLabel();
+		return;
+	}
 
 	if (!obj.originalbuf) 
 	{
@@ -3060,35 +3066,6 @@ void exileSniffer::action_SRV_OBJ_REMOVED(UIDecodedPkt& obj, QString *analysis)
 
 void exileSniffer::action_SRV_MOBILE_START_SKILL(UIDecodedPkt& obj, QString *analysis)
 {
-	/*
-	00 EA 
-	00 00 03 E4
-	00 00 03 E4 
-	70 00 
-	00 
-	80 B7 
-	80 9D 
-	80 B9 
-	80 83 
-	29 09 //skill
-	84 68 //pkid
-
-
-#3351 17:23:20 Server[Game] to PlayerClient(31 bytes)
-  00 EA 
-  00 00 03 E4 
-  00 00 00 00 
-  00 00 
-  80 
-  00 00 00 A9 
-  80 B8 
-  80 8B 
-  80 BC 
-  80 74 
-  02 66 
-  84 69 //pkid
-	
-	*/
 	obj.toggle_payload_operations(true);
 
 	UINT32 ID1 = obj.get_UInt32(L"ID1");

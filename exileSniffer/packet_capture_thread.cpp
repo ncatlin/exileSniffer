@@ -177,11 +177,8 @@ void packet_capture_thread::on_stream_terminated(Tins::TCPIP::Stream& stream, Ti
 	newStreamMsg << "Stream "<< std::dec << getStreamID(stream) <<" ended ("<<reason<<". Client:" << stream.client_port() <<
 		" -> " << stream.server_addr_v4().to_string() << ":" << stream.server_port();
 
-	std::cout << newStreamMsg.str() << std::endl;
-
 	UIaddLogMsg(newStreamMsg.str().c_str(), 0, uiMsgQueue);
 	UInotifyStreamState(getStreamID(stream), eStreamState::eStreamEnded, uiMsgQueue);
-	
 }
 
 void packet_capture_thread::main_loop()
@@ -196,7 +193,7 @@ void packet_capture_thread::main_loop()
 		this,
 		std::placeholders::_1, std::placeholders::_2));
 
-	Tins::NetworkInterface& iface = Tins::NetworkInterface::default_interface();
+	Tins::NetworkInterface& iface = Tins::NetworkInterface::default_interface(); //todo: allow choice of interface
 	Tins::IPv4Address hostAddr = iface.ipv4_address();
 
 	std::string filterString = "ip host " + hostAddr.to_string();

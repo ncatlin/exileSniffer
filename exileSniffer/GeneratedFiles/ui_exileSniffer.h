@@ -32,6 +32,7 @@
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QTableWidget>
+#include <QtWidgets/QTextEdit>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 #include "statuswidget.h"
@@ -137,6 +138,8 @@ public:
     QLabel *order2hashres;
     QLabel *label_11;
     QWidget *tab;
+    QGridLayout *gridLayout_5;
+    QTextEdit *textEdit;
     QStatusBar *statusBar;
 
     void setupUi(QMainWindow *exileSniffer)
@@ -740,6 +743,17 @@ public:
         processTabs->addTab(utilsTab, QString());
         tab = new QWidget();
         tab->setObjectName(QStringLiteral("tab"));
+        gridLayout_5 = new QGridLayout(tab);
+        gridLayout_5->setSpacing(6);
+        gridLayout_5->setContentsMargins(11, 11, 11, 11);
+        gridLayout_5->setObjectName(QStringLiteral("gridLayout_5"));
+        textEdit = new QTextEdit(tab);
+        textEdit->setObjectName(QStringLiteral("textEdit"));
+        textEdit->setMaximumSize(QSize(800, 280));
+        textEdit->setReadOnly(true);
+
+        gridLayout_5->addWidget(textEdit, 0, 0, 1, 1);
+
         processTabs->addTab(tab, QString());
 
         gridLayout->addWidget(processTabs, 0, 0, 1, 1);
@@ -832,6 +846,25 @@ public:
         order2hashres->setText(QString());
         label_11->setText(QApplication::translate("exileSniffer", "Enter a sequence of hex bytes to lookup a murmur2 hash. Only works for the GGPK strings we have catalogued.", Q_NULLPTR));
         processTabs->setTabText(processTabs->indexOf(utilsTab), QApplication::translate("exileSniffer", "Utilities", Q_NULLPTR));
+        textEdit->setHtml(QApplication::translate("exileSniffer", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">exileSniffer Version 1.0</p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">https://github.com/ncatlin/exileSniffer</p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-b"
+                        "ottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Developed by Nia Catlin</p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Apache 2.0 Licenced</p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Interacts with (and requires) WinPcap to sniff packets - Get it from https://www.winpcap.org/install/default.htm</p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin"
+                        "-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Other libraries used: libtins (stream processing), rapidjson, Qt</p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">PyPoE (https://github.com/OmegaK2/PyPoE) is used to generate the game data dictionary</p></body></html>", Q_NULLPTR));
         processTabs->setTabText(processTabs->indexOf(tab), QApplication::translate("exileSniffer", "About", Q_NULLPTR));
     } // retranslateUi
 

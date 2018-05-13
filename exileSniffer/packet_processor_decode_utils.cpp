@@ -256,7 +256,6 @@ std::wstring packet_processor::consumeWString(size_t bytesLength)
 		{
 			std::stringstream err;
 			err << "Warning! Long string " << bytesLength << " possible bad byte order" << std::endl;
-			std::cout << err.str();
 			UIaddLogMsg(QString::fromStdString(err.str()), activeClientPID, uiMsgQueue);
 		}
 
