@@ -40,6 +40,10 @@ if __name__ == "__main__":
 
 For the long explanation of what it is and how it works read [this](https://tbinarii.blogspot.co.uk/2018/05/reverse-engineering-path-of-exile.html)
 
+How it works
+----------
+
+exileSniffer doesn't modify the Path of Exile binary or its memory. There are no code caves or hardcoded offsets to pointer chains or any of that awful stuff - just some heureustics to read the session key from process memory during login. It then closes the process handle and never interacts with it again (or until the player logs out). All the other information is obtained by network sniffing.
 
 Using
 ----------
