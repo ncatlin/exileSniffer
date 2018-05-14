@@ -140,6 +140,9 @@
     <ClInclude Include="clientHexData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="exileSniffer.h">
@@ -173,5 +176,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="exileSniffer.ico" />
   </ItemGroup>
 </Project>

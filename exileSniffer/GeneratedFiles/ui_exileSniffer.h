@@ -776,7 +776,7 @@ public:
         QObject::connect(logSetDirBtn, SIGNAL(clicked()), exileSniffer, SLOT(doLogSetDir()));
         QObject::connect(logsOpenDirBtn, SIGNAL(clicked()), exileSniffer, SLOT(doLogOpenDir()));
 
-        processTabs->setCurrentIndex(1);
+        processTabs->setCurrentIndex(5);
         decrypt_details_stack->setCurrentIndex(1);
         decodedDetailsTab->setCurrentIndex(1);
         settingsChoiceList->setCurrentRow(0);
