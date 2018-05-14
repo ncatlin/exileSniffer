@@ -44,10 +44,13 @@ For the long explanation of what it is and how it works read [this](https://tbin
 Using
 ----------
 
-Be running Windows. 
-Unzip the archive with 7zip.  
+[Download here](https://github.com/ncatlin/exileSniffer/releases/download/1.0/exileSniffer.7z)
+
 
 (SHA256 = C92C70279809A93A8BF3BF87ADB9D1E8FCFD20D7E9FAFF12A99F956878298190)
+
+Be running Windows. 
+Unzip the archive with 7zip.  
 
 Make sure [WinPcap](https://www.winpcap.org/install/default.htm) is installed. If you can sniff with wireshark, you should be able to sniff with this.
 
