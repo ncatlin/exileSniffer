@@ -45,7 +45,10 @@ Using
 ----------
 
 Be running Windows. 
-Unzip the archive with 7zip.  (SHA256 = C92C70279809A93A8BF3BF87ADB9D1E8FCFD20D7E9FAFF12A99F956878298190)
+Unzip the archive with 7zip.  
+
+(SHA256 = C92C70279809A93A8BF3BF87ADB9D1E8FCFD20D7E9FAFF12A99F956878298190)
+
 Make sure [WinPcap](https://www.winpcap.org/install/default.htm) is installed. If you can sniff with wireshark, you should be able to sniff with this.
 
 *If you get a message about wpcap.dll not being found - you need to install winpcap*.
