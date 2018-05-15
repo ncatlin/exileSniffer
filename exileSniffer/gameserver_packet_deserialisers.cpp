@@ -116,7 +116,7 @@ void packet_processor::init_gamePkt_deserialisers()
 	gamePktDeserialisers[SRV_CREATE_ITEM] = (deserialiser)&packet_processor::deserialise_SRV_CREATE_ITEM;
 	gamePktDeserialisers[SRV_SLOT_ITEMSLIST] = (deserialiser)&packet_processor::deserialise_SRV_SLOT_ITEMSLIST;
 	gamePktDeserialisers[SRV_INVENTORY_SET_REMOVE] = (deserialiser)&packet_processor::deserialise_SRV_INVENTORY_SET_REMOVE;
-	gamePktDeserialisers[SRV_UNK_0x70] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x70;
+	gamePktDeserialisers[SRV_GRANTED_XP] = (deserialiser)&packet_processor::deserialise_SRV_GRANTED_XP;
 	gamePktDeserialisers[CLI_SELECT_STASHTAB] = (deserialiser)&packet_processor::deserialise_CLI_SELECT_STASHTAB;
 	gamePktDeserialisers[SRV_STASHTAB_DATA] = (deserialiser)&packet_processor::deserialise_SRV_STASHTAB_DATA;
 	gamePktDeserialisers[SRV_UNK_0x73] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x73;
@@ -221,7 +221,7 @@ void packet_processor::init_gamePkt_deserialisers()
 	gamePktDeserialisers[CLI_USED_SKILL] = (deserialiser)&packet_processor::deserialise_CLI_USED_SKILL;
 	gamePktDeserialisers[CLI_CLICK_OBJ] = (deserialiser)&packet_processor::deserialise_CLI_CLICK_OBJ;
 	gamePktDeserialisers[CLI_MOUSE_HELD] = (deserialiser)&packet_processor::deserialise_CLI_MOUSE_HELD;
-	//db
+	gamePktDeserialisers[SRV_NOTIFY_AFK] = (deserialiser)&packet_processor::deserialise_SRV_NOTIFY_AFK;
 	gamePktDeserialisers[CLI_MOUSE_RELEASE] = (deserialiser)&packet_processor::deserialise_CLI_MOUSE_RELEASE;
 	//dd
 	//de
@@ -248,7 +248,7 @@ void packet_processor::init_gamePkt_deserialisers()
 	gamePktDeserialisers[SRV_UNK_0xf3] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xf3;
 	//f4
 	gamePktDeserialisers[SRV_UNK_0xf5] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xf5;
-	//f6
+	gamePktDeserialisers[SRV_UNK_0xf6] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xf6;
 	gamePktDeserialisers[SRV_UNK_0xf7] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xf7;	
 	gamePktDeserialisers[SRV_UNK_0xf8] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0xf8;
 	//f9
@@ -1420,9 +1420,9 @@ void packet_processor::deserialise_SRV_INVENTORY_SET_REMOVE(UIDecodedPkt *uipkt)
 	consume_add_dword_ntoh(L"Unk2", uipkt);
 }
 
-void packet_processor::deserialise_SRV_UNK_0x70(UIDecodedPkt *uipkt)
+void packet_processor::deserialise_SRV_GRANTED_XP(UIDecodedPkt *uipkt)
 {
-	consume_add_dword_ntoh(L"Arg", uipkt);
+	consume_add_dword_ntoh(L"XP", uipkt);
 }
 
 void packet_processor::deserialise_CLI_SELECT_STASHTAB(UIDecodedPkt *uipkt)
@@ -1607,8 +1607,8 @@ void packet_processor::deserialise_SRV_MICROTRANSACTION_SHOP_DETAILS(UIDecodedPk
 
 void packet_processor::deserialise_CLI_UNK_A3(UIDecodedPkt *uipkt)
 {
-	consume_add_byte(L"fff", uipkt);
-	consume_add_dword_ntoh(L"fff3", uipkt);
+	consume_add_byte(L"Unk1", uipkt);
+	consume_add_dword_ntoh(L"Unk2", uipkt);
 }
 
 void packet_processor::deserialise_SRV_CHAT_CHANNEL_ID(UIDecodedPkt *uipkt)
@@ -1749,6 +1749,12 @@ void packet_processor::deserialise_CLI_MOUSE_HELD(UIDecodedPkt *uipkt)
 	consume_add_dword_ntoh(L"Coord1", uipkt);
 	consume_add_dword_ntoh(L"Coord2", uipkt);
 }
+
+void packet_processor::deserialise_SRV_NOTIFY_AFK(UIDecodedPkt *uipkt)
+{
+	//no data expected
+}
+
 
 void packet_processor::deserialise_CLI_MOUSE_RELEASE(UIDecodedPkt *uipkt)
 {
@@ -2016,8 +2022,8 @@ void packet_processor::deserialise_SRV_UNK_0xf3(UIDecodedPkt *uipkt)
 	consume_add_word_ntoh(L"ID3", uipkt);
 
 
-	consume_add_dword_ntoh(L"DW1", uipkt);
-	consume_add_dword_ntoh(L"DW2", uipkt);
+	consume_add_dword_ntoh(L"Coord1", uipkt);
+	consume_add_dword_ntoh(L"Coord2", uipkt);
 	consume_add_dword_ntoh(L"DW3", uipkt);
 	consume_add_dword_ntoh(L"DW4", uipkt);
 
@@ -2033,6 +2039,21 @@ void packet_processor::deserialise_SRV_UNK_0xf5(UIDecodedPkt *uipkt)
 	consume_add_dword_ntoh(L"Arg1", uipkt);
 	consume_add_byte(L"Arg2", uipkt);
 }
+
+
+void packet_processor::deserialise_SRV_UNK_0xf6(UIDecodedPkt *uipkt)
+{
+	//10 b objid
+	consume_add_dword_ntoh(L"ID1", uipkt);
+	consume_add_dword_ntoh(L"ID2", uipkt);
+	consume_add_word_ntoh(L"ID3", uipkt);
+
+	consume_add_dword_ntoh(L"Unk1", uipkt);
+	consume_add_dword_ntoh(L"Unk2", uipkt);
+	consume_add_dword_ntoh(L"Unk3", uipkt);
+	consume_add_byte(L"Unk4", uipkt);
+}
+
 
 void packet_processor::deserialise_SRV_UNK_0xf7(UIDecodedPkt *uipkt)
 {

@@ -249,7 +249,7 @@ class exileSniffer : public QMainWindow
 		void action_SRV_CREATE_ITEM(UIDecodedPkt&, QString*);
 		void action_SRV_SLOT_ITEMSLIST(UIDecodedPkt&, QString*);
 		void action_SRV_INVENTORY_SET_REMOVE(UIDecodedPkt&, QString *);
-		void action_SRV_UNK_0x70(UIDecodedPkt&, QString*);
+		void action_SRV_GRANTED_XP(UIDecodedPkt&, QString*);
 		void action_CLI_SELECT_STASHTAB(UIDecodedPkt&, QString*);
 		void action_SRV_STASHTAB_DATA(UIDecodedPkt&, QString*);
 		void action_SRV_UNK_0x73(UIDecodedPkt&, QString*);
@@ -303,6 +303,7 @@ class exileSniffer : public QMainWindow
 
 		void action_CLI_CLICK_OBJ(UIDecodedPkt&, QString*);
 		void action_CLI_MOUSE_HELD(UIDecodedPkt&, QString*);
+		void action_SRV_NOTIFY_AFK(UIDecodedPkt&, QString*);
 		void action_CLI_MOUSE_RELEASE(UIDecodedPkt&, QString*);
 
 		void action_CLI_OPEN_WORLD_SCREEN(UIDecodedPkt&, QString*);
@@ -324,7 +325,7 @@ class exileSniffer : public QMainWindow
 		void action_SRV_UNK_0xf3(UIDecodedPkt&, QString*);
 
 		void action_SRV_UNK_0xf5(UIDecodedPkt&, QString*);
-
+		void action_SRV_UNK_0xf6(UIDecodedPkt&, QString*);
 		void action_SRV_UNK_0xf7(UIDecodedPkt&, QString*);
 		void action_SRV_UNK_0xf8(UIDecodedPkt&, QString*);
 

@@ -1,5 +1,17 @@
 Version 1.0.1
 
-Handle more packets
-	0x81 - SRV_CHANGE_LIGHTING
-	0x82 - CLI_TRANSFER_ITEM
+	Handle more packets
+		0x81 - SRV_CHANGE_LIGHTING
+		0x82 - CLI_TRANSFER_ITEM
+		0xdb - SRV_NOTIFY_AFK
+		0xf6 - SRV_UNK_0xf6
+
+	Improve existing packets
+		0x75 - SRV_MOVE_OBJECT
+
+	Minor display/naming improvements:
+		0x70 - SRV_GRANTED_XP
+		0xA3 - CLI_UNK_A3
+		0xF3 - CLI_UNK_F3
+		
+	

@@ -257,7 +257,7 @@
 	{"ID":216, "Name":"CLI_USED_SKILL", "Description":"Player action (lockstep)", "Inbound":false },
 	{"ID":217, "Name":"CLI_CLICK_OBJ", "Description":"Clicked object (lockstep)", "Inbound":false },
 	{"ID":218, "Name":"CLI_MOUSE_HELD", "Description":"Moved held mouse (lockstep)", "Inbound":false },
-	{"ID":219, "Name":"UNKNOWN", "Description":"Unknown", "Inbound":false },
+	{"ID":219, "Name":"SRV_NOTIFY_AFK", "Description":"You are AFK", "Inbound":false },
 	{"ID":220, "Name":"CLI_MOUSE_RELEASE", "Description":"Released skill (lockstep)", "Inbound":false },
 	{"ID":221, "Name":"UNKNOWN", "Description":"Unknown", "Inbound":false },
 	{"ID":222, "Name":"UNKNOWN", "Description":"Unknown", "Inbound":false },

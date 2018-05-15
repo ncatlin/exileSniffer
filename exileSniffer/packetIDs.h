@@ -125,12 +125,12 @@
 #define SRV_CREATE_ITEM (SRV_UNK_0x6c +1)
 #define SRV_SLOT_ITEMSLIST (SRV_CREATE_ITEM+1)
 #define SRV_INVENTORY_SET_REMOVE (SRV_SLOT_ITEMSLIST+1)
-#define SRV_UNK_0x70 (SRV_INVENTORY_SET_REMOVE+1)
-#define CLI_SELECT_STASHTAB 0x71
+#define SRV_GRANTED_XP (SRV_INVENTORY_SET_REMOVE+1)
+#define CLI_SELECT_STASHTAB (SRV_GRANTED_XP+1)
 #define SRV_STASHTAB_DATA (CLI_SELECT_STASHTAB+1)
 #define SRV_UNK_0x73 (SRV_STASHTAB_DATA+1)
 #define CLI_SET_STATUS_MESSAGE 0x74
-#define SRV_DO_TELEPORT (CLI_SET_STATUS_MESSAGE+1)
+#define SRV_MOVE_OBJECT (CLI_SET_STATUS_MESSAGE+1)
 //76
 //77
 //78
@@ -231,8 +231,8 @@
 #define CLI_USED_SKILL 0xd8
 #define CLI_CLICK_OBJ (CLI_USED_SKILL+1) //0xd9
 #define CLI_MOUSE_HELD (CLI_CLICK_OBJ+1) //0xda
-//db  //seen before going afk?
-#define CLI_MOUSE_RELEASE 0xdc
+#define SRV_NOTIFY_AFK (CLI_MOUSE_HELD+1) //0xdb ...seems like kinda weird ordering?
+#define CLI_MOUSE_RELEASE (SRV_NOTIFY_AFK+1) //0xdc
 //dd
 //de
 //df
@@ -258,7 +258,7 @@
 #define SRV_UNK_0xf3 0xf3 //aura?
 //f4
 #define SRV_UNK_0xf5 0xf5
-//f6
+#define SRV_UNK_0xf6 0xf6 //seem in kaom's dream
 #define SRV_UNK_0xf7 0xf7
 #define SRV_UNK_0xf8 0xf8
 //f9

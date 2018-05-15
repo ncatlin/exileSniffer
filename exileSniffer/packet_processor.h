@@ -161,7 +161,7 @@ private:
 	void deserialise_SRV_CREATE_ITEM(UIDecodedPkt *);
 	void deserialise_SRV_SLOT_ITEMSLIST(UIDecodedPkt *);
 	void deserialise_SRV_INVENTORY_SET_REMOVE(UIDecodedPkt *);
-	void deserialise_SRV_UNK_0x70(UIDecodedPkt *);
+	void deserialise_SRV_GRANTED_XP(UIDecodedPkt *);
 	void deserialise_CLI_SELECT_STASHTAB(UIDecodedPkt *);
 	void deserialise_SRV_STASHTAB_DATA(UIDecodedPkt *);
 	void deserialise_SRV_UNK_0x73(UIDecodedPkt *);
@@ -215,6 +215,7 @@ private:
 
 	void deserialise_CLI_CLICK_OBJ(UIDecodedPkt *);
 	void deserialise_CLI_MOUSE_HELD(UIDecodedPkt *);
+	void deserialise_SRV_NOTIFY_AFK(UIDecodedPkt *);
 	void deserialise_CLI_MOUSE_RELEASE(UIDecodedPkt *);
 
 	void deserialise_CLI_OPEN_WORLD_SCREEN(UIDecodedPkt *);
@@ -238,7 +239,7 @@ private:
 	void deserialise_SRV_UNK_0xf3(UIDecodedPkt *);
 
 	void deserialise_SRV_UNK_0xf5(UIDecodedPkt *);
-
+	void deserialise_SRV_UNK_0xf6(UIDecodedPkt *);
 	void deserialise_SRV_UNK_0xf7(UIDecodedPkt *);
 	void deserialise_SRV_UNK_0xf8(UIDecodedPkt *);
 
