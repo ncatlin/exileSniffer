@@ -142,7 +142,7 @@
 //7e
 #define CLI_SWAPPED_WEAPONS 0x7f
 //80
-#define SRV_UNK_0x81 0x81 //i have no idea where i saw this packet
+#define SRV_ADJUST_LIGHTING 0x81
 //82
 //83
 //84

@@ -142,7 +142,7 @@ void exileSniffer::init_gamePkt_Actioners()
 	//7e
 	gamePktActioners[CLI_SWAPPED_WEAPONS] = &exileSniffer::action_CLI_SWAPPED_WEAPONS;
 	//80
-	gamePktActioners[SRV_UNK_0x81] = &exileSniffer::action_SRV_UNK_0x81;
+	gamePktActioners[SRV_ADJUST_LIGHTING] = &exileSniffer::action_SRV_ADJUST_LIGHTING;
 	//82
 	//83
 	//84
@@ -2371,7 +2371,7 @@ void exileSniffer::action_CLI_SWAPPED_WEAPONS(UIDecodedPkt& obj, QString *analys
 	}
 }
 
-void exileSniffer::action_SRV_UNK_0x81(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_ADJUST_LIGHTING(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 

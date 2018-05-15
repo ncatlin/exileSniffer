@@ -133,7 +133,7 @@ void packet_processor::init_gamePkt_deserialisers()
 	//7e
 	gamePktDeserialisers[CLI_SWAPPED_WEAPONS] = (deserialiser)&packet_processor::deserialise_CLI_SWAPPED_WEAPONS;
 	//80
-	gamePktDeserialisers[SRV_UNK_0x81] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x81;
+	gamePktDeserialisers[SRV_ADJUST_LIGHTING] = (deserialiser)&packet_processor::deserialise_SRV_ADJUST_LIGHTING;
 	//82
 	//83
 	//84
@@ -1487,7 +1487,7 @@ void packet_processor::deserialise_CLI_SWAPPED_WEAPONS(UIDecodedPkt *uipkt)
 	consume_add_byte(L"Byte", uipkt);
 }
 
-void packet_processor::deserialise_SRV_UNK_0x81(UIDecodedPkt *uipkt)
+void packet_processor::deserialise_SRV_ADJUST_LIGHTING(UIDecodedPkt *uipkt)
 {
 	consume_add_word_ntoh(L"Unk1", uipkt);
 	consume_add_byte(L"Unk2", uipkt);
