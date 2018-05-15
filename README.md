@@ -40,12 +40,22 @@ if __name__ == "__main__":
 
 For the long explanation of what it is and how it works read [this](https://tbinarii.blogspot.co.uk/2018/05/reverse-engineering-path-of-exile.html)
 
+How it works
+----------
+
+exileSniffer doesn't modify the Path of Exile binary or its memory. There are no code caves or hardcoded offsets to pointer chains or any of that awful stuff - just some heureustics to read the session key from process memory during login. It then closes the process handle and never interacts with it again (or until the player logs out). All the other information is obtained by network sniffing.
 
 Using
 ----------
 
+[Download here](https://github.com/ncatlin/exileSniffer/releases/download/1.0/exileSniffer.7z)
+
+
+(SHA256 = C92C70279809A93A8BF3BF87ADB9D1E8FCFD20D7E9FAFF12A99F956878298190)
+
 Be running Windows. 
 Unzip the archive with 7zip.  
+
 Make sure [WinPcap](https://www.winpcap.org/install/default.htm) is installed. If you can sniff with wireshark, you should be able to sniff with this.
 
 *If you get a message about wpcap.dll not being found - you need to install winpcap*.
