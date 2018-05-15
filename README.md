@@ -1,4 +1,4 @@
-# exileSniffer v1.0
+# exileSniffer v1.0.1
 A protocol decryption and dissection tool for the game 'Path of Exile'
 
 It looks something like this:
@@ -40,6 +40,33 @@ if __name__ == "__main__":
 
 For the long explanation of what it is and how it works read [this](https://tbinarii.blogspot.co.uk/2018/05/reverse-engineering-path-of-exile.html)
 
+Latest Changelog
+----------
+
+Version 1.0.1
+		
+	Memory changes: 
+		Packets now use less memory.
+		Filtered messages were consuming far too much memory so they are now discarded.
+		Previously filtered messages will not return when the filters are cleared. Refer to the logfiles to recover them if needed.
+		I'll implement a hex->packet reconstruction utility soon.
+		
+	Handle more packets
+		0x3b - CLI_USE_ITEM_ON_OBJ
+		0x81 - SRV_CHANGE_LIGHTING
+		0x82 - CLI_TRANSFER_ITEM
+		0xdb - SRV_NOTIFY_AFK
+		0xf6 - SRV_UNK_0xf6
+
+	Improve existing packets
+		0x75 - SRV_MOVE_OBJECT
+
+	Minor display/naming improvements:
+		0x70 - SRV_GRANTED_XP
+		0xA3 - CLI_UNK_A3
+		0xF3 - CLI_UNK_F3
+
+
 How it works
 ----------
 
@@ -48,10 +75,10 @@ exileSniffer doesn't modify the Path of Exile binary or its memory. There are no
 Using
 ----------
 
-[Download here](https://github.com/ncatlin/exileSniffer/releases/download/1.0/exileSniffer.7z)
+[Download here](https://github.com/ncatlin/exileSniffer/releases/download/1.0.1/exileSniffer.7z)
 
 
-(SHA256 = C92C70279809A93A8BF3BF87ADB9D1E8FCFD20D7E9FAFF12A99F956878298190)
+(SHA256 = 84821EA23D0B117C761FB79BADE5136D63ED9A0F3FC347397C4D2B3E7684DC23)
 
 Be running Windows. 
 Unzip the archive with 7zip.  
