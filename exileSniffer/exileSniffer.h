@@ -51,7 +51,6 @@ class exileSniffer : public QMainWindow
 		void read_UI_Q();
 
 		void showRawFiltersDLG() { filterFormObj.isHidden() ? filterFormObj.show() : filterFormObj.hide(); }
-		void refreshFilters();
 
 		void toggleDecodedAutoScroll(bool enabled);
 		void decodedListClicked();
@@ -323,9 +322,7 @@ class exileSniffer : public QMainWindow
 		std::pair <unsigned long, unsigned long> rawCount_Recorded_Filtered;
 		std::pair <int, int> decodedCount_Displayed_Filtered;	 //table row index is int
 		int decodedErrorPacketCount = 0;
-		bool refreshingFilters = false;
 		
-
 		SafeQueue<UI_MESSAGE *> uiMsgQueue; //read by ui thread, written by all others
 		SafeQueue<GAMEPACKET > gamePktQueue, loginPktQueue;
 		map<DWORD, clientHexData *> clients;

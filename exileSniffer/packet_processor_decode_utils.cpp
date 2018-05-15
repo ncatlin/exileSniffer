@@ -278,7 +278,7 @@ consume from decryption buffer a 2 byte length field
 and get a wstring of that length
 place result in the 'container' json object with name 'name'
 */
-void packet_processor::consume_add_lenprefix_string(std::wstring name, WValue& container, rapidjson::Document::AllocatorType& allocator)
+void packet_processor::consume_add_lenprefix_string(std::wstring name, WValue& container, rapidjson::CrtAllocator& allocator)
 {
 	WValue nameItem(name.c_str(), allocator);
 

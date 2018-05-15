@@ -10,7 +10,7 @@ public:
 	json_pipe_thread(SafeQueue<UI_MESSAGE *>* uiq, QString pipename);
 	~json_pipe_thread();
 
-	void sendPacket(rapidjson::GenericDocument<rapidjson::UTF16<> > &doc);
+	void sendPacket(rapidjson::GenericDocument<rapidjson::UTF16<>, rapidjson::CrtAllocator > &doc);
 	void setPipePath(QString pipename);
 	void close();
 

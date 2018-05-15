@@ -175,12 +175,13 @@ void filterForm::buildBuiltinPresets()
 	PRESET_LIST new_objects;
 	new_objects.name = "Show all objects";
 	new_objects.description = "Show new objects, items, monsters, etc";
+	new_objects.IDs.push_back(SRV_ADD_OBJECT);
 	builtinPresets.push_back(new_objects);
 
-	PRESET_LIST drops;
-	drops.name = "Show item drops";
-	drops.description = "Show only item drops";
-	builtinPresets.push_back(drops);
+	//PRESET_LIST drops;
+	//drops.name = "Show item drops";
+	//drops.description = "Show only item drops";
+	//builtinPresets.push_back(drops);
 }
 
 PRESET_LIST filterForm::load_saved_preset(QString groupName)

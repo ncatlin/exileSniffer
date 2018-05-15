@@ -23,7 +23,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="filtersTab">
       <attribute name="title">
@@ -136,25 +136,6 @@
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QPushButton" name="applyBtn">
-           <property name="maximumSize">
-            <size>
-             <width>120</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="toolTip">
-            <string>Filter past entries in the decoded packet list based on the current filters</string>
-           </property>
-           <property name="statusTip">
-            <string>Filters past entries in the decoded packet list based on the current filters</string>
-           </property>
-           <property name="text">
-            <string>Refresh Decoded List</string>
-           </property>
-          </widget>
-         </item>
         </layout>
        </item>
       </layout>
@@ -243,22 +224,6 @@
    <hints>
     <hint type="sourcelabel">
      <x>111</x>
-     <y>412</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>295</x>
-     <y>216</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>applyBtn</sender>
-   <signal>clicked()</signal>
-   <receiver>rawFilterForm</receiver>
-   <slot>applyBtnPress()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>462</x>
      <y>412</y>
     </hint>
     <hint type="destinationlabel">

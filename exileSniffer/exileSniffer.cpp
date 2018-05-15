@@ -188,36 +188,12 @@ bool exileSniffer::eventFilter(QObject *obj, QEvent *event)
 	return false;
 }
 
-//full clear and reload of displayed packets
-void exileSniffer::refreshFilters()
-{
-	if (decodedListEntries.empty()) return;
-
-	ui.decodedListTable->setRowCount(0);
-
-	decodedCount_Displayed_Filtered = make_pair(0, 0);
-
-	refreshingFilters = true;
-	for (auto it = decodedListEntries.begin(); it != decodedListEntries.end(); it++)
-	{
-		UIDecodedPkt *pkt = *it;
-		if (packet_passes_decoded_filter(pkt->getMessageID()))
-		{
-			addDecodedListEntry(pkt, false);
-		}
-	}
-	refreshingFilters = false;
-	updateDecodedFilterLabel();
-}
-
 void exileSniffer::initFilters()
 {
 	if (gameMessageTypes)
 	{
 		filterFormObj.populateFiltersList(*gameMessageTypes);
 		filterFormObj.populatePresetsList();
-
-		connect(&filterFormObj, SIGNAL(applyFilters()), this, SLOT(refreshFilters()));
 	}
 }
 
@@ -837,9 +813,6 @@ void exileSniffer::handle_raw_packet_data(UI_RAWHEX_PKT *pkt)
 
 void exileSniffer::updateDecodedFilterLabel()
 {
-	if (refreshingFilters)
-		ui.decodedDisplayedLabel->setText("Refreshing filters...");
-
 	std::stringstream filterLabTxt;
 	filterLabTxt << std::dec << "Packets ( Displayed: " << decodedCount_Displayed_Filtered.first <<
 	" / Filtered: " << decodedCount_Displayed_Filtered.second <<

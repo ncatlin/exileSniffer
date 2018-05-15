@@ -556,7 +556,6 @@ public:
         settingsChoiceList = new QListWidget(settingsTab);
         new QListWidgetItem(settingsChoiceList);
         new QListWidgetItem(settingsChoiceList);
-        new QListWidgetItem(settingsChoiceList);
         settingsChoiceList->setObjectName(QStringLiteral("settingsChoiceList"));
         settingsChoiceList->setMaximumSize(QSize(200, 16777215));
         settingsChoiceList->setSpacing(3);
@@ -824,11 +823,9 @@ public:
         const bool __sortingEnabled = settingsChoiceList->isSortingEnabled();
         settingsChoiceList->setSortingEnabled(false);
         QListWidgetItem *___qlistwidgetitem = settingsChoiceList->item(0);
-        ___qlistwidgetitem->setText(QApplication::translate("exileSniffer", "General", Q_NULLPTR));
+        ___qlistwidgetitem->setText(QApplication::translate("exileSniffer", "Logfiles", Q_NULLPTR));
         QListWidgetItem *___qlistwidgetitem1 = settingsChoiceList->item(1);
-        ___qlistwidgetitem1->setText(QApplication::translate("exileSniffer", "Logfiles", Q_NULLPTR));
-        QListWidgetItem *___qlistwidgetitem2 = settingsChoiceList->item(2);
-        ___qlistwidgetitem2->setText(QApplication::translate("exileSniffer", "Feeds", Q_NULLPTR));
+        ___qlistwidgetitem1->setText(QApplication::translate("exileSniffer", "Feeds", Q_NULLPTR));
         settingsChoiceList->setSortingEnabled(__sortingEnabled);
 
         groupBox_2->setTitle(QApplication::translate("exileSniffer", "Packet Hexdumps Directory", Q_NULLPTR));

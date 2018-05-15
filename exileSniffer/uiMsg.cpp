@@ -8,7 +8,6 @@
 rapidjson::GenericValue<rapidjson::UTF8<>> *UIDecodedPkt::loginMessageTypes = NULL;
 rapidjson::GenericValue<rapidjson::UTF8<>> *UIDecodedPkt::gameMessageTypes = NULL;
 
-
 void UIaddLogMsg(QString msg, DWORD clientPID, SafeQueue<UI_MESSAGE *> *uiMsgQueue)
 {
 	UI_METALOG_MSG *initmsg = new UI_METALOG_MSG;
@@ -162,6 +161,15 @@ UIDecodedPkt::UIDecodedPkt(DWORD processID, streamType streamServerType,int nwkS
 
 	nwkstreamID = nwkStream;
 	msTime = timeSeen;
+}
+
+
+UIDecodedPkt::~UIDecodedPkt()
+{
+	if (jsn.MemberBegin() != jsn.MemberEnd())
+	{
+		jsn.EraseMember(jsn.MemberBegin(), jsn.MemberEnd());
+	}
 }
 
 void UIDecodedPkt::add_dword(std::wstring name, DWORD dwordfield)

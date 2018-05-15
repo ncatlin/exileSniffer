@@ -716,11 +716,6 @@ FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD</string>
           </property>
           <item>
            <property name="text">
-            <string>General</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
             <string>Logfiles</string>
            </property>
           </item>

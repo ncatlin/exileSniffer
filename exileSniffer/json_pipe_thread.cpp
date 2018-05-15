@@ -136,7 +136,7 @@ void json_pipe_thread::main_loop()
 
 
 
-void json_pipe_thread::sendPacket(rapidjson::GenericDocument<rapidjson::UTF16<>> &doc)
+void json_pipe_thread::sendPacket(rapidjson::GenericDocument<rapidjson::UTF16<>, rapidjson::CrtAllocator> &doc)
 {
 	if (!connected) return;
 	rapidjson::GenericStringBuffer<rapidjson::UTF16<>> buffer;

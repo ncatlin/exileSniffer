@@ -419,7 +419,7 @@ void packet_processor::deserialise_SRV_CHAT_MESSAGE(UIDecodedPkt *uipkt)
 	byte itemCount = consume_Byte();
 
 
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
 	WValue itemArray(rapidjson::kArrayType);
@@ -456,7 +456,7 @@ WValue packet_processor::get_pairs_strings_blob(UIDecodedPkt *uipkt)
 	byte pairCount = consume_Byte();
 	byte stringCount = consume_Byte();
 
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 	WValue pairArray(rapidjson::kArrayType);
 
 	for (int i = 0; i < pairCount; i++)
@@ -485,7 +485,7 @@ WValue packet_processor::get_pairs_strings_blob(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_SRV_SERVER_MESSAGE(UIDecodedPkt *uipkt)
 {
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 
 	//outer
 	consume_add_word_ntoh(L"BackendErrorsRow", uipkt);
@@ -600,7 +600,7 @@ void packet_processor::deserialise_SRV_AREA_INFO(UIDecodedPkt* uipkt)
 	}
 
 
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 	WValue preloadHashList(rapidjson::kArrayType); 
 	WValue preloadHashResults(rapidjson::kArrayType);
@@ -720,7 +720,7 @@ void packet_processor::deserialise_SRV_PRELOAD_MONSTER_LIST(UIDecodedPkt* uipkt)
 		if (errorFlag != eNoErr) return;
 	}
 
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
 	WValue preloadJSON(rapidjson::kArrayType);
@@ -751,7 +751,7 @@ void packet_processor::deserialise_SRV_PRELOAD_MONSTER_LIST(UIDecodedPkt* uipkt)
 
 void packet_processor::deserialise_UNK_13_A5_LIST(UIDecodedPkt * uipkt)
 {
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 	WValue blobArray(rapidjson::kArrayType);
 	ushort listSize = ntohs(consume_WORD());
 
@@ -793,7 +793,7 @@ void packet_processor::deserialise_UNK_13_A5_LIST(UIDecodedPkt * uipkt)
 
 void packet_processor::deserialise_SRV_UNK_0x13(UIDecodedPkt * uipkt)
 {
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 
 	deserialise_UNK_13_A5_LIST(uipkt);
 
@@ -1081,7 +1081,7 @@ void packet_processor::deserialise_CLI_SPLIT_STACK(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_SRV_LIST_PORTALS(UIDecodedPkt *uipkt)
 {
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 
 	WValue portalList(rapidjson::kArrayType);
 
@@ -1142,7 +1142,7 @@ void packet_processor::deserialise_CLI_GET_PARTY_DETAILS(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_SRV_FRIENDSLIST(UIDecodedPkt *uipkt)
 {
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 
 	consume_add_lenprefix_string(L"Name", *(uipkt->payload), allocator);
 	consume_add_lenprefix_string(L"String2", *(uipkt->payload), allocator);
@@ -1169,7 +1169,7 @@ void packet_processor::deserialise_SRV_FRIENDSLIST(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_SRV_PARTY_DETAILS(UIDecodedPkt *uipkt)
 {
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 
 	consume_add_dword_ntoh(L"ID", uipkt);
 
@@ -1224,7 +1224,7 @@ void packet_processor::deserialise_CLI_REQUEST_PUBLICPARTIES(UIDecodedPkt *uipkt
 
 void packet_processor::deserialise_SRV_PUBLIC_PARTY_LIST(UIDecodedPkt *uipkt)
 {
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 
 	WValue partyArray(rapidjson::kArrayType);
 
@@ -1285,7 +1285,7 @@ void packet_processor::deserialise_SRV_UNK_0x68(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_SRV_UNK_0x6c(UIDecodedPkt *uipkt)
 {
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 
 	WValue entryArray(rapidjson::kArrayType);
 
@@ -1308,7 +1308,7 @@ void packet_processor::deserialise_SRV_UNK_0x6c(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_item(UIDecodedPkt *uipkt, WValue& container)
 {
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 
 	container.AddMember(L"ItemID", (UINT32)ntohl(consume_DWORD()), allocator);
 	container.AddMember(L"Column", consume_Byte(), allocator);
@@ -1335,7 +1335,7 @@ void packet_processor::deserialise_item(UIDecodedPkt *uipkt, WValue& container)
 
 void packet_processor::deserialise_SRV_CREATE_ITEM(UIDecodedPkt *uipkt)
 {
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 
 	//routine outer
 	consume_add_byte(L"B1", uipkt);
@@ -1386,7 +1386,7 @@ void packet_processor::deserialise_SRV_SLOT_ITEMSLIST(UIDecodedPkt *uipkt)
 	DWORD itemCount = ntohl(consume_DWORD());
 	uipkt->add_dword(L"Count", itemCount);
 
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
 	WValue itemArray(rapidjson::kArrayType);
@@ -1451,7 +1451,7 @@ void packet_processor::deserialise_SRV_UNK_0x73(UIDecodedPkt *uipkt)
 {
 	consume_add_dword(L"Data1", uipkt); //todo - this is not fixed at 4, its just what ive seen it as
 
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 	consume_add_lenprefix_string(L"String1", *(uipkt->payload), allocator);
 	consume_add_lenprefix_string(L"String2", *(uipkt->payload), allocator);
 }
@@ -1534,7 +1534,7 @@ void packet_processor::deserialise_SRV_SKILLPANE_DATA(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_SRV_UNK_POSITION_LIST(UIDecodedPkt *uipkt)
 {
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 
 	ushort count = consume_Byte();
 
@@ -1566,7 +1566,7 @@ void packet_processor::deserialise_SRV_PVP_MATCHLIST(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_SRV_EVENTSLIST(UIDecodedPkt *uipkt)
 {
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 
 	ushort count = ntohs(consume_WORD());
 	uipkt->add_word(L"Count", count);
@@ -1640,7 +1640,7 @@ void packet_processor::deserialise_CLI_EXIT_TO_CHARSCREEN(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_SRV_LOGINSRV_CRYPT(UIDecodedPkt *uipkt)
 {
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 
 	consume_add_dword_ntoh(L"Unk1", uipkt);
 
@@ -1682,7 +1682,7 @@ void packet_processor::deserialise_CLI_UNK_0xC7(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_SRV_UNK_0xCA(UIDecodedPkt *uipkt)
 {
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 
 	WValue itemArray(rapidjson::kArrayType);
 
@@ -1710,7 +1710,7 @@ void packet_processor::deserialise_SRV_UNK_0xCA(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_SRV_EVENTSLIST_2(UIDecodedPkt *uipkt)
 {
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 
 	uint count = ntohl(consume_DWORD());
 
@@ -1775,7 +1775,7 @@ void packet_processor::deserialise_CLI_OPEN_WORLD_SCREEN(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_SRV_GUILD_MEMBER_LIST(UIDecodedPkt *uipkt)
 {
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 	consume_add_lenprefix_string(L"String1", *(uipkt->payload), allocator);
 	consume_add_lenprefix_string(L"String2", *(uipkt->payload), allocator);
 	consume_add_lenprefix_string(L"String3", *(uipkt->payload), allocator);
@@ -1993,7 +1993,7 @@ void packet_processor::deserialise_SRV_STAT_CHANGED(UIDecodedPkt *uipkt)
 	consume_add_word_ntoh(L"ID3", uipkt);
 
 	//same routine in 0x0f - merge into a list getter func
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 	WValue pairlist(rapidjson::kArrayType);
 	DWORD paircount = customSizeByteGet();
 	for (int i = 0; i < paircount; i++)
@@ -2134,7 +2134,7 @@ void packet_processor::deserialise_SRV_START_EFFECT(UIDecodedPkt *uipkt)
 
 
 	WValue statList(rapidjson::kArrayType);
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 	if (IS_IN_VECTOR(ggpk->recoveryBuffs, buffDefinitionsRow))
 	{
 		byte listsize1 = ggpk->buffDefinitions_names_statCounts.at(buffDefinitionsRow).second;
@@ -2300,7 +2300,7 @@ void packet_processor::deserialise_SRV_HEARTBEAT(UIDecodedPkt *uipkt)
 
 void packet_processor::SRV_ADD_OBJ_decode_character(UIDecodedPkt *uipkt, size_t objBlobDataLen)
 {
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
 	//rewind back to start of blob

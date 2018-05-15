@@ -420,6 +420,7 @@ void exileSniffer::action_undecoded_packet(UIDecodedPkt& obj)
 	if (pktID < rawFiltersFormUI.filterTable->rowCount() && !packet_passes_decoded_filter(pktID))
 	{
 		++decodedCount_Displayed_Filtered.second;
+		obj.setFiltered();
 		updateDecodedFilterLabel();
 		return;
 	}
@@ -457,6 +458,7 @@ void exileSniffer::action_decoded_game_packet(UIDecodedPkt& decoded)
 {
 	if (!packet_passes_decoded_filter(decoded.getMessageID()))
 	{
+		decoded.setFiltered();
 		++decodedCount_Displayed_Filtered.second;
 		updateDecodedFilterLabel();
 		return;

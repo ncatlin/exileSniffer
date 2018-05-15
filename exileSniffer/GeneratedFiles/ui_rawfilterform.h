@@ -39,7 +39,6 @@ public:
     QHBoxLayout *horizontalLayout;
     QPushButton *includeBtn;
     QPushButton *excludeBtn;
-    QPushButton *applyBtn;
     QWidget *presetsTab;
     QVBoxLayout *verticalLayout_3;
     QTreeWidget *presetsTree;
@@ -116,12 +115,6 @@ public:
 
         horizontalLayout->addWidget(excludeBtn);
 
-        applyBtn = new QPushButton(filtersTab);
-        applyBtn->setObjectName(QStringLiteral("applyBtn"));
-        applyBtn->setMaximumSize(QSize(120, 16777215));
-
-        horizontalLayout->addWidget(applyBtn);
-
 
         verticalLayout_4->addLayout(horizontalLayout);
 
@@ -165,7 +158,6 @@ public:
         retranslateUi(rawFilterForm);
         QObject::connect(excludeBtn, SIGNAL(clicked()), rawFilterForm, SLOT(excludeSelectedFilters()));
         QObject::connect(includeBtn, SIGNAL(clicked()), rawFilterForm, SLOT(includeSelectedFilters()));
-        QObject::connect(applyBtn, SIGNAL(clicked()), rawFilterForm, SLOT(applyBtnPress()));
         QObject::connect(presetsTree, SIGNAL(customContextMenuRequested(QPoint)), rawFilterForm, SLOT(showPresetContextMenu(QPoint)));
         QObject::connect(saveBtn, SIGNAL(clicked()), rawFilterForm, SLOT(saveCustom()));
         QObject::connect(saveName, SIGNAL(returnPressed()), rawFilterForm, SLOT(saveCustom()));
@@ -173,7 +165,7 @@ public:
         QObject::connect(presetsTree, SIGNAL(itemActivated(QTreeWidgetItem*,int)), rawFilterForm, SLOT(activatePresetListClicked()));
         QObject::connect(filterTable, SIGNAL(cellActivated(int,int)), rawFilterForm, SLOT(toggleSelectedFilter()));
 
-        tabWidget->setCurrentIndex(1);
+        tabWidget->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(rawFilterForm);
@@ -201,13 +193,6 @@ public:
 #endif // QT_NO_STATUSTIP
         includeBtn->setText(QApplication::translate("rawFilterForm", "Include Selected", Q_NULLPTR));
         excludeBtn->setText(QApplication::translate("rawFilterForm", "Exclude Selected", Q_NULLPTR));
-#ifndef QT_NO_TOOLTIP
-        applyBtn->setToolTip(QApplication::translate("rawFilterForm", "Filter past entries in the decoded packet list based on the current filters", Q_NULLPTR));
-#endif // QT_NO_TOOLTIP
-#ifndef QT_NO_STATUSTIP
-        applyBtn->setStatusTip(QApplication::translate("rawFilterForm", "Filters past entries in the decoded packet list based on the current filters", Q_NULLPTR));
-#endif // QT_NO_STATUSTIP
-        applyBtn->setText(QApplication::translate("rawFilterForm", "Refresh Decoded List", Q_NULLPTR));
         tabWidget->setTabText(tabWidget->indexOf(filtersTab), QApplication::translate("rawFilterForm", "Filters", Q_NULLPTR));
         QTreeWidgetItem *___qtreewidgetitem = presetsTree->headerItem();
         ___qtreewidgetitem->setText(1, QApplication::translate("rawFilterForm", "Summary", Q_NULLPTR));

@@ -93,7 +93,7 @@ void packet_processor::deserialise_LOGIN_CLI_RESYNC(UIDecodedPkt *uipkt)
 
 void packet_processor::deserialise_LOGIN_SRV_CHAR_LIST(UIDecodedPkt *uipkt)
 {
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 
 	WValue charList(rapidjson::kArrayType);
 	UINT32 charCount = ntohl(consume_DWORD());
@@ -138,7 +138,7 @@ void packet_processor::deserialise_LOGIN_CLI_CHARACTER_SELECTED(UIDecodedPkt *ui
 
 void packet_processor::deserialise_LOGIN_SRV_NOTIFY_GAMESERVER(UIDecodedPkt *uipkt)
 {
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 
 	consume_add_dword_ntoh(L"Unk1", uipkt);
 	consume_add_dword_ntoh(L"AreaCode", uipkt);
@@ -206,7 +206,7 @@ void packet_processor::deserialise_LOGIN_SRV_NOTIFY_GAMESERVER(UIDecodedPkt *uip
 
 void packet_processor::deserialise_LOGIN_CLI_CREATED_CHARACTER(UIDecodedPkt *uipkt)
 {
-	rapidjson::Document::AllocatorType& allocator = uipkt->jsn.GetAllocator();
+	rapidjson::CrtAllocator& allocator = uipkt->jsn.GetAllocator();
 	consume_add_lenprefix_string(L"Name", *(uipkt->payload), allocator);
 	consume_add_lenprefix_string(L"League", *(uipkt->payload), allocator);
 	consume_add_qword(L"Unk1", uipkt);

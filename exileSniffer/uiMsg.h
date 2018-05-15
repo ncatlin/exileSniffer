@@ -4,7 +4,7 @@
 
 enum streamType { eLogin = 'L', eGame = 'G', ePatch = 'P', eNone = 0 };
 
-typedef rapidjson::GenericValue<rapidjson::UTF16<> > WValue;
+typedef rapidjson::GenericValue<rapidjson::UTF16<>, rapidjson::CrtAllocator > WValue;
 enum uiMsgType {eMetaLog, eClientEvent, eStreamEvent, eSniffingStarted,
 	eLoginNote, ePacketHex, eDecodedPacket, eKeyUpdate, eIVUpdate, eCryptIterUpdate};
 
@@ -101,6 +101,8 @@ class UIDecodedPkt : public UI_MESSAGE
 {
 public:
 	UIDecodedPkt(DWORD processID, streamType streamServerType,int nwkStream, bool isIncoming, long long timeSeen);
+	~UIDecodedPkt();
+
 	void toggle_payload_operations(bool state) { payloadOperations = state; }
 
 	void add_dword(std::wstring name, DWORD dwordfield);
@@ -108,7 +110,7 @@ public:
 	void add_byte(std::wstring name, byte bytefield);
 	void add_wstring(std::wstring name, std::wstring stringfield);
 	void add_array(std::wstring name, WValue value);
-	rapidjson::GenericDocument<rapidjson::UTF16<> >& getJSON() {	return jsn;	}
+	rapidjson::GenericDocument<rapidjson::UTF16<>, rapidjson::CrtAllocator>& getJSON() {	return jsn;	}
 
 	std::wstring get_wstring(std::wstring name);
 	UINT32 get_UInt32(std::wstring name);
@@ -119,6 +121,7 @@ public:
 	void setEndOffset(unsigned short off);
 	void setFailedDecode() { failedDecode = true; }
 	void setAbandoned() { abandoned = true; }
+	void setFiltered() { filtered = true; }
 	bool decodeError() { return failedDecode; }
 	bool wasAbandoned() { return abandoned; }
 	DWORD getClientProcessID() { return PID; }
@@ -147,7 +150,7 @@ public:
 	ushort origBufferOffset;
 	vector<byte> pktBytes;
 
-	rapidjson::GenericDocument<rapidjson::UTF16<> > jsn;
+	rapidjson::GenericDocument<rapidjson::UTF16<>, rapidjson::CrtAllocator> jsn;
 	WValue* payload = NULL;
 
 	QString summary;

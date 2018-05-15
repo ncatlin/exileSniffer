@@ -64,7 +64,7 @@ private:
 	inline void consume_add_qword(std::wstring name, UIDecodedPkt *uipkt) { uipkt->add_dword(name, consume_QWORD()); }
 	inline void consume_add_word_ntoh(std::wstring name, UIDecodedPkt *uipkt) { uipkt->add_word(name, ntohs(consume_WORD())); }
 	inline void consume_add_dword_ntoh(std::wstring name, UIDecodedPkt *uipkt) { uipkt->add_dword(name, ntohl(consume_DWORD())); }
-	void consume_add_lenprefix_string(std::wstring name, WValue& container, rapidjson::Document::AllocatorType& allocator);
+	void consume_add_lenprefix_string(std::wstring name, WValue& container, rapidjson::CrtAllocator& allocator);
 	std::wstring consume_hexblob(unsigned int size);
 
 	void deserialise_item(UIDecodedPkt *uipkt, WValue& container);
