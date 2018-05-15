@@ -72,7 +72,7 @@
 #define CLI_USE_ITEM_ON_ITEM (CLI_USE_BELT_SLOT+1) //0x38
 //39
 //3a
-//3b
+#define CLI_USE_ITEM_ON_OBJ 0x3b
 //3c
 //3d
 //3e

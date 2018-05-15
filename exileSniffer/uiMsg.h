@@ -90,7 +90,7 @@ public:
 	streamType stream;
 	bool incoming;
 
-	vector<byte>* pktBytes;
+	vector<byte> pktBytes;
 	unsigned short startBytes;
 
 	bool decodeFailed = false;
@@ -115,8 +115,8 @@ public:
 	UINT64 get_UInt64(std::wstring name);
 	
 	void setBuffer(vector<byte> *buf) { originalbuf = buf; }
-	void setStartOffset(unsigned short off) { bufferOffsets.first = off; }
-	void setEndOffset(unsigned short off) { bufferOffsets.second = off; }
+	void setStartOffset(unsigned short off) { origBufferOffset = off; }
+	void setEndOffset(unsigned short off);
 	void setFailedDecode() { failedDecode = true; }
 	void setAbandoned() { abandoned = true; }
 	bool decodeError() { return failedDecode; }
@@ -137,18 +137,15 @@ public:
 
 	QString senderString();
 
-	std::pair<vector<byte> *, ushort> bytesBuf() {
-		return make_pair(originalbuf + bufferOffsets.first,
-			bufferOffsets.second - bufferOffsets.first);
-	}
-
 	static rapidjson::GenericValue<rapidjson::UTF8<>> *loginMessageTypes;
 	static rapidjson::GenericValue<rapidjson::UTF8<>> *gameMessageTypes;
 
 public:
 	int nwkstreamID;
-	vector<byte> *originalbuf = NULL;
-	std::pair<ushort, ushort> bufferOffsets;
+
+	vector<byte> *originalbuf;
+	ushort origBufferOffset;
+	vector<byte> pktBytes;
 
 	rapidjson::GenericDocument<rapidjson::UTF16<> > jsn;
 	WValue* payload = NULL;

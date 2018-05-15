@@ -21,7 +21,7 @@
        <enum>QTabWidget::North</enum>
       </property>
       <property name="currentIndex">
-       <number>5</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="interceptionTab">
        <attribute name="title">
@@ -581,7 +581,7 @@ FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD</string>
                <enum>QTabWidget::West</enum>
               </property>
               <property name="currentIndex">
-               <number>1</number>
+               <number>0</number>
               </property>
               <widget class="QWidget" name="decodeAnalysisTab">
                <attribute name="title">
@@ -712,8 +712,13 @@ FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD</string>
            <enum>QListView::ListMode</enum>
           </property>
           <property name="currentRow">
-           <number>0</number>
+           <number>-1</number>
           </property>
+          <item>
+           <property name="text">
+            <string>General</string>
+           </property>
+          </item>
           <item>
            <property name="text">
             <string>Logfiles</string>
@@ -729,7 +734,7 @@ FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD</string>
         <item>
          <widget class="QStackedWidget" name="settingsStack">
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="logSettings">
            <layout class="QVBoxLayout" name="verticalLayout">
@@ -1043,7 +1048,7 @@ FD DD ED DC 1A DD DD DD DD DD DD DD DD DD DD DD</string>
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;exileSniffer Version 1.0&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;exileSniffer Version 1.0.1&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;https://github.com/ncatlin/exileSniffer&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;

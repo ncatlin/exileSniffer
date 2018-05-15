@@ -38,7 +38,6 @@ class exileSniffer : public QMainWindow
 	public:
 		exileSniffer(QWidget *parent = Q_NULLPTR);
 		~exileSniffer() {
-			//todo - vector + loop
 			pipeThread->close();
 			if (packetProcessor) packetProcessor->running = false;
 			if (packetSniffer) packetSniffer->stop_sniffing();
@@ -84,7 +83,6 @@ class exileSniffer : public QMainWindow
 		void handle_stream_event(UI_STREAMEVENT_MSG *streamNote);
 		void handle_client_event(UI_CLIENTEVENT_MSG *cliEvtMsg);
 		void output_hex_to_file(UI_RAWHEX_PKT *pkt, std::ofstream& file);
-		//void output_hex_to_pane(UI_RAWHEX_PKT *pkt);
 
 		void init_gamePkt_Actioners();
 		void init_loginPkt_Actioners();
@@ -172,6 +170,7 @@ class exileSniffer : public QMainWindow
 		
 		void action_CLI_USE_BELT_SLOT(UIDecodedPkt&, QString*);
 		void action_CLI_USE_ITEM_ON_ITEM(UIDecodedPkt&, QString*);
+		void action_CLI_USE_ITEM_ON_OBJ(UIDecodedPkt&, QString*);
 		void action_CLI_UNK_0x41(UIDecodedPkt&, QString*);
 
 		void action_CLI_SELECT_NPC_DIALOG(UIDecodedPkt&, QString*);

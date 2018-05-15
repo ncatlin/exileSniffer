@@ -518,6 +518,7 @@ void packet_processor::deserialise_packets_from_decrypted(streamType streamServe
 
 				if (errorFlag == eNoErr || errorFlag == eAbandoned)
 				{
+					ui_decodedpkt->setBuffer(decryptedBuffer);
 					ui_decodedpkt->setEndOffset(decryptedIndex);
 
 					if (errorFlag == eAbandoned)
@@ -533,20 +534,20 @@ void packet_processor::deserialise_packets_from_decrypted(streamType streamServe
 			}
 		}
 		
-		//warning - can be resized (and thus moved) during deserialisation - only store pointers afterwards
-		ui_decodedpkt->setBuffer(decryptedBuffer);
-
 		if (errorFlag != eNoErr)
 		{
 			remainingDecrypted = 0;
 			emit_decoding_err_msg(pktIDWord, currentStreamObj->lastPktID);
 			ui_decodedpkt->setFailedDecode();
+			ui_decodedpkt->setBuffer(decryptedBuffer);
 			ui_decodedpkt->setEndOffset(dataLen);
 		}
 
 		uiMsgQueue->addItem(ui_decodedpkt);
 		currentStreamObj->lastPktID = pktIDWord;
 	}
+
+	delete decryptedBuffer;
 }
 
 void packet_processor::handle_packet_to_gameserver(vector<byte> &nwkData, long long timems)

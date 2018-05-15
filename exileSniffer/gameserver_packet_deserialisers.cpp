@@ -1031,6 +1031,13 @@ void packet_processor::deserialise_CLI_USE_ITEM_ON_ITEM(UIDecodedPkt *uipkt)
 	consume_add_dword_ntoh(L"Item2", uipkt);
 }
 
+void packet_processor::deserialise_CLI_USE_ITEM_ON_OBJ(UIDecodedPkt *uipkt)
+{
+	consume_add_dword_ntoh(L"Unk", uipkt);
+	consume_add_dword_ntoh(L"ItemID", uipkt);
+	consume_add_dword_ntoh(L"ObjectID", uipkt);
+}
+
 void packet_processor::deserialise_CLI_UNK_0x41(UIDecodedPkt *uipkt)
 {
 	consume_add_dword_ntoh(L"Unk1", uipkt);

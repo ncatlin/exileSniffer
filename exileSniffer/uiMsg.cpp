@@ -117,7 +117,8 @@ UI_RAWHEX_PKT::UI_RAWHEX_PKT(DWORD processID, streamType streamServer, bool isIn
 
 void UI_RAWHEX_PKT::setData(vector<byte> *source)
 {
-	pktBytes = source;
+	pktBytes.resize(source->size());
+	std::copy(source->begin(), source->end(), pktBytes.begin());
 
 	if (source->size() < 2) return;
 
@@ -318,4 +319,13 @@ QString UIDecodedPkt::senderString()
 	if (streamServer == eGame) return "[" + QString::number(nwkstreamID) + "] GameServer";
 	if (streamServer == eLogin) return "[" + QString::number(nwkstreamID) + "] LoginServer";
 	return "sender() Error";
+}
+
+//move the decrypted bytes to this packets own buffer
+void UIDecodedPkt::setEndOffset(unsigned short endoffset)
+{
+	size_t size = endoffset - origBufferOffset;
+	pktBytes.resize(size);
+	std::copy(originalbuf->begin() + origBufferOffset,
+		originalbuf->begin() + endoffset, pktBytes.begin());
 }

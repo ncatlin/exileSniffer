@@ -126,7 +126,8 @@ private:
 	void deserialise_CLI_ACTIVATE_ITEM(UIDecodedPkt*);
 
 	void deserialise_CLI_USE_BELT_SLOT(UIDecodedPkt *);
-	void deserialise_CLI_USE_ITEM_ON_ITEM(UIDecodedPkt *);
+	void deserialise_CLI_USE_ITEM_ON_ITEM(UIDecodedPkt *); 
+	void deserialise_CLI_USE_ITEM_ON_OBJ(UIDecodedPkt *);
 	void deserialise_CLI_UNK_0x41(UIDecodedPkt *);
 
 	void deserialise_CLI_SELECT_NPC_DIALOG(UIDecodedPkt *uipkt);

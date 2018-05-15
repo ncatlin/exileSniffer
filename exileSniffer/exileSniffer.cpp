@@ -588,9 +588,7 @@ void exileSniffer::action_UI_Msg(UI_MESSAGE *msg)
 
 		case uiMsgType::eDecodedPacket:
 		{
-			deleteAfterUse = false; //archived
 			UIDecodedPkt &uiDecodedMsg = *((UIDecodedPkt *)msg);
-
 
 			if(!uiDecodedMsg.decodeError())
 				action_decoded_packet(uiDecodedMsg); 
@@ -604,6 +602,10 @@ void exileSniffer::action_UI_Msg(UI_MESSAGE *msg)
 
 			//important: this should happen after action_decoded_packet as it adds analysis details
 			pipeThread->sendPacket(uiDecodedMsg.jsn);
+
+			if (!uiDecodedMsg.filtered)
+				deleteAfterUse = false;
+
 			break;
 		}
 
@@ -735,14 +737,14 @@ void exileSniffer::output_hex_to_file(UI_RAWHEX_PKT *pkt, std::ofstream& file)
 		mixeddump << serverString(pkt->stream, "f") << " to PlayerClient";
 	else
 		mixeddump << "PlayerClient to " << serverString(pkt->stream, "f");
-	mixeddump << " (" << std::dec << pkt->pktBytes->size() << " bytes)" << std::endl;
+	mixeddump << " (" << std::dec << pkt->pktBytes.size() << " bytes)" << std::endl;
 
 	stringstream::pos_type bytesStart = mixeddump.tellp();
 
 	mixeddump << std::setfill('0') << std::uppercase << "  ";
-	for (int i = 0; i < pkt->pktBytes->size(); ++i)
+	for (int i = 0; i < pkt->pktBytes.size(); ++i)
 	{
-		byte item = pkt->pktBytes->at(i);
+		byte item = pkt->pktBytes.at(i);
 
 		if (item)
 			mixeddump << " " << std::hex << std::setw(2) << (int)item;
@@ -757,9 +759,9 @@ void exileSniffer::output_hex_to_file(UI_RAWHEX_PKT *pkt, std::ofstream& file)
 	mixeddump << "\r\n" << std::endl << std::nouppercase;
 
 	mixeddump << "   ";
-	for (int i = 0; i < pkt->pktBytes->size(); ++i)
+	for (int i = 0; i < pkt->pktBytes.size(); ++i)
 	{
-		byte item = pkt->pktBytes->at(i);
+		byte item = pkt->pktBytes.at(i);
 
 		if (item >= ' ' && item <= '~')
 			mixeddump << (char)item;
@@ -778,57 +780,6 @@ void exileSniffer::output_hex_to_file(UI_RAWHEX_PKT *pkt, std::ofstream& file)
 
 	file << hexdumpstring << std::endl;
 }
-/*
-//todo: bold first two bytes, may need to add a 'continuationpacket' field
-void exileSniffer::output_hex_to_pane(UI_RAWHEX_PKT *pkt)
-{
-	std::stringstream hexdump;
-	std::stringstream asciidump;
-
-	char timestamp[20];
-	struct tm *tm = gmtime(&pkt->createdtime);
-	strftime(timestamp, sizeof(timestamp), "%H:%M:%S", tm);
-
-	hexdump << "#" << rawCount_Recorded_Filtered.first << " " << timestamp << " ";
-
-	if (pkt->incoming)
-		hexdump << serverString(pkt->stream, "f") << " to PlayerClient";
-	else
-		hexdump << "PlayerClient to " << serverString(pkt->stream, "f");
-	hexdump << "(" << std::dec << pkt->pktBytes->size() << " bytes)" << std::endl;
-	asciidump << std::endl;
-
-
-	stringstream::pos_type bytesStart = hexdump.tellp();
-
-	hexdump << std::setfill('0') << std::uppercase << " ";
-	for (int i = 0; i < pkt->pktBytes->size(); ++i)
-	{
-		byte item = pkt->pktBytes->at(i);
-
-		if (item)
-			hexdump << " " << std::hex << std::setw(2) << (int)item;
-		else
-			hexdump << " 00";
-
-		if (item >= ' ' && item <= '~')
-			asciidump << (char)item;
-		else
-			asciidump << '.';//replace unprintable with dots
-
-		if ((i + 1) % UIhexPacketsPerRow == 0)
-		{
-			hexdump << std::endl << "  ";
-			asciidump << std::endl;
-		}
-	}
-	hexdump << "\n" << std::endl << std::nouppercase;
-	asciidump << "\n" << std::endl;
-
-	std::string hexdumpstring = hexdump.str();
-	insertRawText(hexdumpstring, asciidump.str());
-}
-*/
 
 bool exileSniffer::packet_passes_decoded_filter(ushort msgID)
 {
@@ -965,19 +916,13 @@ void exileSniffer::decodedCellActivated(int row, int col)
 		return;
 	}
 
-	size_t msgSize;
-	if (obj->decodeError())
-		msgSize = obj->originalbuf->size() - obj->bufferOffsets.first;
-	else
-		msgSize = obj->bufferOffsets.second - obj->bufferOffsets.first;
-
 	std::wstring serverName = (obj->getStreamType() == eGame) ? L"GameServer" : L"LoginServer";
-	size_t bufStart = obj->bufferOffsets.first;
 	long long pktTime = obj->time_processed_ms();
 
 	ui.decodedRawHex->clear();
 	ui.decodedRawText->clear();
-
+	
+	size_t msgSize = obj->pktBytes.size();
 	std::wstringstream hexdump;
 	hexdump << epochms_to_timestring(pktTime);
 	hexdump << " (start +" << msToQStringSeconds(startMSSinceEpoch, pktTime).toStdWString() << "s)" << std::endl;
@@ -988,15 +933,13 @@ void exileSniffer::decodedCellActivated(int row, int col)
 		hexdump << "PlayerClient -> " << serverName;
 
 	hexdump << std::setfill(L'0') << std::uppercase << L" ";
-	hexdump << " (" << std::dec << msgSize << " bytes)" << std::endl;
+	hexdump << " (" << std::dec << obj->pktBytes.size() << " bytes)" << std::endl;
 	hexdump << std::endl;
 	hexdump << " ";
 
 	for (int i = 0; i < msgSize; ++i)
 	{
-		int index = bufStart + i;
-		if (index >= obj->originalbuf->size()) break;
-		byte item = obj->originalbuf->at(index);
+		byte item = obj->pktBytes.at(i);
 
 		if (item)
 			hexdump << " " << std::hex << std::setw(2) << (int)item;
@@ -1016,11 +959,10 @@ void exileSniffer::decodedCellActivated(int row, int col)
 	std::wstringstream asciiDump;
 	asciiDump << std::setfill(L'0') << std::hex << std::setw(3);
 	asciiDump << "\n\n\n 000:";
+
 	for (int i = 0; i < msgSize; ++i)
 	{
-		int index = bufStart + i;
-		if (index >= obj->originalbuf->size()) break;
-		byte item = obj->originalbuf->at(index);
+		byte item = obj->pktBytes.at(i);
 
 		if (item >= ' ' && item <= '~')
 			asciiDump << (char)item;

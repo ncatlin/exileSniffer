@@ -72,7 +72,7 @@ void exileSniffer::init_gamePkt_Actioners()
 	gamePktActioners[CLI_USE_ITEM_ON_ITEM] = &exileSniffer::action_CLI_USE_ITEM_ON_ITEM;
 	//39
 	//3a
-	//3b
+	gamePktActioners[CLI_USE_ITEM_ON_OBJ] = &exileSniffer::action_CLI_USE_ITEM_ON_OBJ;
 	//3c
 	//3d
 	//3e
@@ -432,16 +432,10 @@ void exileSniffer::action_undecoded_packet(UIDecodedPkt& obj)
 		return;
 	}
 
-	size_t sizeAfterID;
-	if (obj.bufferOffsets.first <= obj.originalbuf->size())
-		sizeAfterID = obj.originalbuf->size() - obj.bufferOffsets.first;
-	else
-		sizeAfterID = obj.originalbuf->size();
-
 	wstringstream summary;
 	summary << "Undecoded packet or poorly decoded previous packet (~ "
-		<< std::dec << sizeAfterID << " byte";
-	summary << ((sizeAfterID == 1) ? ")" : "s)");
+		<< std::dec << obj.pktBytes.size() << " byte";
+	summary << ((obj.pktBytes.size() == 1) ? ")" : "s)");
 
 
 	obj.summary = QString::fromStdWString(summary.str());
@@ -1533,6 +1527,25 @@ void exileSniffer::action_CLI_USE_ITEM_ON_ITEM(UIDecodedPkt& obj, QString *analy
 	}
 }
 
+void exileSniffer::action_CLI_USE_ITEM_ON_OBJ(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+
+	//total guess that this is quantity
+	UINT32 unk = obj.get_UInt32(L"Unk");
+	UINT32 itemID = obj.get_UInt32(L"ItemID");
+	UINT32 objectID = obj.get_UInt32(L"ObjectID");
+
+	if (!analysis)
+	{
+		std::wstringstream summary;
+		summary << "Used item 0x" << std::hex << itemID << " on object 0x" << objectID << ", Unk: 0x"<< unk;
+
+		obj.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
+		return;
+	}
+}
 
 void exileSniffer::action_CLI_UNK_0x41(UIDecodedPkt& obj, QString* analysis)
 {

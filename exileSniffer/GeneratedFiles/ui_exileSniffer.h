@@ -556,6 +556,7 @@ public:
         settingsChoiceList = new QListWidget(settingsTab);
         new QListWidgetItem(settingsChoiceList);
         new QListWidgetItem(settingsChoiceList);
+        new QListWidgetItem(settingsChoiceList);
         settingsChoiceList->setObjectName(QStringLiteral("settingsChoiceList"));
         settingsChoiceList->setMaximumSize(QSize(200, 16777215));
         settingsChoiceList->setSpacing(3);
@@ -776,11 +777,11 @@ public:
         QObject::connect(logSetDirBtn, SIGNAL(clicked()), exileSniffer, SLOT(doLogSetDir()));
         QObject::connect(logsOpenDirBtn, SIGNAL(clicked()), exileSniffer, SLOT(doLogOpenDir()));
 
-        processTabs->setCurrentIndex(5);
+        processTabs->setCurrentIndex(3);
         decrypt_details_stack->setCurrentIndex(1);
-        decodedDetailsTab->setCurrentIndex(1);
-        settingsChoiceList->setCurrentRow(0);
-        settingsStack->setCurrentIndex(1);
+        decodedDetailsTab->setCurrentIndex(0);
+        settingsChoiceList->setCurrentRow(-1);
+        settingsStack->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(exileSniffer);
@@ -823,9 +824,11 @@ public:
         const bool __sortingEnabled = settingsChoiceList->isSortingEnabled();
         settingsChoiceList->setSortingEnabled(false);
         QListWidgetItem *___qlistwidgetitem = settingsChoiceList->item(0);
-        ___qlistwidgetitem->setText(QApplication::translate("exileSniffer", "Logfiles", Q_NULLPTR));
+        ___qlistwidgetitem->setText(QApplication::translate("exileSniffer", "General", Q_NULLPTR));
         QListWidgetItem *___qlistwidgetitem1 = settingsChoiceList->item(1);
-        ___qlistwidgetitem1->setText(QApplication::translate("exileSniffer", "Feeds", Q_NULLPTR));
+        ___qlistwidgetitem1->setText(QApplication::translate("exileSniffer", "Logfiles", Q_NULLPTR));
+        QListWidgetItem *___qlistwidgetitem2 = settingsChoiceList->item(2);
+        ___qlistwidgetitem2->setText(QApplication::translate("exileSniffer", "Feeds", Q_NULLPTR));
         settingsChoiceList->setSortingEnabled(__sortingEnabled);
 
         groupBox_2->setTitle(QApplication::translate("exileSniffer", "Packet Hexdumps Directory", Q_NULLPTR));
@@ -850,19 +853,19 @@ public:
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">exileSniffer Version 1.0</p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">exileSniffer Version 1.0.1</p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">https://github.com/ncatlin/exileSniffer</p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n"
-"<p style=\" margin-top:0px; margin-b"
-                        "ottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Developed by Nia Catlin</p>\n"
+"<p style=\" margin-top:0px; margin"
+                        "-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Developed by Nia Catlin</p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Apache 2.0 Licenced</p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Interacts with (and requires) WinPcap to sniff packets - Get it from https://www.winpcap.org/install/default.htm</p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n"
-"<p style=\" margin-top:0px; margin"
-                        "-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Other libraries used: libtins (stream processing), rapidjson, Qt</p>\n"
+"<p style=\" margin-top:0px; marg"
+                        "in-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Other libraries used: libtins (stream processing), rapidjson, Qt</p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">PyPoE (https://github.com/OmegaK2/PyPoE) is used to generate the game data dictionary</p></body></html>", Q_NULLPTR));
         processTabs->setTabText(processTabs->indexOf(tab), QApplication::translate("exileSniffer", "About", Q_NULLPTR));
