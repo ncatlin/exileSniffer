@@ -169,6 +169,9 @@ private:
 	void deserialise_SRV_UNK_0x75(UIDecodedPkt *);
 
 	void deserialise_CLI_ACTIVATE_MAP(UIDecodedPkt *);
+
+	void deserialise_SRV_UNK_0x81(UIDecodedPkt *);
+
 	void deserialise_CLI_SWAPPED_WEAPONS(UIDecodedPkt *);
 
 	void deserialise_SRV_INVENTORY_FULL(UIDecodedPkt*);

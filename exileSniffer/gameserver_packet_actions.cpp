@@ -142,7 +142,7 @@ void exileSniffer::init_gamePkt_Actioners()
 	//7e
 	gamePktActioners[CLI_SWAPPED_WEAPONS] = &exileSniffer::action_CLI_SWAPPED_WEAPONS;
 	//80
-	//81
+	gamePktActioners[SRV_UNK_0x81] = &exileSniffer::action_SRV_UNK_0x81;
 	//82
 	//83
 	//84
@@ -2369,6 +2369,33 @@ void exileSniffer::action_CLI_SWAPPED_WEAPONS(UIDecodedPkt& obj, QString *analys
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
+}
+
+void exileSniffer::action_SRV_UNK_0x81(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+
+	UINT32 unk1 = obj.get_UInt32(L"Unk1");
+	UINT32 unk2 = obj.get_UInt32(L"Unk2");
+	UINT32 unk3 = obj.get_UInt32(L"Unk3");
+
+	if (!analysis)
+	{
+		std::wstringstream summary;
+		summary << std::hex;
+		summary << "Unk msg 0x81. Arg1: 0x "<< unk1 << ", Arg2: 0x"<<unk2 << ", Arg3: 0x" << unk3;
+
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+
+	std::wstringstream analysisStream;
+	analysisStream << "Unknown short Unk1: 0x" << unk1 << std::endl;
+	analysisStream << "Unknown byte Unk2: 0x" << unk2 << std::endl;
+	analysisStream << "Unknown dword Unk3: 0x" << unk3 << std::endl;
+
 }
 
 void exileSniffer::action_SRV_INVENTORY_FULL(UIDecodedPkt& obj, QString *analysis)

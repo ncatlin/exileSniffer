@@ -259,6 +259,8 @@ class exileSniffer : public QMainWindow
 		void action_CLI_ACTIVATE_MAP(UIDecodedPkt&, QString*);
 		void action_CLI_SWAPPED_WEAPONS(UIDecodedPkt&, QString*);
 
+		void action_SRV_UNK_0x81(UIDecodedPkt&, QString*);
+
 		void action_SRV_INVENTORY_FULL(UIDecodedPkt&, QString*);
 
 		void action_SRV_PVP_MATCHLIST(UIDecodedPkt&, QString*);
