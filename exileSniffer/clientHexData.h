@@ -18,8 +18,6 @@ public:
 	bool logUnfiltered = false;
 	QDir storageDir;
 
-	vector <UI_RAWHEX_PKT *> rawHexPackets;
-
 	std::ofstream filteredLogfile;
 	std::ofstream unfilteredLogfile;
 };

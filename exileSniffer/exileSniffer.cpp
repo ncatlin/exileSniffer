@@ -581,7 +581,6 @@ void exileSniffer::action_UI_Msg(UI_MESSAGE *msg)
 
 		case uiMsgType::ePacketHex:
 		{
-			deleteAfterUse = false; //archived
 			handle_raw_packet_data((UI_RAWHEX_PKT *)msg);
 			break;
 		}
@@ -882,8 +881,6 @@ void exileSniffer::handle_raw_packet_data(UI_RAWHEX_PKT *pkt)
 		output_hex_to_file(pkt, client->get_filtered_hexlog());
 	else
 		++rawCount_Recorded_Filtered.second;
-
-	client->rawHexPackets.push_back(pkt);
 }
 
 void exileSniffer::updateDecodedFilterLabel()
