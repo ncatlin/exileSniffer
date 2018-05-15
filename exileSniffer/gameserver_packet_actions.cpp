@@ -143,7 +143,7 @@ void exileSniffer::init_gamePkt_Actioners()
 	gamePktActioners[CLI_SWAPPED_WEAPONS] = &exileSniffer::action_CLI_SWAPPED_WEAPONS;
 	//80
 	gamePktActioners[SRV_ADJUST_LIGHTING] = &exileSniffer::action_SRV_ADJUST_LIGHTING;
-	//82
+	gamePktActioners[CLI_TRANSFER_ITEM] = &exileSniffer::action_CLI_TRANSFER_ITEM;
 	//83
 	//84
 	//85

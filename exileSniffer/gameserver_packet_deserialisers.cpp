@@ -134,7 +134,7 @@ void packet_processor::init_gamePkt_deserialisers()
 	gamePktDeserialisers[CLI_SWAPPED_WEAPONS] = (deserialiser)&packet_processor::deserialise_CLI_SWAPPED_WEAPONS;
 	//80
 	gamePktDeserialisers[SRV_ADJUST_LIGHTING] = (deserialiser)&packet_processor::deserialise_SRV_ADJUST_LIGHTING;
-	//82
+	gamePktDeserialisers[CLI_TRANSFER_ITEM] = (deserialiser)&packet_processor::deserialise_CLI_TRANSFER_ITEM;
 	//83
 	//84
 	//85
