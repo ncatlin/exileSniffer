@@ -130,7 +130,7 @@ void exileSniffer::init_gamePkt_Actioners()
 	gamePktActioners[SRV_STASHTAB_DATA] = &exileSniffer::action_SRV_STASHTAB_DATA;
 	gamePktActioners[SRV_UNK_0x73] = &exileSniffer::action_SRV_UNK_0x73;
 	gamePktActioners[CLI_SET_STATUS_MESSAGE] = &exileSniffer::action_CLI_SET_STATUS_MESSAGE;
-	gamePktActioners[SRV_UNK_0x75] = &exileSniffer::action_SRV_UNK_0x75;
+	gamePktActioners[SRV_MOVE_OBJECT] = &exileSniffer::action_SRV_MOVE_OBJECT;
 	//76
 	//77
 	//78
@@ -2302,14 +2302,24 @@ void exileSniffer::action_CLI_SET_STATUS_MESSAGE(UIDecodedPkt& obj, QString *ana
 	}
 }
 
-void exileSniffer::action_SRV_UNK_0x75(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_MOVE_OBJECT(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
+
+	UINT32 objectID = obj.get_UInt32(L"ObjectID");
+	UINT32 coord1 = obj.get_UInt32(L"Coord1");
+	UINT32 coord2 = obj.get_UInt32(L"Coord2");
+	UINT32 unk1 = obj.get_UInt32(L"Unk1");
+	UINT32 unk2 = obj.get_UInt32(L"Unk2");
+	UINT32 flags = obj.get_UInt32(L"Flags");
 
 	if (!analysis)
 	{
 		std::wstringstream summary;
-		summary << "Unk msg 0x75";
+		summary << "Object 0x" << std::hex << objectID << " moved to coord (" << std::dec << coord1 << "," << coord2 << ").";
+		summary << std::hex << "Unk1: 0x"<< unk1 <<", Unk2: 0x" << unk2;
+		if (flags)
+			summary << " +Flags 0x" << flags;
 
 		UI_DECODED_LIST_ENTRY listentry(obj);
 		listentry.summary = listentry.summary = QString::fromStdWString(summary.str());
@@ -2319,14 +2329,12 @@ void exileSniffer::action_SRV_UNK_0x75(UIDecodedPkt& obj, QString *analysis)
 
 	wstringstream analysisStream;
 	analysisStream << std::hex;
+	analysisStream << "ObjectID: 0x" << objectID << std::endl;
+	analysisStream << "Coords: (" << std::dec << obj.get_UInt32(L"Coord1") << "," << obj.get_UInt32(L"Coord2") << ")" << std::endl;
 	analysisStream << "Unk1: 0x" << obj.get_UInt32(L"Unk1") << std::endl;
 	analysisStream << "Unk2: 0x" << obj.get_UInt32(L"Unk2") << std::endl;
-	analysisStream << "Unk3: 0x" << obj.get_UInt32(L"Unk3") << std::endl;
-	analysisStream << "Unk4: 0x" << obj.get_UInt32(L"Unk4") << std::endl;
-	analysisStream << "Unk5: 0x" << obj.get_UInt32(L"Unk5") << std::endl;
 	analysisStream << std::endl;
 
-	UINT32 flags = obj.get_UInt32(L"Flags");
 	analysisStream << "Flags: 0x" << flags << std::endl;
 	if (flags & 0x8)
 	{
@@ -2336,6 +2344,8 @@ void exileSniffer::action_SRV_UNK_0x75(UIDecodedPkt& obj, QString *analysis)
 	{
 		analysisStream << "Flag 0x10 val: 0x" << obj.get_UInt32(L"Unk_cond_b") << std::endl;
 	}
+
+
 
 	*analysis = QString::fromStdWString(analysisStream.str());
 }
@@ -2395,7 +2405,34 @@ void exileSniffer::action_SRV_ADJUST_LIGHTING(UIDecodedPkt& obj, QString *analys
 	analysisStream << "Unknown short Unk1: 0x" << unk1 << std::endl;
 	analysisStream << "Unknown byte Unk2: 0x" << unk2 << std::endl;
 	analysisStream << "Unknown dword Unk3: 0x" << unk3 << std::endl;
+	*analysis = QString::fromStdWString(analysisStream.str());
+}
 
+void exileSniffer::action_CLI_TRANSFER_ITEM(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+
+	UINT32 container = obj.get_UInt32(L"Container");
+	UINT32 item = obj.get_UInt32(L"Item");
+	UINT32 unk = obj.get_UInt32(L"Unk");
+
+	if (!analysis)
+	{
+		std::wstringstream summary;
+		summary << std::hex;
+		summary << "Player moved item 0x" << std::hex << " to container 0x" << container << ". Unk byte: 0x" << unk;
+
+		UI_DECODED_LIST_ENTRY listentry(obj);
+		listentry.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(listentry, &obj);
+		return;
+	}
+
+	std::wstringstream analysisStream;
+	analysisStream << "Container: 0x" << container << std::endl;
+	analysisStream << "Item ID: 0x" << item << std::endl;
+	analysisStream << "Unknown byte: 0x" << unk << std::endl;
+	*analysis = QString::fromStdWString(analysisStream.str());
 }
 
 void exileSniffer::action_SRV_INVENTORY_FULL(UIDecodedPkt& obj, QString *analysis)
@@ -2409,6 +2446,8 @@ void exileSniffer::action_SRV_INVENTORY_FULL(UIDecodedPkt& obj, QString *analysi
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}
+
+	*analysis = "No further data expected";
 }
 
 
@@ -3675,7 +3714,7 @@ void exileSniffer::action_CLI_FINISHED_LOADING(UIDecodedPkt& obj, QString *analy
 	if (!analysis)
 	{
 		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Client requested playerID";
+		listentry.summary = "Client finished loading the zone";
 		addDecodedListEntry(listentry, &obj);
 		return;
 	}

@@ -1,0 +1,5 @@
+Version 1.0.1
+
+Handle more packets
+	0x81 - SRV_CHANGE_LIGHTING
+	0x82 - CLI_TRANSFER_ITEM

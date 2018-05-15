@@ -254,12 +254,13 @@ class exileSniffer : public QMainWindow
 		void action_SRV_STASHTAB_DATA(UIDecodedPkt&, QString*);
 		void action_SRV_UNK_0x73(UIDecodedPkt&, QString*);
 		void action_CLI_SET_STATUS_MESSAGE(UIDecodedPkt&, QString*);
-		void action_SRV_UNK_0x75(UIDecodedPkt&, QString*);
+		void action_SRV_MOVE_OBJECT(UIDecodedPkt&, QString*);
 
 		void action_CLI_ACTIVATE_MAP(UIDecodedPkt&, QString*);
 		void action_CLI_SWAPPED_WEAPONS(UIDecodedPkt&, QString*);
 
 		void action_SRV_ADJUST_LIGHTING(UIDecodedPkt&, QString*);
+		void action_CLI_TRANSFER_ITEM(UIDecodedPkt&, QString*);
 
 		void action_SRV_INVENTORY_FULL(UIDecodedPkt&, QString*);
 

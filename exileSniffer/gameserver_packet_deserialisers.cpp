@@ -121,7 +121,7 @@ void packet_processor::init_gamePkt_deserialisers()
 	gamePktDeserialisers[SRV_STASHTAB_DATA] = (deserialiser)&packet_processor::deserialise_SRV_STASHTAB_DATA;
 	gamePktDeserialisers[SRV_UNK_0x73] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x73;
 	gamePktDeserialisers[CLI_SET_STATUS_MESSAGE] = (deserialiser)&packet_processor::deserialise_CLI_SET_STATUS_MESSAGE;
-	gamePktDeserialisers[SRV_UNK_0x75] = (deserialiser)&packet_processor::deserialise_SRV_UNK_0x75;
+	gamePktDeserialisers[SRV_MOVE_OBJECT] = (deserialiser)&packet_processor::deserialise_SRV_MOVE_OBJECT;
 	//76
 	//77
 	//78
@@ -1456,13 +1456,13 @@ void packet_processor::deserialise_CLI_SET_STATUS_MESSAGE(UIDecodedPkt *uipkt)
 	uipkt->add_wstring(L"StatusText", status);
 }
 
-void packet_processor::deserialise_SRV_UNK_0x75(UIDecodedPkt *uipkt)
+void packet_processor::deserialise_SRV_MOVE_OBJECT(UIDecodedPkt *uipkt)
 {
+	consume_add_dword_ntoh(L"ObjectID", uipkt);
+	consume_add_dword_ntoh(L"Coord1", uipkt);
+	consume_add_dword_ntoh(L"Coord2", uipkt);
 	consume_add_dword_ntoh(L"Unk1", uipkt);
 	consume_add_dword_ntoh(L"Unk2", uipkt);
-	consume_add_dword_ntoh(L"Unk3", uipkt);
-	consume_add_dword_ntoh(L"Unk4", uipkt);
-	consume_add_dword_ntoh(L"Unk5", uipkt);
 
 	byte controlByte = consume_Byte();
 	uipkt->add_byte(L"Flags", controlByte);
@@ -1491,7 +1491,14 @@ void packet_processor::deserialise_SRV_ADJUST_LIGHTING(UIDecodedPkt *uipkt)
 {
 	consume_add_word_ntoh(L"Unk1", uipkt);
 	consume_add_byte(L"Unk2", uipkt);
-	consume_add_dword_ntoh(L"Unk2", uipkt);
+	consume_add_dword_ntoh(L"Unk3", uipkt);
+}
+
+void packet_processor::deserialise_CLI_TRANSFER_ITEM(UIDecodedPkt *uipkt)
+{
+	consume_add_word_ntoh(L"Container", uipkt);
+	consume_add_dword_ntoh(L"Item", uipkt);
+	consume_add_byte(L"Unk", uipkt);
 }
 
 void packet_processor::deserialise_CLI_SKILLPANE_ACTION(UIDecodedPkt *uipkt)
