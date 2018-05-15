@@ -121,13 +121,26 @@ public:
 	void setAbandoned() { abandoned = true; }
 	bool decodeError() { return failedDecode; }
 	bool wasAbandoned() { return abandoned; }
-	long long time_processed_ms() { return mstime; }
 	DWORD getClientProcessID() { return PID; }
 	int getStreamID() { return nwkstreamID; }
-	ushort getMessageID() { return messageID; }
 	void set_validate_MessageID(ushort msgID, SafeQueue<UI_MESSAGE *> *uiMsgQueue);
 	streamType getStreamType() { return streamServer; }
 	bool isIncoming() { return incoming; }
+
+	long long time_processed_ms() { return msTime; }
+	QString dayMonTime() { return QString::fromStdWString(epochms_to_timestring(msTime)); }
+	QString floatSeconds(long long start) { return QString::number((msTime - start) / 1000.0, 'd', 4); }
+
+	ushort getMessageID() { return messageID; }
+	QString hexPktID() { return "0x" + QString::number(messageID, 16); }
+	QString decPktID() { return QString::number(messageID); }
+
+	QString senderString();
+
+	std::pair<vector<byte> *, ushort> bytesBuf() {
+		return make_pair(originalbuf + bufferOffsets.first,
+			bufferOffsets.second - bufferOffsets.first);
+	}
 
 	static rapidjson::GenericValue<rapidjson::UTF8<>> *loginMessageTypes;
 	static rapidjson::GenericValue<rapidjson::UTF8<>> *gameMessageTypes;
@@ -140,6 +153,10 @@ public:
 	rapidjson::GenericDocument<rapidjson::UTF16<> > jsn;
 	WValue* payload = NULL;
 
+	QString summary;
+	QString fulltext;
+	bool filtered = false;
+
 private:
 	ushort messageID;
 	DWORD PID;
@@ -148,7 +165,7 @@ private:
 	bool failedDecode = false;
 	bool abandoned = false;
 	bool payloadOperations = false;
-	long long mstime;
+	long long msTime;
 };
 
 Q_DECLARE_METATYPE(UIDecodedPkt *);

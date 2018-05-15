@@ -48,9 +48,8 @@ void exileSniffer::action_LOGIN_CLI_KEEP_ALIVE(UIDecodedPkt& obj, QString *analy
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Client keepalive message";
-		addDecodedListEntry(listentry, &obj);
+		obj.summary = "Client keepalive message";
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -72,9 +71,9 @@ void exileSniffer::action_LOGIN_EPHERMERAL_PUBKEY(UIDecodedPkt& obj, QString *an
 		if (sigLen > 0)
 			summary << " + DSA signature ("<< sigLen << " bytes)";
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -108,9 +107,9 @@ void exileSniffer::action_LOGIN_CLI_AUTH_DATA(UIDecodedPkt& obj, QString *analys
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Client authentication data for account: "+QString::fromStdWString(accountName);
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary = "Client authentication data for account: "+QString::fromStdWString(accountName);
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -152,9 +151,9 @@ void exileSniffer::action_LOGIN_SRV_UNK0x4(UIDecodedPkt& obj, QString *analysis)
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Unknown packet 0x04";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary = "Unknown packet 0x04";
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -167,9 +166,9 @@ void exileSniffer::action_LOGIN_CLI_RESYNC(UIDecodedPkt& obj, QString *analysis)
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Character Select Resync. Arg 0x"+QString::number(obj.get_UInt32(L"Arg"));
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary = "Character Select Resync. Arg 0x"+QString::number(obj.get_UInt32(L"Arg"));
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -201,9 +200,9 @@ void exileSniffer::action_LOGIN_SRV_CHAR_LIST(UIDecodedPkt& obj, QString *analys
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Character list with "+QString::number(listSize)+" characters";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary = "Character list with "+QString::number(listSize)+" characters";
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -242,9 +241,9 @@ void exileSniffer::action_LOGIN_SRV_FINAL_PKT(UIDecodedPkt& obj, QString *analys
 	
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Final loginserver packet. Arg: 0x"+QString::number(arg,16);
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary = "Final loginserver packet. Arg: 0x"+QString::number(arg,16);
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -257,9 +256,9 @@ void exileSniffer::action_LOGIN_CLI_CHANGE_PASSWORD(UIDecodedPkt& obj, QString *
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Password change";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary = "Password change";
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -272,9 +271,9 @@ void exileSniffer::action_LOGIN_CLI_DELETE_CHARACTER(UIDecodedPkt& obj, QString 
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Delete character";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary = "Delete character";
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -287,9 +286,9 @@ void exileSniffer::action_LOGIN_CLI_CHARACTER_SELECTED(UIDecodedPkt& obj, QStrin
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Character selected";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary = "Character selected";
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -309,9 +308,9 @@ void exileSniffer::action_LOGIN_SRV_NOTIFY_GAMESERVER(UIDecodedPkt& obj, QString
 	if (gbit == obj.payload->MemberEnd())
 	{
 		add_metalog_update("Warning: No ServerBlobs found in payload of LOGIN_SRV_NOTIFY_GAMESERVER", obj.getClientProcessID());
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Gameserver connection information [BAD]";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary = "Gameserver connection information [BAD]";
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -330,9 +329,9 @@ void exileSniffer::action_LOGIN_SRV_NOTIFY_GAMESERVER(UIDecodedPkt& obj, QString
 		summary << "Gameserver connection info: " << IPToString(firstIPDW) <<
 			":" << std::dec << firstPort << " (" << areaname << ")";
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -350,9 +349,9 @@ void exileSniffer::action_LOGIN_CLI_CREATED_CHARACTER(UIDecodedPkt& obj, QString
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Character created: "+QString::fromStdWString(name);
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary = "Character created: "+QString::fromStdWString(name);
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -371,9 +370,9 @@ void exileSniffer::action_LOGIN_CLI_REQUEST_RACE_DATA(UIDecodedPkt& obj, QString
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Client requested race data";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary = "Client requested race data";
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -391,9 +390,9 @@ void exileSniffer::action_LOGIN_SRV_LEAGUE_LIST(UIDecodedPkt& obj, QString *anal
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "League list with "+QString::number(blobListSize)+" entries";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary = "League list with "+QString::number(blobListSize)+" entries";
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -409,9 +408,9 @@ void exileSniffer::action_LOGIN_CLI_REQUEST_LEAGUES(UIDecodedPkt& obj, QString *
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Client requested league list";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary = "Client requested league list";
+		addDecodedListEntry(&obj);
 		return;
 	}
 

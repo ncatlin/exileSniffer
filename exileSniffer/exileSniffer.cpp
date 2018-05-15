@@ -200,9 +200,10 @@ void exileSniffer::refreshFilters()
 	refreshingFilters = true;
 	for (auto it = decodedListEntries.begin(); it != decodedListEntries.end(); it++)
 	{
-		if (packet_passes_decoded_filter(it->second->getMessageID()))
+		UIDecodedPkt *pkt = *it;
+		if (packet_passes_decoded_filter(pkt->getMessageID()))
 		{
-			addDecodedListEntry(it->first, it->second, false);
+			addDecodedListEntry(pkt, false);
 		}
 	}
 	refreshingFilters = false;
@@ -1126,13 +1127,7 @@ void exileSniffer::hashUtilInput()
 		ui.order2hashres->setText("Not found");
 }
 
-QString UI_DECODED_LIST_ENTRY::sender()
-{
-	if (!incoming) return "[" + QString::number(streamID) + "] Client";
-	if (streamServer == eGame) return "[" + QString::number(streamID) + "] GameServer";
-	if (streamServer == eLogin) return "[" + QString::number(streamID) + "] LoginServer";
-	return "sender() Error";
-}
+
 
 void exileSniffer::doLogSetDir()
 {

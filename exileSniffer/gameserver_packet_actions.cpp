@@ -339,58 +339,58 @@ void exileSniffer::setRowColor(int tablerow, QColor colour)
 	}
 }
 
-void exileSniffer::addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPkt *obj, bool isNewEntry)
+void exileSniffer::addDecodedListEntry(UIDecodedPkt *entry, bool isNewEntry)
 {
 	if (isNewEntry)
-		decodedListEntries.push_back(make_pair(entry, obj));
+		decodedListEntries.push_back(entry);
 
 	unsigned int rowIndex = ui.decodedListTable->rowCount();
 	ui.decodedListTable->setRowCount(rowIndex + 1);
 	if(ui.decodedAutoscrollCheck->isChecked())
 		ui.decodedListTable->scrollToBottom();
 
-	QTableWidgetItem *time = new QTableWidgetItem(entry.floatSeconds(startMSSinceEpoch));
-	time->setData(Qt::UserRole, QVariant::fromValue<UIDecodedPkt *>(obj)); //add object pointer to first column
+	QTableWidgetItem *time = new QTableWidgetItem(entry->floatSeconds(startMSSinceEpoch));
+	time->setData(Qt::UserRole, QVariant::fromValue<UIDecodedPkt *>(entry)); //add object pointer to first column
 	ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_TIME, time);
 
-	QTableWidgetItem *sender = new QTableWidgetItem(entry.sender());
+	QTableWidgetItem *sender = new QTableWidgetItem(entry->senderString());
 	ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_SENDER, sender);
 
-	QTableWidgetItem *pktIDItem = new QTableWidgetItem(entry.hexPktID());
+	QTableWidgetItem *pktIDItem = new QTableWidgetItem(entry->hexPktID());
 	ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_MSGID, pktIDItem);
 
-	if (entry.badDecode())
+	if (entry->decodeError())
 	{
-		entry.summary = "<!BAD!>" + entry.summary;
+		entry->summary = "<!BAD!>" + entry->summary;
 
-		QTableWidgetItem *summary = new QTableWidgetItem(entry.summary);
+		QTableWidgetItem *summary = new QTableWidgetItem(entry->summary);
 		ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_SUMMARY, summary);
 
 		setRowColor(rowIndex, QColor(255, 150, 150, 255));
 		return;
 	}
 
-	if (obj->wasAbandoned())
+	if (entry->wasAbandoned())
 	{
-		entry.summary = "<!ABAND!>" + entry.summary;
+		entry->summary = "<!ABAND!>" + entry->summary;
 
-		QTableWidgetItem *summary = new QTableWidgetItem(entry.summary);
+		QTableWidgetItem *summary = new QTableWidgetItem(entry->summary);
 		ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_SUMMARY, summary);
 
 		setRowColor(rowIndex, QColor(255, 175, 175, 255));
 		return;
 	}
 
-	QTableWidgetItem *summary = new QTableWidgetItem(entry.summary);
+	QTableWidgetItem *summary = new QTableWidgetItem(entry->summary);
 	ui.decodedListTable->setItem(rowIndex, DECODED_SECTION_SUMMARY, summary);
 
 
-	streamType streamServer = obj->getStreamType();
-	ushort msgid = obj->getMessageID();
+	streamType streamServer = entry->getStreamType();
+	ushort msgid = entry->getMessageID();
 
 	if (streamServer == eGame)
 	{
-		if (obj->isIncoming())
+		if (entry->isIncoming())
 			setRowColor(rowIndex, Qt::white);
 		else
 			setRowColor(rowIndex, QColor(235, 235, 235, 255)); //grey
@@ -399,7 +399,7 @@ void exileSniffer::addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPk
 	{
 		if (streamServer == eLogin)
 		{
-			if (obj->isIncoming())
+			if (entry->isIncoming())
 				setRowColor(rowIndex, QColor(255, 255, 230, 255));  //yellowy
 			else
 				setRowColor(rowIndex, QColor(255, 255, 200, 255));	//dark yellowy	
@@ -443,9 +443,9 @@ void exileSniffer::action_undecoded_packet(UIDecodedPkt& obj)
 		<< std::dec << sizeAfterID << " byte";
 	summary << ((sizeAfterID == 1) ? ")" : "s)");
 
-	UI_DECODED_LIST_ENTRY listentry(obj);
-	listentry.summary = QString::fromStdWString(summary.str());
-	addDecodedListEntry(listentry, &obj);
+
+	obj.summary = QString::fromStdWString(summary.str());
+	addDecodedListEntry(&obj);
 
 	++decodedErrorPacketCount;
 	updateDecodedFilterLabel();
@@ -526,9 +526,8 @@ void exileSniffer::action_CLI_CHAT_MSG_ITEMS(UIDecodedPkt& obj, QString *analysi
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player(You) sent chat message with with linked item ";
-		addDecodedListEntry(listentry, &obj);
+		obj.summary= "Player(You) sent chat message with with linked item ";
+		addDecodedListEntry(&obj);
 		return;
 	}
 	
@@ -557,9 +556,9 @@ void exileSniffer::action_CLI_CHAT_COMMAND(UIDecodedPkt& obj, QString *analysis)
 		wstringstream summary;
 		summary << "Used builtin command at commands.dat index: " << std::dec << commandsDatIndex <<
 			" [Arg 0x: " << std::hex << arg << "]";
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -608,9 +607,9 @@ void exileSniffer::action_SRV_CHAT_MESSAGE(UIDecodedPkt& obj, QString *analysis)
 			summary << "[" << tag << "]";
 		summary << ": " << text;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -645,9 +644,9 @@ void exileSniffer::action_SRV_SERVER_MESSAGE(UIDecodedPkt& obj, QString *analysi
 		summary << "msgID " << ggpkDatRow;
 
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -700,9 +699,9 @@ void exileSniffer::action_CLI_LOGGED_OUT(UIDecodedPkt& obj, QString *analysis)
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Game client logged out. [Arg: 0x"+QString::number((byte)arg, 16)+"]";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Game client logged out. [Arg: 0x"+QString::number((byte)arg, 16)+"]";
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -715,9 +714,9 @@ void exileSniffer::action_CLI_CHAT_MSG(UIDecodedPkt& obj, QString *analysis)
 	//todo - channel decode
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player(You) spoke in chat: "+ QString::fromStdWString(obj.get_wstring(L"Message"));
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Player(You) spoke in chat: "+ QString::fromStdWString(obj.get_wstring(L"Message"));
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -742,9 +741,9 @@ void exileSniffer::action_CLI_HNC(UIDecodedPkt& obj, QString *analysis)
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Game Client sent ping challenge 0x" + QString::number(challenge, 16);
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Game Client sent ping challenge 0x" + QString::number(challenge, 16);
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -757,9 +756,9 @@ void exileSniffer::action_SRV_HNC(UIDecodedPkt& obj, QString *analysis)
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Server sent HNC response 0x" + QString::number(response, 16);
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Server sent HNC response 0x" + QString::number(response, 16);
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -787,9 +786,9 @@ void exileSniffer::action_SRV_AREA_INFO(UIDecodedPkt& obj, QString *analysis)
 		summary << "<Loading Area: " << areaname
 			<< "> - Server sent environment and objects preload data (" << std::dec << listSize << " items)";
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -942,9 +941,9 @@ void exileSniffer::action_SRV_PRELOAD_MONSTER_LIST(UIDecodedPkt& obj, QString *a
 		wstringstream summary;
 		summary << "Server sent monster preload list with " << std::dec << listSize << " entries";
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -1011,9 +1010,9 @@ void exileSniffer::action_SRV_UNK_0x13(UIDecodedPkt& obj, QString *analysis)
 			" entries. Endstring: "<<endString<<", EndVal1: 0x"<<std::hex<< endShort<<
 			", EndVal2: 0x"<<endDWORD;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -1064,9 +1063,9 @@ void exileSniffer::action_SRV_ITEMS_LIST(UIDecodedPkt& obj, QString *analysis)
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Server listing items held by obj ID: 0x"+QString::number(objID,16);
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Server listing items held by obj ID: 0x"+QString::number(objID,16);
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1093,9 +1092,9 @@ void exileSniffer::action_CLI_CLICKED_GROUND_ITEM(UIDecodedPkt& obj, QString *an
 			summary << " <!Unusual modifier 0x" << std::hex << modifier << " - what are you doing?>";
 
 		summary << " seq: 0x" << seq;
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1121,9 +1120,9 @@ void exileSniffer::action_CLI_ACTION_PREDICTIVE(UIDecodedPkt& obj, QString *anal
 			summary << " <!Unusual modifier 0x" << std::hex<< modifier << " - what are you doing?>";
 	
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1137,9 +1136,9 @@ void exileSniffer::action_SRV_TRANSFER_INSTANCE(UIDecodedPkt& obj, QString *anal
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Server transferred account to another instance. Arg 0x" + QString::number(arg, 16);
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Server transferred account to another instance. Arg 0x" + QString::number(arg, 16);
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1149,9 +1148,9 @@ void exileSniffer::action_SRV_INSTANCE_SERVER_DATA(UIDecodedPkt& obj, QString *a
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(L"Server sent instance server data");
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(L"Server sent instance server data");
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1170,9 +1169,9 @@ void exileSniffer::action_CLI_PICKUP_ITEM(UIDecodedPkt& obj, QString *analysis)
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1191,9 +1190,9 @@ void exileSniffer::action_CLI_PLACE_ITEM(UIDecodedPkt& obj, QString *analysis)
 		wstringstream summary;
 		summary << "Placed item down in container " << slotToString(container) << " at (" << std::dec << col << "," << row << ")";
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1205,9 +1204,9 @@ void exileSniffer::action_CLI_DROP_ITEM(UIDecodedPkt& obj, QString *analysis)
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Dropped held item on ground";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Dropped held item on ground";
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1217,9 +1216,9 @@ void exileSniffer::action_CLI_REMOVE_SOCKET(UIDecodedPkt& obj, QString *analysis
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player(You) emptied socket";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Player(You) emptied socket";
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1229,9 +1228,9 @@ void exileSniffer::action_CLI_INSERT_SOCKET(UIDecodedPkt& obj, QString *analysis
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player(You) inserted into socket";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Player(You) inserted into socket";
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1241,9 +1240,9 @@ void exileSniffer::action_CLI_LEVEL_SKILLGEM(UIDecodedPkt& obj, QString *analysi
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player(You) levelled a skillgem";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Player(You) levelled a skillgem";
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1259,9 +1258,9 @@ void exileSniffer::action_SRV_UNK_0x20(UIDecodedPkt& obj, QString *analysis)
 		//summary << "  -  Other data: 0x" << obj.get_UInt32(L"Unk1") << ", 0x" << obj.get_UInt32(L"Unk2")
 		//	<< ", 0x" << obj.get_UInt32(L"Unk3") << ", 0x" << obj.get_UInt32(L"Unk4");
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1272,9 +1271,9 @@ void exileSniffer::action_CLI_SKILLPOINT_CHANGE(UIDecodedPkt& obj, QString *anal
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player(You) added a skillpoint";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Player(You) added a skillpoint";
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1287,9 +1286,9 @@ void exileSniffer::action_CLI_CHOSE_ASCENDANCY(UIDecodedPkt& obj, QString *analy
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player chose ascendancy "+QString::number(choice);
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Player chose ascendancy "+QString::number(choice);
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1309,9 +1308,9 @@ void exileSniffer::action_CLI_MERGE_STACK(UIDecodedPkt& obj, QString *analysis)
 		std::wstringstream summary;
 		summary << "Player merged item stacks. Data: 0x" << unk1 << ", 0x" << unk2 << ", 0x" << unk3;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1324,9 +1323,9 @@ void exileSniffer::action_CLI_CANCEL_BUF(UIDecodedPkt& obj, QString *analysis)
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Attempted to cancel buff "+QString::number(buffID,10);
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Attempted to cancel buff "+QString::number(buffID,10);
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1336,9 +1335,9 @@ void exileSniffer::action_SRV_UNK_0x2c(UIDecodedPkt& obj, QString *analysis)
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Unknown packet 0x2c. Unk size bytes read (4 seen) + 13 bytes at end";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Unknown packet 0x2c. Unk size bytes read (4 seen) + 13 bytes at end";
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1360,9 +1359,9 @@ void exileSniffer::action_CLI_SELECT_MAPTRAVEL(UIDecodedPkt& obj, QString *analy
 		summary << "Player selected waypoint in area " << areaname <<
 			std::hex<< ", Arg2: 0x"<<unk2<<", Arg3: 0x"<<byte;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1376,9 +1375,9 @@ void exileSniffer::action_CLI_SET_HOTBARSKILL(UIDecodedPkt& obj, QString *analys
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Set hotbar slot "+QString::number(slot)+" to 0x"+QString::number(skillID, 16);
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Set hotbar slot "+QString::number(slot)+" to 0x"+QString::number(skillID, 16);
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1388,9 +1387,9 @@ void exileSniffer::action_SRV_SKILL_SLOTS_LIST(UIDecodedPkt& obj, QString *analy
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Server sent hotbar skill ID list";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Server sent hotbar skill ID list";
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -1421,9 +1420,9 @@ void exileSniffer::action_CLI_REVIVE_CHOICE(UIDecodedPkt& obj, QString *analysis
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player chose revive option " + QString::number(choice);
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Player chose revive option " + QString::number(choice);
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1469,9 +1468,9 @@ void exileSniffer::action_SRV_YOU_DIED(UIDecodedPkt& obj, QString *analysis)
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = summary + " Arg: 0x"+QString::number(unk1, 16);
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= summary + " Arg: 0x"+QString::number(unk1, 16);
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1489,9 +1488,9 @@ void exileSniffer::action_CLI_ACTIVATE_ITEM(UIDecodedPkt& obj, QString *analysis
 		std::wstringstream summary;
 		summary << "Used (" << std::dec << q1 << ") item 0x" << std::hex << item1;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1504,9 +1503,9 @@ void exileSniffer::action_CLI_USE_BELT_SLOT(UIDecodedPkt& obj, QString *analysis
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Activated belt slot "+QString::number(slot);
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Activated belt slot "+QString::number(slot);
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1527,9 +1526,9 @@ void exileSniffer::action_CLI_USE_ITEM_ON_ITEM(UIDecodedPkt& obj, QString *analy
 		summary << "Used (" << std::dec<< q1 << ") item 0x" << std::hex << item1;
 		summary << " on (" << std::dec << q2 << ") item 0x" << std::hex << item2;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1543,9 +1542,9 @@ void exileSniffer::action_CLI_UNK_0x41(UIDecodedPkt& obj, QString* analysis)
 		std::wstringstream summary;
 		summary << "Unk pkt 0x41";
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1558,9 +1557,9 @@ void exileSniffer::action_CLI_SELECT_NPC_DIALOG(UIDecodedPkt& obj, QString *anal
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Client selected dialog option "+QString::number(option);
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Client selected dialog option "+QString::number(option);
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1580,9 +1579,9 @@ void exileSniffer::action_SRV_SHOW_NPC_DIALOG(UIDecodedPkt& obj, QString *analys
 		summary << "Dialog item " << std::dec << dialogIdx << " shown for object (0x" << 
 			std::hex << ID1 << "," << ID2 << "," << ID3 << ")";
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -1598,9 +1597,9 @@ void exileSniffer::action_CLI_CLOSE_NPC_DIALOG(UIDecodedPkt& obj, QString *analy
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player closed dialog";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Player closed dialog";
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1628,9 +1627,9 @@ void exileSniffer::action_SRV_OPEN_UI_PANE(UIDecodedPkt& obj, QString* analysis)
 		std::wstringstream summary;
 		summary << "Server opened Client UI pane "<<converter.from_bytes(paneName)<<std::hex<<", Arg: 0x" << arg;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1654,9 +1653,9 @@ void exileSniffer::action_CLI_SPLIT_STACK(UIDecodedPkt& obj, QString* analysis)
 		summary << "ItemID1: 0x" << iid;
 		summary << ", Unk32: 0x" << unk1 << ", Unk8: 0x" << unk2;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1674,9 +1673,9 @@ void exileSniffer::action_SRV_LIST_PORTALS(UIDecodedPkt& obj, QString* analysis)
 		wstringstream summary;
 		summary << "List of "<< std::dec << listSize <<" portals";
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -1711,9 +1710,9 @@ void exileSniffer::action_CLI_SEND_PARTY_INVITE(UIDecodedPkt& obj, QString* anal
 		std::wstringstream summary;
 		summary << "Invited other player \"" << obj.get_wstring(L"Name") << "\" to party";
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1727,9 +1726,9 @@ void exileSniffer::action_CLI_TRY_JOIN_PARTY(UIDecodedPkt& obj, QString*analysis
 		std::wstringstream summary;
 		summary << "Sent request to join public party ID 0x" << std::hex << obj.get_UInt32(L"ID");
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1742,9 +1741,9 @@ void exileSniffer::action_CLI_DISBAND_PUBLIC_PARTY(UIDecodedPkt& obj, QString*an
 		std::wstringstream summary;
 		summary << "Disbanded public party ID 0x" << std::hex << obj.get_UInt32(L"ID");
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1758,9 +1757,9 @@ void exileSniffer::action_CLI_CREATE_PUBLICPARTY(UIDecodedPkt& obj, QString*anal
 		summary << "Created public party called: \"" 
 			<< obj.get_wstring(L"Name") << "\" - arg 0x" << std::hex << obj.get_UInt32(L"Arg");
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1775,9 +1774,9 @@ void exileSniffer::action_CLI_UNK_x56(UIDecodedPkt& obj, QString *analysis)
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Sent packet 0x56 argument: " + QString::number(arg);
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Sent packet 0x56 argument: " + QString::number(arg);
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1790,9 +1789,9 @@ void exileSniffer::action_CLI_GET_PARTY_DETAILS(UIDecodedPkt& obj, QString*analy
 		std::wstringstream summary;
 		summary << "Send joined request for public party 0x" << std::hex << obj.get_UInt32(L"ID");
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1807,9 +1806,9 @@ void exileSniffer::action_SRV_FRIENDSLIST(UIDecodedPkt& obj, QString *analysis)
 		std::wstringstream summary;
 		summary << "Character socialpane " << obj.get_wstring(L"Name") << ", " << obj.get_wstring(L"String2");
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -1853,9 +1852,9 @@ void exileSniffer::action_SRV_PARTY_DETAILS(UIDecodedPkt& obj, QString *analysis
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Server sent details for public party (" + QString::number(listSize) + " members)";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Server sent details for public party (" + QString::number(listSize) + " members)";
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -1883,9 +1882,9 @@ void exileSniffer::action_SRV_PARTY_ENDED(UIDecodedPkt& obj, QString *analysis)
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Party ended";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Party ended";
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1895,9 +1894,9 @@ void exileSniffer::action_CLI_REQUEST_PUBLICPARTIES(UIDecodedPkt& obj, QString *
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Client requested latest public parties - arg " + obj.get_UInt32(L"Arg");
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Client requested latest public parties - arg " + obj.get_UInt32(L"Arg");
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1907,9 +1906,9 @@ void exileSniffer::action_SRV_PUBLIC_PARTY_LIST(UIDecodedPkt& obj, QString *anal
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Server sent list of public parties";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Server sent list of public parties";
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -1933,9 +1932,9 @@ void exileSniffer::action_CLI_MOVE_ITEM_PANE(UIDecodedPkt& obj, QString *analysi
 		summary << "Client placed item 0x" << itemID << " in pane 0x" << paneID 
 			<< " at " << std::dec << column << "," << row;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -1953,9 +1952,9 @@ void exileSniffer::action_CLI_CONFIRM_SELL(UIDecodedPkt& obj, QString *analysis)
 		wstringstream summary;
 		summary << "Player confirmed sale. Arg: 0x"<<std::hex<<arg;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -1976,9 +1975,9 @@ void exileSniffer::action_SRV_UNK_0x67(UIDecodedPkt& obj, QString *analysis)
 		wstringstream summary;
 		summary << "Unk (vendor related msg) 0x67: " << unkstring;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -2004,9 +2003,9 @@ void exileSniffer::action_SRV_UNK_0x68(UIDecodedPkt& obj, QString *analysis)
 		summary << std::hex << "Unk (vendor related msg) 0x68. Unk1: 0x" << obj.get_UInt32(L"Unk1")
 			<< ", Unk2: 0x" << obj.get_UInt32(L"Unk2");
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -2030,9 +2029,9 @@ void exileSniffer::action_SRV_UNK_0x6c(UIDecodedPkt& obj, QString *analysis)
 		wstringstream summary;
 		summary << "Server sent unknown string/byte pair list with "<< bloblist.Size() << " entries";
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -2059,9 +2058,9 @@ void exileSniffer::action_SRV_CREATE_ITEM(UIDecodedPkt& obj, QString *analysis)
 	{
 		wstringstream summary;
 		summary << "Server updated items in inventory";
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -2133,9 +2132,9 @@ void exileSniffer::action_SRV_SLOT_ITEMSLIST(UIDecodedPkt& obj, QString *analysi
 	{
 		wstringstream summary;
 		summary << "Server sent list of " << std::dec << itemCount << " items in slot " << container;
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -2199,9 +2198,9 @@ void exileSniffer::action_SRV_INVENTORY_SET_REMOVE(UIDecodedPkt& obj, QString *a
 		wstringstream summary;
 		summary << "Inventory set remove. Unk1: 0x" << std::hex << unk1 << ", Unk2: 0x"<< unk2;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -2218,9 +2217,9 @@ void exileSniffer::action_SRV_GRANTED_XP(UIDecodedPkt& obj, QString *analysis)
 		wstringstream summary;
 		summary << "Player gained " << std::dec << xp << " experience";
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -2237,9 +2236,9 @@ void exileSniffer::action_CLI_SELECT_STASHTAB(UIDecodedPkt& obj, QString *analys
 	{
 		wstringstream summary;
 		summary << "Client changed stash tab. Data: 0x" << std::hex << unk1 << ", 0x"<<unk2<<", 0x"<<unk3;
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -2256,9 +2255,9 @@ void exileSniffer::action_SRV_STASHTAB_DATA(UIDecodedPkt& obj, QString *analysis
 	{
 		wstringstream summary;
 		summary << "Stash tab data: 0x" << std::hex << unk1 << ", 0x" << unk2 << ", 0x" << unk3;
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -2276,9 +2275,9 @@ void exileSniffer::action_SRV_UNK_0x73(UIDecodedPkt& obj, QString *analysis)
 		wstringstream summary;
 		summary << "Server msg 0x73. Data: 0x" << std::hex << data1 << ". Str1: " << string1 
 			<< ", String2: "<<string2 <<" (bad strings? Different length data...)";
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -2292,9 +2291,9 @@ void exileSniffer::action_CLI_SET_STATUS_MESSAGE(UIDecodedPkt& obj, QString *ana
 		std::wstringstream summary;
 		summary << "Set status text: \"" << obj.get_wstring(L"StatusText") << "\"";
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -2318,9 +2317,9 @@ void exileSniffer::action_SRV_MOVE_OBJECT(UIDecodedPkt& obj, QString *analysis)
 		if (flags)
 			summary << " +Flags 0x" << flags;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -2354,9 +2353,9 @@ void exileSniffer::action_CLI_ACTIVATE_MAP(UIDecodedPkt& obj, QString *analysis)
 	byte arg = obj.get_UInt32(L"Byte");
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player activate map device";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Player activate map device";
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -2371,9 +2370,9 @@ void exileSniffer::action_CLI_SWAPPED_WEAPONS(UIDecodedPkt& obj, QString *analys
 	byte arg = obj.get_UInt32(L"Byte");
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Swapped to weapon slot "+QString::number(arg,10);
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Swapped to weapon slot "+QString::number(arg,10);
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -2392,9 +2391,9 @@ void exileSniffer::action_SRV_ADJUST_LIGHTING(UIDecodedPkt& obj, QString *analys
 		summary << std::hex;
 		summary << "Unk msg 0x81. Arg1: 0x "<< unk1 << ", Arg2: 0x"<<unk2 << ", Arg3: 0x" << unk3;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -2419,9 +2418,9 @@ void exileSniffer::action_CLI_TRANSFER_ITEM(UIDecodedPkt& obj, QString *analysis
 		summary << std::hex;
 		summary << "Player moved item 0x" << std::hex << " to container 0x" << container << ". Unk byte: 0x" << unk;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -2438,9 +2437,9 @@ void exileSniffer::action_SRV_INVENTORY_FULL(UIDecodedPkt& obj, QString *analysi
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "'Inventory Full' notice";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "'Inventory Full' notice";
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -2520,9 +2519,9 @@ void exileSniffer::action_SRV_PVP_MATCHLIST(UIDecodedPkt& obj, QString *analysis
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "List of "+ QString::number(listSize)+" available PVP match types";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "List of "+ QString::number(listSize)+" available PVP match types";
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -2538,9 +2537,9 @@ void exileSniffer::action_SRV_EVENTSLIST(UIDecodedPkt& obj, QString *analysis)
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "List of " + QString::number(listSize) + " available events to join";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "List of " + QString::number(listSize) + " available events to join";
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -2554,9 +2553,9 @@ void exileSniffer::action_CLI_SKILLPANE_ACTION(UIDecodedPkt& obj, QString *analy
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Used skillpane";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Used skillpane";
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -2569,9 +2568,9 @@ void exileSniffer::action_SRV_ACHIEVEMENT_1(UIDecodedPkt& obj, QString *analysis
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Achievement_1 arg: 0x" + QString::number(arg,16);
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Achievement_1 arg: 0x" + QString::number(arg,16);
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -2584,9 +2583,9 @@ void exileSniffer::action_SRV_ACHIEVEMENT_2(UIDecodedPkt& obj, QString *analysis
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Achievement_2 arg: 0x" + QString::number(arg, 16);
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Achievement_2 arg: 0x" + QString::number(arg, 16);
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -2596,9 +2595,9 @@ void exileSniffer::action_SRV_SKILLPANE_DATA(UIDecodedPkt& obj, QString *analysi
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Skillpane data from server";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Skillpane data from server";
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -2623,9 +2622,9 @@ void exileSniffer::action_SRV_UNK_POSITION_LIST(UIDecodedPkt& obj, QString *anal
 		summary << "Srv positionlist with " <<std::dec << itemList.Size() << " entries beginning (" <<
 			item1 << "," << item2 << "," << item3 << ")";
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -2648,9 +2647,9 @@ void exileSniffer::action_CLI_MICROTRANSACTION_SHOP_ACTION(UIDecodedPkt& obj, QS
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player(You) opened microtransaction pane";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Player(You) opened microtransaction pane";
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -2660,9 +2659,9 @@ void exileSniffer::action_SRV_MICROTRANSACTION_SHOP_DETAILS(UIDecodedPkt& obj, Q
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Transaction pane details from server";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Transaction pane details from server";
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -2677,9 +2676,9 @@ void exileSniffer::action_CLI_UNK_A3(UIDecodedPkt& obj, QString *analysis)
 		summary << "Unk message A3 from client. Unk1: 0x" << obj.get_UInt32(L"Unk1") << ", Unk2: 0x" << obj.get_UInt32(L"Unk2");
 
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -2693,9 +2692,9 @@ void exileSniffer::action_SRV_UNK_A5(UIDecodedPkt& obj, QString *analysis)
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Unknown list A5";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Unknown list A5";
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -2746,9 +2745,9 @@ void exileSniffer::action_CLI_UNK_0xC6(UIDecodedPkt& obj, QString *analysis)
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Client sent dataless message ID 0xC6";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Client sent dataless message ID 0xC6";
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -2759,9 +2758,9 @@ void exileSniffer::action_CLI_UNK_0xC7(UIDecodedPkt& obj, QString *analysis)
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Client sent dataless message ID 0xC7";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Client sent dataless message ID 0xC7";
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -2790,9 +2789,9 @@ void exileSniffer::action_SRV_UNK_0xCA(UIDecodedPkt& obj, QString *analysis)
 		summary << "Unk2: 0x" << unk2 << std::endl;
 		summary << "Listcount: 0x" << listSize << std::endl;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -2808,9 +2807,9 @@ void exileSniffer::action_SRV_EVENTSLIST_2(UIDecodedPkt& obj, QString *analysis)
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "List of " + QString::number(listSize) + " available events to join";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "List of " + QString::number(listSize) + " available events to join";
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -2834,9 +2833,9 @@ void exileSniffer::action_CLI_USED_SKILL(UIDecodedPkt& obj, QString *analysis)
 		if (!modDetails.empty())
 			summary << " [" << modDetails << "]";
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -2858,9 +2857,9 @@ void exileSniffer::action_CLI_CLICK_OBJ(UIDecodedPkt& obj, QString *analysis)
 		if (!modDetails.empty())
 			summary << " [" << modDetails << "]";
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -2874,9 +2873,9 @@ void exileSniffer::action_CLI_MOUSE_HELD(UIDecodedPkt& obj, QString *analysis)
 		summary << "[Lockstep]Mouse Held (" << obj.get_UInt32(L"Coord1") 
 			<< "," << obj.get_UInt32(L"Coord2") << ")";
 		
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -2886,9 +2885,9 @@ void exileSniffer::action_SRV_NOTIFY_AFK(UIDecodedPkt& obj, QString *analysis)
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "You are AFK?";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "You are AFK?";
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -2899,9 +2898,9 @@ void exileSniffer::action_CLI_MOUSE_RELEASE(UIDecodedPkt& obj, QString *analysis
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Released mouse";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Released mouse";
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -2911,9 +2910,9 @@ void exileSniffer::action_CLI_OPEN_WORLD_SCREEN(UIDecodedPkt& obj, QString *anal
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player opened world screen";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Player opened world screen";
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -2933,9 +2932,9 @@ void exileSniffer::action_SRV_CHAT_CHANNEL_ID(UIDecodedPkt& obj, QString *analys
 			", Type: 0x" << std::hex << type <<
 			", Language: " << std::dec << language << std::endl;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -2954,9 +2953,9 @@ void exileSniffer::action_SRV_GUILD_MEMBER_LIST(UIDecodedPkt& obj, QString *anal
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Guild member listing";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Guild member listing";
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -2980,9 +2979,9 @@ void exileSniffer::action_CLI_GUILD_CREATE(UIDecodedPkt& obj, QString *analysis)
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player(You) created guild";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Player(You) created guild";
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -2998,9 +2997,9 @@ void exileSniffer::action_SRV_UNK_0xE4(UIDecodedPkt& obj, QString *analysis)
 		wstringstream summary;
 		summary << "Unk msg 0xE4. Arg: 0x" << std::hex << arg << std::dec << "("<<arg<<")";
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -3028,9 +3027,9 @@ void exileSniffer::action_SRV_UNK_0xE6(UIDecodedPkt& obj, QString *analysis)
 			"6 (items - not decoded!): " << list6Len << std::endl;
 
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -3041,9 +3040,9 @@ void exileSniffer::action_CLI_EXIT_TO_CHARSCREEN(UIDecodedPkt& obj, QString *ana
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Client exited";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Client exited";
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -3053,9 +3052,9 @@ void exileSniffer::action_SRV_LOGINSRV_CRYPT(UIDecodedPkt& obj, QString *analysi
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Server sent loginserver data for character screen display";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Server sent loginserver data for character screen display";
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -3078,9 +3077,9 @@ void exileSniffer::action_CLI_DUEL_CHALLENGE(UIDecodedPkt& obj, QString *analysi
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player initiated duel challenge";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Player initiated duel challenge";
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -3093,9 +3092,9 @@ void exileSniffer::action_SRV_DUEL_RESPONSE(UIDecodedPkt& obj, QString *analysis
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player responded to duel challenge";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Player responded to duel challenge";
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -3108,9 +3107,9 @@ void exileSniffer::action_SRV_DUEL_CHALLENGE(UIDecodedPkt& obj, QString *analysi
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Duel challenge from server";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Duel challenge from server";
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -3135,9 +3134,9 @@ void exileSniffer::action_SRV_OBJ_REMOVED(UIDecodedPkt& obj, QString *analysis)
 		if (unk2)
 			summary << " unk2: 0x" << unk2;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -3180,9 +3179,9 @@ void exileSniffer::action_SRV_MOBILE_START_SKILL(UIDecodedPkt& obj, QString *ana
 			summary << " [ TargetID: 0x" << targID << "]";
 		}
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -3201,9 +3200,9 @@ void exileSniffer::action_SRV_MOBILE_FINISH_SKILL(UIDecodedPkt& obj, QString *an
 		wstringstream summary;
 		summary << std::hex << "ObjID (0x" << std::hex << ID1 << "," << ID2 << "," << ID3 << ") finished skill activation";
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -3229,9 +3228,9 @@ void exileSniffer::action_SRV_MOVE_CHANNELLED(UIDecodedPkt& obj, QString *analys
 		summary << std::dec << "(" << coord1 << "," << coord2 << ")";
 	    summary << std::hex << " UnkCount: 0x" << unk1;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -3257,9 +3256,9 @@ void exileSniffer::action_SRV_END_CHANNELLED(UIDecodedPkt& obj, QString *analysi
 			", UnkCount: 0x" << unk4 << 
 			", Unk5: 0x" << unk5;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -3300,9 +3299,9 @@ void exileSniffer::action_SRV_MOBILE_UNK_0xee(UIDecodedPkt& obj, QString *analys
 	//todo add the other bits
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -3328,9 +3327,9 @@ void exileSniffer::action_SRV_MOBILE_UNK_0xef(UIDecodedPkt& obj, QString *analys
 		summary << std::hex << "Unk 0xef. objID (0x" << std::hex << ID1 << "," << ID2 << "," << ID3 << ") "
 			", SBBD: 0x" << s1<<","<<b1<<","<<b2<<","<<d1<<". EndByte: 0x"<<UnkEndB;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -3371,9 +3370,9 @@ void exileSniffer::action_SRV_MOBILE_UPDATE_HMS(UIDecodedPkt& obj, QString *anal
 		summary << "] is now " << std::dec << val << " Unk4(more?): 0x"<<unk4<< std::endl;
 
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -3398,9 +3397,9 @@ void exileSniffer::action_SRV_STAT_CHANGED(UIDecodedPkt& obj, QString *analysis)
 		summary << "Stat change for object ID (0x" << std::hex << ID1 << ", 0x" << ID2 << ", 0x" << ID3 << ") - " <<
 			std::dec<<listSize<<" stats changed";
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -3444,9 +3443,9 @@ void exileSniffer::action_SRV_UNK_0xf2(UIDecodedPkt& obj, QString *analysis)
 		std::wstringstream summary;
 		summary << std::hex << "Pkt 0xf2. ID (0x" << ID1 << ", 0x" << ID2 << ", 0x" << ID3 << ") Arg 0x" << arg ;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -3472,9 +3471,9 @@ void exileSniffer::action_SRV_UNK_0xf3(UIDecodedPkt& obj, QString *analysis)
 		summary << std::dec << "Coord(" << coord1 << ", " << coord2 << ")";
 		summary << std::hex << ", 0x"<<DW3<<", 0x"<<DW4;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -3495,9 +3494,9 @@ void exileSniffer::action_SRV_UNK_0xf5(UIDecodedPkt& obj, QString *analysis)
 		summary << std::hex << "Pkt 0xf5. ID 0x(" << ID1 << "," << ID2 << "," << ID3 << ") Args: 0x"
 			<< arg1 << ", 0x" << arg2;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -3520,9 +3519,9 @@ void exileSniffer::action_SRV_UNK_0xf6(UIDecodedPkt& obj, QString *analysis)
 		summary << std::hex << "Pkt 0xf6. ID 0x(" << ID1 << "," << ID2 << "," << ID3 << ")";
 		summary << " Args: 0x" << arg1 << ", 0x" << arg2 << ", 0x" << arg3 << ", 0x" << arg4;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -3544,9 +3543,9 @@ void exileSniffer::action_SRV_UNK_0xf7(UIDecodedPkt& obj, QString *analysis)
 		summary << std::hex << "Pkt 0xf7. ID (0x" << ID1 << ", 0x" << ID2 << ", 0x" << ID3 << ") Args: 0x"
 			<< arg1 << ", 0x" << arg2 << ", arg3: 0x"<<arg3;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -3565,9 +3564,9 @@ void exileSniffer::action_SRV_UNK_0xf8(UIDecodedPkt& obj, QString *analysis)
 		std::wstringstream summary;
 		summary << std::hex << "Pkt 0xf8. ID (0x" << ID1 << ", 0x" << ID2 << ", 0x" << ID3 << ") Arg: 0x"<<arg;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -3597,9 +3596,9 @@ void exileSniffer::action_SRV_START_BUFF(UIDecodedPkt& obj, QString *analysis) /
 			<< ") ControlBits: 0x" << controlByte <<
 			" Unk: 0x" << UnkDWord3;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -3642,9 +3641,9 @@ void exileSniffer::action_SRV_END_EFFECT(UIDecodedPkt& obj, QString *analysis) /
 		std::wstringstream summary;
 		summary << std::hex << "Buff 0x"<<BuffID<<" ended on obj ID (0x"<< ID1 << "," << ID2 << "," << ID3 << ")";
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -3665,9 +3664,9 @@ void exileSniffer::action_SRV_EVENT_TRIGGERED(UIDecodedPkt& obj, QString *analys
 		std::wstringstream summary;
 		summary << std::hex << "Event triggered: ObjID (0x" << ID1 << "," << ID2 << "," << ID3 << ") State: 0x" << state;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -3695,9 +3694,9 @@ void exileSniffer::action_SRV_UNK_0x106(UIDecodedPkt& obj, QString *analysis)
 		summary << "u1: x" << unk1 << ", u2: x" << unk2
 			<< ", ( d1: x" << unkd1 << ", d2: x" << unkd2 << ", d3: 0x" << unkd3 << "), u3: x" << unk3;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -3734,9 +3733,9 @@ void exileSniffer::action_SRV_UNK_0x108(UIDecodedPkt& obj, QString *analysis)
 		summary << "Unk msg 0x108. ID (0x" << ID1 << "," << ID2 << "," << ID3 << ")";
 		summary << " Unk1: 0x" << unkd1 << ", 2: 0x" << unk2 << "3: 0x" << unk3;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -3755,9 +3754,9 @@ void exileSniffer::action_CLI_FINISHED_LOADING(UIDecodedPkt& obj, QString *analy
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Client finished loading the zone";
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= "Client finished loading the zone";
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -3776,9 +3775,9 @@ void exileSniffer::action_SRV_NOTIFY_PLAYERID(UIDecodedPkt& obj, QString *analys
 		std::wstringstream summary;
 		summary << std::hex << "Server notified client of playerID. (ID1 0x"<< ID1 << "," << ID2 << "," << ID3 << ")";
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -3810,9 +3809,9 @@ void exileSniffer::action_SRV_UNKNOWN_0x111(UIDecodedPkt& obj, QString *analysis
 				<< count1 << ", list 2 (see 0x118) has " << count2;
 		}
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -3838,11 +3837,11 @@ void exileSniffer::action_SRV_UNKNOWN_0x118(UIDecodedPkt& obj, QString *analysis
 	{
 		std::wstringstream summary;
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
+
 		summary << "pkt 0x118 <item/gem/skill data> ";
 		summary << std::dec << index << ": " << converter.from_bytes(hashResult) << ". 0x" << unk1 << " 0x" << unk2a << unk2b;
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -3858,14 +3857,13 @@ void exileSniffer::action_SRV_UNKNOWN_0x118(UIDecodedPkt& obj, QString *analysis
 	*analysis = QString::fromStdWString(analysisStream.str());
 }
 
-void exileSniffer::action_CLI_OPTOUT_TUTORIALS(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_CLI_OPTOUT_TUTORIALS(UIDecodedPkt &obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Player(You) opted out of tutorials";
-		addDecodedListEntry(listentry, &obj);
+		obj.summary= "Player(You) opted out of tutorials";
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -3875,9 +3873,8 @@ void exileSniffer::action_SRV_BESTIARY_CAPTIVES(UIDecodedPkt& obj, QString *anal
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Server sent list of menagerie captives";
-		addDecodedListEntry(listentry, &obj);
+		obj.summary= "Server sent list of menagerie captives";
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -3887,9 +3884,8 @@ void exileSniffer::action_CLI_OPEN_BESTIARY(UIDecodedPkt& obj, QString *analysis
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Client requested bestiary data";
-		addDecodedListEntry(listentry, &obj);
+		obj.summary= "Client requested bestiary data";
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -3899,9 +3895,8 @@ void exileSniffer::action_SRV_BESTIARY_UNLOCKED_LIST(UIDecodedPkt& obj, QString 
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Server sent updated list of unlocked bestiary monsters";
-		addDecodedListEntry(listentry, &obj);
+		obj.summary= "Server sent updated list of unlocked bestiary monsters";
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -3916,9 +3911,8 @@ void exileSniffer::action_SRV_SHOW_ENTERING_MSG(UIDecodedPkt& obj, QString *anal
 
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Starting transtion to area " + QString::fromStdWString(areaname);
-		addDecodedListEntry(listentry, &obj);
+		obj.summary= "Starting transtion to area " + QString::fromStdWString(areaname);
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -3929,9 +3923,8 @@ void exileSniffer::action_SRV_HEARTBEAT(UIDecodedPkt& obj, QString *analysis)
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = "Server Heartbeat";
-		addDecodedListEntry(listentry, &obj);
+		obj.summary= "Server Heartbeat";
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -3971,9 +3964,9 @@ void exileSniffer::action_SRV_ADD_OBJECT(UIDecodedPkt& obj, QString *analysis)
 				"> ID (0x" << ID1 << "," << ID2 << "," << ID3 << ") - " << dataLen << " bytes>";
 		}
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 
@@ -4196,9 +4189,9 @@ void exileSniffer::action_SRV_UPDATE_OBJECT(UIDecodedPkt& obj, QString *analysis
 		wstringstream summary;
 		summary << std::hex <<"Update obj ID(0x" << ID1 << "," << ID2 << ","<< ID3 <<") -<"<<std::dec<<dataLen<<" bytes>";
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }
@@ -4216,9 +4209,9 @@ void exileSniffer::action_SRV_IDNOTIFY_0x137(UIDecodedPkt& obj, QString *analysi
 		wstringstream summary;
 		summary << std::hex << "ObjID notify 0x137. ID- (0x" << ID1 << "," << ID2 << "," << ID3 << ")";
 
-		UI_DECODED_LIST_ENTRY listentry(obj);
-		listentry.summary = QString::fromStdWString(summary.str());
-		addDecodedListEntry(listentry, &obj);
+
+		obj.summary= QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
 		return;
 	}
 }

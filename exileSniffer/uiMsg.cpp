@@ -160,7 +160,7 @@ UIDecodedPkt::UIDecodedPkt(DWORD processID, streamType streamServerType,int nwkS
 	}
 
 	nwkstreamID = nwkStream;
-	mstime = timeSeen;
+	msTime = timeSeen;
 }
 
 void UIDecodedPkt::add_dword(std::wstring name, DWORD dwordfield)
@@ -310,4 +310,12 @@ void UIDecodedPkt::set_validate_MessageID(ushort msgID, SafeQueue<UI_MESSAGE *> 
 			UIaddLogMsg(msg.str(), this->getClientProcessID(), uiMsgQueue);
 		}
 	}
+}
+
+QString UIDecodedPkt::senderString()
+{
+	if (!incoming) return "[" + QString::number(nwkstreamID) + "] Client";
+	if (streamServer == eGame) return "[" + QString::number(nwkstreamID) + "] GameServer";
+	if (streamServer == eLogin) return "[" + QString::number(nwkstreamID) + "] LoginServer";
+	return "sender() Error";
 }

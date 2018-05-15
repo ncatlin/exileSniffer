@@ -31,49 +31,6 @@ struct RAW_FILTERS {
 	vector <pair<short, streamType>> packets;
 };
 
-class UI_DECODED_LIST_ENTRY
-{
-	public:
-		UI_DECODED_LIST_ENTRY(UIDecodedPkt& pktobj) {
-			msTime = pktobj.time_processed_ms();
-			pktID = pktobj.getMessageID();
-			failedDecode = pktobj.decodeError();
-			originalbuf = pktobj.originalbuf;
-			bufferOffsets = pktobj.bufferOffsets;
-			streamID = pktobj.getStreamID();
-			streamServer = pktobj.getStreamType();
-			incoming = pktobj.isIncoming();
-		}
-
-		QString dayMonTime() { return QString::fromStdWString(epochms_to_timestring(msTime)); }
-		QString floatSeconds(long long start) { return QString::number((msTime - start) / 1000.0, 'd', 4); }
-		QString hexPktID() { return "0x" + QString::number(pktID, 16); }
-		QString decPktID() { return QString::number(pktID); }
-		QString sender();
-		bool badDecode() { return failedDecode; }
-		std::pair<vector<byte> *, ushort> bytesBuf() {
-			return make_pair(originalbuf + bufferOffsets.first, 
-				bufferOffsets.second - bufferOffsets.first);
-		}
-
-	public:
-		QString summary;
-		QString fulltext;
-		bool filtered = false;
-
-	private:
-		bool failedDecode;
-		long long msTime;
-		unsigned short pktID;
-		int streamID;
-		bool incoming;
-		streamType streamServer;
-		vector<byte> *originalbuf;
-		std::pair <ushort, ushort> bufferOffsets;
-};
-
-
-
 class exileSniffer : public QMainWindow
 {
 	Q_OBJECT
@@ -144,7 +101,7 @@ class exileSniffer : public QMainWindow
 		void action_decoded_login_packet(UIDecodedPkt& decoded);
 		
 		clientHexData * get_clientdata(DWORD pid);
-		void addDecodedListEntry(UI_DECODED_LIST_ENTRY& entry, UIDecodedPkt *obj, bool isNewEntry = true);
+		void addDecodedListEntry(UIDecodedPkt *obj, bool isNewEntry = true);
 		void setRowColor(int row, QColor colour);
 
 		bool packet_passes_decoded_filter(ushort msgID);
@@ -383,7 +340,7 @@ class exileSniffer : public QMainWindow
 		map<unsigned short, actionFunc> gamePktActioners;
 		map<unsigned short, actionFunc> loginPktActioners;
 		
-		std::vector<std::pair<UI_DECODED_LIST_ENTRY, UIDecodedPkt *>> decodedListEntries;
+		std::vector<UIDecodedPkt *> decodedListEntries;
 
 		const long long startMSSinceEpoch = ms_since_epoch();
 		bool activeDecryption = false;
