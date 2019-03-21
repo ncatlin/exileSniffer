@@ -79,7 +79,7 @@ void exileSniffer::init_gamePkt_Actioners()
 	gamePktActioners[SRV_OPEN_UI_PANE] = &exileSniffer::action_SRV_OPEN_UI_PANE;
 	gamePktActioners[CLI_SPLIT_STACK] = &exileSniffer::action_CLI_SPLIT_STACK;
 	gamePktActioners[CLI_UNK_0x41] = &exileSniffer::action_CLI_UNK_0x41;
-	//42
+	gamePktActioners[CLI_UNK_0x42] = &exileSniffer::action_CLI_UNK_0x42;
 	//43
 	//44
 	//45
@@ -99,7 +99,7 @@ void exileSniffer::init_gamePkt_Actioners()
 	gamePktActioners[CLI_DISBAND_PUBLIC_PARTY] = &exileSniffer::action_CLI_DISBAND_PUBLIC_PARTY;
 	//54
 	gamePktActioners[CLI_CREATE_PUBLICPARTY] = &exileSniffer::action_CLI_CREATE_PUBLICPARTY;
-	gamePktActioners[CLI_UNK_x56] = &exileSniffer::action_CLI_UNK_x56;
+	gamePktActioners[CLI_UNK_x57] = &exileSniffer::action_CLI_UNK_x57;
 	gamePktActioners[CLI_GET_PARTY_DETAILS] = &exileSniffer::action_CLI_GET_PARTY_DETAILS;
 	gamePktActioners[SRV_FRIENDSLIST] = &exileSniffer::action_SRV_FRIENDSLIST;
 	//59
@@ -116,19 +116,19 @@ void exileSniffer::init_gamePkt_Actioners()
 	//64
 	gamePktActioners[CLI_CONFIRM_SELL] = &exileSniffer::action_CLI_CONFIRM_SELL;
 	//66
-	gamePktActioners[SRV_UNK_0x67] = &exileSniffer::action_SRV_UNK_0x67;
 	gamePktActioners[SRV_UNK_0x68] = &exileSniffer::action_SRV_UNK_0x68;
+	gamePktActioners[SRV_UNK_0x69] = &exileSniffer::action_SRV_UNK_0x69;
 	//69
 	//6a
 	//6b
-	gamePktActioners[SRV_UNK_0x6c] = &exileSniffer::action_SRV_UNK_0x6c;
+	gamePktActioners[SRV_UNK_0x6d] = &exileSniffer::action_SRV_UNK_0x6d;
 	gamePktActioners[SRV_CREATE_ITEM] = &exileSniffer::action_SRV_CREATE_ITEM;
 	gamePktActioners[SRV_SLOT_ITEMSLIST] = &exileSniffer::action_SRV_SLOT_ITEMSLIST;
 	gamePktActioners[SRV_INVENTORY_SET_REMOVE] = &exileSniffer::action_SRV_INVENTORY_SET_REMOVE;
 	gamePktActioners[SRV_GRANTED_XP] = &exileSniffer::action_SRV_GRANTED_XP;
 	gamePktActioners[CLI_SELECT_STASHTAB] = &exileSniffer::action_CLI_SELECT_STASHTAB;
 	gamePktActioners[SRV_STASHTAB_DATA] = &exileSniffer::action_SRV_STASHTAB_DATA;
-	gamePktActioners[SRV_UNK_0x73] = &exileSniffer::action_SRV_UNK_0x73;
+	gamePktActioners[SRV_UNK_0x74] = &exileSniffer::action_SRV_UNK_0x74;
 	gamePktActioners[CLI_SET_STATUS_MESSAGE] = &exileSniffer::action_CLI_SET_STATUS_MESSAGE;
 	gamePktActioners[SRV_MOVE_OBJECT] = &exileSniffer::action_SRV_MOVE_OBJECT;
 	//76
@@ -176,11 +176,10 @@ void exileSniffer::init_gamePkt_Actioners()
 	//a0
 	gamePktActioners[SRV_MICROTRANSACTION_SHOP_DETAILS] = &exileSniffer::action_SRV_MICROTRANSACTION_SHOP_DETAILS;
 	//a2
-	gamePktActioners[CLI_UNK_A3] = &exileSniffer::action_CLI_UNK_A3;
+	gamePktActioners[CLI_UNK_A4] = &exileSniffer::action_CLI_UNK_A4;
 	gamePktActioners[SRV_CHAT_CHANNEL_ID] = &exileSniffer::action_SRV_CHAT_CHANNEL_ID;
-	gamePktActioners[SRV_UNK_A5] = &exileSniffer::action_SRV_UNK_A5;
-	//a6
-	//a7
+	gamePktActioners[SRV_UNK_A6] = &exileSniffer::action_SRV_UNK_A6;
+	gamePktActioners[SRV_UNK_A7] = &exileSniffer::action_SRV_UNK_0xA7;
 	//a8
 	//a9
 	//aa
@@ -210,11 +209,11 @@ void exileSniffer::init_gamePkt_Actioners()
 	gamePktActioners[SRV_DUEL_RESPONSE] = &exileSniffer::action_SRV_DUEL_RESPONSE;
 	gamePktActioners[SRV_DUEL_CHALLENGE] = &exileSniffer::action_SRV_DUEL_CHALLENGE;
 	//c5
-	gamePktActioners[CLI_UNK_0xC6] = &exileSniffer::action_CLI_UNK_0xC6; 
-	gamePktActioners[CLI_UNK_0xC7] = &exileSniffer::action_CLI_UNK_0xC7;
+	gamePktActioners[CLI_UNK_0xC7] = &exileSniffer::action_CLI_UNK_0xC7; 
+	gamePktActioners[CLI_UNK_0xC8] = &exileSniffer::action_CLI_UNK_0xC8;
 	//c8
 	//c9
-	gamePktActioners[SRV_UNK_0xCA] = &exileSniffer::action_SRV_UNK_0xCA;
+	gamePktActioners[SRV_UNK_0xCB] = &exileSniffer::action_SRV_UNK_0xCB;
 	//cb
 	//cd
 	//CLI_VISIT_HIDEOUT
@@ -239,9 +238,9 @@ void exileSniffer::init_gamePkt_Actioners()
 	//e1
 	//e2
 	//e3
-	gamePktActioners[SRV_UNK_0xE4] = &exileSniffer::action_SRV_UNK_0xE4;
+	gamePktActioners[SRV_UNK_0xE5] = &exileSniffer::action_SRV_UNK_0xE5;
 	//e5
-	gamePktActioners[SRV_UNK_0xE6] = &exileSniffer::action_SRV_UNK_0xE6;
+	gamePktActioners[SRV_UNK_0xE7] = &exileSniffer::action_SRV_UNK_0xE7;
 	//e7
 	//e8
 	gamePktActioners[SRV_OBJ_REMOVED] = &exileSniffer::action_SRV_OBJ_REMOVED;
@@ -249,17 +248,17 @@ void exileSniffer::init_gamePkt_Actioners()
 	gamePktActioners[SRV_MOBILE_FINISH_SKILL] = &exileSniffer::action_SRV_MOBILE_FINISH_SKILL;
 	gamePktActioners[SRV_MOVE_CHANNELLED] = &exileSniffer::action_SRV_MOVE_CHANNELLED;
 	gamePktActioners[SRV_END_CHANNELLED] = &exileSniffer::action_SRV_END_CHANNELLED;
-	gamePktActioners[SRV_MOBILE_UNK_0xee] = &exileSniffer::action_SRV_MOBILE_UNK_0xee;
 	gamePktActioners[SRV_MOBILE_UNK_0xef] = &exileSniffer::action_SRV_MOBILE_UNK_0xef;
+	gamePktActioners[SRV_MOBILE_UNK_0xf0] = &exileSniffer::action_SRV_MOBILE_UNK_0xf0;
 	gamePktActioners[SRV_MOBILE_UPDATE_HMS] = &exileSniffer::action_SRV_MOBILE_UPDATE_HMS;
 	gamePktActioners[SRV_STAT_CHANGED] = &exileSniffer::action_SRV_STAT_CHANGED;
-	gamePktActioners[SRV_UNK_0xf2] = &exileSniffer::action_SRV_UNK_0xf2;
 	gamePktActioners[SRV_UNK_0xf3] = &exileSniffer::action_SRV_UNK_0xf3;
+	gamePktActioners[SRV_UNK_0xf4] = &exileSniffer::action_SRV_UNK_0xf4;
 	//f4
-	gamePktActioners[SRV_UNK_0xf5] = &exileSniffer::action_SRV_UNK_0xf5;
 	gamePktActioners[SRV_UNK_0xf6] = &exileSniffer::action_SRV_UNK_0xf6;
 	gamePktActioners[SRV_UNK_0xf7] = &exileSniffer::action_SRV_UNK_0xf7;
 	gamePktActioners[SRV_UNK_0xf8] = &exileSniffer::action_SRV_UNK_0xf8;
+	gamePktActioners[SRV_UNK_0xf9] = &exileSniffer::action_SRV_UNK_0xf9;
 	//f9
 	gamePktActioners[SRV_START_EFFECT] = &exileSniffer::action_SRV_START_BUFF;
 	gamePktActioners[SRV_END_EFFECT] = &exileSniffer::action_SRV_END_EFFECT;
@@ -273,9 +272,9 @@ void exileSniffer::init_gamePkt_Actioners()
 	//103
 	//104
 	//105
-	gamePktActioners[SRV_UNKNOWN_0x106] = &exileSniffer::action_SRV_UNK_0x106;
+	gamePktActioners[SRV_UNKNOWN_0x107] = &exileSniffer::action_SRV_UNK_0x107;
 	//107
-	gamePktActioners[SRV_UNKNOWN_0x108] = &exileSniffer::action_SRV_UNK_0x108;
+	gamePktActioners[SRV_UNKNOWN_0x109] = &exileSniffer::action_SRV_UNK_0x109;
 	//109
 	//10a
 	//10b
@@ -284,14 +283,14 @@ void exileSniffer::init_gamePkt_Actioners()
 	gamePktActioners[CLI_FINISHED_LOADING] = &exileSniffer::action_CLI_FINISHED_LOADING;
 	gamePktActioners[SRV_NOTIFY_PLAYERID] = &exileSniffer::action_SRV_NOTIFY_PLAYERID;
 	//0x110 - player pressed add new stash tab +?
-	gamePktActioners[SRV_UNKNOWN_0x111] = &exileSniffer::action_SRV_UNKNOWN_0x111;
+	gamePktActioners[SRV_UNKNOWN_0x112] = &exileSniffer::action_SRV_UNKNOWN_0x112;
 	//112
 	//113
 	//114
 	//115
 	//116
 	//117
-	gamePktActioners[SRV_UNKNOWN_0x118] = &exileSniffer::action_SRV_UNKNOWN_0x118;
+	gamePktActioners[SRV_UNKNOWN_0x119] = &exileSniffer::action_SRV_UNKNOWN_0x119;
 	//119
 	//11a
 	//11b
@@ -322,7 +321,7 @@ void exileSniffer::init_gamePkt_Actioners()
 	//134
 	gamePktActioners[SRV_ADD_OBJECT] = &exileSniffer::action_SRV_ADD_OBJECT;
 	gamePktActioners[SRV_UPDATE_OBJECT] = &exileSniffer::action_SRV_UPDATE_OBJECT;
-	gamePktActioners[SRV_IDNOTIFY_0x137] = &exileSniffer::action_SRV_IDNOTIFY_0x137;
+	gamePktActioners[SRV_IDNOTIFY_0x138] = &exileSniffer::action_SRV_IDNOTIFY_0x138;
 	//138
 	//139
 
@@ -1564,6 +1563,22 @@ void exileSniffer::action_CLI_UNK_0x41(UIDecodedPkt& obj, QString* analysis)
 	}
 }
 
+void exileSniffer::action_CLI_UNK_0x42(UIDecodedPkt& obj, QString* analysis)
+{
+	obj.toggle_payload_operations(true);
+	if (!analysis)
+	{
+		std::wstringstream summary;
+		summary << "Unk pkt 0x42";
+
+
+		obj.summary = obj.summary = QString::fromStdWString(summary.str());
+		addDecodedListEntry(&obj);
+		return;
+	}
+}
+
+
 void exileSniffer::action_CLI_SELECT_NPC_DIALOG(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
@@ -1780,7 +1795,7 @@ void exileSniffer::action_CLI_CREATE_PUBLICPARTY(UIDecodedPkt& obj, QString*anal
 }
 
 
-void exileSniffer::action_CLI_UNK_x56(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_CLI_UNK_x57(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 	//seen 1 while going from town to riverways, maybe declares area as fightable/droppable items? thats in GGPK so not convinced.
@@ -1979,7 +1994,7 @@ void exileSniffer::action_CLI_CONFIRM_SELL(UIDecodedPkt& obj, QString *analysis)
 	*analysis = QString::fromStdWString(analysisStream.str());
 }
 
-void exileSniffer::action_SRV_UNK_0x67(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_UNK_0x68(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
@@ -2008,7 +2023,7 @@ void exileSniffer::action_SRV_UNK_0x67(UIDecodedPkt& obj, QString *analysis)
 	*analysis = QString::fromStdWString(analysisStream.str());
 }
 
-void exileSniffer::action_SRV_UNK_0x68(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_UNK_0x69(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
@@ -2032,7 +2047,7 @@ void exileSniffer::action_SRV_UNK_0x68(UIDecodedPkt& obj, QString *analysis)
 
 //todo this and the pkt below share a lot of item handling code
 //create a common itemlist analysis function
-void exileSniffer::action_SRV_UNK_0x6c(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_UNK_0x6d(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
@@ -2277,7 +2292,7 @@ void exileSniffer::action_SRV_STASHTAB_DATA(UIDecodedPkt& obj, QString *analysis
 	}
 }
 
-void exileSniffer::action_SRV_UNK_0x73(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_UNK_0x74(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
@@ -2681,7 +2696,7 @@ void exileSniffer::action_SRV_MICROTRANSACTION_SHOP_DETAILS(UIDecodedPkt& obj, Q
 	}
 }
 
-void exileSniffer::action_CLI_UNK_A3(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_CLI_UNK_A4(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 	if (!analysis)
@@ -2698,7 +2713,7 @@ void exileSniffer::action_CLI_UNK_A3(UIDecodedPkt& obj, QString *analysis)
 	}
 }
 
-void exileSniffer::action_SRV_UNK_A5(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_UNK_A6(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
@@ -2754,14 +2769,13 @@ void exileSniffer::action_SRV_UNK_A5(UIDecodedPkt& obj, QString *analysis)
 }
 
 
-//sent when clicking join pvp
-void exileSniffer::action_CLI_UNK_0xC6(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_UNK_0xA7(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 	if (!analysis)
 	{
 
-		obj.summary= "Client sent dataless message ID 0xC6";
+		obj.summary = "Srv msg 0xA7";
 		addDecodedListEntry(&obj);
 		return;
 	}
@@ -2774,13 +2788,26 @@ void exileSniffer::action_CLI_UNK_0xC7(UIDecodedPkt& obj, QString *analysis)
 	if (!analysis)
 	{
 
+		obj.summary= "Client sent dataless message ID 0xC6";
+		addDecodedListEntry(&obj);
+		return;
+	}
+}
+
+//sent when clicking join pvp
+void exileSniffer::action_CLI_UNK_0xC8(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+	if (!analysis)
+	{
+
 		obj.summary= "Client sent dataless message ID 0xC7";
 		addDecodedListEntry(&obj);
 		return;
 	}
 }
 
-void exileSniffer::action_SRV_UNK_0xCA(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_UNK_0xCB(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
@@ -3001,7 +3028,7 @@ void exileSniffer::action_CLI_GUILD_CREATE(UIDecodedPkt& obj, QString *analysis)
 	}
 }
 
-void exileSniffer::action_SRV_UNK_0xE4(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_UNK_0xE5(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
@@ -3019,7 +3046,7 @@ void exileSniffer::action_SRV_UNK_0xE4(UIDecodedPkt& obj, QString *analysis)
 	}
 }
 
-void exileSniffer::action_SRV_UNK_0xE6(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_UNK_0xE7(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
@@ -3281,7 +3308,7 @@ void exileSniffer::action_SRV_END_CHANNELLED(UIDecodedPkt& obj, QString *analysi
 	*analysis = QString::fromStdWString(analysisStream.str());
 }
 
-void exileSniffer::action_SRV_MOBILE_UNK_0xee(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_MOBILE_UNK_0xef(UIDecodedPkt& obj, QString *analysis)
 {
 	UINT32 ID1 = obj.get_UInt32(L"ID1");
 	UINT32 ID2 = obj.get_UInt32(L"ID2");
@@ -3323,7 +3350,7 @@ void exileSniffer::action_SRV_MOBILE_UNK_0xee(UIDecodedPkt& obj, QString *analys
 	*analysis = QString::fromStdWString(summary.str());
 }
 
-void exileSniffer::action_SRV_MOBILE_UNK_0xef(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_MOBILE_UNK_0xf0(UIDecodedPkt& obj, QString *analysis)
 {
 	UINT32 ID1 = obj.get_UInt32(L"ID1");
 	UINT32 ID2 = obj.get_UInt32(L"ID2");
@@ -3444,7 +3471,7 @@ void exileSniffer::action_SRV_STAT_CHANGED(UIDecodedPkt& obj, QString *analysis)
 	*analysis = QString::fromStdWString(analysisStream.str());
 }
 
-void exileSniffer::action_SRV_UNK_0xf2(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_UNK_0xf3(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 	UINT32 ID1 = obj.get_UInt32(L"ID1");
@@ -3467,7 +3494,7 @@ void exileSniffer::action_SRV_UNK_0xf2(UIDecodedPkt& obj, QString *analysis)
 
 
 
-void exileSniffer::action_SRV_UNK_0xf3(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_UNK_0xf4(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 	UINT32 ID1 = obj.get_UInt32(L"ID1");
@@ -3493,7 +3520,7 @@ void exileSniffer::action_SRV_UNK_0xf3(UIDecodedPkt& obj, QString *analysis)
 	}
 }
 
-void exileSniffer::action_SRV_UNK_0xf5(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_UNK_0xf6(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 	UINT32 ID1 = obj.get_UInt32(L"ID1");
@@ -3516,7 +3543,7 @@ void exileSniffer::action_SRV_UNK_0xf5(UIDecodedPkt& obj, QString *analysis)
 	}
 }
 
-void exileSniffer::action_SRV_UNK_0xf6(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_UNK_0xf7(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 	UINT32 ID1 = obj.get_UInt32(L"ID1");
@@ -3541,7 +3568,7 @@ void exileSniffer::action_SRV_UNK_0xf6(UIDecodedPkt& obj, QString *analysis)
 	}
 }
 
-void exileSniffer::action_SRV_UNK_0xf7(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_UNK_0xf8(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 	UINT32 ID1 = obj.get_UInt32(L"ID1");
@@ -3565,7 +3592,7 @@ void exileSniffer::action_SRV_UNK_0xf7(UIDecodedPkt& obj, QString *analysis)
 	}
 }
 
-void exileSniffer::action_SRV_UNK_0xf8(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_UNK_0xf9(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 	UINT32 ID1 = obj.get_UInt32(L"ID1");
@@ -3686,7 +3713,7 @@ void exileSniffer::action_SRV_EVENT_TRIGGERED(UIDecodedPkt& obj, QString *analys
 	}
 }
 
-void exileSniffer::action_SRV_UNK_0x106(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_UNK_0x107(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
@@ -3704,7 +3731,7 @@ void exileSniffer::action_SRV_UNK_0x106(UIDecodedPkt& obj, QString *analysis)
 	if (!analysis)
 	{
 		std::wstringstream summary;
-		summary << "Unk msg 0x106 " << std::hex;
+		summary << "Unk msg 0x107 " << std::hex;
 		summary << "ID (0x" << ID1 << "," << ID2 << "," << ID3 << ")"; 
 		summary << "u1: x" << unk1 << ", u2: x" << unk2
 			<< ", ( d1: x" << unkd1 << ", d2: x" << unkd2 << ", d3: 0x" << unkd3 << "), u3: x" << unk3;
@@ -3717,7 +3744,7 @@ void exileSniffer::action_SRV_UNK_0x106(UIDecodedPkt& obj, QString *analysis)
 
 	std::wstringstream analysisss;
 
-	analysisss << "Unk msg 0x106 " << std::hex << std::endl;
+	analysisss << "Unk msg 0x107 " << std::hex << std::endl;
 	analysisss << "\t1: 0x" << unk1 << std::endl; 
 	analysisss << "\t2: 0x" << unk2 << std::endl;
 	analysisss << "\t\td1: 0x" << unkd1 << std::endl;
@@ -3728,7 +3755,7 @@ void exileSniffer::action_SRV_UNK_0x106(UIDecodedPkt& obj, QString *analysis)
 	*analysis = QString::fromStdWString(analysisss.str());
 }
 
-void exileSniffer::action_SRV_UNK_0x108(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_UNK_0x109(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
@@ -3745,7 +3772,7 @@ void exileSniffer::action_SRV_UNK_0x108(UIDecodedPkt& obj, QString *analysis)
 	{
 		std::wstringstream summary;
 		summary << std::hex;
-		summary << "Unk msg 0x108. ID (0x" << ID1 << "," << ID2 << "," << ID3 << ")";
+		summary << "Unk msg 0x109. ID (0x" << ID1 << "," << ID2 << "," << ID3 << ")";
 		summary << " Unk1: 0x" << unkd1 << ", 2: 0x" << unk2 << "3: 0x" << unk3;
 
 
@@ -3756,7 +3783,7 @@ void exileSniffer::action_SRV_UNK_0x108(UIDecodedPkt& obj, QString *analysis)
 
 	std::wstringstream analysisss;
 
-	analysisss << "Unk msg 0x106 " << std::hex << std::endl;
+	analysisss << "Unk msg 0x109 " << std::hex << std::endl;
 	analysisss << "\t1: 0x" << unkd1 << std::endl;
 	analysisss << "\t2: 0x" << unk2 << std::endl;
 	analysisss << "\t3: 0x" << unk3 << std::endl;
@@ -3802,7 +3829,7 @@ void exileSniffer::action_SRV_NOTIFY_PLAYERID(UIDecodedPkt& obj, QString *analys
 	QString::fromStdWString(analysisStream.str());
 }
 
-void exileSniffer::action_SRV_UNKNOWN_0x111(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_UNKNOWN_0x112(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
@@ -3817,7 +3844,7 @@ void exileSniffer::action_SRV_UNKNOWN_0x111(UIDecodedPkt& obj, QString *analysis
 		std::wstringstream summary;
 		 
 		if (count1 == 0 && count2 == 0)
-			summary << "0x111 packet <item/gem/skill data?> with empty lists";
+			summary << "0x112 packet <item/gem/skill data?> with empty lists";
 		else
 		{
 			summary << std::dec<<"!![Alert]!! 0x111 packet with lists! List 1 has "
@@ -3833,7 +3860,7 @@ void exileSniffer::action_SRV_UNKNOWN_0x111(UIDecodedPkt& obj, QString *analysis
 
 }
 
-void exileSniffer::action_SRV_UNKNOWN_0x118(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_UNKNOWN_0x119(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
@@ -3853,7 +3880,7 @@ void exileSniffer::action_SRV_UNKNOWN_0x118(UIDecodedPkt& obj, QString *analysis
 		std::wstringstream summary;
 
 
-		summary << "pkt 0x118 <item/gem/skill data> ";
+		summary << "pkt 0x119 <item/gem/skill data> ";
 		summary << std::dec << index << ": " << converter.from_bytes(hashResult) << ". 0x" << unk1 << " 0x" << unk2a << unk2b;
 		obj.summary= QString::fromStdWString(summary.str());
 		addDecodedListEntry(&obj);
@@ -3861,7 +3888,7 @@ void exileSniffer::action_SRV_UNKNOWN_0x118(UIDecodedPkt& obj, QString *analysis
 	}
 
 	wstringstream analysisStream;
-	analysisStream << "This is an item as it would appear on the second list of an 0x111 pkt" << std::endl;
+	analysisStream << "This is an item as it would appear on the second list of an 0x112 pkt" << std::endl;
 	analysisStream << std::hex;
 	analysisStream << "Index: 0x" << index << std::endl;
 	analysisStream << "Hash: 0x" << hash << " - " << converter.from_bytes(hashCategory) << 
@@ -4211,7 +4238,7 @@ void exileSniffer::action_SRV_UPDATE_OBJECT(UIDecodedPkt& obj, QString *analysis
 	}
 }
 
-void exileSniffer::action_SRV_IDNOTIFY_0x137(UIDecodedPkt& obj, QString *analysis)
+void exileSniffer::action_SRV_IDNOTIFY_0x138(UIDecodedPkt& obj, QString *analysis)
 {
 	obj.toggle_payload_operations(true);
 
@@ -4222,7 +4249,7 @@ void exileSniffer::action_SRV_IDNOTIFY_0x137(UIDecodedPkt& obj, QString *analysi
 	if (!analysis)
 	{
 		wstringstream summary;
-		summary << std::hex << "ObjID notify 0x137. ID- (0x" << ID1 << "," << ID2 << "," << ID3 << ")";
+		summary << std::hex << "ObjID notify 0x138. ID- (0x" << ID1 << "," << ID2 << "," << ID3 << ")";
 
 
 		obj.summary= QString::fromStdWString(summary.str());

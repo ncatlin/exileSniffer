@@ -166,7 +166,7 @@ void filterForm::buildBuiltinPresets()
 	ERASE_FROM_VECTOR(exclude_Common.IDs, SRV_STAT_CHANGED);
 	ERASE_FROM_VECTOR(exclude_Common.IDs, SRV_START_EFFECT);
 	ERASE_FROM_VECTOR(exclude_Common.IDs, SRV_END_EFFECT);
-	ERASE_FROM_VECTOR(exclude_Common.IDs, SRV_IDNOTIFY_0x137);	//135 more useful
+	ERASE_FROM_VECTOR(exclude_Common.IDs, SRV_IDNOTIFY_0x138);	//136 more useful
 
 	exclude_Common.name = "Exclude chat/skills/combat";
 	exclude_Common.description = "Filters out chat, actions and status updates";

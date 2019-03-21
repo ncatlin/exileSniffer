@@ -332,7 +332,7 @@ void exileSniffer::setStateDecrypting(int streamID)
 		ui.sniffStatusWidget->setText(QString::fromStdString(streamWidgetMsg.str()));
 		ui.sniffStatusWidget->setState(statusWidgetState::eGood);
 
-		ui.keyExStatusWidget->setText("Decryting stream for game process ID "+
+		ui.keyExStatusWidget->setText("Decrypting stream for game process ID "+
 			QString::number(decryptingProcess));
 		ui.keyExStatusWidget->setState(statusWidgetState::eGood);
 	}

@@ -539,6 +539,7 @@ void packet_processor::deserialise_packets_from_decrypted(streamType streamServe
 			remainingDecrypted = 0;
 			emit_decoding_err_msg(pktIDWord, currentStreamObj->lastPktID);
 			ui_decodedpkt->setFailedDecode();
+			ui_decodedpkt->setStartOffset(0);
 			ui_decodedpkt->setBuffer(decryptedBuffer);
 			ui_decodedpkt->setEndOffset(dataLen);
 		}
@@ -659,11 +660,11 @@ void packet_processor::handle_packet_from_gameserver(vector<byte> &nwkData, long
 	decryptedIndex = 0;
 	errorFlag = eNoErr;
 
-	if (currentStreamObj->packetCount == 1)
+	ushort firstPktID = ntohs(getUshort(nwkData.data()));
+
+	if (currentStreamObj->packetCount < 4 && firstPktID == SRV_PKT_ENCAPSULATED)
 	{
 		//first packet from gameserver starts 0005, followed by crypt which starts 0012
-		ushort firstPktID = ntohs(getUshort(nwkData.data()));
-		assert(firstPktID == SRV_PKT_ENCAPSULATED);
 
 		currentStreamObj->recvSalsa.SetKeyWithIV(
 			(byte *)currentStreamObj->workingRecvKey->salsakey, 32,

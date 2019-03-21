@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'rawfilterform.ui'
 **
-** Created by: Qt User Interface Compiler version 5.9.1
+** Created by: Qt User Interface Compiler version 5.12.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -10,9 +10,7 @@
 #define UI_RAWFILTERFORM_H
 
 #include <QtCore/QVariant>
-#include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
-#include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
@@ -50,20 +48,20 @@ public:
     void setupUi(QWidget *rawFilterForm)
     {
         if (rawFilterForm->objectName().isEmpty())
-            rawFilterForm->setObjectName(QStringLiteral("rawFilterForm"));
+            rawFilterForm->setObjectName(QString::fromUtf8("rawFilterForm"));
         rawFilterForm->resize(665, 434);
         rawFilterForm->setContextMenuPolicy(Qt::CustomContextMenu);
         rawFilterForm->setToolTipDuration(0);
         verticalLayout = new QVBoxLayout(rawFilterForm);
-        verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
+        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
         tabWidget = new QTabWidget(rawFilterForm);
-        tabWidget->setObjectName(QStringLiteral("tabWidget"));
+        tabWidget->setObjectName(QString::fromUtf8("tabWidget"));
         filtersTab = new QWidget();
-        filtersTab->setObjectName(QStringLiteral("filtersTab"));
+        filtersTab->setObjectName(QString::fromUtf8("filtersTab"));
         verticalLayout_4 = new QVBoxLayout(filtersTab);
-        verticalLayout_4->setObjectName(QStringLiteral("verticalLayout_4"));
+        verticalLayout_4->setObjectName(QString::fromUtf8("verticalLayout_4"));
         label_2 = new QLabel(filtersTab);
-        label_2->setObjectName(QStringLiteral("label_2"));
+        label_2->setObjectName(QString::fromUtf8("label_2"));
         QFont font;
         font.setItalic(true);
         label_2->setFont(font);
@@ -71,7 +69,7 @@ public:
         verticalLayout_4->addWidget(label_2);
 
         verticalLayout_2 = new QVBoxLayout();
-        verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
+        verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
         filterTable = new QTableWidget(filtersTab);
         if (filterTable->columnCount() < 5)
             filterTable->setColumnCount(5);
@@ -85,7 +83,7 @@ public:
         filterTable->setHorizontalHeaderItem(3, __qtablewidgetitem3);
         QTableWidgetItem *__qtablewidgetitem4 = new QTableWidgetItem();
         filterTable->setHorizontalHeaderItem(4, __qtablewidgetitem4);
-        filterTable->setObjectName(QStringLiteral("filterTable"));
+        filterTable->setObjectName(QString::fromUtf8("filterTable"));
         filterTable->setContextMenuPolicy(Qt::CustomContextMenu);
         filterTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
         filterTable->setDragDropOverwriteMode(false);
@@ -102,15 +100,15 @@ public:
         verticalLayout_4->addLayout(verticalLayout_2);
 
         horizontalLayout = new QHBoxLayout();
-        horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
+        horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
         includeBtn = new QPushButton(filtersTab);
-        includeBtn->setObjectName(QStringLiteral("includeBtn"));
+        includeBtn->setObjectName(QString::fromUtf8("includeBtn"));
         includeBtn->setMaximumSize(QSize(120, 16777215));
 
         horizontalLayout->addWidget(includeBtn);
 
         excludeBtn = new QPushButton(filtersTab);
-        excludeBtn->setObjectName(QStringLiteral("excludeBtn"));
+        excludeBtn->setObjectName(QString::fromUtf8("excludeBtn"));
         excludeBtn->setMaximumSize(QSize(120, 16777215));
 
         horizontalLayout->addWidget(excludeBtn);
@@ -120,30 +118,30 @@ public:
 
         tabWidget->addTab(filtersTab, QString());
         presetsTab = new QWidget();
-        presetsTab->setObjectName(QStringLiteral("presetsTab"));
+        presetsTab->setObjectName(QString::fromUtf8("presetsTab"));
         verticalLayout_3 = new QVBoxLayout(presetsTab);
-        verticalLayout_3->setObjectName(QStringLiteral("verticalLayout_3"));
+        verticalLayout_3->setObjectName(QString::fromUtf8("verticalLayout_3"));
         presetsTree = new QTreeWidget(presetsTab);
         new QTreeWidgetItem(presetsTree);
-        presetsTree->setObjectName(QStringLiteral("presetsTree"));
+        presetsTree->setObjectName(QString::fromUtf8("presetsTree"));
         presetsTree->setContextMenuPolicy(Qt::CustomContextMenu);
 
         verticalLayout_3->addWidget(presetsTree);
 
         horizontalLayout_2 = new QHBoxLayout();
-        horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
+        horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
         label = new QLabel(presetsTab);
-        label->setObjectName(QStringLiteral("label"));
+        label->setObjectName(QString::fromUtf8("label"));
 
         horizontalLayout_2->addWidget(label);
 
         saveName = new QLineEdit(presetsTab);
-        saveName->setObjectName(QStringLiteral("saveName"));
+        saveName->setObjectName(QString::fromUtf8("saveName"));
 
         horizontalLayout_2->addWidget(saveName);
 
         saveBtn = new QPushButton(presetsTab);
-        saveBtn->setObjectName(QStringLiteral("saveBtn"));
+        saveBtn->setObjectName(QString::fromUtf8("saveBtn"));
 
         horizontalLayout_2->addWidget(saveBtn);
 
@@ -173,41 +171,41 @@ public:
 
     void retranslateUi(QWidget *rawFilterForm)
     {
-        rawFilterForm->setWindowTitle(QApplication::translate("rawFilterForm", "Manage Message Filters", Q_NULLPTR));
-        label_2->setText(QApplication::translate("rawFilterForm", "Hint: You can save a custom filter list on the preset tab", Q_NULLPTR));
+        rawFilterForm->setWindowTitle(QApplication::translate("rawFilterForm", "Manage Message Filters", nullptr));
+        label_2->setText(QApplication::translate("rawFilterForm", "Hint: You can save a custom filter list on the preset tab", nullptr));
         QTableWidgetItem *___qtablewidgetitem = filterTable->horizontalHeaderItem(0);
-        ___qtablewidgetitem->setText(QApplication::translate("rawFilterForm", "ID", Q_NULLPTR));
+        ___qtablewidgetitem->setText(QApplication::translate("rawFilterForm", "ID", nullptr));
         QTableWidgetItem *___qtablewidgetitem1 = filterTable->horizontalHeaderItem(1);
-        ___qtablewidgetitem1->setText(QApplication::translate("rawFilterForm", "Function", Q_NULLPTR));
+        ___qtablewidgetitem1->setText(QApplication::translate("rawFilterForm", "Function", nullptr));
         QTableWidgetItem *___qtablewidgetitem2 = filterTable->horizontalHeaderItem(2);
-        ___qtablewidgetitem2->setText(QApplication::translate("rawFilterForm", "Origin", Q_NULLPTR));
+        ___qtablewidgetitem2->setText(QApplication::translate("rawFilterForm", "Origin", nullptr));
         QTableWidgetItem *___qtablewidgetitem3 = filterTable->horizontalHeaderItem(3);
-        ___qtablewidgetitem3->setText(QApplication::translate("rawFilterForm", "Session Count", Q_NULLPTR));
+        ___qtablewidgetitem3->setText(QApplication::translate("rawFilterForm", "Session Count", nullptr));
         QTableWidgetItem *___qtablewidgetitem4 = filterTable->horizontalHeaderItem(4);
-        ___qtablewidgetitem4->setText(QApplication::translate("rawFilterForm", "Filter", Q_NULLPTR));
+        ___qtablewidgetitem4->setText(QApplication::translate("rawFilterForm", "Filter", nullptr));
 #ifndef QT_NO_TOOLTIP
-        filterTable->setToolTip(QApplication::translate("rawFilterForm", "These apply to newly received packets. Press 'Refresh Decoded List' to apply them to past packets", Q_NULLPTR));
+        filterTable->setToolTip(QApplication::translate("rawFilterForm", "These apply to newly received packets. Press 'Refresh Decoded List' to apply them to past packets", nullptr));
 #endif // QT_NO_TOOLTIP
 #ifndef QT_NO_STATUSTIP
-        filterTable->setStatusTip(QApplication::translate("rawFilterForm", "These apply to newly received packets. Press 'Refresh Decoded List' to apply them to past packets", Q_NULLPTR));
+        filterTable->setStatusTip(QApplication::translate("rawFilterForm", "These apply to newly received packets. Press 'Refresh Decoded List' to apply them to past packets", nullptr));
 #endif // QT_NO_STATUSTIP
-        includeBtn->setText(QApplication::translate("rawFilterForm", "Include Selected", Q_NULLPTR));
-        excludeBtn->setText(QApplication::translate("rawFilterForm", "Exclude Selected", Q_NULLPTR));
-        tabWidget->setTabText(tabWidget->indexOf(filtersTab), QApplication::translate("rawFilterForm", "Filters", Q_NULLPTR));
+        includeBtn->setText(QApplication::translate("rawFilterForm", "Include Selected", nullptr));
+        excludeBtn->setText(QApplication::translate("rawFilterForm", "Exclude Selected", nullptr));
+        tabWidget->setTabText(tabWidget->indexOf(filtersTab), QApplication::translate("rawFilterForm", "Filters", nullptr));
         QTreeWidgetItem *___qtreewidgetitem = presetsTree->headerItem();
-        ___qtreewidgetitem->setText(1, QApplication::translate("rawFilterForm", "Summary", Q_NULLPTR));
-        ___qtreewidgetitem->setText(0, QApplication::translate("rawFilterForm", "Category", Q_NULLPTR));
+        ___qtreewidgetitem->setText(1, QApplication::translate("rawFilterForm", "Summary", nullptr));
+        ___qtreewidgetitem->setText(0, QApplication::translate("rawFilterForm", "Category", nullptr));
 
         const bool __sortingEnabled = presetsTree->isSortingEnabled();
         presetsTree->setSortingEnabled(false);
         QTreeWidgetItem *___qtreewidgetitem1 = presetsTree->topLevelItem(0);
-        ___qtreewidgetitem1->setText(0, QApplication::translate("rawFilterForm", "Builtin", Q_NULLPTR));
+        ___qtreewidgetitem1->setText(0, QApplication::translate("rawFilterForm", "Builtin", nullptr));
         presetsTree->setSortingEnabled(__sortingEnabled);
 
-        label->setText(QApplication::translate("rawFilterForm", "Save custom preset:", Q_NULLPTR));
-        saveName->setText(QApplication::translate("rawFilterForm", "presetName", Q_NULLPTR));
-        saveBtn->setText(QApplication::translate("rawFilterForm", "Save", Q_NULLPTR));
-        tabWidget->setTabText(tabWidget->indexOf(presetsTab), QApplication::translate("rawFilterForm", "Presets", Q_NULLPTR));
+        label->setText(QApplication::translate("rawFilterForm", "Save custom preset:", nullptr));
+        saveName->setText(QApplication::translate("rawFilterForm", "presetName", nullptr));
+        saveBtn->setText(QApplication::translate("rawFilterForm", "Save", nullptr));
+        tabWidget->setTabText(tabWidget->indexOf(presetsTab), QApplication::translate("rawFilterForm", "Presets", nullptr));
     } // retranslateUi
 
 };

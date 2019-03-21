@@ -72,7 +72,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>C:\devel\libs\crypp;C:\Users\nia\Source\Repos\vcpkg\packages\rapidjson_x64-windows\include;C:\devel\libs\WpdPack\Include;C:\devel\libs\libtins\debug\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Qt\5.12.0\msvc2017_64\include;C:\devel\libs\crypp;C:\Users\nia\Source\Repos\vcpkg\packages\rapidjson_x64-windows\include;C:\devel\libs\WpdPack\Include;C:\devel\libs\libtins\debug\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\devel\libs\crypp\x64\Output\Debug;C:\devel\libs\WpdPack\Lib\x64;C:\devel\libs\libtins\debug\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
