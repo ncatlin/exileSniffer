@@ -1,4 +1,16 @@
 # exileSniffer v1.0.1
+
+-------------
+
+Important Note! 
+This is a proof of concept for a game reversing blog post: it worked with POE as of April 2018, which obviously isn't now. 
+Every expansion (and many of the little updates) makes changes to the game stream which breaks decryption and the changes have to be reverse engineered and added to the sniffer code. 
+I don't play the game so the motivation to keep it updated isn't staggering.
+
+If you are more keen on doing this than I am then you are welcome to fork it or read the code to figure out how to make your own tool. 
+
+--------------
+
 A protocol decryption and dissection tool for the game 'Path of Exile'
 
 It looks something like this:
