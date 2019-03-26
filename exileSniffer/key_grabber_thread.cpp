@@ -471,7 +471,9 @@ void key_grabber_thread::getRunningClientPIDs(std::vector <DWORD>& resultsList)
 		{
 			std::wstring binPath = entry.szExeFile;
 			if (WSTRING_CONTAINS(binPath,L"PathOfExile.exe") ||
-				WSTRING_CONTAINS(binPath, L"PathOfExile_x64.exe"))
+				WSTRING_CONTAINS(binPath, L"PathOfExile_x64.exe") ||
+				WSTRING_CONTAINS(binPath, L"PathOfExile_Steam.exe") ||
+				WSTRING_CONTAINS(binPath, L"PathOfExile_x64Steam.exe"))
 			{
 				DWORD newPID = entry.th32ProcessID;
 				resultsList.push_back(newPID);

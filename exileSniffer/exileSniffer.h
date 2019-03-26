@@ -126,6 +126,7 @@ class exileSniffer : public QMainWindow
 		void action_LOGIN_CLI_REQUEST_RACE_DATA(UIDecodedPkt&, QString*);
 		void action_LOGIN_SRV_LEAGUE_LIST(UIDecodedPkt&, QString*);
 		void action_LOGIN_CLI_REQUEST_LEAGUES(UIDecodedPkt&, QString*);
+		void action_LOGIN_CLI_UNK0x24(UIDecodedPkt&, QString *);
 
 		void action_SRV_PKT_ENCAPSULATED(UIDecodedPkt&, QString*);
 		void action_CLI_CHAT_MSG_ITEMS(UIDecodedPkt&, QString*);
@@ -171,6 +172,7 @@ class exileSniffer : public QMainWindow
 		void action_CLI_USE_ITEM_ON_ITEM(UIDecodedPkt&, QString*);
 		void action_CLI_USE_ITEM_ON_OBJ(UIDecodedPkt&, QString*);
 		void action_CLI_UNK_0x41(UIDecodedPkt&, QString*);
+		void action_CLI_UNK_0x42(UIDecodedPkt&, QString*);
 
 		void action_CLI_SELECT_NPC_DIALOG(UIDecodedPkt&, QString*);
 		void action_SRV_SHOW_NPC_DIALOG(UIDecodedPkt&, QString*);
@@ -184,7 +186,7 @@ class exileSniffer : public QMainWindow
 		void action_CLI_TRY_JOIN_PARTY(UIDecodedPkt&, QString*);
 		void action_CLI_DISBAND_PUBLIC_PARTY(UIDecodedPkt&, QString*);
 		void action_CLI_CREATE_PUBLICPARTY(UIDecodedPkt&, QString*);
-		void action_CLI_UNK_x56(UIDecodedPkt&, QString*);
+		void action_CLI_UNK_x57(UIDecodedPkt&, QString*);
 		void action_CLI_GET_PARTY_DETAILS(UIDecodedPkt&, QString*);
 		void action_SRV_FRIENDSLIST(UIDecodedPkt&, QString*);
 
@@ -197,17 +199,17 @@ class exileSniffer : public QMainWindow
 
 		void action_CLI_CONFIRM_SELL(UIDecodedPkt&, QString*);
 
-		void action_SRV_UNK_0x67(UIDecodedPkt&, QString*);
 		void action_SRV_UNK_0x68(UIDecodedPkt&, QString*);
+		void action_SRV_UNK_0x69(UIDecodedPkt&, QString*);
 
-		void action_SRV_UNK_0x6c(UIDecodedPkt&, QString*);
+		void action_SRV_UNK_0x6d(UIDecodedPkt&, QString*);
 		void action_SRV_CREATE_ITEM(UIDecodedPkt&, QString*);
 		void action_SRV_SLOT_ITEMSLIST(UIDecodedPkt&, QString*);
 		void action_SRV_INVENTORY_SET_REMOVE(UIDecodedPkt&, QString *);
 		void action_SRV_GRANTED_XP(UIDecodedPkt&, QString*);
 		void action_CLI_SELECT_STASHTAB(UIDecodedPkt&, QString*);
 		void action_SRV_STASHTAB_DATA(UIDecodedPkt&, QString*);
-		void action_SRV_UNK_0x73(UIDecodedPkt&, QString*);
+		void action_SRV_UNK_0x74(UIDecodedPkt&, QString*);
 		void action_CLI_SET_STATUS_MESSAGE(UIDecodedPkt&, QString*);
 		void action_SRV_MOVE_OBJECT(UIDecodedPkt&, QString*);
 
@@ -231,11 +233,12 @@ class exileSniffer : public QMainWindow
 
 		void action_CLI_MICROTRANSACTION_SHOP_ACTION(UIDecodedPkt&, QString*);
 		void action_SRV_MICROTRANSACTION_SHOP_DETAILS(UIDecodedPkt&, QString*);
-		void action_CLI_UNK_A3(UIDecodedPkt&, QString*);
+		void action_CLI_UNK_A4(UIDecodedPkt&, QString*);
 
 		void action_SRV_CHAT_CHANNEL_ID(UIDecodedPkt&, QString*);
 
-		void action_SRV_UNK_A5(UIDecodedPkt&, QString*);
+		void action_SRV_UNK_A6(UIDecodedPkt&, QString*); 
+		void action_SRV_UNK_0xA7(UIDecodedPkt&, QString*);
 
 		void action_SRV_GUILD_MEMBER_LIST(UIDecodedPkt&, QString*);
 
@@ -247,10 +250,10 @@ class exileSniffer : public QMainWindow
 		void action_CLI_DUEL_CHALLENGE(UIDecodedPkt&, QString*);
 		void action_SRV_DUEL_RESPONSE(UIDecodedPkt&, QString*);
 		void action_SRV_DUEL_CHALLENGE(UIDecodedPkt&, QString*);
-		void action_CLI_UNK_0xC6(UIDecodedPkt&, QString*);
 		void action_CLI_UNK_0xC7(UIDecodedPkt&, QString*);
+		void action_CLI_UNK_0xC8(UIDecodedPkt&, QString*);
 
-		void action_SRV_UNK_0xCA(UIDecodedPkt&, QString*);
+		void action_SRV_UNK_0xCB(UIDecodedPkt&, QString*);
 
 		void action_SRV_EVENTSLIST_2(UIDecodedPkt&, QString*);
 
@@ -263,41 +266,41 @@ class exileSniffer : public QMainWindow
 
 		void action_CLI_OPEN_WORLD_SCREEN(UIDecodedPkt&, QString*);
 
-		void action_SRV_UNK_0xE4(UIDecodedPkt&, QString*);
+		void action_SRV_UNK_0xE5(UIDecodedPkt&, QString*);
 
-		void action_SRV_UNK_0xE6(UIDecodedPkt&, QString*);	
+		void action_SRV_UNK_0xE7(UIDecodedPkt&, QString*);	
 		void action_SRV_OBJ_REMOVED(UIDecodedPkt&, QString*);
 		void action_SRV_MOBILE_START_SKILL(UIDecodedPkt&, QString*);
 		void action_SRV_MOBILE_FINISH_SKILL(UIDecodedPkt&, QString*);
 
-		void action_SRV_MOBILE_UNK_0xee(UIDecodedPkt&, QString*);
 		void action_SRV_MOBILE_UNK_0xef(UIDecodedPkt&, QString*);
+		void action_SRV_MOBILE_UNK_0xf0(UIDecodedPkt&, QString*);
 		void action_SRV_MOVE_CHANNELLED(UIDecodedPkt&, QString*);
 		void action_SRV_END_CHANNELLED(UIDecodedPkt&, QString*);
 		void action_SRV_MOBILE_UPDATE_HMS(UIDecodedPkt&, QString*);
 		void action_SRV_STAT_CHANGED(UIDecodedPkt&, QString*);
-		void action_SRV_UNK_0xf2(UIDecodedPkt&, QString*);
 		void action_SRV_UNK_0xf3(UIDecodedPkt&, QString*);
+		void action_SRV_UNK_0xf4(UIDecodedPkt&, QString*);
 
-		void action_SRV_UNK_0xf5(UIDecodedPkt&, QString*);
 		void action_SRV_UNK_0xf6(UIDecodedPkt&, QString*);
 		void action_SRV_UNK_0xf7(UIDecodedPkt&, QString*);
 		void action_SRV_UNK_0xf8(UIDecodedPkt&, QString*);
+		void action_SRV_UNK_0xf9(UIDecodedPkt&, QString*);
 
 		void action_SRV_START_BUFF(UIDecodedPkt&, QString*);
 		void action_SRV_END_EFFECT(UIDecodedPkt&, QString*);
 
 		void action_SRV_EVENT_TRIGGERED(UIDecodedPkt&, QString*);
 
-		void action_SRV_UNK_0x106(UIDecodedPkt&, QString*); 
+		void action_SRV_UNK_0x107(UIDecodedPkt&, QString*); 
 		
-		void action_SRV_UNK_0x108(UIDecodedPkt&, QString*);
+		void action_SRV_UNK_0x109(UIDecodedPkt&, QString*);
 
 		void action_CLI_FINISHED_LOADING(UIDecodedPkt&, QString *);
 		void action_SRV_NOTIFY_PLAYERID(UIDecodedPkt&, QString *);
 
-		void action_SRV_UNKNOWN_0x111(UIDecodedPkt&, QString*);
-		void action_SRV_UNKNOWN_0x118(UIDecodedPkt&, QString*);
+		void action_SRV_UNKNOWN_0x112(UIDecodedPkt&, QString*);
+		void action_SRV_UNKNOWN_0x119(UIDecodedPkt&, QString*);
 		void action_CLI_OPTOUT_TUTORIALS(UIDecodedPkt&, QString*);
 		void action_SRV_BESTIARY_CAPTIVES(UIDecodedPkt&, QString*);
 		void action_CLI_OPEN_BESTIARY(UIDecodedPkt&, QString*);
@@ -306,7 +309,7 @@ class exileSniffer : public QMainWindow
 		void action_SRV_HEARTBEAT(UIDecodedPkt&, QString*);
 		void action_SRV_ADD_OBJECT(UIDecodedPkt&, QString*);
 		void action_SRV_UPDATE_OBJECT(UIDecodedPkt&, QString*);
-		void action_SRV_IDNOTIFY_0x137(UIDecodedPkt&, QString*);
+		void action_SRV_IDNOTIFY_0x138(UIDecodedPkt&, QString*);
 		
 	private:
 		Ui::exileSniffer ui;

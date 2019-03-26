@@ -20,6 +20,8 @@ void exileSniffer::init_loginPkt_Actioners()
 	loginPktActioners[LOGIN_CLI_REQUEST_RACE_DATA] = &exileSniffer::action_LOGIN_CLI_REQUEST_RACE_DATA;
 	loginPktActioners[LOGIN_SRV_LEAGUE_LIST] = &exileSniffer::action_LOGIN_SRV_LEAGUE_LIST;
 	loginPktActioners[LOGIN_CLI_REQUEST_LEAGUES] = &exileSniffer::action_LOGIN_CLI_REQUEST_LEAGUES;
+	loginPktActioners[LOGIN_CLI_UNK0x24] = &exileSniffer::action_LOGIN_CLI_UNK0x24;
+	
 }
 
 void exileSniffer::action_decoded_login_packet(UIDecodedPkt& decoded)
@@ -417,3 +419,19 @@ void exileSniffer::action_LOGIN_CLI_REQUEST_LEAGUES(UIDecodedPkt& obj, QString *
 	//wstringstream analysisStream;
 	//*analysis = QString::fromStdWString(analysisStream.str());
 }
+
+void exileSniffer::action_LOGIN_CLI_UNK0x24(UIDecodedPkt& obj, QString *analysis)
+{
+	obj.toggle_payload_operations(true);
+	if (!analysis)
+	{
+
+		obj.summary = "Client unknown login packet 0x24";
+		addDecodedListEntry(&obj);
+		return;
+	}
+
+	//wstringstream analysisStream;
+	//*analysis = QString::fromStdWString(analysisStream.str());
+}
+

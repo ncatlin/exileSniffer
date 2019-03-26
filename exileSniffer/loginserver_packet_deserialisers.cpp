@@ -19,6 +19,8 @@ void packet_processor::init_loginPkt_deserialisers()
 	loginPktDeserialisers[LOGIN_CLI_REQUEST_RACE_DATA] = (deserialiser)&packet_processor::deserialise_LOGIN_CLI_REQUEST_RACE_DATA;
 	loginPktDeserialisers[LOGIN_SRV_LEAGUE_LIST] = (deserialiser)&packet_processor::deserialise_LOGIN_SRV_LEAGUE_LIST;
 	loginPktDeserialisers[LOGIN_CLI_REQUEST_LEAGUES] = (deserialiser)&packet_processor::deserialise_LOGIN_CLI_REQUEST_LEAGUES;
+	loginPktDeserialisers[LOGIN_CLI_UNK0x24] = (deserialiser)&packet_processor::deserialise_LOGIN_CLI_UNK0x24;
+	
 }
 
 void packet_processor::deserialise_LOGIN_CLI_KEEP_ALIVE(UIDecodedPkt *)
@@ -237,4 +239,9 @@ void packet_processor::deserialise_LOGIN_SRV_LEAGUE_LIST(UIDecodedPkt *uipkt)
 void packet_processor::deserialise_LOGIN_CLI_REQUEST_LEAGUES(UIDecodedPkt *)
 {
 	consume_blob(remainingDecrypted);
+}
+
+void packet_processor::deserialise_LOGIN_CLI_UNK0x24(UIDecodedPkt *)
+{
+	//no data expected
 }
