@@ -291,7 +291,7 @@ if __name__ == "__main__":
     ascbytes = st.encode('ascii')
     print(hex(murmur2.murmur2_32(ascbytes, 0)))
     st = "HideoutBeach" 
-    exit()
+    #exit()
 
     print("Loading GGPK")
     ggpkobj = createggpkfile(poedir)
