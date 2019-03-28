@@ -18,7 +18,7 @@ Put the path of your POE directory below.
 You may want to specify a location for the resulting ggpk_exports.json too.
 '''
 poedir = "C:\\Program Files\\Grinding Gear Games\\Path of Exile\\"
-targetfile = "ggpk_exports.json"
+targetFile = "ggpk_exports.json"
 
 
 
@@ -254,7 +254,7 @@ def load_hideouts(ggpkobj):
     rit = getDatIterator(ggpkobj, "Hideouts.dat")
 
     for i in rit:
-        reference = int(i['Unknown9'])
+        reference = int(i['Unknown0'])
         result[reference] = i['Id']
 
     return result
@@ -291,7 +291,7 @@ if __name__ == "__main__":
     ascbytes = st.encode('ascii')
     print(hex(murmur2.murmur2_32(ascbytes, 0)))
     st = "HideoutBeach" 
-    exit()
+    #exit()
 
     print("Loading GGPK")
     ggpkobj = createggpkfile(poedir)
